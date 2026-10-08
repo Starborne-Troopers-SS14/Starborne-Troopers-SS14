@@ -1,8 +1,0 @@
-- type: tile
-  id: ST14FloorDunes
-  name: st14-tiles-dunes
-  parent: BaseFloorPlanet
-  sprite: /Textures/_ST14/Tiles/Dunes/dunes.png
-  variants: 16
-  footstepSounds:
-    collection: FootstepAsteroid
