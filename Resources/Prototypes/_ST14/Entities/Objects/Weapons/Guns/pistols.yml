@@ -21,3 +21,105 @@
       path: /Audio/_ST14/Weapons/gun_mk2_fire.ogg
   - type: StealTarget
     stealGroup: OfficerHandgun
+
+- type: entity
+  name: Peacemaker
+  parent: BaseWeaponPistol
+  id: ST14WeaponPistolPeacemaker
+  description: The standard-issue Mobile Infantry sidearm. Fast-firing and reliable, the last line of defence when the rifle runs dry.
+  components:
+  - type: Sprite
+    sprite: _ST14/Objects/Weapons/Guns/Pistols/peacemaker.rsi
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+    - state: mag-0
+      map: [ "enum.GunVisualLayers.Mag" ]
+  - type: Item
+    sprite: _ST14/Objects/Weapons/Guns/Pistols/peacemaker.rsi
+  - type: Clothing
+    sprite: _ST14/Objects/Weapons/Guns/Pistols/peacemaker.rsi
+  - type: Gun
+    fireRate: 6.67
+    availableModes:
+    - SemiAuto
+    soundGunshot:
+      path: /Audio/_ST14/Weapons/gun_mk2_fire.ogg
+  - type: ItemSlots
+    slots:
+      gun_magazine:
+        name: Magazine
+        startingItem: ST14MagazinePeacemaker
+        insertSound: /Audio/Weapons/Guns/MagIn/pistol_magin.ogg
+        ejectSound: /Audio/Weapons/Guns/MagOut/pistol_magout.ogg
+        priority: 2
+        whitelist:
+          tags:
+          - ST14MagazinePeacemaker
+        whitelistFailPopup: gun-magazine-whitelist-fail
+      gun_chamber:
+        name: Chamber
+        priority: 1
+        whitelist:
+          tags:
+          - CartridgePistol
+  - type: ContainerContainer
+    containers:
+      gun_magazine: !type:ContainerSlot
+      gun_chamber: !type:ContainerSlot
+  - type: MagazineVisuals
+    magState: mag
+    steps: 1
+    zeroVisible: true
+  - type: Appearance
+
+- type: entity
+  name: TW-109-e Emancipator
+  parent: BaseWeaponPistol
+  id: ST14WeaponPistolEmancipator
+  description: A heavy-calibre sidearm. Slow and hard-kicking, but every round hits like a hammer.
+  components:
+  - type: Sprite
+    sprite: _ST14/Objects/Weapons/Guns/Pistols/emancipator.rsi
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+    - state: mag-0
+      map: [ "enum.GunVisualLayers.Mag" ]
+  - type: Item
+    sprite: _ST14/Objects/Weapons/Guns/Pistols/emancipator.rsi
+  - type: Clothing
+    sprite: _ST14/Objects/Weapons/Guns/Pistols/emancipator.rsi
+  - type: Gun
+    fireRate: 3
+    availableModes:
+    - SemiAuto
+    soundGunshot:
+      path: /Audio/_ST14/Weapons/gun_mk2_fire.ogg
+  - type: ItemSlots
+    slots:
+      gun_magazine:
+        name: Magazine
+        startingItem: ST14MagazineEmancipator
+        insertSound: /Audio/Weapons/Guns/MagIn/pistol_magin.ogg
+        ejectSound: /Audio/Weapons/Guns/MagOut/pistol_magout.ogg
+        priority: 2
+        whitelist:
+          tags:
+          - ST14MagazineEmancipator
+        whitelistFailPopup: gun-magazine-whitelist-fail
+      gun_chamber:
+        name: Chamber
+        priority: 1
+        whitelist:
+          tags:
+          - CartridgePistol
+  - type: ContainerContainer
+    containers:
+      gun_magazine: !type:ContainerSlot
+      gun_chamber: !type:ContainerSlot
+  - type: MagazineVisuals
+    magState: mag
+    steps: 1
+    zeroVisible: true
+  - type: Appearance

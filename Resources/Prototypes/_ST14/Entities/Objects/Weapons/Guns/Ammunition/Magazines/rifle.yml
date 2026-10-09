@@ -1,0 +1,44 @@
+﻿- type: entity
+  parent: BaseItem
+  id: ST14MagazineMorita
+  name: "Morita magazine (.30 rifle)"
+  description: 160-round high-capacity magazine for the Morita family of rifles. Loaded with caseless ammunition.
+  components:
+  - type: Tag
+    tags:
+    - ST14MagazineMorita
+  - type: Item
+    size: Normal
+  - type: BallisticAmmoProvider
+    mayTransfer: true
+    whitelist:
+      tags:
+      - CartridgeLightRifle
+    proto: ST14CartridgeMoritaCaseless
+    capacity: 160
+  - type: ContainerContainer
+    containers:
+      ballistic-ammo: !type:Container
+  - type: Sprite
+    sprite: _ST14/Objects/Weapons/Guns/Ammunition/Magazine/morita_mag.rsi
+    state: base
+
+- type: entity
+  parent: ST14MagazineMorita
+  id: ST14MagazineMoritaEmpty
+  name: "Morita magazine (.30 rifle any)"
+  suffix: empty
+  components:
+  - type: BallisticAmmoProvider
+    proto: null
+
+- type: Tag
+  id: ST14MagazineMorita
+
+- type: entity
+  parent: CartridgeLightRifle
+  id: ST14CartridgeMoritaCaseless
+  name: "cartridge (.30 rifle caseless)"
+  components:
+  - type: CartridgeAmmo
+    deleteOnSpawn: true

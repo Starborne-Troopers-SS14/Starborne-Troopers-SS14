@@ -16,6 +16,7 @@
   - type: Clothing
     sprite: _ST14/Objects/Weapons/Guns/Rifles/moritacarbine/32x32.rsi
   - type: Gun
+    fireRate: 10
     soundGunshot:
       path: /Audio/_ST14/Weapons/gun_mk2_fire.ogg
   - type: ChamberMagazineAmmoProvider
@@ -25,13 +26,13 @@
     slots:
       gun_magazine:
         name: Magazine
-        startingItem: MagazineLightRifle
+        startingItem: ST14MagazineMorita
         insertSound: /Audio/_ST14/Weapons/gun_mk2_reload.ogg
         ejectSound: /Audio/_ST14/Weapons/gun_mk2_reload.ogg
         priority: 2
         whitelist:
           tags:
-            - MagazineLightRifle
+            - ST14MagazineMorita
         whitelistFailPopup: gun-magazine-whitelist-fail
       gun_chamber:
         name: Chamber
@@ -67,6 +68,7 @@
   - type: Clothing
     sprite: _ST14/Objects/Weapons/Guns/Rifles/moritamarksman/32x32.rsi
   - type: Gun
+    fireRate: 5
     soundGunshot:
       path: /Audio/_ST14/Weapons/gun_mk2_fire.ogg
   - type: ChamberMagazineAmmoProvider
@@ -76,13 +78,13 @@
     slots:
       gun_magazine:
         name: Magazine
-        startingItem: MagazineLightRifle
+        startingItem: ST14MagazineMorita
         insertSound: /Audio/_ST14/Weapons/gun_mk2_reload.ogg
         ejectSound: /Audio/_ST14/Weapons/gun_mk2_reload.ogg
         priority: 2
         whitelist:
           tags:
-            - MagazineLightRifle
+            - ST14MagazineMorita
         whitelistFailPopup: gun-magazine-whitelist-fail
       gun_chamber:
         name: Chamber
@@ -118,6 +120,7 @@
   - type: Clothing
     sprite: _ST14/Objects/Weapons/Guns/Rifles/moritarifle/32x32.rsi
   - type: Gun
+    fireRate: 10
     soundGunshot:
       path: /Audio/_ST14/Weapons/gun_mk2_fire.ogg
   - type: ChamberMagazineAmmoProvider
@@ -127,13 +130,13 @@
     slots:
       gun_magazine:
         name: Magazine
-        startingItem: MagazineLightRifle
+        startingItem: ST14MagazineMorita
         insertSound: /Audio/_ST14/Weapons/gun_mk2_reload.ogg
         ejectSound: /Audio/_ST14/Weapons/gun_mk2_reload.ogg
         priority: 2
         whitelist:
           tags:
-            - MagazineLightRifle
+            - ST14MagazineMorita
         whitelistFailPopup: gun-magazine-whitelist-fail
       gun_chamber:
         name: Chamber
