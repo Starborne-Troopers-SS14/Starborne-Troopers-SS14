@@ -1,0 +1,43 @@
+﻿- type: Tag
+  id: ST14MagazineShotgun
+
+- type: entity
+  parent: ShellShotgun
+  id: ST14ShellShotgun
+  name: shell (caseless)
+  components:
+  - type: CartridgeAmmo
+    deleteOnSpawn: true
+
+- type: entity
+  parent: BaseItem
+  id: ST14MagazineShotgun
+  name: Shotgun magazine
+  description: 8-round box magazine for the shotgun. Loaded with caseless buckshot.
+  components:
+  - type: Tag
+    tags:
+    - ST14MagazineShotgun
+  - type: Item
+    size: Small
+  - type: BallisticAmmoProvider
+    mayTransfer: true
+    whitelist:
+      tags:
+      - ShellShotgun
+    proto: ST14ShellShotgun
+    capacity: 20
+  - type: ContainerContainer
+    containers:
+      ballistic-ammo: !type:Container
+  - type: Sprite
+    sprite: _ST14/Objects/Weapons/Guns/Ammunition/Magazine/shotgun_mag.rsi
+    state: base
+
+- type: entity
+  parent: ST14MagazineShotgun
+  id: ST14MagazineShotgunEmpty
+  suffix: empty
+  components:
+  - type: BallisticAmmoProvider
+    proto: null

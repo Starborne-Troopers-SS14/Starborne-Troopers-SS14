@@ -1,23 +1,20 @@
 {
     "version": 1,
+    "license": "All-Rights-Reserved",
+    "copyright": "Made by Denlero",
     "size": {
-        "x": 32,
-        "y": 32
+        "x": 64,
+        "y": 80
     },
-    "license": "CC0-1.0",
-    "copyright": "Placeholder sprites generated for testing, replace with real art",
     "states": [
         {
             "name": "idle"
         },
         {
-            "name": "working",
-            "delays": [
-                [
-                    0.5,
-                    0.5
-                ]
-            ]
+            "name": "hologram"
+        },
+        {
+            "name": "working"
         }
     ]
 }

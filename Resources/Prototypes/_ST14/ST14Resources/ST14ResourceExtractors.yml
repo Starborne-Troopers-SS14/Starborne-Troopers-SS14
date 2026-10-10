@@ -62,12 +62,12 @@
         acts: [ "Destruction" ]
   - type: ST14ResourceExtractor
     extractionRate: 16.67
-    hitInterval: 1
-    shakeRadius: 4
-    shakeStrength: 0.06
-    soundRadius: 6
+    hitInterval: 2
+    shakeRadius: 10
+    shakeStrength: 0.2
+    soundRadius: 10
     hitSound:
-      path: /Audio/Items/drill_hit.ogg
+      path: /Audio/_ST14/ST14Resources/drill_impact.ogg
     capsuleSlot1:
       name: st14-extractor-capsule-slot-1
       whitelist:
