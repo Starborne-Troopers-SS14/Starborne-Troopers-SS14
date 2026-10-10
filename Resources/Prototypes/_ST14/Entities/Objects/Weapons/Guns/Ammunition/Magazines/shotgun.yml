@@ -26,7 +26,7 @@
       tags:
       - ShellShotgun
     proto: ST14ShellShotgun
-    capacity: 8
+    capacity: 20
   - type: ContainerContainer
     containers:
       ballistic-ammo: !type:Container

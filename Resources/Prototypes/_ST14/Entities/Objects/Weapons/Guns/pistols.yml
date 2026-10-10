@@ -44,14 +44,14 @@
     availableModes:
     - SemiAuto
     soundGunshot:
-      path: /Audio/_ST14/Weapons/gun_mk2_fire.ogg
+      path: /Audio/_ST14/Weapons/Peacemaker/peacemaker_fire.ogg
   - type: ItemSlots
     slots:
       gun_magazine:
         name: Magazine
         startingItem: ST14MagazinePeacemaker
-        insertSound: /Audio/Weapons/Guns/MagIn/pistol_magin.ogg
-        ejectSound: /Audio/Weapons/Guns/MagOut/pistol_magout.ogg
+        insertSound: /Audio/_ST14/Weapons/Peacemaker/peacemaker_reload.ogg
+        ejectSound: /Audio/_ST14/Weapons/Peacemaker/peacemaker_reload.ogg
         priority: 2
         whitelist:
           tags:
@@ -95,14 +95,14 @@
     availableModes:
     - SemiAuto
     soundGunshot:
-      path: /Audio/_ST14/Weapons/gun_mk2_fire.ogg
+      path: /Audio/_ST14/Weapons/Emancipator/emancipator_fire.ogg
   - type: ItemSlots
     slots:
       gun_magazine:
         name: Magazine
         startingItem: ST14MagazineEmancipator
-        insertSound: /Audio/Weapons/Guns/MagIn/pistol_magin.ogg
-        ejectSound: /Audio/Weapons/Guns/MagOut/pistol_magout.ogg
+        insertSound: /Audio/_ST14/Weapons/Emancipator/emancipator_reload.ogg
+        ejectSound: /Audio/_ST14/Weapons/Emancipator/emancipator_reload.ogg
         priority: 2
         whitelist:
           tags:
