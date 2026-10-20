@@ -1,14 +1,17 @@
 {
     "version": 1,
+    "license": "All-Rights-Reserved",
+    "copyright": "Made by Denlero",
     "size": {
         "x": 64,
         "y": 80
     },
-    "license": "All rights reserved. Starborn Troopers",
-    "copyright": "Discord: Denlero",
     "states": [
         {
             "name": "idle"
+        },
+        {
+            "name": "hologram"
         },
         {
             "name": "working"

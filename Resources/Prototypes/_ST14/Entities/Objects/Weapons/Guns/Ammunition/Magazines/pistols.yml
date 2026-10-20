@@ -1,0 +1,111 @@
+- type: Tag
+  id: ST14MagazinePeacemaker
+
+- type: Tag
+  id: ST14MagazineEmancipator
+
+- type: entity
+  parent: BaseBullet
+  id: ST14BulletPeacemaker
+  name: bullet (Peacemaker)
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Projectile
+    damage:
+      types:
+        Piercing: 14
+
+- type: entity
+  parent: BaseBullet
+  id: ST14BulletEmancipator
+  name: bullet (Emancipator)
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Projectile
+    damage:
+      types:
+        Piercing: 26
+
+- type: entity
+  parent: CartridgePistol
+  id: ST14CartridgePeacemaker
+  name: cartridge (Peacemaker caseless)
+  components:
+  - type: CartridgeAmmo
+    proto: ST14BulletPeacemaker
+    deleteOnSpawn: true
+
+- type: entity
+  parent: CartridgePistol
+  id: ST14CartridgeEmancipator
+  name: cartridge (Emancipator caseless)
+  components:
+  - type: CartridgeAmmo
+    proto: ST14BulletEmancipator
+    deleteOnSpawn: true
+
+- type: entity
+  parent: BaseItem
+  id: ST14MagazinePeacemaker
+  name: Peacemaker magazine
+  description: 12-round magazine for the Peacemaker sidearm. Loaded with caseless ammunition.
+  components:
+  - type: Tag
+    tags:
+    - ST14MagazinePeacemaker
+  - type: Item
+    size: Tiny
+  - type: BallisticAmmoProvider
+    mayTransfer: true
+    whitelist:
+      tags:
+      - CartridgePistol
+    proto: ST14CartridgePeacemaker
+    capacity: 12
+  - type: ContainerContainer
+    containers:
+      ballistic-ammo: !type:Container
+  - type: Sprite
+    sprite: _ST14/Objects/Weapons/Guns/Ammunition/Magazine/peacemaker_mag.rsi
+    state: base
+
+- type: entity
+  parent: ST14MagazinePeacemaker
+  id: ST14MagazinePeacemakerEmpty
+  suffix: empty
+  components:
+  - type: BallisticAmmoProvider
+    proto: null
+
+- type: entity
+  parent: BaseItem
+  id: ST14MagazineEmancipator
+  name: Emancipator magazine
+  description: 7-round heavy-calibre magazine for the Emancipator. Loaded with caseless ammunition.
+  components:
+  - type: Tag
+    tags:
+    - ST14MagazineEmancipator
+  - type: Item
+    size: Small
+  - type: BallisticAmmoProvider
+    mayTransfer: true
+    whitelist:
+      tags:
+      - CartridgePistol
+    proto: ST14CartridgeEmancipator
+    capacity: 7
+  - type: ContainerContainer
+    containers:
+      ballistic-ammo: !type:Container
+  - type: Sprite
+    sprite: _ST14/Objects/Weapons/Guns/Ammunition/Magazine/emancipator_mag.rsi
+    state: base
+
+- type: entity
+  parent: ST14MagazineEmancipator
+  id: ST14MagazineEmancipatorEmpty
+  suffix: empty
+  components:
+  - type: BallisticAmmoProvider
+    proto: null
