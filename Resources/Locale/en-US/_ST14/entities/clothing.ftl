@@ -54,3 +54,6 @@ ent-ST14ClothingBackpackSatchel = Mobile Infantry satchel
 
 ent-ST14ClothingBackpackEngineer = engineer backpack
     .desc = The engineering corps field pack, with mounting points for a canister and a holstered sidearm.
+
+ent-ST14ClothingOuterHardsuitEngineer = engineering suit
+    .desc = A special suit that protects against hazardous, low pressure environments. Has radiation shielding. Required to work with the engineer multitool.

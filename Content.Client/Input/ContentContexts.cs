@@ -1,3 +1,4 @@
+using Content.Shared._ST14.Input; // ST14
 using Content.Shared.Input;
 using Robust.Shared.Input;
 
@@ -72,6 +73,7 @@ namespace Content.Client.Input
             human.AddFunction(ContentKeyFunctions.MovePulledObject);
             human.AddFunction(ContentKeyFunctions.ReleasePulledObject);
             human.AddFunction(ContentKeyFunctions.OpenCraftingMenu);
+            human.AddFunction(ST14KeyFunctions.OpenEngineerBuildMenu); // ST14
             human.AddFunction(ContentKeyFunctions.OpenInventoryMenu);
             human.AddFunction(ContentKeyFunctions.SmartEquipBackpack);
             human.AddFunction(ContentKeyFunctions.SmartEquipBelt);

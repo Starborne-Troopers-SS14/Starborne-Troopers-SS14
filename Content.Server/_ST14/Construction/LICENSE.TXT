@@ -1,0 +1,25 @@
+Copyright (c) 2026 Sh1ntra, dicsord: shintra. All rights reserved.
+
+The files in this directory and its subdirectories are proprietary.
+They are not covered by the license of the rest of the project.
+
+No permission is granted to use, copy, modify, merge, publish, distribute,
+sublicense, or run these files, in whole or in part, for any purpose,
+commercial or non-commercial, without prior written permission from the author.
+
+Permission to use these files in the Starship Troopers SS14 project
+is granted to Denlero, discord: denlero on the terms agreed separately.
+
+---
+
+Авторские права (c) 2026 Sh1ntra, дискорд: shintra. Все права защищены.
+
+Файлы в этой папке и её подпапках являются проприетарными и не подпадают
+под лицензию, действующую для остальной части проекта.
+
+Любое использование, копирование, изменение, распространение или запуск этих файлов,
+полностью или частично, в любых целях, коммерческих или некоммерческих,
+допускается только с предварительного письменного разрешения автора.
+
+Разрешение на использование в проекте Starship Troopers SS14 предоставлено
+Denlero, discord: denlero на условиях, согласованных отдельно.

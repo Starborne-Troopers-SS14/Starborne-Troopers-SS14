@@ -29,6 +29,7 @@
         - MachineLayer
   - type: Sprite
     noRot: true
+    offset: 0,0.75
     layers:
     - state: idle
       map: [ "base" ]

@@ -1,0 +1,4 @@
+- type: shader
+  id: ST14BlueprintGhost
+  kind: source
+  path: "/Textures/_ST14/Shaders/blueprint_ghost.swsl"

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Content.Client._ST14.Construction; // ST14
 using Content.Client.ContextMenu.UI;
 using Content.Client.Gameplay;
 using Content.Client.Graphics;
@@ -24,6 +25,7 @@ public sealed partial class InteractionOutlineSystem : EntitySystem
     private static readonly ProtoId<ShaderPrototype> ShaderOutOfRange = "SelectionOutline";
     private const float DefaultWidth = 1;
     private readonly Dictionary<(bool InRange, int RenderScale), ShaderInstance> _shaderCache = new();
+    private readonly Dictionary<(Color Color, int RenderScale), ShaderInstance> _st14ColorShaders = new(); // ST14
 
     [Dependency] private IConfigurationManager _configManager = default!;
     [Dependency] private IEyeManager _eyeManager = default!;
@@ -34,6 +36,7 @@ public sealed partial class InteractionOutlineSystem : EntitySystem
     [Dependency] private SharedInteractionSystem _interactionSystem = default!;
     [Dependency] private IPrototypeManager _prototypeManager = default!;
     [Dependency] private SpriteSystem _sprite = default!;
+    [Dependency] private ST14MultitoolSystem _st14Multitool = default!; // ST14
 
     /// <summary>
     ///     Whether to currently draw the outline. The outline may be temporarily disabled by other systems
@@ -46,6 +49,7 @@ public sealed partial class InteractionOutlineSystem : EntitySystem
     private bool _cvarEnabled = true;
 
     private EntityUid? _lastHoveredEntity;
+    private Color? _st14Color; // ST14
 
     public override void Shutdown()
     {
@@ -55,6 +59,15 @@ public sealed partial class InteractionOutlineSystem : EntitySystem
         }
 
         _shaderCache.Clear();
+
+        // ST14-start
+        foreach (var shader in _st14ColorShaders.Values)
+        {
+            shader.Dispose();
+        }
+
+        _st14ColorShaders.Clear();
+        // ST14-end
         base.Shutdown();
     }
 
@@ -168,11 +181,22 @@ public sealed partial class InteractionOutlineSystem : EntitySystem
 
         InteractionOutlineComponent? outline;
 
+        // ST14-start
+        var st14Color = _st14Multitool.GetOutlineColor(entityToClick);
+        var st14ColorChanged = st14Color != _st14Color;
+        _st14Color = st14Color;
+        // ST14-end
+
         if (entityToClick == _lastHoveredEntity)
         {
             if (entityToClick != null && TryComp(entityToClick, out outline))
             {
                 UpdateOutline((entityToClick.Value, outline), inRange, renderScale);
+
+                // ST14-start
+                if (st14ColorChanged && outline.Active)
+                    SetOutlinePostShader(entityToClick.Value, inRange, renderScale);
+                // ST14-end
             }
 
             return;
@@ -232,7 +256,7 @@ public sealed partial class InteractionOutlineSystem : EntitySystem
 
     private void SetOutlinePostShader(Entity<SpriteComponent?> sprite, bool inRange, int renderScale)
     {
-        var shader = GetShader(inRange, renderScale);
+        var shader = _st14Color is { } st14Color ? GetST14Shader(st14Color, renderScale) : GetShader(inRange, renderScale); // ST14
         if (_sprite.TryGetPostShader(sprite, ContentPostShaderIds.InteractionOutline, out var entry) &&
             entry.Shader == shader)
         {
@@ -255,6 +279,20 @@ public sealed partial class InteractionOutlineSystem : EntitySystem
         _shaderCache.Add(key, shader);
         return shader;
     }
+
+    // ST14-start
+    private ShaderInstance GetST14Shader(Color color, int renderScale)
+    {
+        if (_st14ColorShaders.TryGetValue((color, renderScale), out var shader))
+            return shader;
+
+        shader = _prototypeManager.Index(ShaderInRange).InstanceUnique();
+        shader.SetParameter("outline_width", DefaultWidth * renderScale);
+        shader.SetParameter("outline_color", color);
+        _st14ColorShaders.Add((color, renderScale), shader);
+        return shader;
+    }
+    // ST14-end
 
     private ShaderInstance MakeNewShader(bool inRange, int renderScale)
     {

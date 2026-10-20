@@ -1,0 +1,29 @@
+- type: ST14EngineerBuildable
+  id: ArmiumDrill
+  result: ST14ArmiumDrill
+  cost: 500
+  buildTime: 15
+  conditions:
+  - !type:TileNotBlocked
+  - !type:ST14ResourceFieldCondition
+    resource: Armium
+
+- type: ST14EngineerBuildable
+  id: AuronDrill
+  result: ST14AuronDrill
+  cost: 500
+  buildTime: 15
+  conditions:
+  - !type:TileNotBlocked
+  - !type:ST14ResourceFieldCondition
+    resource: Auron
+
+- type: ST14EngineerBuildable
+  id: NeftPumpJack
+  result: ST14NeftPumpJack
+  cost: 500
+  buildTime: 15
+  conditions:
+  - !type:TileNotBlocked
+  - !type:ST14ResourceFieldCondition
+    resource: Neft
