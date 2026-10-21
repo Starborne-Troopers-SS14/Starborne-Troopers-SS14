@@ -1,0 +1,9 @@
+﻿- type: soundCollection
+  id: ST14EPulse88Fire
+  files:
+  - /Audio/_ST14/SoundCollections/Weapons/MachineGuns/Epulse88/A_E-Pulse_88_Fire_1P_Shoot_01.ogg
+  - /Audio/_ST14/SoundCollections/Weapons/MachineGuns/Epulse88/A_E-Pulse_88_Fire_1P_Shoot_02.ogg
+  - /Audio/_ST14/SoundCollections/Weapons/MachineGuns/Epulse88/A_E-Pulse_88_Fire_1P_Shoot_03.ogg
+  - /Audio/_ST14/SoundCollections/Weapons/MachineGuns/Epulse88/A_E-Pulse_88_Fire_1P_Shoot_04.ogg
+  - /Audio/_ST14/SoundCollections/Weapons/MachineGuns/Epulse88/A_E-Pulse_88_Fire_1P_Shoot_05.ogg
+  - /Audio/_ST14/SoundCollections/Weapons/MachineGuns/Epulse88/A_E-Pulse_88_Fire_1P_Shoot_06.ogg

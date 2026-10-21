@@ -39,6 +39,12 @@
         base:
           False: { state: idle }
           True: { state: working }
+  - type: ST14ResourceExtractorSlotVisuals
+    fillStates:
+    - base       # пустая
+    - filled-3
+    - filled-2
+    - filled-1   # полная
   - type: ItemSlots
   - type: ContainerContainer
     containers:
@@ -87,8 +93,36 @@
   components:
   - type: Sprite
     sprite: _ST14/Structures/ST14Resources/armium_drill.rsi
+    layers:
+    - state: idle
+      map: [ "base" ]
+    - sprite: _ST14/Structures/ST14Resources/bluegoo/inpumpleft.rsi
+      state: base
+      map: [ "capsule_slot_1" ]
+      visible: false
+    - sprite: _ST14/Structures/ST14Resources/bluegoo/inpumpright.rsi
+      state: base
+      map: [ "capsule_slot_2" ]
+      visible: false
   - type: ST14ResourceExtractor
     resourceType: Armium
+    hitInterval: 2.5
+    hitSound:
+      path: /Audio/_ST14/ST14Resources/A_Refinery_Ram.ogg
+      params:
+        volume: 4
+        playOffsetSeconds: 0.90
+  - type: AmbientSound
+    enabled: false
+    range: 10
+    volume: -8
+    sound:
+      path: /Audio/_ST14/ST14Resources/A_Refinery_Loop.ogg
+  - type: PointLight
+    enabled: false
+    radius: 3
+    energy: 1.5
+    color: "ffe900"
 
 - type: entity
   parent: ST14BaseResourceExtractor
@@ -98,8 +132,36 @@
   components:
   - type: Sprite
     sprite: _ST14/Structures/ST14Resources/auron_drill.rsi
+    layers:
+    - state: idle
+      map: [ "base" ]
+    - sprite: _ST14/Structures/ST14Resources/yellowgoo/inpumpleft.rsi
+      state: base
+      map: [ "capsule_slot_1" ]
+      visible: false
+    - sprite: _ST14/Structures/ST14Resources/yellowgoo/inpumpright.rsi
+      state: base
+      map: [ "capsule_slot_2" ]
+      visible: false
   - type: ST14ResourceExtractor
     resourceType: Auron
+    hitInterval: 2.5
+    hitSound:
+      path: /Audio/_ST14/ST14Resources/A_Refinery_Ram.ogg
+      params:
+        volume: 4
+        playOffsetSeconds: 0.90
+  - type: AmbientSound
+    enabled: false
+    range: 10
+    volume: -8
+    sound:
+      path: /Audio/_ST14/ST14Resources/A_Refinery_Loop.ogg
+  - type: PointLight
+    enabled: false
+    radius: 3
+    energy: 1.5
+    color: "ffe900"
 
 - type: entity
   parent: ST14BaseResourceExtractor

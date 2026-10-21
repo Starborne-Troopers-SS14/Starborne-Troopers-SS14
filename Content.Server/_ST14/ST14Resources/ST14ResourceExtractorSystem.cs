@@ -2,6 +2,7 @@ using System.Numerics;
 using Content.Shared._ST14.ST14Resources;
 using Content.Shared._ST14.ST14Resources.Components;
 using Content.Shared._ST14.ST14Resources.EntitySystems;
+using Content.Shared.Audio;
 using Content.Shared.Camera;
 using Content.Shared.Examine;
 using Content.Shared.FixedPoint;
@@ -20,6 +21,8 @@ public sealed partial class ST14ResourceExtractorSystem : SharedST14ResourceExtr
     [Dependency] private EntityLookupSystem _lookup = default!;
     [Dependency] private SharedAppearanceSystem _appearance = default!;
     [Dependency] private SharedAudioSystem _audio = default!;
+    [Dependency] private SharedAmbientSoundSystem _ambient = default!;
+    [Dependency] private SharedPointLightSystem _light = default!;
     [Dependency] private SharedCameraRecoilSystem _recoil = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private SharedUserInterfaceSystem _ui = default!;
@@ -27,6 +30,12 @@ public sealed partial class ST14ResourceExtractorSystem : SharedST14ResourceExtr
 
     private readonly HashSet<Entity<CameraRecoilComponent>> _shakeTargets = new();
     private readonly HashSet<Entity<ST14ResourceFieldComponent>> _fields = new();
+
+    private static readonly ST14ResourceExtractorVisuals[] SlotVisuals =
+    {
+        ST14ResourceExtractorVisuals.Slot1Fill,
+        ST14ResourceExtractorVisuals.Slot2Fill,
+    };
 
     public override void Initialize()
     {
@@ -45,6 +54,9 @@ public sealed partial class ST14ResourceExtractorSystem : SharedST14ResourceExtr
     private void OnMapInit(Entity<ST14ResourceExtractorComponent> ent, ref MapInitEvent args)
     {
         _appearance.SetData(ent, ST14ResourceExtractorVisuals.Extracting, ent.Comp.Extracting);
+        _ambient.SetAmbience(ent, ent.Comp.Extracting);
+        SetLight(ent, ent.Comp.Extracting);
+        UpdateSlotVisuals(ent);
     }
 
     private void OnContainerModified(EntityUid uid, ST14ResourceExtractorComponent comp, ContainerModifiedMessage args)
@@ -54,6 +66,7 @@ public sealed partial class ST14ResourceExtractorSystem : SharedST14ResourceExtr
             return;
 
         var ent = new Entity<ST14ResourceExtractorComponent>(uid, comp);
+        UpdateSlotVisuals(ent);
 
         if (args is EntRemovedFromContainerMessage && comp.Extracting && index == comp.ActiveSlot && !TryAutoSwitch(ent))
         {
@@ -161,6 +174,7 @@ public sealed partial class ST14ResourceExtractorSystem : SharedST14ResourceExtr
             Capsules.TryAdd(next, ent.Comp.ResourceType, leftover);
         }
 
+        UpdateSlotVisuals(ent);
         PlayHitEffects(ent);
 
         if (!CanFill(ent, ent.Comp.ActiveSlot))
@@ -193,7 +207,37 @@ public sealed partial class ST14ResourceExtractorSystem : SharedST14ResourceExtr
 
         Dirty(ent);
         _appearance.SetData(ent, ST14ResourceExtractorVisuals.Extracting, extracting);
+        _ambient.SetAmbience(ent, extracting);
+        SetLight(ent, extracting);
         UpdateUi(ent);
+    }
+
+    /// <summary>
+    /// Включает/выключает свет ламп, если у бура есть PointLight.
+    /// </summary>
+    private void SetLight(EntityUid uid, bool enabled)
+    {
+        if (_light.TryGetLight(uid, out var light))
+            _light.SetEnabled(uid, enabled, light);
+    }
+
+    /// <summary>
+    /// Передаёт на клиент заполнение капсулы в каждом слоте: 0..1, или -1 если слот пуст.
+    /// </summary>
+    private void UpdateSlotVisuals(Entity<ST14ResourceExtractorComponent> ent)
+    {
+        for (var i = 0; i < SlotVisuals.Length; i++)
+        {
+            var fraction = -1f;
+            if (TryGetCapsule(ent, i, out var capsule))
+            {
+                fraction = capsule.Comp.Capacity > FixedPoint2.Zero
+                    ? (capsule.Comp.Amount / capsule.Comp.Capacity).Float()
+                    : 0f;
+            }
+
+            _appearance.SetData(ent, SlotVisuals[i], fraction);
+        }
     }
 
     private ST14ResourceExtractorStatus GetStatus(Entity<ST14ResourceExtractorComponent> ent)

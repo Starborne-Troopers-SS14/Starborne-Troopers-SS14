@@ -1,0 +1,7 @@
+﻿- type: soundCollection
+  id: ST14EmancipatorFire
+  files:
+  - /Audio/_ST14/SoundCollections/Weapons/Pistols/Emancipator/A_Emancipator_1P_Fire_01.ogg
+  - /Audio/_ST14/SoundCollections/Weapons/Pistols/Emancipator/A_Emancipator_1P_Fire_02.ogg
+  - /Audio/_ST14/SoundCollections/Weapons/Pistols/Emancipator/A_Emancipator_1P_Fire_03.ogg
+  - /Audio/_ST14/SoundCollections/Weapons/Pistols/Emancipator/A_Emancipator_1P_Fire_04.ogg

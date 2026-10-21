@@ -1,0 +1,36 @@
+- type: entity
+  parent: BaseItem
+  id: ST14MagazineEPulse88
+  name: "E-Pulse 88 ammo box"
+  description: A 300-round belt box for the E-Pulse 88. Heavy enough that nobody volunteers to carry the spares.
+  components:
+  - type: Tag
+    tags:
+    - ST14MagazineEPulse88
+  - type: Item
+    size: Large
+  - type: BallisticAmmoProvider
+    mayTransfer: true
+    whitelist:
+      tags:
+      - CartridgeLightRifle
+    proto: ST14CartridgeMoritaCaseless
+    capacity: 50
+  - type: ContainerContainer
+    containers:
+      ballistic-ammo: !type:Container
+  - type: Sprite
+    sprite: _ST14/Objects/Weapons/Guns/Ammunition/Magazine/epulse88_mag.rsi
+    state: base
+
+- type: entity
+  parent: ST14MagazineEPulse88
+  id: ST14MagazineEPulse88Empty
+  name: "E-Pulse 88 ammo box"
+  suffix: empty
+  components:
+  - type: BallisticAmmoProvider
+    proto: null
+
+- type: Tag
+  id: ST14MagazineEPulse88

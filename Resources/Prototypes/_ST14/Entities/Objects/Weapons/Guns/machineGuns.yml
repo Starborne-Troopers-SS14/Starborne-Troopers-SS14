@@ -1,0 +1,74 @@
+- type: entity
+  abstract: true
+  parent: BaseWeaponLightMachineGun
+  id: ST14BaseWeaponMachineGun
+  components:
+  - type: Item
+    size: Huge
+  - type: Wieldable
+  - type: GunRequiresWield
+  - type: Gun
+    selectedMode: FullAuto
+    availableModes:
+    - FullAuto
+  - type: ContainerContainer
+    containers:
+      gun_magazine: !type:ContainerSlot
+      gun_chamber: !type:ContainerSlot
+  - type: MagazineVisuals
+    magState: mag
+    steps: 1
+    zeroVisible: true
+  - type: Appearance
+
+- type: entity
+  name: E-Pulse 88
+  parent: ST14BaseWeaponMachineGun
+  id: ST14WeaponMachineGunEPulse88
+  description: A belt-fed squad support weapon. Heavy, loud, and built to keep a bug wave's head down while the rest of the squad repositions.
+  components:
+  - type: Sprite
+    sprite: _ST14/Objects/Weapons/Guns/MachineGuns/epulse88.rsi/icon.rsi
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+    - state: mag-0
+      map: [ "enum.GunVisualLayers.Mag" ]
+  - type: Item
+    sprite: _ST14/Objects/Weapons/Guns/MachineGuns/epulse88.rsi/32x32.rsi
+  - type: Clothing
+    sprite: _ST14/Objects/Weapons/Guns/MachineGuns/epulse88.rsi/32x32.rsi
+  - type: Gun
+    fireRate: 3
+    soundGunshot:
+      collection: ST14EPulse88Fire
+      params:
+        variation: 0.04
+        maxDistance: 40
+        referenceDistance: 3
+        rolloffFactor: 0.6
+  - type: ChamberMagazineAmmoProvider
+    soundRack:
+      path: /Audio/_ST14/SoundCollections/Weapons/MachineGuns/Epulse88/A_E-Pulse_88_BoltBack.ogg
+    soundBoltOpened:
+      path: /Audio/_ST14/SoundCollections/Weapons/MachineGuns/Epulse88/A_E-Pulse_88_BoltBack.ogg
+    soundBoltClosed:
+      path: /Audio/_ST14/SoundCollections/Weapons/MachineGuns/Epulse88/A_E-Pulse_88_BoltForward.ogg
+  - type: ItemSlots
+    slots:
+      gun_magazine:
+        name: Magazine
+        startingItem: ST14MagazineEPulse88
+        insertSound: /Audio/_ST14/SoundCollections/Weapons/MachineGuns/Epulse88/A_E-Pulse_88_BoxIn.ogg
+        ejectSound: /Audio/_ST14/SoundCollections/Weapons/MachineGuns/Epulse88/A_E-Pulse_88_BoxOut.ogg
+        priority: 2
+        whitelist:
+          tags:
+          - ST14MagazineEPulse88
+        whitelistFailPopup: gun-magazine-whitelist-fail
+      gun_chamber:
+        name: Chamber
+        priority: 1
+        whitelist:
+          tags:
+          - CartridgeLightRifle

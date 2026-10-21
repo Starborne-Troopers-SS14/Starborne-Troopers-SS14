@@ -18,28 +18,31 @@
   - type: Gun
     fireRate: 10
     soundGunshot:
-      path: /Audio/_ST14/Weapons/Morita/morita_carbine_fire.ogg
+      collection: ST14MoritaCarbineFire
+      params:
+        variation: 0.04
   - type: ChamberMagazineAmmoProvider
     soundRack:
-      path: /Audio/_ST14/Weapons/Morita/morita_reload.ogg
+      path: /Audio/_ST14/SoundCollections/Weapons/Rifles/MoritaMK1Carbine/A_MoritaMK1Rifle_Bolt_01.ogg
   - type: ItemSlots
     slots:
       gun_magazine:
         name: Magazine
         startingItem: ST14MagazineMorita
-        insertSound: /Audio/_ST14/Weapons/Morita/morita_reload.ogg
-        ejectSound: /Audio/_ST14/Weapons/Morita/morita_reload.ogg
+        insertSound:
+          collection: ST14MoritaCarbineMagIn
+        ejectSound: /Audio/_ST14/SoundCollections/Weapons/Rifles/MoritaMK1Carbine/A_MoritaMK1Rifle_reload_magout_01.ogg
         priority: 2
         whitelist:
           tags:
-            - ST14MagazineMorita
+          - ST14MagazineMorita
         whitelistFailPopup: gun-magazine-whitelist-fail
       gun_chamber:
         name: Chamber
         priority: 1
         whitelist:
           tags:
-            - CartridgeLightRifle
+          - CartridgeLightRifle
   - type: ContainerContainer
     containers:
       gun_magazine: !type:ContainerSlot
@@ -51,7 +54,7 @@
   - type: Appearance
 
 - type: entity
-  name: Morita marksman
+  name: MoritaII
   parent: BaseWeaponRifle
   id: ST14WeaponRifleMoritaMarksman
   description: A scoped Morita built for picking Arachnids off at range. Slower to shoulder, but it hits where you point it.
@@ -70,28 +73,31 @@
   - type: Gun
     fireRate: 5
     soundGunshot:
-      path: /Audio/_ST14/Weapons/gun_mk2_fire.ogg
+      collection: ST14MoritaFire
+      params:
+        variation: 0.04
   - type: ChamberMagazineAmmoProvider
     soundRack:
-      path: /Audio/_ST14/Weapons/gun_mk2_reload.ogg
+      path: /Audio/_ST14/SoundCollections/Weapons/Rifles/MoritaMK2/A_MoritaMK1Rifle_Bolt_01.ogg
   - type: ItemSlots
     slots:
       gun_magazine:
         name: Magazine
         startingItem: ST14MagazineMorita
-        insertSound: /Audio/_ST14/Weapons/gun_mk2_reload.ogg
-        ejectSound: /Audio/_ST14/Weapons/gun_mk2_reload.ogg
+        insertSound:
+          collection: ST14MoritaMagIn
+        ejectSound: /Audio/_ST14/SoundCollections/Weapons/Rifles/MoritaMK2/A_MoritaMK1Rifle_reload_magout_01.ogg
         priority: 2
         whitelist:
           tags:
-            - ST14MagazineMorita
+          - ST14MagazineMorita
         whitelistFailPopup: gun-magazine-whitelist-fail
       gun_chamber:
         name: Chamber
         priority: 1
         whitelist:
           tags:
-            - CartridgeLightRifle
+          - CartridgeLightRifle
   - type: ContainerContainer
     containers:
       gun_magazine: !type:ContainerSlot
@@ -103,7 +109,7 @@
   - type: Appearance
 
 - type: entity
-  name: Morita rifle
+  name: MoritaMK1Rifle
   parent: BaseWeaponRifle
   id: ST14WeaponRifleMoritaRifle
   description: The workhorse rifle of the Mobile Infantry. Reliable, serviceable, and chambered for the ammunition every trooper carries.
@@ -122,28 +128,95 @@
   - type: Gun
     fireRate: 10
     soundGunshot:
-      path: /Audio/_ST14/Weapons/Morita/morita_fire.ogg
+      collection: ST14MoritaRifleFire
+      params:
+        variation: 0.04
+        maxDistance: 35
+        referenceDistance: 3
+        rolloffFactor: 0.6
   - type: ChamberMagazineAmmoProvider
     soundRack:
-      path: /Audio/_ST14/Weapons/Morita/morita_reload.ogg
+      path: /Audio/_ST14/SoundCollections/Weapons/Rifles/MoritaMK1Rifle/A_MoritaMK1Rifle_Bolt_01.ogg
   - type: ItemSlots
     slots:
       gun_magazine:
         name: Magazine
         startingItem: ST14MagazineMorita
-        insertSound: /Audio/_ST14/Weapons/Morita/morita_reload.ogg
-        ejectSound: /Audio/_ST14/Weapons/Morita/morita_reload.ogg
+        insertSound:
+          collection: ST14MoritaRifleMagIn
+        ejectSound: /Audio/_ST14/SoundCollections/Weapons/Rifles/MoritaMK1Rifle/A_MoritaMK1Rifle_reload_magout_01.ogg
         priority: 2
         whitelist:
           tags:
-            - ST14MagazineMorita
+          - ST14MagazineMorita
         whitelistFailPopup: gun-magazine-whitelist-fail
       gun_chamber:
         name: Chamber
         priority: 1
         whitelist:
           tags:
-            - CartridgeLightRifle
+          - CartridgeLightRifle
+  - type: ContainerContainer
+    containers:
+      gun_magazine: !type:ContainerSlot
+      gun_chamber: !type:ContainerSlot
+  - type: MagazineVisuals
+    magState: mag
+    steps: 1
+    zeroVisible: true
+  - type: Appearance
+
+- type: entity
+  name: E-Pulse 44
+  parent: BaseWeaponRifle
+  id: ST14WeaponRifleEPulse44
+  description: A compact energy-assisted rifle. Lighter than the E-Pulse 88 and fed from its own standard magazines.
+  components:
+  - type: Sprite
+    sprite: _ST14/Objects/Weapons/Guns/Rifles/epulse44/icon.rsi
+    layers:
+    - state: base
+      map: [ "enum.GunVisualLayers.Base" ]
+    - state: mag-0
+      map: [ "enum.GunVisualLayers.Mag" ]
+  - type: Item
+    sprite: _ST14/Objects/Weapons/Guns/Rifles/epulse44/32x32.rsi
+  - type: Clothing
+    sprite: _ST14/Objects/Weapons/Guns/Rifles/epulse44/32x32.rsi
+  - type: Gun
+    fireRate: 5
+    soundGunshot:
+      collection: ST14EPulse44Fire
+      params:
+        variation: 0.04
+        maxDistance: 35
+        referenceDistance: 3
+        rolloffFactor: 0.6
+  - type: ChamberMagazineAmmoProvider
+    soundRack:
+      path: /Audio/_ST14/SoundCollections/Weapons/Rifles/Epulse44/A_E-Pulse_44_Reload_Bolt_Back.ogg
+    soundBoltOpened:
+      path: /Audio/_ST14/SoundCollections/Weapons/Rifles/Epulse44/A_E-Pulse_44_Reload_Bolt_Back.ogg
+    soundBoltClosed:
+      path: /Audio/_ST14/SoundCollections/Weapons/Rifles/Epulse44/A_E-Pulse_44_Reload_Bolt_Forward.ogg
+  - type: ItemSlots
+    slots:
+      gun_magazine:
+        name: Magazine
+        startingItem: ST14MagazineEPulse44
+        insertSound: /Audio/_ST14/SoundCollections/Weapons/Rifles/Epulse44/A_E-Pulse_44_Magin_Latch.ogg
+        ejectSound: /Audio/_ST14/SoundCollections/Weapons/Rifles/Epulse44/A_E-Pulse_44_Magout.ogg
+        priority: 2
+        whitelist:
+          tags:
+          - ST14MagazineEPulse44
+        whitelistFailPopup: gun-magazine-whitelist-fail
+      gun_chamber:
+        name: Chamber
+        priority: 1
+        whitelist:
+          tags:
+          - CartridgeLightRifle
   - type: ContainerContainer
     containers:
       gun_magazine: !type:ContainerSlot

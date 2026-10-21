@@ -1,0 +1,10 @@
+﻿- type: soundCollection
+  id: ST14PeacemakerFire
+  files:
+    - /Audio/_ST14/SoundCollections/Weapons/Pistols/Peacemaker/A_Peacemaker_fire_1p_01.ogg
+    - /Audio/_ST14/SoundCollections/Weapons/Pistols/Peacemaker/A_Peacemaker_fire_1p_02.ogg
+    - /Audio/_ST14/SoundCollections/Weapons/Pistols/Peacemaker/A_Peacemaker_fire_1p_03.ogg
+    - /Audio/_ST14/SoundCollections/Weapons/Pistols/Peacemaker/A_Peacemaker_fire_1p_04.ogg
+    - /Audio/_ST14/SoundCollections/Weapons/Pistols/Peacemaker/A_Peacemaker_fire_1p_05.ogg
+    - /Audio/_ST14/SoundCollections/Weapons/Pistols/Peacemaker/A_Peacemaker_fire_1p_06.ogg
+    - /Audio/_ST14/SoundCollections/Weapons/Pistols/Peacemaker/A_Peacemaker_fire_1p_07.ogg

@@ -1,0 +1,21 @@
+﻿- type: soundCollection
+  id: ST14MoritaRifleFire
+  files:
+  - /Audio/_ST14/SoundCollections/Weapons/Rifles/MoritaMK1Rifle/A_Morita_Fire_1P_Shoot_01.ogg
+  - /Audio/_ST14/SoundCollections/Weapons/Rifles/MoritaMK1Rifle/A_Morita_Fire_1P_Shoot_02.ogg
+  - /Audio/_ST14/SoundCollections/Weapons/Rifles/MoritaMK1Rifle/A_Morita_Fire_1P_Shoot_03.ogg
+  - /Audio/_ST14/SoundCollections/Weapons/Rifles/MoritaMK1Rifle/A_Morita_Fire_1P_Shoot_04.ogg
+  - /Audio/_ST14/SoundCollections/Weapons/Rifles/MoritaMK1Rifle/A_Morita_Fire_1P_Shoot_05.ogg
+  - /Audio/_ST14/SoundCollections/Weapons/Rifles/MoritaMK1Rifle/A_Morita_Fire_1P_Shoot_06.ogg
+  - /Audio/_ST14/SoundCollections/Weapons/Rifles/MoritaMK1Rifle/A_Morita_Fire_1P_Shoot_07.ogg
+  - /Audio/_ST14/SoundCollections/Weapons/Rifles/MoritaMK1Rifle/A_Morita_Fire_1P_Shoot_08.ogg
+  - /Audio/_ST14/SoundCollections/Weapons/Rifles/MoritaMK1Rifle/A_Morita_Fire_1P_Shoot_09.ogg
+  - /Audio/_ST14/SoundCollections/Weapons/Rifles/MoritaMK1Rifle/A_Morita_Fire_1P_Shoot_10.ogg
+
+- type: soundCollection
+  id: ST14MoritaRifleMagIn
+  files:
+  - /Audio/_ST14/SoundCollections/Weapons/Rifles/MoritaMK1Rifle/A_MoritaMK1Rifle_reload_magin_01.ogg
+  - /Audio/_ST14/SoundCollections/Weapons/Rifles/MoritaMK1Rifle/A_MoritaMK1Rifle_reload_magin_02.ogg
+  - /Audio/_ST14/SoundCollections/Weapons/Rifles/MoritaMK1Rifle/A_MoritaMK1Rifle_reload_magin_03.ogg
+  - /Audio/_ST14/SoundCollections/Weapons/Rifles/MoritaMK1Rifle/A_MoritaMK1Rifle_reload_magin_04.ogg

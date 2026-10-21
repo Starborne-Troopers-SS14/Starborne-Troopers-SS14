@@ -44,14 +44,19 @@
     availableModes:
     - SemiAuto
     soundGunshot:
-      path: /Audio/_ST14/Weapons/Peacemaker/peacemaker_fire.ogg
+      collection: ST14PeacemakerFire
+      params:
+        variation: 0.04
+  - type: ChamberMagazineAmmoProvider
+    soundRack:
+      path: /Audio/_ST14/SoundCollections/Weapons/Pistols/Peacemaker/A_Peacemaker_slide_01.ogg
   - type: ItemSlots
     slots:
       gun_magazine:
         name: Magazine
         startingItem: ST14MagazinePeacemaker
-        insertSound: /Audio/_ST14/Weapons/Peacemaker/peacemaker_reload.ogg
-        ejectSound: /Audio/_ST14/Weapons/Peacemaker/peacemaker_reload.ogg
+        insertSound: /Audio/_ST14/SoundCollections/Weapons/Pistols/Peacemaker/A_Peacemaker_magin_01.ogg
+        ejectSound: /Audio/_ST14/SoundCollections/Weapons/Pistols/Peacemaker/A_Peacemaker_magout_01.ogg
         priority: 2
         whitelist:
           tags:
@@ -74,7 +79,7 @@
   - type: Appearance
 
 - type: entity
-  name: TW-109-e Emancipator
+  name: Emancipator
   parent: BaseWeaponPistol
   id: ST14WeaponPistolEmancipator
   description: A heavy-calibre sidearm. Slow and hard-kicking, but every round hits like a hammer.
@@ -95,14 +100,16 @@
     availableModes:
     - SemiAuto
     soundGunshot:
-      path: /Audio/_ST14/Weapons/Emancipator/emancipator_fire.ogg
+      collection: ST14EmancipatorFire
+      params:
+        variation: 0.04
   - type: ItemSlots
     slots:
       gun_magazine:
         name: Magazine
         startingItem: ST14MagazineEmancipator
-        insertSound: /Audio/_ST14/Weapons/Emancipator/emancipator_reload.ogg
-        ejectSound: /Audio/_ST14/Weapons/Emancipator/emancipator_reload.ogg
+        insertSound: /Audio/_ST14/SoundCollections/Weapons/Pistols/Emancipator/A_Emancipator_MagIn_01.ogg
+        ejectSound: /Audio/_ST14/SoundCollections/Weapons/Pistols/Emancipator/A_Emancipator_MagOut_01.ogg
         priority: 2
         whitelist:
           tags:

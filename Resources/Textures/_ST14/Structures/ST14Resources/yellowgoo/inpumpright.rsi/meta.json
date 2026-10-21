@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "license": "All-Rights-Reserved",
+  "copyright": "Made by PatoGrone",
+  "size": {
+    "x": 64,
+    "y": 80
+  },
+  "states": [
+    {
+      "name": "base"
+    },
+    {
+      "name": "filled-1"
+    },
+    {
+      "name": "filled-2"
+    },
+    {
+      "name": "filled-3"
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 ﻿- type: entity
   parent: BaseItem
   id: ST14MagazineMorita
-  name: "Morita magazine (.30 rifle)"
+  name: "Morita magazine"
   description: 160-round high-capacity magazine for the Morita family of rifles. Loaded with caseless ammunition.
   components:
   - type: Tag
@@ -15,7 +15,7 @@
       tags:
       - CartridgeLightRifle
     proto: ST14CartridgeMoritaCaseless
-    capacity: 160
+    capacity: 60
   - type: ContainerContainer
     containers:
       ballistic-ammo: !type:Container
@@ -26,7 +26,7 @@
 - type: entity
   parent: ST14MagazineMorita
   id: ST14MagazineMoritaEmpty
-  name: "Morita magazine (.30 rifle any)"
+  name: "Morita magazine"
   suffix: empty
   components:
   - type: BallisticAmmoProvider
@@ -38,7 +38,44 @@
 - type: entity
   parent: CartridgeLightRifle
   id: ST14CartridgeMoritaCaseless
-  name: "cartridge (.30 rifle caseless)"
+  name: "cartridge"
   components:
   - type: CartridgeAmmo
     deleteOnSpawn: true
+
+- type: entity
+  parent: BaseItem
+  id: ST14MagazineEPulse44
+  name: "E-Pulse 44 magazine"
+  description: A standard 60-round magazine for the E-Pulse 44. Loaded with caseless ammunition.
+  components:
+  - type: Tag
+    tags:
+    - ST14MagazineEPulse44
+  - type: Item
+    size: Normal
+  - type: BallisticAmmoProvider
+    mayTransfer: true
+    whitelist:
+      tags:
+      - CartridgeLightRifle
+    proto: ST14CartridgeMoritaCaseless
+    capacity: 30
+  - type: ContainerContainer
+    containers:
+      ballistic-ammo: !type:Container
+  - type: Sprite
+    sprite: _ST14/Objects/Weapons/Guns/Ammunition/Magazine/epulse44_mag.rsi
+    state: base
+
+- type: entity
+  parent: ST14MagazineEPulse44
+  id: ST14MagazineEPulse44Empty
+  name: "E-Pulse 44 magazine"
+  suffix: empty
+  components:
+  - type: BallisticAmmoProvider
+    proto: null
+
+- type: Tag
+  id: ST14MagazineEPulse44

@@ -102,6 +102,9 @@ public sealed partial class ST14ResourceCapsuleSystem : EntitySystem
 
         _appearance.SetData(ent, ST14ResourceCapsuleVisuals.FillFraction, fraction);
 
+        // ID ресурса для клиента — по нему выбирается спрайт капсулы. Пустая строка = капсула пустая.
+        _appearance.SetData(ent, ST14ResourceCapsuleVisuals.Resource, ent.Comp.ResourceType?.Id ?? string.Empty);
+
         if (ent.Comp.ResourceType is { } type)
             _appearance.SetData(ent, ST14ResourceCapsuleVisuals.Color, _prototype.Index(type).Color);
     }
