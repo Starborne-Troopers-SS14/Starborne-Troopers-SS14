@@ -1,0 +1,46 @@
+uniform highp float progress;
+uniform highp float pixelHeight;
+uniform highp float edgeRows;
+uniform highp vec4 edgeColor;
+uniform highp float holoAlpha;
+
+varying highp vec2 localUV;
+
+const highp vec3 HoloGain = vec3(0.64, 0.70, 0.60);
+const highp vec3 HoloBase = vec3(0.265, 0.315, 0.346);
+const highp vec3 ScanlineDim = vec3(0.147, 0.027, 0.044);
+
+void vertex() {
+    localUV = tCoord2;
+}
+
+highp vec3 hologram(highp vec3 color, highp float row) {
+    highp float brightest = max(color.r, max(color.g, color.b));
+    highp float darkest = min(color.r, min(color.g, color.b));
+
+    if (brightest > 0.35 && brightest - darkest > 0.5 * brightest)
+        return min(color + 0.15, vec3(1.0));
+
+    highp float luma = dot(color, vec3(0.2126, 0.7152, 0.0722));
+    return clamp(HoloGain * luma + HoloBase - mod(row, 2.0) * ScanlineDim, 0.0, 1.0);
+}
+
+void fragment() {
+    highp vec4 sprite = zTexture(UV);
+    highp float row = floor(localUV.y * pixelHeight);
+    highp float line = floor(progress * pixelHeight);
+
+    if (row < line) {
+        COLOR = sprite;
+    } else {
+        highp vec3 holo = zFromSrgb(vec4(hologram(zToSrgb(sprite).rgb, row), 1.0)).rgb;
+        highp float flicker = 0.9 + 0.1 * sin(TIME * 6.0 + row * 0.5);
+        COLOR = vec4(holo, sprite.a * holoAlpha * flicker);
+
+        highp float dist = row - line;
+        if (progress > 0.0 && progress < 1.0 && dist < edgeRows) {
+            highp float edge = 1.0 - 0.5 * dist / edgeRows;
+            COLOR = vec4(mix(COLOR.rgb, edgeColor.rgb, edge), max(COLOR.a, sprite.a * edge));
+        }
+    }
+}

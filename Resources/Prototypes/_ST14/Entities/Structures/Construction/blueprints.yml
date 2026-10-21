@@ -1,0 +1,15 @@
+- type: entity
+  id: ST14Blueprint
+  name: construction hologram
+  description: An unfinished structure. Hold LMB with an engineer multitool to build it.
+  categories: [ HideSpawnMenu ]
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: true
+  - type: Clickable
+  - type: InteractionOutline
+  - type: Sprite
+  - type: ST14Blueprint
+  - type: ST14BlueprintVisuals

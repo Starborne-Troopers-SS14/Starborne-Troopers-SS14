@@ -2,13 +2,15 @@
   parent: BaseItem
   id: ST14ResourceCapsule
   name: resource capsule
-  description: A sealed capsule for carrying extracted resources. Fits any drill.
+  description: A sealed capsule for carrying extracted resources.
   components:
   - type: Sprite
-    sprite: _ST14/Structures/ST14Resources/bluegoo/32x32.rsi
+    sprite: _ST14/Objects/Specific/ST14Resources/capsule.rsi
     layers:
     - state: base
+    - state: fill-1
       map: [ "fill" ]
+      visible: false
   - type: Item
     size: Normal
     sprite: _ST14/Structures/ST14Resources/bluegoo/32x32.rsi
@@ -22,6 +24,10 @@
   - type: ST14ResourceCapsule
     capacity: 2000
   - type: ST14ResourceCapsuleVisuals
+    maxFillLevels: 4
+  - type: Clothing
+    slots: NONE
+    quickEquip: false
     applyColor: false
     fillStates:
     - base

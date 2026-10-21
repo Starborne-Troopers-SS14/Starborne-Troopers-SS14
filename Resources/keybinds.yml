@@ -238,6 +238,10 @@ binds:
 - function: OpenCraftingMenu
   type: State
   key: G
+# ST14
+- function: OpenEngineerBuildMenu
+  type: State
+  key: G
 - function: OpenGuidebook
   type: State
   key: NumpadNum0

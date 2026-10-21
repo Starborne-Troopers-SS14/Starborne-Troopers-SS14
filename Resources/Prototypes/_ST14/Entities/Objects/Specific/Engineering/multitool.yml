@@ -1,0 +1,13 @@
+- type: entity
+  parent: BaseItem
+  id: ST14EngineerMultitool
+  name: engineer multitool
+  description: Builds and dismantles fortifications, consuming armium from the capsule on the engineer's suit.
+  components:
+  - type: Sprite
+    sprite: _ST14/Objects/Specific/Engineering/builderrpistol.rsi
+    state: icon
+  - type: Item
+    size: Normal
+    sprite: _ST14/Objects/Specific/Engineering/builderrpistol.rsi
+  - type: ST14Multitool
