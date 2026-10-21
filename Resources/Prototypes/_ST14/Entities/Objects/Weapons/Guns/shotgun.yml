@@ -21,7 +21,7 @@
     availableModes:
     - SemiAuto
     soundGunshot:
-      path: /Audio/_ST14/Weapons/Shotgun/SFX_shotgun_primary_fire.ogg
+      path: /Audio/_ST14/SoundCollections/Weapons/Shotgun/SFX_shotgun_primary_fire.ogg
   - type: ChamberMagazineAmmoProvider
     soundRack:
       path: /Audio/_ST14/Weapons/shotgun_reload.ogg
@@ -30,8 +30,8 @@
       gun_magazine:
         name: Magazine
         startingItem: ST14MagazineShotgun
-        insertSound: /Audio/_ST14/Weapons/Shotgun/shotgun_reload.ogg
-        ejectSound: /Audio/_ST14/Weapons/Shotgun/shotgun_reload.ogg
+        insertSound: /Audio/_ST14/SoundCollections/Weapons/Shotgun/SFX_shotgun_reload.ogg
+        ejectSound: /Audio/_ST14/SoundCollections/Weapons/Shotgun/SFX_shotgun_reload.ogg
         priority: 2
         whitelist:
           tags:
