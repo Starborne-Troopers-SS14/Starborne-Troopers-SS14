@@ -5,14 +5,14 @@
   description: A compact sidearm issued to engineering troops. Not much stopping power, but it is always within reach.
   components:
   - type: Sprite
-    sprite: _ST14/Objects/Weapons/Guns/Pistols/builderrpistol.rsi
+    sprite: _ST14/Objects/Specific/Engineering/builderrpistol.rsi
     layers:
     - state: icon
   - type: Item
-    sprite: _ST14/Objects/Weapons/Guns/Pistols/builderrpistol.rsi
+    sprite: _ST14/Objects/Specific/Engineering/builderrpistol.rsi
     storedOffset: 0,-2
   - type: Clothing
-    sprite: _ST14/Objects/Weapons/Guns/Pistols/builderrpistol.rsi
+    sprite: _ST14/Objects/Specific/Engineering/builderrpistol.rsi
   - type: Gun
     fireRate: 5
     availableModes:
