@@ -28,16 +28,16 @@
   description: A belt-fed squad support weapon. Heavy, loud, and built to keep a bug wave's head down while the rest of the squad repositions.
   components:
   - type: Sprite
-    sprite: _ST14/Objects/Weapons/Guns/MachineGuns/epulse88.rsi/icon.rsi
+    sprite: _ST14/Objects/Weapons/Guns/MachineGuns/epulse88/icon.rsi
     layers:
     - state: base
       map: [ "enum.GunVisualLayers.Base" ]
     - state: mag-0
       map: [ "enum.GunVisualLayers.Mag" ]
   - type: Item
-    sprite: _ST14/Objects/Weapons/Guns/MachineGuns/epulse88.rsi/32x32.rsi
+    sprite: _ST14/Objects/Weapons/Guns/MachineGuns/epulse88/32x32.rsi
   - type: Clothing
-    sprite: _ST14/Objects/Weapons/Guns/MachineGuns/epulse88.rsi/32x32.rsi
+    sprite: _ST14/Objects/Weapons/Guns/MachineGuns/epulse88/32x32.rsi
   - type: Gun
     fireRate: 3
     soundGunshot:

@@ -11,11 +11,11 @@ namespace Content.Server._ST14.ST14Resources;
 /// Двуручные предметы. Работает только на сервере: виртуальный предмет во второй руке
 /// создаёт сервер, клиент просто получает его по сети и ничего не предсказывает.
 /// </summary>
-public sealed class ST14TwoHandedItemSystem : EntitySystem
+public sealed partial class ST14TwoHandedItemSystem : EntitySystem
 {
-    [Dependency] private readonly SharedHandsSystem _hands = default!;
-    [Dependency] private readonly SharedVirtualItemSystem _virtualItem = default!;
-    [Dependency] private readonly SharedPopupSystem _popup = default!;
+    [Dependency] private SharedHandsSystem _hands = default!;
+    [Dependency] private SharedVirtualItemSystem _virtualItem = default!;
+    [Dependency] private SharedPopupSystem _popup = default!;
 
     public override void Initialize()
     {
@@ -38,7 +38,6 @@ public sealed class ST14TwoHandedItemSystem : EntitySystem
 
     private void OnEquipped(Entity<ST14TwoHandedItemComponent> ent, ref GotEquippedHandEvent args)
     {
-        // Занимаем остальные руки виртуальными предметами
         for (var i = 0; i < ent.Comp.HandsNeeded - 1; i++)
         {
             _virtualItem.TrySpawnVirtualItemInHand(ent, args.User, true);
@@ -52,7 +51,6 @@ public sealed class ST14TwoHandedItemSystem : EntitySystem
 
     private void OnVirtualItemDeleted(Entity<ST14TwoHandedItemComponent> ent, ref VirtualItemDeletedEvent args)
     {
-        // Игрок "выбросил" виртуальный предмет из второй руки — роняем и саму капсулу
         if (args.BlockingEntity != ent.Owner)
             return;
 
