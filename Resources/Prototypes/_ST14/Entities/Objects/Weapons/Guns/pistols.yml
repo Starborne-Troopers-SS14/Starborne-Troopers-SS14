@@ -17,8 +17,6 @@
     fireRate: 5
     availableModes:
     - SemiAuto
-    soundGunshot:
-      path: /Audio/_ST14/Weapons/gun_mk2_fire.ogg
   - type: StealTarget
     stealGroup: OfficerHandgun
 
