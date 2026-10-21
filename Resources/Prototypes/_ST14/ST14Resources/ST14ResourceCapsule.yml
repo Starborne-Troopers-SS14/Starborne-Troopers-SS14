@@ -18,6 +18,9 @@
     capacity: 2000
   - type: ST14ResourceCapsuleVisuals
     maxFillLevels: 4
+  - type: Clothing
+    slots: NONE
+    quickEquip: false
 
 - type: entity
   parent: ST14ResourceCapsule

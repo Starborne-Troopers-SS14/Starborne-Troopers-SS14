@@ -1,5 +1,4 @@
 using Content.Shared._ST14.ST14Resources;
-using Content.Shared.Tag;
 using Robust.Shared.Audio;
 using Robust.Shared.GameStates;
 using Robust.Shared.Prototypes;
@@ -10,7 +9,7 @@ namespace Content.Shared._ST14.Construction.Components;
 public sealed partial class ST14MultitoolComponent : Component
 {
     public const string CapsuleSlot = "capsule";
-    public const string SuitSlot = "outerClothing";
+    public const string SuitSlot = "jumpsuit";
 
     [DataField]
     public float Range = 3f;
@@ -28,7 +27,7 @@ public sealed partial class ST14MultitoolComponent : Component
     public ProtoId<ST14ResourcePrototype> Resource = "Armium";
 
     [DataField]
-    public ProtoId<TagPrototype>? RequiredSuitTag;
+    public bool RequiresSuit = true;
 
     [DataField]
     public SoundSpecifier? BuildSound = new SoundPathSpecifier("/Audio/Effects/singularity.ogg",

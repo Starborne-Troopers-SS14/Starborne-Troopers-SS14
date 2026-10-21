@@ -18,7 +18,6 @@ using Robust.Shared.Input;
 using Robust.Shared.Input.Binding;
 using Robust.Shared.Map;
 using Robust.Shared.Player;
-using Robust.Shared.Prototypes;
 
 namespace Content.Client._ST14.Construction;
 
@@ -91,10 +90,10 @@ public sealed partial class ST14MultitoolSystem : SharedST14MultitoolSystem
 
     public FixedPoint2? GetLocalArmium()
     {
-        if (!TryGetLocalMultitool(out var tool))
+        if (_player.LocalEntity is not { } user || !TryGetHeldMultitool(user, out var tool))
             return null;
 
-        if (!TryGetCapsule(tool, out var capsule) || !Capsules.IsCompatible(capsule, tool.Comp.Resource))
+        if (!TryGetCapsule(user, out var capsule) || !Capsules.IsCompatible(capsule, tool.Comp.Resource))
             return FixedPoint2.Zero;
 
         return capsule.Comp.Amount;

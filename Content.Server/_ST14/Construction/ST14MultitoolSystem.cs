@@ -112,7 +112,7 @@ public sealed partial class ST14MultitoolSystem : SharedST14MultitoolSystem
         if (work == 0f || buildable.Cost <= FixedPoint2.Zero)
             return work;
 
-        if (!TryGetCapsule(tool, out var capsule))
+        if (tool.Comp.User is not { } user || !TryGetCapsule(user, out var capsule))
         {
             Stop(tool, "st14-multitool-no-capsule", settle: false);
             return 0f;

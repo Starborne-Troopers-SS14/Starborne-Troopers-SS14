@@ -1,10 +1,5 @@
-construction-category-st14-engineering = Инженерные сооружения
-
-st14-construction-recipe-auron-drill = бур аурона
-st14-construction-recipe-auron-drill-desc = Ставит голограмму на месторождение аурона. Достраивается мультитулом: 500 армиума.
 st14-construction-condition-resource-field = Нужно подходящее месторождение.
 
-st14-multitool-capsule-slot = капсула
 st14-multitool-required = Возьмите инженерный мультитул в руку.
 st14-multitool-not-in-hand = Возьмите инженерный мультитул в руку.
 st14-multitool-no-suit = Нужен инженерный костюм.
@@ -18,11 +13,8 @@ st14-multitool-examine-no-capsule = Капсула не вставлена.
 st14-blueprint-cant-place = Здесь нельзя строить.
 st14-blueprint-spot-taken = Место занято.
 
-ent-ST14EngineerMultitool = инженерный мультитул
+ent-ST14EngineerMultitool = Инженерный мультитул
     .desc = Строит и разбирает укрепления, расходуя армиум из вставленной капсулы.
-ent-ST14EngineerMultitoolFilled = { ent-ST14EngineerMultitool }
-    .desc = { ent-ST14EngineerMultitool.desc }
-ent-ST14BlueprintAuronDrill = голограмма бура аурона
     .desc = Недостроенный бур аурона. Зажмите ЛКМ мультитулом, чтобы достроить.
 
 st14-build-menu-title = Строительство

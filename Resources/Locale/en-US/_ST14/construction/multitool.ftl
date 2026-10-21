@@ -4,7 +4,6 @@ st14-construction-recipe-auron-drill = auron drill
 st14-construction-recipe-auron-drill-desc = Places a hologram on an auron field. Finish it with a multitool: 500 armium.
 st14-construction-condition-resource-field = Requires a matching resource field.
 
-st14-multitool-capsule-slot = capsule
 st14-multitool-required = Hold an engineer multitool in your hand.
 st14-multitool-not-in-hand = Hold the engineer multitool in your hand.
 st14-multitool-no-suit = You need an engineering suit.

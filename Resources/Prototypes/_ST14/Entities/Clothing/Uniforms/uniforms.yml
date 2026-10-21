@@ -23,3 +23,5 @@
     sprite: _ST14/Clothing/Uniforms/Jumpsuit/engiuniform.rsi
   - type: FoldableClothing
     foldedEquippedPrefix: jacketless
+  - type: ST14EngineerSuit
+    requiredJob: ST14Engineer

@@ -2,12 +2,10 @@ using System.Diagnostics.CodeAnalysis;
 using Content.Shared._ST14.Construction.Components;
 using Content.Shared._ST14.ST14Resources.Components;
 using Content.Shared._ST14.ST14Resources.EntitySystems;
-using Content.Shared.Containers.ItemSlots;
 using Content.Shared.Examine;
 using Content.Shared.Hands.EntitySystems;
 using Content.Shared.Inventory;
 using Content.Shared.Popups;
-using Content.Shared.Tag;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Timing;
@@ -20,11 +18,9 @@ public abstract partial class SharedST14MultitoolSystem : EntitySystem
     [Dependency] protected SharedPopupSystem Popup = default!;
     [Dependency] protected ST14ResourceCapsuleSystem Capsules = default!;
     [Dependency] private InventorySystem _inventory = default!;
-    [Dependency] private ItemSlotsSystem _itemSlots = default!;
     [Dependency] private SharedHandsSystem _hands = default!;
     [Dependency] private SharedMapSystem _map = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
-    [Dependency] private TagSystem _tag = default!;
 
     public override void Initialize()
     {
@@ -59,7 +55,7 @@ public abstract partial class SharedST14MultitoolSystem : EntitySystem
         if (!args.IsInDetailsRange)
             return;
 
-        if (!TryGetCapsule(ent, out var capsule))
+        if (!TryGetCapsule(args.Examiner, out var capsule))
         {
             args.PushMarkup(Loc.GetString("st14-multitool-examine-no-capsule"));
             return;
@@ -170,14 +166,14 @@ public abstract partial class SharedST14MultitoolSystem : EntitySystem
         return true;
     }
 
-    protected bool TryGetCapsule(Entity<ST14MultitoolComponent> tool, out Entity<ST14ResourceCapsuleComponent> capsule)
+    protected bool TryGetCapsule(EntityUid user, out Entity<ST14ResourceCapsuleComponent> capsule)
     {
         capsule = default;
-        if (_itemSlots.GetItemOrNull(tool.Owner, ST14MultitoolComponent.CapsuleSlot) is not { } item ||
+        if (!_inventory.TryGetSlotEntity(user, ST14MultitoolComponent.CapsuleSlot, out var item) ||
             !TryComp<ST14ResourceCapsuleComponent>(item, out var comp))
             return false;
 
-        capsule = (item, comp);
+        capsule = (item.Value, comp);
         return true;
     }
 
@@ -186,14 +182,14 @@ public abstract partial class SharedST14MultitoolSystem : EntitySystem
         if (_hands.GetActiveItem(user) != tool.Owner)
             return "st14-multitool-not-in-hand";
 
-        if (tool.Comp.RequiredSuitTag is { } suitTag &&
-            (!_inventory.TryGetSlotEntity(user, ST14MultitoolComponent.SuitSlot, out var suit) || !_tag.HasTag(suit.Value, suitTag)))
+        if (tool.Comp.RequiresSuit &&
+            (!_inventory.TryGetSlotEntity(user, ST14MultitoolComponent.SuitSlot, out var suit) || !HasComp<ST14EngineerSuitComponent>(suit)))
             return "st14-multitool-no-suit";
 
         if (mode == ST14MultitoolMode.None)
             return null;
 
-        if (!TryGetCapsule(tool, out var capsule))
+        if (!TryGetCapsule(user, out var capsule))
             return "st14-multitool-no-capsule";
 
         if (!Capsules.IsCompatible(capsule, tool.Comp.Resource))

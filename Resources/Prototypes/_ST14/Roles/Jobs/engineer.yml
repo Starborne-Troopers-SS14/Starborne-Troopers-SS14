@@ -1,0 +1,43 @@
+- type: job
+  id: ST14Engineer
+  name: st14-job-name-engineer
+  description: st14-job-description-engineer
+  playTimeTracker: JobST14Engineer
+  startingGear: ST14EngineerGear
+  icon: JobIconST14Engineer
+  supervisors: st14-job-supervisors-engineer
+  special:
+  - !type:ST14EquipItemSpecial
+    slot: capsule
+    prototype: ST14ResourceCapsuleArmiumFilled
+
+- type: startingGear
+  id: ST14EngineerGear
+  equipment:
+    jumpsuit: ST14JumpsuitEngineeringUniform
+    head: ST14ClothingHeadHelmetEngineer
+    gloves: ST14ClothingHandsGlovesEngineer
+    belt: ST14ClothingBeltEngineer
+    shoes: ST14ClothingShoesCombatBoots
+    back: ST14ClothingBackpackEngineer
+  inhand:
+  - ST14EngineerMultitool
+
+- type: department
+  id: ST14Engineering
+  name: st14-department-engineering
+  description: st14-department-engineering-description
+  color: "#EFB341"
+  roles:
+  - ST14Engineer
+
+- type: playTimeTracker
+  id: JobST14Engineer
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconST14Engineer
+  icon:
+    sprite: /Textures/Interface/Misc/job_icons.rsi
+    state: StationEngineer
+  jobName: st14-job-name-engineer
