@@ -8,10 +8,7 @@
     },
     "states": [
         {
-            "name": "terrain-tarPit"
-        },
-        {
-            "name": "terrain-tarPit1",
+            "name": "terrain-tarPit",
             "delays": [
                 [
                     0.1,
