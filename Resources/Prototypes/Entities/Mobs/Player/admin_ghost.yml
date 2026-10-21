@@ -104,7 +104,7 @@
   - type: ShowAntagIcons
   - type: ShowContrabandDetails
   - type: Inventory
-    templateId: human
+    templateId: aghost
   - type: Loadout
     prototypes: [ MobAghostGear ]
   - type: BypassInteractionChecks
