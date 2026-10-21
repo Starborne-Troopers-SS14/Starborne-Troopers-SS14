@@ -123,7 +123,7 @@
     enabled: false
     radius: 3
     energy: 1.5
-    color: "ffe900"
+    color: "#ffe900"
 
 - type: entity
   parent: ST14BaseResourceExtractor
@@ -162,7 +162,7 @@
     enabled: false
     radius: 3
     energy: 1.5
-    color: "ffe900"
+    color: "#ffe900"
 
 - type: entity
   parent: ST14BaseResourceExtractor
