@@ -1,5 +1,7 @@
+using System.Collections.Concurrent;
 using System.Numerics;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Robust.Client.Graphics;
 using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface;
@@ -49,11 +51,14 @@ public static class ST14HubStyle
         [ST14HubFont.Black] = new[] { "/Fonts/_ST14/Orbitron/Orbitron-Black.ttf", "/Fonts/_ST14/Exo2/Exo2-Black.ttf", "/Fonts/NotoSansDisplay/NotoSansDisplay-Bold.ttf" },
     };
 
-    private static readonly Dictionary<(ST14HubFont, int), Font> FontCache = new();
+    // One cache per resource cache: integration tests run several clients in one process at the same time,
+    // and a font belongs to the client that loaded it.
+    private static readonly ConditionalWeakTable<IResourceCache, ConcurrentDictionary<(ST14HubFont, int), Font>> FontCaches = new();
 
     public static Font Font(IResourceCache cache, ST14HubFont font, int size)
     {
-        if (FontCache.TryGetValue((font, size), out var cached))
+        var fontCache = FontCaches.GetValue(cache, _ => new ConcurrentDictionary<(ST14HubFont, int), Font>());
+        if (fontCache.TryGetValue((font, size), out var cached))
             return cached;
 
         var fonts = FontStacks[font]
@@ -62,8 +67,7 @@ public static class ST14HubStyle
             .ToArray();
 
         var result = fonts.Length == 1 ? fonts[0] : new StackedFont(fonts);
-        FontCache[(font, size)] = result;
-        return result;
+        return fontCache.GetOrAdd((font, size), result);
     }
 
     public static Texture Tex(IResourceCache cache, string file)
