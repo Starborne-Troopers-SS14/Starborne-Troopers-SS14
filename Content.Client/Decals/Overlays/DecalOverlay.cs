@@ -53,7 +53,9 @@ namespace Content.Client.Decals.Overlays
             var xformSystem = _entManager.System<TransformSystem>();
             var eyeAngle = args.Viewport.Eye?.Rotation ?? Angle.Zero;
 
-            var gridAABB = xformSystem.GetInvWorldMatrix(xform).TransformBox(args.WorldBounds.Enlarged(1f));
+            var gridAABB = xformSystem.GetInvWorldMatrix(xform).TransformBox(args.WorldBounds.Enlarged(6f));
+            // ST14: decals are kept by their bottom-left corner and ours are up to ~5 tiles big, so look further
+            // out or a decal vanishes while most of it is still on screen
             _decals.Clear();
 
             foreach (var chunkEnt in _chunkEntities.GetChunksIntersecting(owner, gridAABB))

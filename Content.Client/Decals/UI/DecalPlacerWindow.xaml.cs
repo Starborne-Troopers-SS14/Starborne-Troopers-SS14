@@ -1,3 +1,4 @@
+using System.Numerics; // ST14
 using System.Linq;
 using Content.Client.Stylesheets;
 using Content.Shared.Decals;
@@ -27,6 +28,7 @@ public sealed partial class DecalPlacerWindow : DefaultWindow
     private PaletteColorPicker? _picker;
 
     private SortedDictionary<string, Texture>? _decals;
+    private const float PreviewSize = 64f; // ST14
     private string? _selected;
     private Color _color = Color.White;
     private bool _useColor;
@@ -150,7 +152,9 @@ public sealed partial class DecalPlacerWindow : DefaultWindow
                 TextureNormal = tex,
                 Name = decal,
                 ToolTip = decal,
-                Modulate = _useColor ? _color : Color.White
+                Modulate = _useColor ? _color : Color.White,
+                // ST14: big decals are shrunk to fit the cell instead of spilling over the window
+                Scale = new Vector2(MathF.Min(1f, PreviewSize / MathF.Max(tex.Width, tex.Height))),
             };
             button.OnPressed += ButtonOnPressed;
             if (_selected == decal)

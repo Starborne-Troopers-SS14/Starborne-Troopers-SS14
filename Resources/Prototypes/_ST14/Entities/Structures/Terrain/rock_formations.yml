@@ -1,57 +1,281 @@
+# Each rock is its own entity so the hitbox can follow that sprite's ground footprint.
+# Polygons cover the lower three quarters of the opaque outline minus 14 px at the very bottom, so a mob
+# can stand right against the rock. At most 8 vertices (physics limit).
 - type: entity
-  parent: BaseWall
-  id: ST14RockFormation
-  name: rock formation
-  description: A weathered outcrop of sandstone, worn into ridges by wind and grit.
+  abstract: true
+  parent: BaseStructure
+  id: ST14RockFormationBase
+  name: rocks
+  description: A pile of weathered sandstone, worn by wind and grit.
+  placement:
+    mode: SnapgridCenter
   components:
+  # Same draw depth as mobs so the rock y-sorts with them: walk behind it and it covers you.
   - type: Sprite
     sprite: _ST14/Structures/Terrain/rock_formations.rsi
-    layers:
-    - state: rockFormation1
-      map: [ "ST14RockFormation" ]
-      offset: 0, 0.78125
+    drawdepth: Mobs
+    offset: 0, 0.78125
   - type: Icon
     sprite: _ST14/Structures/Terrain/rock_formations.rsi
+  - type: Physics
+    bodyType: Static
+  - type: Tag
+    tags:
+    - Structure
+
+- type: entity
+  parent: ST14RockFormationBase
+  id: ST14RockFormation1
+  components:
+  - type: Sprite
+    state: rockFormation1
+  - type: Icon
+    state: rockFormation1
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PolygonShape
+          vertices:
+          - "-1.238,-0.041"
+          - "1.174,-0.045"
+          - "1.235,0.164"
+          - "0.711,0.845"
+          - "-0.311,0.815"
+          - "-0.741,0.629"
+          - "-0.953,0.402"
+          - "-1.238,-0.011"
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+        density: 1000
+
+- type: entity
+  parent: ST14RockFormationBase
+  id: ST14RockFormation2Left
+  components:
+  - type: Sprite
+    state: rockFormation2_top-l
+  - type: Icon
+    state: rockFormation2_top-l
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PolygonShape
+          vertices:
+          - "-0.808,0.005"
+          - "0.808,0.005"
+          - "0.703,0.592"
+          - "0.618,0.937"
+          - "0.534,1.112"
+          - "-0.414,1.107"
+          - "-0.580,0.734"
+          - "-0.806,0.064"
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+        density: 1000
+
+- type: entity
+  parent: ST14RockFormationBase
+  id: ST14RockFormation2Right
+  components:
+  - type: Sprite
+    state: rockFormation2_top-r
+  - type: Icon
+    state: rockFormation2_top-r
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PolygonShape
+          vertices:
+          - "-0.715,0.005"
+          - "0.902,0.005"
+          - "0.900,0.064"
+          - "0.674,0.734"
+          - "0.508,1.107"
+          - "-0.441,1.112"
+          - "-0.524,0.937"
+          - "-0.609,0.592"
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+        density: 1000
+
+- type: entity
+  parent: ST14RockFormationBase
+  id: ST14RockFormation3Left
+  components:
+  - type: Sprite
+    state: rockFormation3_top-l
+  - type: Icon
+    state: rockFormation3_top-l
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PolygonShape
+          vertices:
+          - "-1.428,0.277"
+          - "1.738,0.271"
+          - "1.641,0.665"
+          - "0.991,1.472"
+          - "-0.480,1.448"
+          - "-0.898,1.345"
+          - "-1.080,1.142"
+          - "-1.329,0.669"
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+        density: 1000
+
+- type: entity
+  parent: ST14RockFormationBase
+  id: ST14RockFormation3Right
+  components:
+  - type: Sprite
+    state: rockFormation3_top-r
+  - type: Icon
+    state: rockFormation3_top-r
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PolygonShape
+          vertices:
+          - "-1.738,0.271"
+          - "1.428,0.277"
+          - "1.329,0.669"
+          - "1.080,1.142"
+          - "0.898,1.345"
+          - "0.480,1.448"
+          - "-0.991,1.472"
+          - "-1.641,0.665"
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+        density: 1000
+
+- type: entity
+  parent: ST14RockFormationBase
+  id: ST14RockFormation4
+  components:
+  - type: Sprite
     state: rockFormation4
-  - type: RandomSprite
-    available:
-    - ST14RockFormation:
-        rockFormation1: null
-        rockFormation2_top-l: null
-        rockFormation2_top-r: null
-        rockFormation3_top-l: null
-        rockFormation3_top-r: null
-        rockFormation4: null
-        shortRocks: null
+  - type: Icon
+    state: rockFormation4
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PolygonShape
+          vertices:
+          - "-1.674,0.514"
+          - "-1.616,0.154"
+          - "1.675,0.146"
+          - "1.641,0.601"
+          - "1.488,1.448"
+          - "-0.610,1.414"
+          - "-1.428,1.380"
+          - "-1.641,1.023"
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+        density: 1000
+
+- type: entity
+  parent: ST14RockFormationBase
+  id: ST14RockFormationShortRocks
+  name: rocks
+  description: A low pile of sandstone slabs.
+  components:
+  - type: Sprite
+    state: shortRocks
+  - type: Icon
+    state: shortRocks
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PolygonShape
+          vertices:
+          - "-0.738,-0.043"
+          - "0.705,-0.046"
+          - "0.735,0.273"
+          - "0.736,0.390"
+          - "-0.285,0.361"
+          - "-0.547,0.213"
+          - "-0.578,0.185"
+          - "-0.737,-0.014"
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+        density: 1000
+
+# Mapping helpers: the old random-sprite ids now spawn one of the fitted rocks.
+- type: entity
+  parent: MarkerBase
+  id: ST14RockFormation
+  name: random rocks spawner
+  components:
+  - type: Sprite
+    layers:
+    - state: red
+    - sprite: _ST14/Structures/Terrain/rock_formations.rsi
+      state: rockFormation1
+  - type: EntityTableSpawner
+    table: !type:GroupSelector
+      children:
+      - id: ST14RockFormation1
+      - id: ST14RockFormation2Left
+      - id: ST14RockFormation2Right
+      - id: ST14RockFormation3Left
+      - id: ST14RockFormation3Right
+      - id: ST14RockFormation4
+      - id: ST14RockFormationShortRocks
+    offset: 0.0
 
 - type: entity
   parent: ST14RockFormation
   id: ST14RockFormationLarge
+  name: random large rocks spawner
   components:
   - type: Sprite
-    sprite: _ST14/Structures/Terrain/rock_formations.rsi
     layers:
-    - state: rockFormation4
-      map: [ "ST14RockFormation" ]
-      offset: 0, 0.78125
-  - type: RandomSprite
-    available:
-    - ST14RockFormation:
-        rockFormation4: null
-        rockFormation3_top-l: null
-        rockFormation3_top-r: null
+    - state: red
+    - sprite: _ST14/Structures/Terrain/rock_formations.rsi
+      state: rockFormation4
+  - type: EntityTableSpawner
+    table: !type:GroupSelector
+      children:
+      - id: ST14RockFormation3Left
+      - id: ST14RockFormation3Right
+      - id: ST14RockFormation4
+    offset: 0.0
 
 - type: entity
   parent: ST14RockFormation
   id: ST14RockFormationShort
+  name: random short rocks spawner
   components:
   - type: Sprite
-    sprite: _ST14/Structures/Terrain/rock_formations.rsi
     layers:
-    - state: shortRocks
-      map: [ "ST14RockFormation" ]
-      offset: 0, 0.78125
-  - type: RandomSprite
-    available:
-    - ST14RockFormation:
-        shortRocks: null
+    - state: red
+    - sprite: _ST14/Structures/Terrain/rock_formations.rsi
+      state: shortRocks
+  - type: EntityTableSpawner
+    table: !type:GroupSelector
+      children:
+      - id: ST14RockFormationShortRocks
+      - id: ST14RockFormation2Left
+      - id: ST14RockFormation2Right
+    offset: 0.0

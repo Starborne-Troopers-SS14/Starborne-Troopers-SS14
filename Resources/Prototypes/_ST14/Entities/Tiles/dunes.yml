@@ -6,3 +6,10 @@
   variants: 16
   footstepSounds:
     collection: FootstepAsteroid
+
+# dunes.png is a 128x128 texture cut into 16 pieces, laid out 4x4 by grid position.
+- type: st14MultiTile
+  id: ST14FloorDunes
+  tile: ST14FloorDunes
+  width: 4
+  height: 4

@@ -67,7 +67,7 @@ public sealed partial class DecalPlacementSystem : EntitySystem
                     coords = coords.WithPosition(newPos);
                 }
 
-                coords = coords.Offset(new Vector2(-0.5f, -0.5f));
+                coords = coords.Offset(-GetDecalHalfSize(_decalId)); // ST14: centre big decals on the cursor
 
                 if (!coords.IsValid(EntityManager))
                     return false;
@@ -109,6 +109,20 @@ public sealed partial class DecalPlacementSystem : EntitySystem
         SubscribeLocalEvent<PlaceDecalActionEvent>(OnPlaceDecalAction);
     }
 
+    // ST14-start
+    /// <summary>
+    /// Half the decal's size in tiles. Decals are stored by their bottom-left corner and drawn at the texture's
+    /// own size, so a decal bigger than a tile has to be shifted by half its size to land centred on the cursor
+    /// </summary>
+    public Vector2 GetDecalHalfSize(string decalId)
+    {
+        if (!ProtoMan.TryIndex<DecalPrototype>(decalId, out var decal))
+            return new Vector2(0.5f, 0.5f);
+
+        return _sprite.Frame0(decal.Sprite).Size / (float) EyeManager.PixelsPerMeter / 2f;
+    }
+    // ST14-end
+
     private void OnPlaceDecalAction(PlaceDecalActionEvent args)
     {
         if (args.Handled)
@@ -128,7 +142,7 @@ public sealed partial class DecalPlacementSystem : EntitySystem
             args.Target = args.Target.WithPosition(newPos);
         }
 
-        args.Target = args.Target.Offset(new Vector2(-0.5f, -0.5f));
+        args.Target = args.Target.Offset(-GetDecalHalfSize(args.DecalId)); // ST14: centre big decals on the cursor
 
         var decal = new Decal(args.Target.Position, args.DecalId, args.Color, Angle.FromDegrees(args.Rotation), args.ZIndex, args.Cleanable);
         RaisePredictiveEvent(new RequestDecalPlacementEvent(decal, GetNetCoordinates(args.Target)));
