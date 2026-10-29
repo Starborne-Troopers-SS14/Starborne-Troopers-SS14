@@ -99,35 +99,35 @@ public sealed class ST14GalaxyMapView : Control
             return 0;
         }
 
-        // the war table is dark: the galaxy is only a faint glow under the sectors
+        // the Milky Way itself: bulge and bar, four spiral arms and a thin disc between them
         var stars = new List<(Vector2, float, Color, float)>();
         var warm = new Color(1f, 0.86f, 0.62f);
         var blue = new Color(0.76f, 0.85f, 1f);
         var pink = new Color(1f, 0.6f, 0.78f);
 
-        for (var i = 0; i < 1000; i++)
+        for (var i = 0; i < 1400; i++)
         {
             var p = new Vector2(Gauss() * 0.13f, Gauss() * 0.055f);
             p = Vector2.Transform(p, Matrix3x2.CreateRotation(bar));
-            stars.Add((p, 0.5f + random.NextSingle() * 0.9f, Color.InterpolateBetween(warm, Color.White, random.NextSingle() * 0.4f).WithAlpha(0.6f),
+            stars.Add((p, 0.6f + random.NextSingle() * 1.1f, Color.InterpolateBetween(warm, Color.White, random.NextSingle() * 0.4f),
                 random.NextSingle() * MathF.Tau));
         }
 
-        for (var i = 0; i < 5000; i++)
+        for (var i = 0; i < 5600; i++)
         {
             var r = 0.12f + 0.86f * MathF.Sqrt(random.NextSingle());
             var p = ArmPoint(PickArm(), r, 0.022f + 0.04f * r);
             var roll = random.NextSingle();
             var color = roll < 0.04f ? pink : roll < 0.25f ? Color.InterpolateBetween(warm, Color.White, 0.5f) : blue;
-            stars.Add((p, 0.4f + random.NextSingle() * random.NextSingle() * 1.4f, color.WithAlpha(0.75f), random.NextSingle() * MathF.Tau));
+            stars.Add((p, 0.5f + random.NextSingle() * random.NextSingle() * 1.6f, color, random.NextSingle() * MathF.Tau));
         }
 
         for (var i = 0; i < 1800; i++)
         {
-            var r = MathF.Sqrt(random.NextSingle()) * 1.05f;
+            var r = MathF.Sqrt(random.NextSingle()) * 0.98f;
             var a = random.NextSingle() * MathF.Tau;
             stars.Add((new Vector2(MathF.Cos(a), MathF.Sin(a)) * r, 0.4f + random.NextSingle() * 0.6f,
-                Color.InterpolateBetween(blue, warm, random.NextSingle()).WithAlpha(0.5f), random.NextSingle() * MathF.Tau));
+                Color.InterpolateBetween(blue, warm, random.NextSingle()).WithAlpha(0.6f), random.NextSingle() * MathF.Tau));
         }
 
         // colours are converted to linear once here, the stars are redrawn every frame
@@ -135,16 +135,22 @@ public sealed class ST14GalaxyMapView : Control
 
         var clouds = new List<(Vector2, float, Color)>
         {
-            (Vector2.Zero, 1.1f, new Color(0.25f, 0.35f, 0.55f, 0.12f)),
-            (Vector2.Zero, 0.3f, new Color(1f, 0.8f, 0.55f, 0.3f)),
-            (Vector2.Zero, 0.12f, new Color(1f, 0.9f, 0.72f, 0.55f)),
+            (Vector2.Zero, 1.05f, new Color(0.35f, 0.45f, 0.65f, 0.1f)),
+            (Vector2.Zero, 0.36f, new Color(1f, 0.78f, 0.5f, 0.45f)),
+            (Vector2.Zero, 0.17f, new Color(1f, 0.9f, 0.72f, 0.7f)),
         };
 
-        for (var i = 0; i < 260; i++)
+        for (var i = 0; i < 300; i++)
         {
             var r = 0.14f + 0.8f * MathF.Sqrt(random.NextSingle());
             clouds.Add((ArmPoint(PickArm(), r, 0.02f), 0.05f + random.NextSingle() * 0.08f,
-                new Color(0.35f, 0.5f, 0.85f, 0.04f + random.NextSingle() * 0.04f)));
+                new Color(0.45f, 0.6f, 0.95f, 0.05f + random.NextSingle() * 0.05f)));
+        }
+
+        for (var i = 0; i < 40; i++)
+        {
+            var r = 0.2f + 0.7f * random.NextSingle();
+            clouds.Add((ArmPoint(PickArm(), r, 0.015f), 0.015f + random.NextSingle() * 0.02f, new Color(1f, 0.45f, 0.65f, 0.22f)));
         }
 
         Clouds = clouds.Select(c => (c.Item1, c.Item2, Color.FromSrgb(c.Item3))).ToArray();
@@ -462,7 +468,7 @@ public sealed class ST14GalaxyMapView : Control
         var scale = Scale;
         var focused = SelectedSector != null;
 
-        // faint galaxy under the table
+        // the galaxy under the sectors
         _glow.Clear();
         foreach (var (pos, radius, color) in Clouds)
         {
@@ -515,15 +521,6 @@ public sealed class ST14GalaxyMapView : Control
             Arc(outer, sector.Start, sector.End, line, color);
             if (sector.Ring > 0)
                 _shapes.Line(ToScreen(Polar(inner, sector.Start)), ToScreen(Polar(outer, sector.Start)), line, color);
-        }
-
-        // rim of the table: a ring with ticks
-        Arc(EdgeRadius, 0, 360, line, LineColor.WithAlpha(0.22f));
-        for (var a = 0f; a < 360; a += 3f)
-        {
-            var big = a % 15 == 0;
-            _shapes.Line(ToScreen(Polar(EdgeRadius, a)), ToScreen(Polar(EdgeRadius + (big ? 0.025f : 0.012f), a)), line,
-                LineColor.WithAlpha(big ? 0.35f : 0.18f));
         }
 
         if (_hoveredSector != null && _hoveredSector != SelectedSector)
