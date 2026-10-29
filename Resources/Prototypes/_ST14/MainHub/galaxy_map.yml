@@ -1,0 +1,464 @@
+# Galaxy map of the galactic war. Angles go clockwise from the right side of the map, the galaxy has a radius of 1.
+# Rings: 0 is the core, 1 ends at 0.4, 2 at 0.66, 3 at 0.97 (see ST14GalaxySectorPrototype.RingRadius)
+
+# Core
+- type: st14GalaxySector
+  id: ST14SectorCore
+  name: st14-galaxy-sector-core
+  ring: 0
+
+# Inner ring
+- type: st14GalaxySector
+  id: ST14SectorNorma
+  name: st14-galaxy-sector-norma
+  ring: 1
+  start: 0
+  end: 60
+
+- type: st14GalaxySector
+  id: ST14SectorScutum
+  name: st14-galaxy-sector-scutum
+  ring: 1
+  start: 60
+  end: 120
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorCentaurus
+  name: st14-galaxy-sector-centaurus
+  ring: 1
+  start: 120
+  end: 180
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorCygnus
+  name: st14-galaxy-sector-cygnus
+  ring: 1
+  start: 180
+  end: 240
+  faction: Contested
+
+- type: st14GalaxySector
+  id: ST14SectorSagittarius
+  name: st14-galaxy-sector-sagittarius
+  ring: 1
+  start: 240
+  end: 300
+
+- type: st14GalaxySector
+  id: ST14SectorCarina
+  name: st14-galaxy-sector-carina
+  ring: 1
+  start: 300
+  end: 360
+
+# Middle ring
+- type: st14GalaxySector
+  id: ST14SectorAldebaran
+  name: st14-galaxy-sector-aldebaran
+  ring: 2
+  start: 0
+  end: 45
+  faction: Contested
+
+- type: st14GalaxySector
+  id: ST14SectorSirius
+  name: st14-galaxy-sector-sirius
+  ring: 2
+  start: 45
+  end: 90
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorSol
+  name: st14-galaxy-sector-sol
+  ring: 2
+  start: 90
+  end: 135
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorOrion
+  name: st14-galaxy-sector-orion
+  ring: 2
+  start: 135
+  end: 180
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorPerseus
+  name: st14-galaxy-sector-perseus
+  ring: 2
+  start: 180
+  end: 225
+  faction: Contested
+
+- type: st14GalaxySector
+  id: ST14SectorRigel
+  name: st14-galaxy-sector-rigel
+  ring: 2
+  start: 225
+  end: 270
+  faction: Arachnid
+
+- type: st14GalaxySector
+  id: ST14SectorVega
+  name: st14-galaxy-sector-vega
+  ring: 2
+  start: 270
+  end: 315
+  faction: Contested
+
+- type: st14GalaxySector
+  id: ST14SectorAntares
+  name: st14-galaxy-sector-antares
+  ring: 2
+  start: 315
+  end: 360
+  faction: Contested
+
+# Outer ring
+- type: st14GalaxySector
+  id: ST14SectorHydra
+  name: st14-galaxy-sector-hydra
+  ring: 3
+  start: 0
+  end: 36
+  faction: Contested
+
+- type: st14GalaxySector
+  id: ST14SectorTauCeti
+  name: st14-galaxy-sector-tau-ceti
+  ring: 3
+  start: 36
+  end: 72
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorSanctuary
+  name: st14-galaxy-sector-sanctuary
+  ring: 3
+  start: 72
+  end: 108
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorColonies
+  name: st14-galaxy-sector-colonies
+  ring: 3
+  start: 108
+  end: 144
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorHesperus
+  name: st14-galaxy-sector-hesperus
+  ring: 3
+  start: 144
+  end: 180
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorTangoUrilla
+  name: st14-galaxy-sector-tango-urilla
+  ring: 3
+  start: 180
+  end: 216
+  faction: Contested
+
+- type: st14GalaxySector
+  id: ST14SectorGehenna
+  name: st14-galaxy-sector-gehenna
+  ring: 3
+  start: 216
+  end: 252
+  faction: Arachnid
+
+- type: st14GalaxySector
+  id: ST14SectorKlendathu
+  name: st14-galaxy-sector-klendathu
+  ring: 3
+  start: 252
+  end: 288
+  faction: Arachnid
+
+- type: st14GalaxySector
+  id: ST14SectorQuarantine
+  name: st14-galaxy-sector-quarantine
+  ring: 3
+  start: 288
+  end: 324
+  faction: Arachnid
+
+- type: st14GalaxySector
+  id: ST14SectorPlanetP
+  name: st14-galaxy-sector-planet-p
+  ring: 3
+  start: 324
+  end: 360
+  faction: Arachnid
+
+# Planets
+- type: st14GalaxyPlanet
+  id: ST14PlanetEarth
+  name: st14-galaxy-planet-earth
+  description: st14-galaxy-planet-earth-desc
+  sector: ST14SectorSol
+  radius: 0.55
+  angle: 112
+  faction: Federation
+  liberation: 100
+  capital: true
+  seed: 1
+  surface: ["#123A6B", "#2E6B9E", "#3F7A3A", "#8A8A5A", "#F2F2F2"]
+  atmosphere: "#8CC8FF"
+  links: [ ST14PlanetMars, ST14PlanetSirius, ST14PlanetSanctuary, ST14PlanetHesperus ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetMars
+  name: st14-galaxy-planet-mars
+  description: st14-galaxy-planet-mars-desc
+  sector: ST14SectorSol
+  radius: 0.48
+  angle: 100
+  faction: Federation
+  liberation: 100
+  seed: 2
+  surface: ["#4A1E12", "#8C3B1E", "#C2643A", "#E0A07A"]
+  atmosphere: "#E0A07A"
+  links: [ ST14PlanetPluto ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetPluto
+  name: st14-galaxy-planet-pluto
+  description: st14-galaxy-planet-pluto-desc
+  sector: ST14SectorSol
+  radius: 0.6
+  angle: 126
+  faction: Federation
+  liberation: 100
+  seed: 3
+  surface: ["#3A3540", "#6E6672", "#B8AFA8", "#EDE6DC"]
+  atmosphere: "#B8C8E0"
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetSirius
+  name: st14-galaxy-planet-sirius
+  description: st14-galaxy-planet-sirius-desc
+  sector: ST14SectorSirius
+  radius: 0.5
+  angle: 66
+  faction: Federation
+  liberation: 100
+  seed: 4
+  surface: ["#1E3A2A", "#3E6B3A", "#8AA05A", "#D8D0A0"]
+  atmosphere: "#A0E0C0"
+  links: [ ST14PlanetTauCeti ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetTauCeti
+  name: st14-galaxy-planet-tau-ceti
+  description: st14-galaxy-planet-tau-ceti-desc
+  sector: ST14SectorTauCeti
+  radius: 0.8
+  angle: 54
+  faction: Federation
+  liberation: 100
+  seed: 5
+  surface: ["#20304A", "#40607A", "#90A8B0", "#E8F0F0"]
+  atmosphere: "#C0E0FF"
+  links: [ ST14PlanetHydra ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetSanctuary
+  name: st14-galaxy-planet-sanctuary
+  description: st14-galaxy-planet-sanctuary-desc
+  sector: ST14SectorSanctuary
+  radius: 0.8
+  angle: 92
+  faction: Federation
+  liberation: 100
+  seed: 6
+  surface: ["#0E3050", "#1E6080", "#4A8A50", "#A0B070", "#FFFFFF"]
+  atmosphere: "#8CD0FF"
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetHesperus
+  name: st14-galaxy-planet-hesperus
+  description: st14-galaxy-planet-hesperus-desc
+  sector: ST14SectorHesperus
+  radius: 0.82
+  angle: 160
+  faction: Federation
+  liberation: 92
+  seed: 7
+  surface: ["#2A2A3A", "#4A5068", "#7A88A0", "#C8D0E0"]
+  atmosphere: "#A8B8FF"
+  links: [ ST14PlanetTangoUrilla ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetZegema
+  name: st14-galaxy-planet-zegema
+  description: st14-galaxy-planet-zegema-desc
+  sector: ST14SectorAldebaran
+  radius: 0.54
+  angle: 22
+  faction: Contested
+  liberation: 55
+  seed: 8
+  surface: ["#103848", "#2A7A88", "#D8C890", "#F0E8C8"]
+  atmosphere: "#90E0F0"
+  links: [ ST14PlanetSirius, ST14PlanetHydra ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetHydra
+  name: st14-galaxy-planet-hydra
+  description: st14-galaxy-planet-hydra-desc
+  sector: ST14SectorHydra
+  radius: 0.8
+  angle: 16
+  faction: Contested
+  liberation: 48
+  seed: 9
+  surface: ["#28301A", "#4A5A2A", "#7A7A40", "#B0A070"]
+  atmosphere: "#C0D890"
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetGhutana
+  name: st14-galaxy-planet-ghutana
+  description: st14-galaxy-planet-ghutana-desc
+  sector: ST14SectorPerseus
+  radius: 0.55
+  angle: 202
+  faction: Contested
+  liberation: 62
+  seed: 10
+  surface: ["#3A2A1A", "#6A5030", "#A08860", "#E0D0B0"]
+  atmosphere: "#E0C8A0"
+  links: [ ST14PlanetPluto, ST14PlanetRigel ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetTangoUrilla
+  name: st14-galaxy-planet-tango-urilla
+  description: st14-galaxy-planet-tango-urilla-desc
+  sector: ST14SectorTangoUrilla
+  radius: 0.8
+  angle: 197
+  faction: Contested
+  liberation: 40
+  seed: 11
+  surface: ["#202818", "#3A4A28", "#6A6A3A", "#A8A070"]
+  atmosphere: "#B0C880"
+  links: [ ST14PlanetGehenna ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetRigel
+  name: st14-galaxy-planet-rigel
+  description: st14-galaxy-planet-rigel-desc
+  sector: ST14SectorRigel
+  radius: 0.53
+  angle: 246
+  faction: Arachnid
+  liberation: 12
+  seed: 12
+  surface: ["#301010", "#602418", "#904A28", "#C08050"]
+  atmosphere: "#E08060"
+  links: [ ST14PlanetKlendathu ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetVaruna
+  name: st14-galaxy-planet-varuna
+  description: st14-galaxy-planet-varuna-desc
+  sector: ST14SectorVega
+  radius: 0.52
+  angle: 292
+  faction: Contested
+  liberation: 35
+  seed: 13
+  surface: ["#182838", "#2A4A60", "#5A7A80", "#B0C0C0"]
+  atmosphere: "#80C0E0"
+  links: [ ST14PlanetKlendathu, ST14PlanetAntares ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetAntares
+  name: st14-galaxy-planet-antares
+  description: st14-galaxy-planet-antares-desc
+  sector: ST14SectorAntares
+  radius: 0.56
+  angle: 334
+  faction: Contested
+  liberation: 47
+  seed: 14
+  surface: ["#381818", "#6A2A20", "#A05A3A", "#D8A070"]
+  atmosphere: "#F0A080"
+  links: [ ST14PlanetZegema, ST14PlanetQuarantine ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetGehenna
+  name: st14-galaxy-planet-gehenna
+  description: st14-galaxy-planet-gehenna-desc
+  sector: ST14SectorGehenna
+  radius: 0.83
+  angle: 232
+  faction: Arachnid
+  liberation: 8
+  seed: 15
+  surface: ["#200808", "#501810", "#A03010", "#F08020"]
+  atmosphere: "#FF7030"
+  links: [ ST14PlanetKlendathu ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetKlendathu
+  name: st14-galaxy-planet-klendathu
+  description: st14-galaxy-planet-klendathu-desc
+  sector: ST14SectorKlendathu
+  radius: 0.82
+  angle: 268
+  faction: Contested
+  liberation: 18
+  war: true
+  hexFrequency: 5
+  seed: 16
+  surface: ["#2A140C", "#5A2E18", "#8C5230", "#C08A58", "#E8C898"]
+  atmosphere: "#E8A070"
+  links: [ ST14PlanetQuarantine ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetQuarantine
+  name: st14-galaxy-planet-quarantine
+  description: st14-galaxy-planet-quarantine-desc
+  sector: ST14SectorQuarantine
+  radius: 0.86
+  angle: 306
+  faction: Arachnid
+  liberation: 0
+  seed: 17
+  surface: ["#181010", "#3A2018", "#6A4028", "#9A7050"]
+  atmosphere: "#C08060"
+  links: [ ST14PlanetPlanetP ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetPlanetP
+  name: st14-galaxy-planet-planet-p
+  description: st14-galaxy-planet-planet-p-desc
+  sector: ST14SectorPlanetP
+  radius: 0.85
+  angle: 342
+  faction: Arachnid
+  liberation: 0
+  seed: 18
+  surface: ["#101418", "#283038", "#505860", "#9098A0"]
+  atmosphere: "#90A0B0"
+
+# Background of the galaxy map: only the dark backdrop, the galaxy itself is drawn by the map
+- type: st14HubScene
+  id: ST14HubGalaxyMap
+  layers:
+  - id: background
+    texture: /Textures/_ST14/Interface/Hub/War/galaxy_background.png
+    anchorMin: 0, 0
+    anchorMax: 1, 1
+    position: 0, 0
+    size: 0, 0
+    pivot: 0.5, 0.5
