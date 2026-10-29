@@ -13,7 +13,7 @@ public static partial class ST14CVars
         CVarDef.Create("st14.language", "", CVar.ARCHIVE);
 
     public static readonly CVarDef<string> ServerLanguage =
-        CVarDef.Create("st14.server_language", "", CVar.ARCHIVE);
+        CVarDef.Create("st14.server_language", "", CVar.SERVER | CVar.REPLICATED | CVar.ARCHIVE);
 
     /// <summary>
     /// Main menu backgrounds: supersampled rendering and a smoothed animation clock. Off draws them straight to the screen

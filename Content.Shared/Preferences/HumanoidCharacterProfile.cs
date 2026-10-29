@@ -23,6 +23,7 @@ using Robust.Shared.Serialization;
 using Robust.Shared.Utility;
 using Robust.Shared;
 using YamlDotNet.RepresentationModel;
+using Content.Shared._ST14.Localization; // ST14
 
 namespace Content.Shared.Preferences
 {
@@ -35,7 +36,10 @@ namespace Content.Shared.Preferences
     {
         public static readonly ProtoId<SpeciesPrototype> DefaultSpecies = "Human";
         public static readonly ProtoId<EmoteSoundsPrototype> DefaultVoice = "MaleHuman";
-        private static readonly Regex RestrictedNameRegex = new(@"[^A-Za-z0-9 '\-]");
+        // ST14 start
+        private static readonly Regex RestrictedNameRegexRu = new(@"[^А-Яа-я '\-]");
+        private static readonly Regex RestrictedNameRegexEn = new(@"[^A-Za-z '\-]");
+        // ST14 end
         private static readonly Regex ICNameCaseRegex = new(@"^(?<word>\w)|\b(?<word>\w)(?=\w*$)");
 
         /// <summary>
@@ -686,7 +690,10 @@ namespace Content.Shared.Preferences
 
             if (configManager.GetCVar(CCVars.RestrictedNames))
             {
-                name = RestrictedNameRegex.Replace(name, string.Empty);
+                // ST14 start
+                var nameRegex = Cultures.ResolveServer(configManager).Name == "ru-RU" ? RestrictedNameRegexRu : RestrictedNameRegexEn;
+                name = nameRegex.Replace(name, string.Empty);
+                // ST14 end
             }
 
             if (configManager.GetCVar(CCVars.ICNameCase))
