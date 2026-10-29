@@ -141,3 +141,16 @@ st14-galaxy-sector-phlegethon = Флегетон
 st14-galaxy-sector-cocytus = Коцит
 st14-galaxy-sector-lethe = Лета
 st14-galaxy-sector-gloom = Мрачная туманность
+
+st14-galaxy-target = Цель атаки: сектор { $code }
+st14-galaxy-cell-target = Цель Высшего командования
+st14-galaxy-order = Назначить целью атаки
+st14-galaxy-land-not-target = Цель выбирает командование
+
+st14-war-command-description = Галактическая война: состояние, итог раунда в целевом секторе, смена цели, сброс.
+st14-war-command-help = st14_war status|win|objective|loss|reset [планета] или st14_war target <номер сектора> [планета]
+st14-war-command-no-planet = Нет планеты с войной: { $planet }
+st14-war-command-no-target = У планеты нет целевого сектора.
+st14-war-command-bad-target = Этот сектор нельзя сделать целью: он не на линии фронта.
+st14-war-command-done = Готово, клиенты получили новое состояние.
+st14-war-command-status = { $planet }: освобождение { $liberation }%, цель { $target } ({ $targetLiberation }%), секторов на фронте: { $front }

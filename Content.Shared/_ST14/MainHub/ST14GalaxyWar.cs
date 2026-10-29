@@ -1,8 +1,7 @@
 using System.Linq;
 using System.Numerics;
-using Content.Shared._ST14.MainHub;
 
-namespace Content.Client._ST14.MainHub.Galaxy;
+namespace Content.Shared._ST14.MainHub;
 
 /// <summary>
 /// Honeycomb over a sphere: the dual of a subdivided icosahedron. Every cell is a hexagon, except twelve pentagons
@@ -159,7 +158,8 @@ public sealed class ST14HexCell
 }
 
 /// <summary>
-/// The war on one planet: the hex grid and who holds each cell. Made from the planet seed, so every client sees the same front
+/// The war on one planet: the hex grid and who holds each cell. The first state comes from the planet seed,
+/// after that the server keeps it and sends it to the clients
 /// </summary>
 public sealed class ST14PlanetWar
 {
@@ -223,6 +223,14 @@ public sealed class ST14PlanetWar
             Cells[i] = cell;
         }
 
+        RefreshFront();
+    }
+
+    /// <summary>
+    /// Marks the cells troopers can land on: the contested ones and bug ground next to the Federation
+    /// </summary>
+    public void RefreshFront()
+    {
         for (var i = 0; i < Cells.Length; i++)
         {
             var cell = Cells[i];
@@ -230,6 +238,66 @@ public sealed class ST14PlanetWar
                          cell.Faction == ST14GalaxyFaction.Arachnid &&
                          Grid.Neighbours[i].Any(n => Cells[n].Faction == ST14GalaxyFaction.Federation);
         }
+    }
+
+    /// <summary>
+    /// Moves the bar of a cell after a round fought in it, see <see cref="ST14GalaxyWarRules"/>
+    /// </summary>
+    public void ApplyResult(int index, bool federationWon, bool objectives)
+    {
+        var cell = Cells[index];
+        if (federationWon)
+        {
+            cell.Liberation = MathF.Min(100, cell.Liberation +
+                (objectives ? ST14GalaxyWarRules.ObjectiveGain : ST14GalaxyWarRules.WinGain));
+            if (cell.Liberation >= 100)
+            {
+                cell.Faction = ST14GalaxyFaction.Federation;
+                cell.Hive = false;
+            }
+            else if (cell.Faction == ST14GalaxyFaction.Arachnid)
+            {
+                cell.Faction = ST14GalaxyFaction.Contested;
+            }
+        }
+        else
+        {
+            cell.Liberation = MathF.Max(0, cell.Liberation - ST14GalaxyWarRules.LossPenalty);
+            // Federation ground is lost once its bar runs out, a contested cell stays open for the next landing
+            if (cell.Faction == ST14GalaxyFaction.Federation && cell.Liberation <= 0)
+            {
+                cell.Faction = ST14GalaxyFaction.Arachnid;
+                cell.Base = false;
+            }
+        }
+
+        RefreshFront();
+    }
+
+    public ST14HexCellState[] ExportState()
+    {
+        return Cells.Select(c => new ST14HexCellState(c.Faction, c.Liberation, c.Hive, c.Base)).ToArray();
+    }
+
+    /// <summary>
+    /// Takes the state of the cells from the server or from a save. A state made for another grid is ignored
+    /// </summary>
+    public bool ImportState(IReadOnlyList<ST14HexCellState> states)
+    {
+        if (states.Count != Cells.Length)
+            return false;
+
+        for (var i = 0; i < Cells.Length; i++)
+        {
+            var state = states[i];
+            Cells[i].Faction = state.Faction;
+            Cells[i].Liberation = state.Liberation;
+            Cells[i].Hive = state.Hive;
+            Cells[i].Base = state.Base;
+        }
+
+        RefreshFront();
+        return true;
     }
 
     /// <summary>
@@ -252,5 +320,87 @@ public sealed class ST14PlanetWar
     public int CountOf(ST14GalaxyFaction faction)
     {
         return Cells.Count(c => c.Faction == faction);
+    }
+}
+
+/// <summary>
+/// Smooth 3D value noise, sampled on the unit sphere so planet surfaces have no seam
+/// </summary>
+public static class ST14Noise
+{
+    private static float Hash(int x, int y, int z, int seed)
+    {
+        unchecked
+        {
+            var h = (uint) (seed * 1013904223 + x * 374761393 + y * 668265263 + z * 1274126177);
+            h = (h ^ (h >> 13)) * 1274126177u;
+            h ^= h >> 16;
+            return (h & 0xFFFFFF) / 16777215f;
+        }
+    }
+
+    public static float Hash(int value, int seed)
+    {
+        return Hash(value, value * 7 + 3, seed * 13 + 1, seed);
+    }
+
+    private static float Smooth(float t)
+    {
+        return t * t * (3 - 2 * t);
+    }
+
+    public static float Value(Vector3 p, int seed)
+    {
+        var x0 = (int) MathF.Floor(p.X);
+        var y0 = (int) MathF.Floor(p.Y);
+        var z0 = (int) MathF.Floor(p.Z);
+        var fx = Smooth(p.X - x0);
+        var fy = Smooth(p.Y - y0);
+        var fz = Smooth(p.Z - z0);
+
+        var c000 = Hash(x0, y0, z0, seed);
+        var c100 = Hash(x0 + 1, y0, z0, seed);
+        var c010 = Hash(x0, y0 + 1, z0, seed);
+        var c110 = Hash(x0 + 1, y0 + 1, z0, seed);
+        var c001 = Hash(x0, y0, z0 + 1, seed);
+        var c101 = Hash(x0 + 1, y0, z0 + 1, seed);
+        var c011 = Hash(x0, y0 + 1, z0 + 1, seed);
+        var c111 = Hash(x0 + 1, y0 + 1, z0 + 1, seed);
+
+        var x00 = c000 + (c100 - c000) * fx;
+        var x10 = c010 + (c110 - c010) * fx;
+        var x01 = c001 + (c101 - c001) * fx;
+        var x11 = c011 + (c111 - c011) * fx;
+        var y0v = x00 + (x10 - x00) * fy;
+        var y1v = x01 + (x11 - x01) * fy;
+        return y0v + (y1v - y0v) * fz;
+    }
+
+    public static float Fbm(Vector3 p, int octaves, int seed)
+    {
+        var sum = 0f;
+        var amplitude = 0.5f;
+        var total = 0f;
+        for (var i = 0; i < octaves; i++)
+        {
+            sum += Value(p, seed + i * 31) * amplitude;
+            total += amplitude;
+            amplitude *= 0.5f;
+            p *= 2.03f;
+        }
+
+        return sum / total;
+    }
+}
+
+public static class ST14Sphere
+{
+    /// <summary>
+    /// Point of the unit sphere, y is the polar axis
+    /// </summary>
+    public static Vector3 Point(float lon, float lat)
+    {
+        var c = MathF.Cos(lat);
+        return new Vector3(c * MathF.Cos(lon), MathF.Sin(lat), c * MathF.Sin(lon));
     }
 }

@@ -27,6 +27,7 @@ public enum ST14GalaxyLevel : byte
 /// </summary>
 public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
 {
+    [Dependency] private IEntityManager _entMan = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
 
     private const float PanelInset = 0.28f;
@@ -37,6 +38,7 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
 
     private readonly ST14GalaxyTextures _textures = new();
     private readonly Dictionary<string, ST14PlanetWar> _wars = new();
+    private readonly Dictionary<string, int> _targets = new();
     private readonly ST14GalaxyMapView _map;
     private readonly ST14PlanetGlobe _surface;
     private readonly PanelContainer _panelBack;
@@ -49,6 +51,8 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
     private ST14GalaxySectorPrototype? _sector;
     private ST14GalaxyPlanetPrototype? _planet;
     private float _dive;
+    private bool _canCommand;
+    private bool _listening;
 
     /// <summary>
     /// A landing was ordered: into the lobby
@@ -140,9 +144,26 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
     {
         base.VisibilityChanged(newVisible);
 
-        // the map opens on the whole galaxy every time
+        // the map opens on the whole galaxy every time and asks the server for the war as it is now
         if (newVisible)
+        {
             ShowGalaxy();
+            if (WarSystem is not { } system)
+                return;
+
+            if (!_listening)
+            {
+                system.StateReceived += OnWarState;
+                _listening = true;
+            }
+
+            system.Request();
+        }
+        else if (_listening && WarSystem is { } system)
+        {
+            system.StateReceived -= OnWarState;
+            _listening = false;
+        }
     }
 
     protected override void FrameUpdate(FrameEventArgs args)
@@ -185,6 +206,34 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
                 base.GoBack();
                 break;
         }
+    }
+
+    /// <summary>
+    /// Entity systems only live while the client is connected, the map draws the war made from the seed without them
+    /// </summary>
+    private ST14GalaxyWarClientSystem? WarSystem =>
+        _entMan.EntitySysManager.TryGetEntitySystem<ST14GalaxyWarClientSystem>(out var system) ? system : null;
+
+    private void OnWarState(ST14GalaxyWarStateEvent ev)
+    {
+        _canCommand = ev.CanCommand;
+        _targets[ev.Planet] = ev.Target;
+        if (_wars.TryGetValue(ev.Planet, out var war))
+            war.ImportState(ev.Cells);
+
+        if (_level != ST14GalaxyLevel.Surface || _planet?.ID != ev.Planet)
+            return;
+
+        _surface.TargetCell = TargetOf(_planet);
+        BuildSurfacePanel(_surface.SelectedCell);
+    }
+
+    /// <summary>
+    /// Sector the High Command sent the troopers to, null while the server has not said
+    /// </summary>
+    private int? TargetOf(ST14GalaxyPlanetPrototype planet)
+    {
+        return _targets.TryGetValue(planet.ID, out var target) && target >= 0 ? target : null;
     }
 
     private void SectorClicked(ST14GalaxySectorPrototype sector)
@@ -252,6 +301,9 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         _planet = planet;
         ShowMap(false);
         _surface.SetPlanet(planet, WarOf(planet));
+        _surface.TargetCell = TargetOf(planet);
+        if (TargetOf(planet) is { } target)
+            _surface.FaceCell(target);
         _surface.Intro(0.12f, GlobeZoom);
         SetPath(_sector, planet, true);
         _hint.Text = Loc.GetString("st14-galaxy-hint-surface").ToUpperInvariant();
@@ -300,6 +352,12 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
 
         var name = Loc.GetString(planet.Name);
         war = new ST14PlanetWar(planet, name.Length > 0 ? name[..1].ToUpperInvariant() : "X");
+        if (WarSystem?.TryGetState(planet.ID, out var state) == true)
+        {
+            war.ImportState(state.Cells);
+            _targets[planet.ID] = state.Target;
+        }
+
         _wars[planet.ID] = war;
         return war;
     }
@@ -430,8 +488,10 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
 
             AddText(Wrap(Loc.GetString("st14-galaxy-surface-help"), 44), ST14HubFont.Regular, 14, new Color(0.82f, 0.85f, 0.9f), 420, 160);
 
-            if (war.FirstLanding is { } landing)
+            if ((TargetOf(_planet) ?? war.FirstLanding) is { } landing)
             {
+                AddText(Loc.GetString("st14-galaxy-target", ("code", war.Cells[landing].Code)).ToUpperInvariant(), ST14HubFont.Medium, 16,
+                    ST14HubStyle.GoldLight, 650, 26);
                 var go = AddButton(Loc.GetString("st14-galaxy-to-landing"), 712, ST14HubStyle.Orange);
                 go.OnPressed += _ =>
                 {
@@ -475,10 +535,25 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
             : "st14-galaxy-cell-deep";
         AddText(Wrap(Loc.GetString(status), 44), ST14HubFont.Regular, 14, new Color(0.82f, 0.85f, 0.9f), y + 10, 160);
 
-        if (cell.Front)
+        // troopers land where the High Command sends them, the High Command can move the attack along the front
+        var target = TargetOf(_planet);
+        if (cell.Front && (target == null || target == index))
         {
+            if (target == index)
+                AddText(Loc.GetString("st14-galaxy-cell-target").ToUpperInvariant(), ST14HubFont.Medium, 16, ST14HubStyle.GoldLight, 590, 26);
+
             var land = AddButton(Loc.GetString("st14-galaxy-land"), 712, ST14HubStyle.Orange);
             land.OnPressed += _ => OnLanding?.Invoke();
+        }
+        else if (cell.Front && _canCommand)
+        {
+            var planetId = _planet.ID;
+            var order = AddButton(Loc.GetString("st14-galaxy-order"), 712, ST14HubStyle.Blue);
+            order.OnPressed += _ => WarSystem?.Order(planetId, index);
+        }
+        else if (cell.Front)
+        {
+            AddButton(Loc.GetString("st14-galaxy-land-not-target"), 712, null, disabled: true);
         }
         else
         {

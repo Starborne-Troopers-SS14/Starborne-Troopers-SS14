@@ -112,6 +112,11 @@ public sealed class ST14PlanetGlobe : Control
 
     public int? HoveredCell => _hovered;
 
+    /// <summary>
+    /// Sector the High Command sent the troopers to, it carries the landing marker
+    /// </summary>
+    public int? TargetCell;
+
     public void SetPlanet(ST14GalaxyPlanetPrototype planet, ST14PlanetWar? war)
     {
         if (_planet != planet)
@@ -421,7 +426,8 @@ public sealed class ST14PlanetGlobe : Control
                 continue;
 
             var cell = war.Cells[i];
-            var landing = cell.Faction == ST14GalaxyFaction.Contested;
+            // the target gets the marker, without one every open landing zone does
+            var landing = TargetCell == null ? cell.Faction == ST14GalaxyFaction.Contested : i == TargetCell;
             var color = landing ? ST14HubStyle.GoldLight : ST14GalaxyColors.Of(cell.Faction);
             var light = MathF.Min(1, Lighting(center) + 0.25f);
             // cells near the limb fade out, the edge of the planet stays clean
@@ -462,7 +468,7 @@ public sealed class ST14PlanetGlobe : Control
             if (landing)
                 landings.Add(centerPos);
 
-            var lineColor = i == _selected ? ST14HubStyle.GoldLight : i == _hovered ? Color.White : color;
+            var lineColor = i == _selected || cell.Front ? ST14HubStyle.GoldLight : i == _hovered ? Color.White : color;
             var lineAlpha = (i == _selected || i == _hovered || landing ? 0.95f : 0.4f) * edge;
             var lineWidth = i == _selected || landing ? width * 2.5f : i == _hovered ? width * 2f : width;
             // a little inside the cell, neighbours do not draw over each other

@@ -164,76 +164,6 @@ public sealed class ST14VertexBuffer
 }
 
 /// <summary>
-/// Smooth 3D value noise, sampled on the unit sphere so planet surfaces have no seam
-/// </summary>
-public static class ST14Noise
-{
-    private static float Hash(int x, int y, int z, int seed)
-    {
-        unchecked
-        {
-            var h = (uint) (seed * 1013904223 + x * 374761393 + y * 668265263 + z * 1274126177);
-            h = (h ^ (h >> 13)) * 1274126177u;
-            h ^= h >> 16;
-            return (h & 0xFFFFFF) / 16777215f;
-        }
-    }
-
-    public static float Hash(int value, int seed)
-    {
-        return Hash(value, value * 7 + 3, seed * 13 + 1, seed);
-    }
-
-    private static float Smooth(float t)
-    {
-        return t * t * (3 - 2 * t);
-    }
-
-    public static float Value(Vector3 p, int seed)
-    {
-        var x0 = (int) MathF.Floor(p.X);
-        var y0 = (int) MathF.Floor(p.Y);
-        var z0 = (int) MathF.Floor(p.Z);
-        var fx = Smooth(p.X - x0);
-        var fy = Smooth(p.Y - y0);
-        var fz = Smooth(p.Z - z0);
-
-        var c000 = Hash(x0, y0, z0, seed);
-        var c100 = Hash(x0 + 1, y0, z0, seed);
-        var c010 = Hash(x0, y0 + 1, z0, seed);
-        var c110 = Hash(x0 + 1, y0 + 1, z0, seed);
-        var c001 = Hash(x0, y0, z0 + 1, seed);
-        var c101 = Hash(x0 + 1, y0, z0 + 1, seed);
-        var c011 = Hash(x0, y0 + 1, z0 + 1, seed);
-        var c111 = Hash(x0 + 1, y0 + 1, z0 + 1, seed);
-
-        var x00 = c000 + (c100 - c000) * fx;
-        var x10 = c010 + (c110 - c010) * fx;
-        var x01 = c001 + (c101 - c001) * fx;
-        var x11 = c011 + (c111 - c011) * fx;
-        var y0v = x00 + (x10 - x00) * fy;
-        var y1v = x01 + (x11 - x01) * fy;
-        return y0v + (y1v - y0v) * fz;
-    }
-
-    public static float Fbm(Vector3 p, int octaves, int seed)
-    {
-        var sum = 0f;
-        var amplitude = 0.5f;
-        var total = 0f;
-        for (var i = 0; i < octaves; i++)
-        {
-            sum += Value(p, seed + i * 31) * amplitude;
-            total += amplitude;
-            amplitude *= 0.5f;
-            p *= 2.03f;
-        }
-
-        return sum / total;
-    }
-}
-
-/// <summary>
 /// Textures the galaxy map makes at runtime: the soft glow sprite and the planet surfaces.
 /// Kept per screen, a texture belongs to the client that made it
 /// </summary>
@@ -358,17 +288,5 @@ public sealed class ST14GalaxyTextures
         var scaled = t * (colors.Count - 1);
         var index = Math.Min((int) scaled, colors.Count - 2);
         return Color.InterpolateBetween(colors[index], colors[index + 1], scaled - index);
-    }
-}
-
-public static class ST14Sphere
-{
-    /// <summary>
-    /// Point of the unit sphere, y is the polar axis
-    /// </summary>
-    public static Vector3 Point(float lon, float lat)
-    {
-        var c = MathF.Cos(lat);
-        return new Vector3(c * MathF.Cos(lon), MathF.Sin(lat), c * MathF.Sin(lon));
     }
 }

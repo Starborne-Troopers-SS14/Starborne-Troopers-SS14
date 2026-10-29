@@ -1,5 +1,6 @@
 using System.Linq;
 using Content.Client._ST14.MainHub.Galaxy;
+using Content.Server._ST14.MainHub;
 using Content.Shared._ST14.MainHub;
 using Robust.Shared.Prototypes;
 
@@ -41,6 +42,47 @@ public sealed class ST14GalaxyMapTest
                     Assert.That(protoMan.HasIndex(link), $"{planet.ID} links to an unknown planet {link}.");
                 }
             }
+        });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>
+    /// Wins fill the bar of the target sector until it is taken, then the front moves to its neighbours and the target follows
+    /// </summary>
+    [Test]
+    public async Task ServerWarTest()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var server = pair.Server;
+        var war = server.System<ST14GalaxyWarSystem>();
+
+        await server.WaitAssertion(() =>
+        {
+            var planet = war.Planets.First();
+            Assert.That(war.Reset(planet));
+            Assert.That(war.TryGetWar(planet, out var state, out var target));
+            Assert.That(target, Is.GreaterThanOrEqualTo(0), "The planet starts without a landing target.");
+
+            Assert.That(war.ApplyResult(planet, false, false));
+            Assert.That(state.Cells[target].Liberation, Is.Zero, "A lost landing must not go below zero.");
+            Assert.That(state.Cells[target].Front, "A lost landing zone must stay open.");
+
+            var rounds = 0;
+            while (state.Cells[target].Faction != ST14GalaxyFaction.Federation && rounds++ < 10)
+            {
+                war.ApplyResult(planet, true, false);
+            }
+
+            Assert.That(rounds, Is.EqualTo((int) MathF.Ceiling(100 / ST14GalaxyWarRules.WinGain)));
+            Assert.That(war.TryGetWar(planet, out state, out var next));
+            Assert.That(next, Is.Not.EqualTo(target), "The target stayed on a taken sector.");
+            Assert.That(state.Cells[next].Front);
+            Assert.That(state.Grid.Neighbours[target].All(n => state.Cells[n].Front || state.Cells[n].Faction == ST14GalaxyFaction.Federation),
+                "The neighbours of a taken sector did not open.");
+
+            Assert.That(war.SetTarget(planet, target), Is.False, "A Federation sector can not be attacked.");
+            war.Reset(planet);
         });
 
         await pair.CleanReturnAsync();

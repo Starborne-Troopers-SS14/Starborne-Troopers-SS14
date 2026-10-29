@@ -141,3 +141,16 @@ st14-galaxy-sector-phlegethon = Phlegethon
 st14-galaxy-sector-cocytus = Cocytus
 st14-galaxy-sector-lethe = Lethe
 st14-galaxy-sector-gloom = Gloom nebula
+
+st14-galaxy-target = Attack target: sector { $code }
+st14-galaxy-cell-target = High Command target
+st14-galaxy-order = Make it the attack target
+st14-galaxy-land-not-target = Command picks the target
+
+st14-war-command-description = Galactic war: state, round result in the target sector, target change, reset.
+st14-war-command-help = st14_war status|win|objective|loss|reset [planet] or st14_war target <sector index> [planet]
+st14-war-command-no-planet = No war planet: { $planet }
+st14-war-command-no-target = The planet has no target sector.
+st14-war-command-bad-target = This sector cannot be the target: it is not on the front line.
+st14-war-command-done = Done, the clients got the new state.
+st14-war-command-status = { $planet }: liberation { $liberation }%, target { $target } ({ $targetLiberation }%), sectors on the front: { $front }

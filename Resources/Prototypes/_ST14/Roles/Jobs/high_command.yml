@@ -1,0 +1,12 @@
+# High Command does not spawn in a round: it plays the galactic war on the galaxy map of the menu and picks where to attack.
+# The job only carries the whitelist, give it with: jobwhitelistadd <player> ST14HighCommand
+- type: job
+  id: ST14HighCommand
+  name: st14-job-name-high-command
+  description: st14-job-description-high-command
+  playTimeTracker: JobST14HighCommand
+  setPreference: false
+  whitelisted: true
+
+- type: playTimeTracker
+  id: JobST14HighCommand
