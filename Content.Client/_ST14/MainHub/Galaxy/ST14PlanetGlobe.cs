@@ -25,7 +25,7 @@ public sealed class ST14PlanetGlobe : Control
     private static readonly ushort[] MeshIndices;
 
     private readonly ST14GalaxyTextures _textures;
-    private readonly ST14VertexBuffer _surface = new();
+    private readonly ST14VertexBuffer _hatch = new();
     private readonly ST14VertexBuffer _overlay = new();
     private readonly ST14VertexBuffer _glow = new();
     private readonly DrawVertexUV2DColor[] _projected = new DrawVertexUV2DColor[MeshPoints.Length];
@@ -46,6 +46,9 @@ public sealed class ST14PlanetGlobe : Control
     private float _time;
     private int? _hovered;
     private int? _selected;
+    private float _introFrom;
+    private float _introTo;
+    private float _intro = 1;
 
     /// <summary>
     /// Radius of the planet relative to the half of the smaller side of the control
@@ -130,6 +133,17 @@ public sealed class ST14PlanetGlobe : Control
     }
 
     /// <summary>
+    /// The planet grows from a small disc to its size, picking up the dive of the galaxy map
+    /// </summary>
+    public void Intro(float from, float to)
+    {
+        _introFrom = from;
+        _introTo = to;
+        _intro = 0;
+        Zoom = from;
+    }
+
+    /// <summary>
     /// Turns the planet so the cell looks at the viewer
     /// </summary>
     public void FaceCell(int cell)
@@ -175,6 +189,13 @@ public sealed class ST14PlanetGlobe : Control
 
         var dt = args.DeltaSeconds;
         _time += dt;
+
+        if (_intro < 1)
+        {
+            _intro = MathF.Min(1, _intro + dt / 0.6f);
+            var ease = 1 - MathF.Pow(1 - _intro, 3);
+            Zoom = _introFrom + (_introTo - _introFrom) * ease;
+        }
 
         if (_dragging)
             return;
@@ -388,7 +409,11 @@ public sealed class ST14PlanetGlobe : Control
         var width = MathF.Max(1f, Radius / 260f);
         var pulse = 0.5f + 0.5f * MathF.Sin(_time * 3f);
 
+        var period = MathF.Max(10f, Radius / 30f);
+        var landings = new List<Vector2>();
+
         _overlay.Clear();
+        _hatch.Clear();
         for (var i = 0; i < grid.Count; i++)
         {
             var center = Vector3.Transform(grid.Centers[i], _rotation);
@@ -396,7 +421,8 @@ public sealed class ST14PlanetGlobe : Control
                 continue;
 
             var cell = war.Cells[i];
-            var color = ST14GalaxyColors.Of(cell.Faction);
+            var landing = cell.Faction == ST14GalaxyFaction.Contested;
+            var color = landing ? ST14HubStyle.GoldLight : ST14GalaxyColors.Of(cell.Faction);
             var light = MathF.Min(1, Lighting(center) + 0.25f);
             // cells near the limb fade out, the edge of the planet stays clean
             var edge = MathF.Min(1, center.Z * 4);
@@ -404,14 +430,14 @@ public sealed class ST14PlanetGlobe : Control
             var fill = cell.Faction switch
             {
                 ST14GalaxyFaction.Federation => 0.2f,
-                ST14GalaxyFaction.Contested => 0.16f + 0.08f * pulse,
-                _ => 0.24f,
+                ST14GalaxyFaction.Contested => 0.3f + 0.2f * pulse,
+                _ => 0.12f,
             };
 
             if (i == _hovered)
-                fill += 0.15f;
+                fill += 0.12f;
             if (i == _selected)
-                fill += 0.2f;
+                fill += 0.15f;
 
             var centerPos = Project(center);
             var corners = grid.Corners[i];
@@ -422,14 +448,23 @@ public sealed class ST14PlanetGlobe : Control
             }
 
             var fillColor = new Color(color.R * light, color.G * light, color.B * light, fill * edge);
+            // bug ground is hatched like enemy space on the galaxy map
+            var hatched = cell.Faction == ST14GalaxyFaction.Arachnid;
+            var hatchColor = new Color(color.R * light, color.G * light, color.B * light, 0.3f * edge);
             for (var c = 0; c < projected.Length; c++)
             {
-                _overlay.Triangle(centerPos, projected[c], projected[(c + 1) % projected.Length], fillColor);
+                var next = projected[(c + 1) % projected.Length];
+                _overlay.Triangle(centerPos, projected[c], next, fillColor);
+                if (hatched)
+                    _hatch.PatternTriangle(centerPos, projected[c], next, period, hatchColor);
             }
 
+            if (landing)
+                landings.Add(centerPos);
+
             var lineColor = i == _selected ? ST14HubStyle.GoldLight : i == _hovered ? Color.White : color;
-            var lineAlpha = (i == _selected || i == _hovered ? 0.95f : 0.45f) * edge;
-            var lineWidth = i == _selected ? width * 2.5f : i == _hovered ? width * 2f : width;
+            var lineAlpha = (i == _selected || i == _hovered || landing ? 0.95f : 0.4f) * edge;
+            var lineWidth = i == _selected || landing ? width * 2.5f : i == _hovered ? width * 2f : width;
             // a little inside the cell, neighbours do not draw over each other
             for (var c = 0; c < projected.Length; c++)
             {
@@ -454,6 +489,21 @@ public sealed class ST14PlanetGlobe : Control
             }
         }
 
+        // the landing zones get a marker that stands over the planet
+        foreach (var pos in landings)
+        {
+            var size = Radius * 0.035f;
+            var lift = pos + new Vector2(0, -size * 2.2f);
+            _overlay.Line(pos, lift, MathF.Max(1, width * 1.5f), ST14HubStyle.GoldLight.WithAlpha(0.9f));
+            _overlay.Circle(lift, size, ST14HubStyle.GoldLight, 6);
+            _overlay.Circle(lift, size * 0.55f, Color.FromHex("#141A22"), 16);
+            _overlay.Circle(lift, size * 0.22f, ST14HubStyle.GoldLight, 10);
+            var wave = (_time * 0.7f) % 1f;
+            _overlay.Ring(pos, size * (0.6f + wave * 1.8f), size * (0.6f + wave * 1.8f) + MathF.Max(1, width * 1.5f),
+                ST14HubStyle.GoldLight.WithAlpha(1 - wave), ST14HubStyle.GoldLight.WithAlpha(1 - wave), 24);
+        }
+
+        _hatch.Draw(handle, _textures.Hatch);
         _overlay.Draw(handle, Texture.White);
     }
 }

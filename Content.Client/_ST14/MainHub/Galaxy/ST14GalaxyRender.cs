@@ -69,6 +69,16 @@ public sealed class ST14VertexBuffer
         Add(c, color);
     }
 
+    /// <summary>
+    /// Triangle whose texture is laid in screen space, a repeating texture keeps one pattern across all shapes
+    /// </summary>
+    public void PatternTriangle(Vector2 a, Vector2 b, Vector2 c, float period, Color color)
+    {
+        Add(a, a / period, color);
+        Add(b, b / period, color);
+        Add(c, c / period, color);
+    }
+
     public void Triangle(Vector2 a, Color ca, Vector2 b, Color cb, Vector2 c, Color cc)
     {
         Add(a, ca);
@@ -234,6 +244,35 @@ public sealed class ST14GalaxyTextures
 
     private readonly Dictionary<string, Texture> _surfaces = new();
     private Texture? _glow;
+    private Texture? _hatch;
+
+    /// <summary>
+    /// Diagonal stripes that cover enemy space, like on the war table of the original game. Tiles without a seam
+    /// </summary>
+    public Texture Hatch
+    {
+        get
+        {
+            if (_hatch != null)
+                return _hatch;
+
+            const int size = 32;
+            using var image = new Image<Rgba32>(size, size);
+            for (var y = 0; y < size; y++)
+            {
+                for (var x = 0; x < size; x++)
+                {
+                    // distance to the nearest stripe along the diagonal, a stripe every 8 pixels
+                    var d = ((x + y) % 8 + 8) % 8;
+                    var a = d < 3 ? 1f : d == 3 || d == 7 ? 0.45f : 0.12f;
+                    image[x, y] = new Rgba32(255, 255, 255, (byte) (a * 255));
+                }
+            }
+
+            _hatch = Texture.LoadFromImage(image, "st14-galaxy-hatch", Smooth);
+            return _hatch;
+        }
+    }
 
     private static readonly TextureLoadParameters Smooth = new()
     {

@@ -1,0 +1,448 @@
+# Sectors of the galaxy map, made by a script: the rings are split into more sectors the further out they are,
+# and every ring is turned a little against the previous one so the borders do not line up
+
+- type: st14GalaxySector
+  id: ST14SectorCore
+  name: st14-galaxy-sector-core
+  ring: 0
+  faction: Unexplored
+
+- type: st14GalaxySector
+  id: ST14SectorCentaurus
+  name: st14-galaxy-sector-centaurus
+  ring: 1
+  start: 13
+  end: 85
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorSirius
+  name: st14-galaxy-sector-sirius
+  ring: 1
+  start: 85
+  end: 157
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorProcyon
+  name: st14-galaxy-sector-procyon
+  ring: 1
+  start: 157
+  end: 229
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorEridanus
+  name: st14-galaxy-sector-eridanus
+  ring: 1
+  start: 229
+  end: 301
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorCassiopeia
+  name: st14-galaxy-sector-cassiopeia
+  ring: 1
+  start: 301
+  end: 373
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorOrion
+  name: st14-galaxy-sector-orion
+  ring: 2
+  start: 26
+  end: 71
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorPerseus
+  name: st14-galaxy-sector-perseus
+  ring: 2
+  start: 71
+  end: 116
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorAndromeda
+  name: st14-galaxy-sector-andromeda
+  ring: 2
+  start: 116
+  end: 161
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorLyra
+  name: st14-galaxy-sector-lyra
+  ring: 2
+  start: 161
+  end: 206
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorCygnus
+  name: st14-galaxy-sector-cygnus
+  ring: 2
+  start: 206
+  end: 251
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorDraco
+  name: st14-galaxy-sector-draco
+  ring: 2
+  start: 251
+  end: 296
+  faction: Arachnid
+
+- type: st14GalaxySector
+  id: ST14SectorPegasus
+  name: st14-galaxy-sector-pegasus
+  ring: 2
+  start: 296
+  end: 341
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorCanes
+  name: st14-galaxy-sector-canes
+  ring: 2
+  start: 341
+  end: 386
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorAldebaran
+  name: st14-galaxy-sector-aldebaran
+  ring: 3
+  start: 39
+  end: 71.73
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorVega
+  name: st14-galaxy-sector-vega
+  ring: 3
+  start: 71.73
+  end: 104.45
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorSol
+  name: st14-galaxy-sector-sol
+  ring: 3
+  start: 104.45
+  end: 137.18
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorCanopus
+  name: st14-galaxy-sector-canopus
+  ring: 3
+  start: 137.18
+  end: 169.91
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorPollux
+  name: st14-galaxy-sector-pollux
+  ring: 3
+  start: 169.91
+  end: 202.64
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorRigel
+  name: st14-galaxy-sector-rigel
+  ring: 3
+  start: 202.64
+  end: 235.36
+  faction: Arachnid
+
+- type: st14GalaxySector
+  id: ST14SectorBetelgeuse
+  name: st14-galaxy-sector-betelgeuse
+  ring: 3
+  start: 235.36
+  end: 268.09
+  faction: Arachnid
+
+- type: st14GalaxySector
+  id: ST14SectorAntares
+  name: st14-galaxy-sector-antares
+  ring: 3
+  start: 268.09
+  end: 300.82
+  faction: Arachnid
+
+- type: st14GalaxySector
+  id: ST14SectorDeneb
+  name: st14-galaxy-sector-deneb
+  ring: 3
+  start: 300.82
+  end: 333.55
+  faction: Arachnid
+
+- type: st14GalaxySector
+  id: ST14SectorAltair
+  name: st14-galaxy-sector-altair
+  ring: 3
+  start: 333.55
+  end: 366.27
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorSpica
+  name: st14-galaxy-sector-spica
+  ring: 3
+  start: 366.27
+  end: 399
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorHydra
+  name: st14-galaxy-sector-hydra
+  ring: 4
+  start: 52
+  end: 77.71
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorTauCeti
+  name: st14-galaxy-sector-tau-ceti
+  ring: 4
+  start: 77.71
+  end: 103.43
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorSanctuary
+  name: st14-galaxy-sector-sanctuary
+  ring: 4
+  start: 103.43
+  end: 129.14
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorColonies
+  name: st14-galaxy-sector-colonies
+  ring: 4
+  start: 129.14
+  end: 154.86
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorHesperus
+  name: st14-galaxy-sector-hesperus
+  ring: 4
+  start: 154.86
+  end: 180.57
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorTangoUrilla
+  name: st14-galaxy-sector-tango-urilla
+  ring: 4
+  start: 180.57
+  end: 206.29
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorChimera
+  name: st14-galaxy-sector-chimera
+  ring: 4
+  start: 206.29
+  end: 232
+  faction: Arachnid
+
+- type: st14GalaxySector
+  id: ST14SectorScorpius
+  name: st14-galaxy-sector-scorpius
+  ring: 4
+  start: 232
+  end: 257.71
+  faction: Arachnid
+
+- type: st14GalaxySector
+  id: ST14SectorAcheron
+  name: st14-galaxy-sector-acheron
+  ring: 4
+  start: 257.71
+  end: 283.43
+  faction: Arachnid
+
+- type: st14GalaxySector
+  id: ST14SectorXenon
+  name: st14-galaxy-sector-xenon
+  ring: 4
+  start: 283.43
+  end: 309.14
+  faction: Arachnid
+
+- type: st14GalaxySector
+  id: ST14SectorObren
+  name: st14-galaxy-sector-obren
+  ring: 4
+  start: 309.14
+  end: 334.86
+  faction: Arachnid
+
+- type: st14GalaxySector
+  id: ST14SectorNorma
+  name: st14-galaxy-sector-norma
+  ring: 4
+  start: 334.86
+  end: 360.57
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorScutum
+  name: st14-galaxy-sector-scutum
+  ring: 4
+  start: 360.57
+  end: 386.29
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorZegema
+  name: st14-galaxy-sector-zegema
+  ring: 4
+  start: 386.29
+  end: 412
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorPhoenix
+  name: st14-galaxy-sector-phoenix
+  ring: 5
+  start: 65
+  end: 86.18
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorMonoceros
+  name: st14-galaxy-sector-monoceros
+  ring: 5
+  start: 86.18
+  end: 107.35
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorGrus
+  name: st14-galaxy-sector-grus
+  ring: 5
+  start: 107.35
+  end: 128.53
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorTucana
+  name: st14-galaxy-sector-tucana
+  ring: 5
+  start: 128.53
+  end: 149.71
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorCarina
+  name: st14-galaxy-sector-carina
+  ring: 5
+  start: 149.71
+  end: 170.88
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorSagittarius
+  name: st14-galaxy-sector-sagittarius
+  ring: 5
+  start: 170.88
+  end: 192.06
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorTartarus
+  name: st14-galaxy-sector-tartarus
+  ring: 5
+  start: 192.06
+  end: 213.24
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorErebus
+  name: st14-galaxy-sector-erebus
+  ring: 5
+  start: 213.24
+  end: 234.41
+  faction: Arachnid
+
+- type: st14GalaxySector
+  id: ST14SectorGehenna
+  name: st14-galaxy-sector-gehenna
+  ring: 5
+  start: 234.41
+  end: 255.59
+  faction: Arachnid
+
+- type: st14GalaxySector
+  id: ST14SectorKlendathu
+  name: st14-galaxy-sector-klendathu
+  ring: 5
+  start: 255.59
+  end: 276.76
+  faction: Arachnid
+
+- type: st14GalaxySector
+  id: ST14SectorQuarantine
+  name: st14-galaxy-sector-quarantine
+  ring: 5
+  start: 276.76
+  end: 297.94
+  faction: Arachnid
+
+- type: st14GalaxySector
+  id: ST14SectorPlanetP
+  name: st14-galaxy-sector-planet-p
+  ring: 5
+  start: 297.94
+  end: 319.12
+  faction: Arachnid
+
+- type: st14GalaxySector
+  id: ST14SectorStyx
+  name: st14-galaxy-sector-styx
+  ring: 5
+  start: 319.12
+  end: 340.29
+  faction: Arachnid
+
+- type: st14GalaxySector
+  id: ST14SectorPhlegethon
+  name: st14-galaxy-sector-phlegethon
+  ring: 5
+  start: 340.29
+  end: 361.47
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorCocytus
+  name: st14-galaxy-sector-cocytus
+  ring: 5
+  start: 361.47
+  end: 382.65
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorLethe
+  name: st14-galaxy-sector-lethe
+  ring: 5
+  start: 382.65
+  end: 403.82
+  faction: Federation
+
+- type: st14GalaxySector
+  id: ST14SectorGloom
+  name: st14-galaxy-sector-gloom
+  ring: 5
+  start: 403.82
+  end: 425
+  faction: Federation

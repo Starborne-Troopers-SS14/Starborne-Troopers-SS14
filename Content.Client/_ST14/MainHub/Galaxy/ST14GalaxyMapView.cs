@@ -11,8 +11,9 @@ using Robust.Shared.Timing;
 namespace Content.Client._ST14.MainHub.Galaxy;
 
 /// <summary>
-/// The Milky Way seen from above, split into sectors with the planets and supply lines on top.
-/// The camera pans with the mouse, zooms with the wheel and flies to the sector or planet the screen asks for
+/// War table of the galactic war: the Milky Way seen from above with the galactic core in the centre, rings of sectors around it,
+/// enemy space hatched, planets with supply lines on top. The camera pans with the mouse, zooms with the wheel
+/// and flies to the sector or dives to the planet the screen asks for
 /// </summary>
 public sealed class ST14GalaxyMapView : Control
 {
@@ -20,14 +21,21 @@ public sealed class ST14GalaxyMapView : Control
     private const float ArcStep = 2f;
     private const float MinZoom = 0.85f;
     private const float MaxZoom = 7f;
+    private const float EdgeRadius = 0.97f;
+
+    private static readonly Color LineColor = new(0.62f, 0.72f, 0.84f);
+    private static readonly Color SupplyColor = Color.FromHex("#CFE6FF");
+    private static readonly Color WarColor = Color.FromHex("#FFA22E");
 
     private readonly IResourceCache _cache;
     private readonly ST14GalaxyTextures _textures;
     private readonly ST14VertexBuffer _glow = new();
     private readonly ST14VertexBuffer _shapes = new();
+    private readonly ST14VertexBuffer _hatch = new();
     private readonly List<(ST14GalaxySectorPrototype Sector, Vector2 Label, float Extent, string Name)> _sectors = new();
     private readonly List<(ST14GalaxyPlanetPrototype Planet, Vector2 Position, string Name)> _planets = new();
     private readonly List<(int From, int To)> _links = new();
+    private readonly List<(float Angle, string Text)> _zoneLabels = new();
 
     private static readonly (Vector2 Pos, float Size, Color Color, float Phase)[] Stars;
     private static readonly (Vector2 Pos, float Radius, Color Color)[] Clouds;
@@ -47,9 +55,9 @@ public sealed class ST14GalaxyMapView : Control
 
     private ST14GalaxySectorPrototype? _hoveredSector;
     private int? _hoveredPlanet;
+    private ST14GalaxyPlanetPrototype? _diving;
 
     public ST14GalaxySectorPrototype? SelectedSector;
-    public ST14GalaxyPlanetPrototype? SelectedPlanet;
 
     public event Action<ST14GalaxySectorPrototype>? OnSectorClicked;
     public event Action<ST14GalaxyPlanetPrototype>? OnPlanetClicked;
@@ -91,37 +99,35 @@ public sealed class ST14GalaxyMapView : Control
             return 0;
         }
 
+        // the war table is dark: the galaxy is only a faint glow under the sectors
         var stars = new List<(Vector2, float, Color, float)>();
         var warm = new Color(1f, 0.86f, 0.62f);
         var blue = new Color(0.76f, 0.85f, 1f);
         var pink = new Color(1f, 0.6f, 0.78f);
 
-        // bulge and bar
-        for (var i = 0; i < 1400; i++)
+        for (var i = 0; i < 1000; i++)
         {
             var p = new Vector2(Gauss() * 0.13f, Gauss() * 0.055f);
             p = Vector2.Transform(p, Matrix3x2.CreateRotation(bar));
-            stars.Add((p, 0.6f + random.NextSingle() * 1.1f, Color.InterpolateBetween(warm, Color.White, random.NextSingle() * 0.4f),
+            stars.Add((p, 0.5f + random.NextSingle() * 0.9f, Color.InterpolateBetween(warm, Color.White, random.NextSingle() * 0.4f).WithAlpha(0.6f),
                 random.NextSingle() * MathF.Tau));
         }
 
-        // spiral arms
-        for (var i = 0; i < 5600; i++)
+        for (var i = 0; i < 5000; i++)
         {
             var r = 0.12f + 0.86f * MathF.Sqrt(random.NextSingle());
             var p = ArmPoint(PickArm(), r, 0.022f + 0.04f * r);
             var roll = random.NextSingle();
             var color = roll < 0.04f ? pink : roll < 0.25f ? Color.InterpolateBetween(warm, Color.White, 0.5f) : blue;
-            stars.Add((p, 0.5f + random.NextSingle() * random.NextSingle() * 1.6f, color, random.NextSingle() * MathF.Tau));
+            stars.Add((p, 0.4f + random.NextSingle() * random.NextSingle() * 1.4f, color.WithAlpha(0.75f), random.NextSingle() * MathF.Tau));
         }
 
-        // thin disc between the arms
         for (var i = 0; i < 1800; i++)
         {
-            var r = MathF.Sqrt(random.NextSingle()) * 0.98f;
+            var r = MathF.Sqrt(random.NextSingle()) * 1.05f;
             var a = random.NextSingle() * MathF.Tau;
             stars.Add((new Vector2(MathF.Cos(a), MathF.Sin(a)) * r, 0.4f + random.NextSingle() * 0.6f,
-                Color.InterpolateBetween(blue, warm, random.NextSingle()).WithAlpha(0.6f), random.NextSingle() * MathF.Tau));
+                Color.InterpolateBetween(blue, warm, random.NextSingle()).WithAlpha(0.5f), random.NextSingle() * MathF.Tau));
         }
 
         // colours are converted to linear once here, the stars are redrawn every frame
@@ -129,22 +135,16 @@ public sealed class ST14GalaxyMapView : Control
 
         var clouds = new List<(Vector2, float, Color)>
         {
-            (Vector2.Zero, 1.05f, new Color(0.35f, 0.45f, 0.65f, 0.1f)),
-            (Vector2.Zero, 0.36f, new Color(1f, 0.78f, 0.5f, 0.45f)),
-            (Vector2.Zero, 0.17f, new Color(1f, 0.9f, 0.72f, 0.7f)),
+            (Vector2.Zero, 1.1f, new Color(0.25f, 0.35f, 0.55f, 0.12f)),
+            (Vector2.Zero, 0.3f, new Color(1f, 0.8f, 0.55f, 0.3f)),
+            (Vector2.Zero, 0.12f, new Color(1f, 0.9f, 0.72f, 0.55f)),
         };
 
-        for (var i = 0; i < 300; i++)
+        for (var i = 0; i < 260; i++)
         {
             var r = 0.14f + 0.8f * MathF.Sqrt(random.NextSingle());
-            clouds.Add((ArmPoint(PickArm(), r, 0.02f), 0.05f + random.NextSingle() * 0.07f,
-                new Color(0.45f, 0.6f, 0.95f, 0.05f + random.NextSingle() * 0.05f)));
-        }
-
-        for (var i = 0; i < 40; i++)
-        {
-            var r = 0.2f + 0.7f * random.NextSingle();
-            clouds.Add((ArmPoint(PickArm(), r, 0.015f), 0.015f + random.NextSingle() * 0.02f, new Color(1f, 0.45f, 0.65f, 0.22f)));
+            clouds.Add((ArmPoint(PickArm(), r, 0.02f), 0.05f + random.NextSingle() * 0.08f,
+                new Color(0.35f, 0.5f, 0.85f, 0.04f + random.NextSingle() * 0.04f)));
         }
 
         Clouds = clouds.Select(c => (c.Item1, c.Item2, Color.FromSrgb(c.Item3))).ToArray();
@@ -184,6 +184,15 @@ public sealed class ST14GalaxyMapView : Control
                     _links.Add((i, j));
             }
         }
+
+        // the name of the enemy runs along the rim over the middle of its outer sectors
+        var outerRing = ST14GalaxySectorPrototype.RingRadius.Length - 1;
+        var enemy = _sectors.Where(s => s.Sector.Ring == outerRing && s.Sector.Faction == ST14GalaxyFaction.Arachnid).ToList();
+        if (enemy.Count > 0)
+        {
+            var mid = (enemy.Min(s => s.Sector.Start) + enemy.Max(s => s.Sector.End)) / 2;
+            _zoneLabels.Add((mid, Loc.GetString("st14-galaxy-zone-arachnid").ToUpperInvariant()));
+        }
     }
 
     public IEnumerable<ST14GalaxySectorPrototype> Sectors => _sectors.Select(s => s.Sector);
@@ -212,42 +221,43 @@ public sealed class ST14GalaxyMapView : Control
 
     public void FocusGalaxy()
     {
+        _diving = null;
         _camTarget = Vector2.Zero;
         _zoomTarget = 1;
     }
 
     public void FocusSector(ST14GalaxySectorPrototype sector)
     {
+        _diving = null;
         var entry = _sectors.FirstOrDefault(s => s.Sector == sector);
         if (entry.Sector == null)
             return;
 
         _camTarget = entry.Label;
-        _zoomTarget = Math.Clamp(0.62f / entry.Extent, 1.5f, 5.5f);
+        _zoomTarget = Math.Clamp(0.55f / entry.Extent, 1.6f, 5.5f);
     }
 
-    public void FocusPlanet(ST14GalaxyPlanetPrototype planet)
+    /// <summary>
+    /// The camera falls onto the planet until it fills the view, the screen then swaps in the planet itself
+    /// </summary>
+    public void Dive(ST14GalaxyPlanetPrototype planet)
     {
         var entry = _planets.FirstOrDefault(p => p.Planet == planet);
         if (entry.Planet == null)
             return;
 
+        _diving = planet;
         _camTarget = entry.Position;
-        _zoomTarget = MathF.Max(_zoomTarget, 3.4f);
-    }
-
-    public Vector2 PositionOf(ST14GalaxyPlanetPrototype planet)
-    {
-        return _planets.FirstOrDefault(p => p.Planet == planet).Position;
+        _zoomTarget = 22f;
     }
 
     private float UiScale => MathF.Min(PixelSize.X / ST14CanvasLayout.CanvasSize.X, PixelSize.Y / ST14CanvasLayout.CanvasSize.Y);
 
-    private float BaseScale => MathF.Min(PixelSize.X, PixelSize.Y) * 0.44f;
+    private float BaseScale => MathF.Min(PixelSize.X, PixelSize.Y) * 0.47f;
 
     private float Scale => BaseScale * _zoom;
 
-    private Vector2 ViewCenter => new(PixelSize.X * (1 - _inset) / 2, PixelSize.Y * 0.47f);
+    private Vector2 ViewCenter => new(PixelSize.X * (1 - _inset) / 2, PixelSize.Y * 0.48f);
 
     private Vector2 ToScreen(Vector2 galaxy)
     {
@@ -270,8 +280,9 @@ public sealed class ST14GalaxyMapView : Control
 
         var dt = args.DeltaSeconds;
         _time += dt;
-        var k = 1 - MathF.Exp(-dt * 5f);
-        _cam = Vector2.Lerp(_cam, _camTarget, k);
+        // a dive accelerates into the planet, everything else glides
+        var k = 1 - MathF.Exp(-dt * (_diving != null ? 3.5f : 5f));
+        _cam = Vector2.Lerp(_cam, _camTarget, MathF.Min(1, k * 1.6f));
         _zoom += (_zoomTarget - _zoom) * k;
         _inset += (_insetTarget - _inset) * k;
     }
@@ -281,6 +292,9 @@ public sealed class ST14GalaxyMapView : Control
     protected override void KeyBindDown(GUIBoundKeyEventArgs args)
     {
         base.KeyBindDown(args);
+
+        if (_diving != null)
+            return;
 
         if (args.Function == EngineKeyFunctions.UIRightClick)
         {
@@ -336,6 +350,9 @@ public sealed class ST14GalaxyMapView : Control
     {
         base.MouseMove(args);
 
+        if (_diving != null)
+            return;
+
         var pos = args.RelativePixelPosition;
         if (_pressed)
         {
@@ -366,6 +383,9 @@ public sealed class ST14GalaxyMapView : Control
     {
         base.MouseWheel(args);
 
+        if (_diving != null)
+            return;
+
         var cursor = args.RelativePixelPosition;
         var anchor = ToGalaxy(cursor);
         _zoomTarget = Math.Clamp(_zoomTarget * MathF.Pow(1.18f, args.Delta.Y), MinZoom, MaxZoom);
@@ -381,10 +401,14 @@ public sealed class ST14GalaxyMapView : Control
 
     private void UpdateHover(Vector2 pixel)
     {
+        // only the planet at war can be picked, the others are there to show the front
         int? planet = null;
-        var best = 16f * MathF.Max(UiScale, 0.5f);
+        var best = 18f * MathF.Max(UiScale, 0.5f);
         for (var i = 0; i < _planets.Count; i++)
         {
+            if (!_planets[i].Planet.War)
+                continue;
+
             var distance = (ToScreen(_planets[i].Position) - pixel).Length();
             if (distance >= best)
                 continue;
@@ -413,11 +437,17 @@ public sealed class ST14GalaxyMapView : Control
             if (r < inner || r >= outer)
                 continue;
 
-            if (sector.Ring == 0 || angle >= sector.Start && angle < sector.End)
+            // a sector may run past 360 degrees
+            if (sector.Ring == 0 || InRange(angle, sector) || InRange(angle + 360, sector))
                 return sector;
         }
 
         return null;
+    }
+
+    private static bool InRange(float angle, ST14GalaxySectorPrototype sector)
+    {
+        return angle >= sector.Start && angle < sector.End;
     }
 
     #endregion
@@ -432,7 +462,7 @@ public sealed class ST14GalaxyMapView : Control
         var scale = Scale;
         var focused = SelectedSector != null;
 
-        // nebulae and stars
+        // faint galaxy under the table
         _glow.Clear();
         foreach (var (pos, radius, color) in Clouds)
         {
@@ -453,53 +483,66 @@ public sealed class ST14GalaxyMapView : Control
 
         _glow.Draw(handle, _textures.Glow);
 
-        // sector fills and borders
+        // enemy space: a tint and diagonal stripes, the stripes keep their size on screen
         _shapes.Clear();
+        _hatch.Clear();
         foreach (var (sector, _, _, _) in _sectors)
         {
-            var fill = ST14GalaxyColors.Of(sector.Faction).WithAlpha(sector.Faction switch
+            var dim = focused && sector != SelectedSector;
+            if (sector.Faction == ST14GalaxyFaction.Arachnid)
             {
-                ST14GalaxyFaction.Federation => 0.07f,
-                ST14GalaxyFaction.Arachnid => 0.1f,
-                ST14GalaxyFaction.Contested => 0.06f,
-                _ => 0f,
-            });
+                FillSector(sector, ST14GalaxyColors.Arachnid.WithAlpha(dim ? 0.08f : 0.13f), false);
+                FillSector(sector, ST14GalaxyColors.Arachnid.WithAlpha(dim ? 0.18f : 0.32f), true);
+            }
 
             if (sector == SelectedSector)
-                fill = ST14HubStyle.GoldLight.WithAlpha(0.07f);
-            else if (focused)
-                fill = Color.Black.WithAlpha(0.38f);
-
-            if (sector == _hoveredSector && sector != SelectedSector)
-                fill = Color.InterpolateBetween(fill, Color.White, 0.5f).WithAlpha(fill.A + 0.07f);
-
-            FillSector(sector, fill);
+                FillSector(sector, ST14HubStyle.GoldLight.WithAlpha(0.06f), false);
+            else if (sector == _hoveredSector)
+                FillSector(sector, Color.White.WithAlpha(0.06f), false);
+            else if (dim)
+                FillSector(sector, Color.Black.WithAlpha(0.3f), false);
         }
 
-        var line = MathF.Max(1f, 1.2f * ui);
+        _hatch.Draw(handle, _textures.Hatch);
+
+        // sector borders: thin lines, warmer inside enemy space
+        var line = MathF.Max(1f, 1.1f * ui);
         foreach (var (sector, _, _, _) in _sectors)
         {
             var (inner, outer) = Radii(sector);
-            var color = ST14GalaxyColors.Line.WithAlpha(focused ? 0.16f : 0.24f);
+            var enemy = sector.Faction == ST14GalaxyFaction.Arachnid;
+            var color = enemy ? ST14GalaxyColors.Arachnid.WithAlpha(0.5f) : LineColor.WithAlpha(focused ? 0.14f : 0.2f);
             Arc(outer, sector.Start, sector.End, line, color);
             if (sector.Ring > 0)
                 _shapes.Line(ToScreen(Polar(inner, sector.Start)), ToScreen(Polar(outer, sector.Start)), line, color);
         }
 
+        // rim of the table: a ring with ticks
+        Arc(EdgeRadius, 0, 360, line, LineColor.WithAlpha(0.22f));
+        for (var a = 0f; a < 360; a += 3f)
+        {
+            var big = a % 15 == 0;
+            _shapes.Line(ToScreen(Polar(EdgeRadius, a)), ToScreen(Polar(EdgeRadius + (big ? 0.025f : 0.012f), a)), line,
+                LineColor.WithAlpha(big ? 0.35f : 0.18f));
+        }
+
         if (_hoveredSector != null && _hoveredSector != SelectedSector)
-            Outline(_hoveredSector, line * 1.6f, Color.White.WithAlpha(0.55f));
+            Outline(_hoveredSector, line * 1.6f, Color.White.WithAlpha(0.5f));
 
         if (SelectedSector != null)
             Outline(SelectedSector, line * 2.2f, ST14HubStyle.GoldLight.WithAlpha(0.9f));
 
-        // supply lines
+        // supply lines: a soft glow under a bright core, the lines into the war planet burn orange
         foreach (var (from, to) in _links)
         {
             var a = _planets[from];
             var b = _planets[to];
-            var lit = a.Planet == SelectedPlanet || b.Planet == SelectedPlanet;
-            _shapes.Line(ToScreen(a.Position), ToScreen(b.Position), line * (lit ? 1.6f : 1.1f),
-                ST14GalaxyColors.Line.WithAlpha(lit ? 0.75f : 0.32f));
+            var war = a.Planet.War || b.Planet.War;
+            var color = war ? WarColor : SupplyColor;
+            var pa = ToScreen(a.Position);
+            var pb = ToScreen(b.Position);
+            _shapes.Line(pa, pb, line * 4f, color.WithAlpha(0.12f));
+            _shapes.Line(pa, pb, line * 1.4f, color.WithAlpha(war ? 0.85f : 0.55f));
         }
 
         _shapes.Draw(handle, Texture.White);
@@ -514,27 +557,32 @@ public sealed class ST14GalaxyMapView : Control
         return new Vector2(MathF.Cos(a), MathF.Sin(a)) * radius;
     }
 
-    private void FillSector(ST14GalaxySectorPrototype sector, Color color)
+    private void FillSector(ST14GalaxySectorPrototype sector, Color color, bool hatch)
     {
         if (color.A <= 0)
             return;
 
+        var period = MathF.Max(12f, 26f * MathF.Max(UiScale, 0.3f));
         var (inner, outer) = Radii(sector);
         for (var a = sector.Start; a < sector.End - 0.001f; a += ArcStep)
         {
             var b = MathF.Min(a + ArcStep, sector.End);
             var o0 = ToScreen(Polar(outer, a));
             var o1 = ToScreen(Polar(outer, b));
-            if (inner <= 0)
+            var i0 = inner <= 0 ? ToScreen(Vector2.Zero) : ToScreen(Polar(inner, a));
+            var i1 = inner <= 0 ? i0 : ToScreen(Polar(inner, b));
+
+            if (hatch)
             {
-                _shapes.Triangle(ToScreen(Vector2.Zero), o0, o1, color);
+                _hatch.PatternTriangle(i0, o0, o1, period, color);
+                if (inner > 0)
+                    _hatch.PatternTriangle(i0, o1, i1, period, color);
                 continue;
             }
 
-            var i0 = ToScreen(Polar(inner, a));
-            var i1 = ToScreen(Polar(inner, b));
             _shapes.Triangle(i0, o0, o1, color);
-            _shapes.Triangle(i0, o1, i1, color);
+            if (inner > 0)
+                _shapes.Triangle(i0, o1, i1, color);
         }
     }
 
@@ -559,10 +607,15 @@ public sealed class ST14GalaxyMapView : Control
         _shapes.Line(ToScreen(Polar(inner, sector.End)), ToScreen(Polar(outer, sector.End)), width, color);
     }
 
+    private float MarkerSize(float ui)
+    {
+        return 5f * ui * Math.Clamp(MathF.Pow(_zoom, 0.4f), 1, 2.2f);
+    }
+
     private void DrawPlanets(DrawingHandleScreen handle, float ui)
     {
         var pulse = 0.5f + 0.5f * MathF.Sin(_time * 3f);
-        var size = 5f * ui * Math.Clamp(MathF.Pow(_zoom, 0.4f), 1, 2.2f);
+        var size = MarkerSize(ui);
 
         _glow.Clear();
         _shapes.Clear();
@@ -570,65 +623,147 @@ public sealed class ST14GalaxyMapView : Control
         {
             var (planet, position, _) = _planets[i];
             var center = ToScreen(position);
-            var color = ST14GalaxyColors.Of(planet.Faction);
-            var radius = planet.Capital ? size * 1.45f : size;
             var hovered = i == _hoveredPlanet;
-            var selected = planet == SelectedPlanet;
 
-            _glow.Sprite(center, radius * 3.2f, color.WithAlpha(hovered || selected ? 0.55f : 0.32f));
-
-            if (planet.War)
+            if (planet == _diving)
             {
-                // the war planet sends out rings like a beacon
-                var wave = (_time * 0.6f) % 1f;
-                _shapes.Ring(center, radius * (1.4f + wave * 2.2f), radius * (1.4f + wave * 2.2f) + MathF.Max(1, 1.5f * ui),
-                    ST14GalaxyColors.Contested.WithAlpha(0.8f * (1 - wave)), ST14GalaxyColors.Contested.WithAlpha(0.8f * (1 - wave)));
+                // the planet grows with the dive until it fills the middle of the view
+                var radius = MathF.Max(size * 1.6f, 0.0045f * Scale);
+                var surface = planet.Surface.Count > 0 ? planet.Surface[planet.Surface.Count / 2] : Color.Gray;
+                _glow.Sprite(center, radius * 1.6f, planet.Atmosphere.WithAlpha(0.6f));
+                _shapes.Circle(center, radius, surface, 48);
+                _shapes.Ring(center, radius * 0.55f, radius, Color.Black.WithAlpha(0f), Color.Black.WithAlpha(0.55f), 48);
+                continue;
             }
 
-            _shapes.Circle(center, radius, color);
-            _shapes.Circle(center, radius * 0.62f, Color.FromHex("#0B1118"));
-            _shapes.Circle(center, radius * (planet.Capital ? 0.4f : 0.3f), planet.Capital ? Color.White : color);
+            if (planet.Capital)
+            {
+                // Earth, the seat of the Federation
+                var radius = size * 1.8f;
+                _glow.Sprite(center, radius * 2.8f, planet.Atmosphere.WithAlpha(0.45f));
+                _shapes.Circle(center, radius, Color.FromHex("#2E6B9E"), 40);
+                _shapes.Circle(center + new Vector2(-radius * 0.25f, -radius * 0.1f), radius * 0.45f, Color.FromHex("#3F7A3A"), 24);
+                _shapes.Ring(center, radius * 0.6f, radius, Color.Black.WithAlpha(0f), Color.Black.WithAlpha(0.45f), 40);
+                _shapes.Ring(center, radius * 1.18f, radius * 1.18f + MathF.Max(1, 1.5f * ui), Color.White.WithAlpha(0.5f), Color.White.WithAlpha(0.5f), 40);
+                continue;
+            }
 
-            if (selected)
-                _shapes.Ring(center, radius * 1.7f, radius * 1.7f + MathF.Max(1.5f, 2f * ui),
-                    ST14HubStyle.GoldLight.WithAlpha(0.7f + 0.3f * pulse), ST14HubStyle.GoldLight.WithAlpha(0.7f + 0.3f * pulse));
-            else if (hovered)
-                _shapes.Ring(center, radius * 1.5f, radius * 1.5f + MathF.Max(1, 1.5f * ui), Color.White, Color.White);
+            if (!planet.War)
+            {
+                // planets out of reach: small grey discs with the colour of their side
+                var locked = Color.InterpolateBetween(ST14GalaxyColors.Of(planet.Faction), new Color(0.55f, 0.58f, 0.62f), 0.55f);
+                _shapes.Circle(center, size * 0.95f, locked.WithAlpha(0.9f), 16);
+                _shapes.Circle(center, size * 0.55f, Color.FromHex("#141A22"), 16);
+                continue;
+            }
+
+            // the planet at war: lit, ringed and pulsing
+            var war = size * 1.5f;
+            _glow.Sprite(center, war * 3.4f, WarColor.WithAlpha(hovered ? 0.6f : 0.4f));
+            var wave = (_time * 0.6f) % 1f;
+            var waveRadius = war * (1.5f + wave * 2.4f);
+            _shapes.Ring(center, waveRadius, waveRadius + MathF.Max(1, 1.5f * ui), WarColor.WithAlpha(0.8f * (1 - wave)),
+                WarColor.WithAlpha(0.8f * (1 - wave)));
+            _shapes.Circle(center, war, planet.Surface.Count > 0 ? planet.Surface[planet.Surface.Count - 2] : Color.Gray, 24);
+            _shapes.Ring(center, war * 0.5f, war, Color.Black.WithAlpha(0f), Color.Black.WithAlpha(0.5f), 24);
+            _shapes.Ring(center, war * 1.25f, war * 1.25f + MathF.Max(1.5f, 2.2f * ui), WarColor.WithAlpha(0.75f + 0.25f * pulse),
+                WarColor.WithAlpha(0.75f + 0.25f * pulse), 32);
+            if (hovered)
+                _shapes.Ring(center, war * 1.6f, war * 1.6f + MathF.Max(1, 1.5f * ui), Color.White, Color.White, 32);
+
+            DrawTarget(center + new Vector2(0, -war * 3.1f), war * 1.15f, ui);
         }
 
         _glow.Draw(handle, _textures.Glow);
         _shapes.Draw(handle, Texture.White);
     }
 
+    /// <summary>
+    /// White hexagon with a crosshair above the planet of the current operation
+    /// </summary>
+    private void DrawTarget(Vector2 center, float radius, float ui)
+    {
+        var corners = new Vector2[6];
+        for (var i = 0; i < 6; i++)
+        {
+            var a = MathF.PI / 3 * i + MathF.PI / 6;
+            corners[i] = center + new Vector2(MathF.Cos(a), MathF.Sin(a)) * radius;
+        }
+
+        for (var i = 0; i < 6; i++)
+        {
+            _shapes.Triangle(center, corners[i], corners[(i + 1) % 6], Color.White.WithAlpha(0.95f));
+        }
+
+        var dark = Color.FromHex("#141A22");
+        var width = MathF.Max(1f, radius * 0.12f);
+        _shapes.Ring(center, radius * 0.38f, radius * 0.38f + width, dark, dark, 20);
+        _shapes.Circle(center, radius * 0.12f, dark, 10);
+        _shapes.Line(center + new Vector2(0, -radius * 0.7f), center + new Vector2(0, -radius * 0.42f), width, dark);
+        _shapes.Line(center + new Vector2(0, radius * 0.7f), center + new Vector2(0, radius * 0.42f), width, dark);
+        _shapes.Line(center + new Vector2(-radius * 0.7f, 0), center + new Vector2(-radius * 0.42f, 0), width, dark);
+        _shapes.Line(center + new Vector2(radius * 0.7f, 0), center + new Vector2(radius * 0.42f, 0), width, dark);
+    }
+
     private void DrawLabels(DrawingHandleScreen handle, float ui, bool focused)
     {
-        var sectorSize = (int) Math.Clamp(MathF.Round(12 * ui * MathF.Sqrt(_zoom)), 9, 30);
+        if (_diving != null)
+            return;
+
+        // the name of the enemy along the rim, letter by letter
+        var zoneSize = (int) Math.Clamp(MathF.Round(0.055f * Scale), 10, 140);
+        var zoneFont = ST14HubStyle.Font(_cache, ST14HubFont.Black, zoneSize);
+        var zoneRadius = (EdgeRadius - 0.045f) * Scale;
+        foreach (var (angle, text) in _zoneLabels)
+        {
+            var widths = text.Select(c => handle.GetDimensions(zoneFont, c.ToString(), 1f).X + zoneSize * 0.25f).ToArray();
+            var total = widths.Sum() / zoneRadius * 180f / MathF.PI;
+            var at = angle - total / 2;
+            for (var i = 0; i < text.Length; i++)
+            {
+                var step = widths[i] / zoneRadius * 180f / MathF.PI;
+                var mid = at + step / 2;
+                at += step;
+                ST14HubStyle.DrawRotatedText(handle, zoneFont, text[i].ToString(), ToScreen(Polar(EdgeRadius - 0.045f, mid)), mid + 90,
+                    ST14GalaxyColors.Arachnid.WithAlpha(0.75f));
+            }
+        }
+
+        // sector names appear once the table is close enough to read them
+        var sectorSize = (int) Math.Clamp(MathF.Round(10 * ui * MathF.Sqrt(_zoom)), 8, 26);
         var sectorFont = ST14HubStyle.Font(_cache, ST14HubFont.Medium, sectorSize);
+        var fade = Math.Clamp((_zoom - 1.4f) / 0.6f, 0, 1);
         foreach (var (sector, label, _, name) in _sectors)
         {
             var selected = sector == SelectedSector;
-            var alpha = selected ? 0.95f : focused ? 0.28f : sector == _hoveredSector ? 0.9f : 0.55f;
-            var pos = ToScreen(label);
-            // the core label sits under the bright centre
-            if (sector.Ring == 0)
-                pos += new Vector2(0, sectorSize * 2.2f);
+            var hovered = sector == _hoveredSector;
+            var alpha = selected ? 0.95f : hovered ? 0.85f : fade * (focused ? 0.3f : 0.55f);
+            if (alpha <= 0.01f)
+                continue;
 
-            var color = selected ? ST14HubStyle.GoldLight : new Color(0.76f, 0.83f, 0.92f);
+            var color = selected ? ST14HubStyle.GoldLight
+                : sector.Faction == ST14GalaxyFaction.Arachnid ? Color.InterpolateBetween(ST14GalaxyColors.Arachnid, Color.White, 0.45f)
+                : new Color(0.76f, 0.83f, 0.92f);
+            // the core label sits under the bright centre
+            var pos = ToScreen(label) + (sector.Ring == 0 ? new Vector2(0, sectorSize * 2.4f) : Vector2.Zero);
             ST14HubStyle.DrawRotatedText(handle, sectorFont, name, pos, 0, color.WithAlpha(alpha), ST14HubStyle.TextShadow);
         }
 
         var planetSize = (int) Math.Clamp(MathF.Round(13 * ui * MathF.Pow(_zoom, 0.3f)), 9, 24);
         var planetFont = ST14HubStyle.Font(_cache, ST14HubFont.Regular, planetSize);
-        var offset = 5f * ui * Math.Clamp(MathF.Pow(_zoom, 0.4f), 1, 2.2f) * 2.6f + planetSize * 0.6f;
+        var size = MarkerSize(ui);
         for (var i = 0; i < _planets.Count; i++)
         {
             var (planet, position, name) = _planets[i];
-            var selected = planet == SelectedPlanet;
-            var show = _zoom >= 2.2f || selected || i == _hoveredPlanet || SelectedSector != null && planet.Sector == SelectedSector.ID || planet.Capital || planet.War;
-            if (!show)
+            var hovered = i == _hoveredPlanet;
+            var inSector = SelectedSector != null && planet.Sector == SelectedSector.ID;
+            if (!planet.War && !planet.Capital && _zoom < 2.2f && !inSector)
                 continue;
 
-            var color = selected ? ST14HubStyle.GoldLight : i == _hoveredPlanet ? Color.White : new Color(0.88f, 0.9f, 0.95f);
+            var color = planet.War ? (hovered ? Color.White : WarColor)
+                : planet.Capital ? new Color(0.85f, 0.9f, 0.95f)
+                : new Color(0.7f, 0.74f, 0.8f, 0.8f);
+            var offset = (planet.Capital ? size * 2.6f : planet.War ? size * 2.6f : size * 1.6f) + planetSize * 0.6f;
             ST14HubStyle.DrawRotatedText(handle, planetFont, name, ToScreen(position) + new Vector2(0, offset), 0, color,
                 ST14HubStyle.TextShadow);
         }

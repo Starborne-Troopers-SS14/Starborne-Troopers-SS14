@@ -14,7 +14,7 @@ public enum ST14GalaxyFaction : byte
 }
 
 /// <summary>
-/// Sector of the Milky Way on the galaxy map: a piece of one ring between two angles. Ring 0 is the galactic core
+/// Sector of the Milky Way on the galaxy map: a piece of one ring between two angles. Ring 0 is the disc around Earth in the centre
 /// </summary>
 [Prototype("st14GalaxySector")]
 public sealed partial class ST14GalaxySectorPrototype : IPrototype
@@ -22,7 +22,7 @@ public sealed partial class ST14GalaxySectorPrototype : IPrototype
     /// <summary>
     /// Outer radius of every ring, the galaxy has a radius of 1
     /// </summary>
-    public static readonly float[] RingRadius = { 0.15f, 0.4f, 0.66f, 0.97f };
+    public static readonly float[] RingRadius = { 0.11f, 0.26f, 0.42f, 0.58f, 0.74f, 0.9f };
 
     [IdDataField]
     public string ID { get; private set; } = default!;
@@ -34,7 +34,7 @@ public sealed partial class ST14GalaxySectorPrototype : IPrototype
     public int Ring;
 
     /// <summary>
-    /// Start and end of the sector in degrees, clockwise from the right side of the map
+    /// Start and end of the sector in degrees, clockwise from the right side of the map. The end may go past 360
     /// </summary>
     [DataField]
     public float Start;
@@ -102,6 +102,12 @@ public sealed partial class ST14GalaxyPlanetPrototype : IPrototype
     /// </summary>
     [DataField]
     public int HexFrequency = 5;
+
+    /// <summary>
+    /// Hex sectors where troopers can land when the Federation holds nothing on the planet yet
+    /// </summary>
+    [DataField]
+    public int LandingZones = 1;
 
     [DataField]
     public int Seed;

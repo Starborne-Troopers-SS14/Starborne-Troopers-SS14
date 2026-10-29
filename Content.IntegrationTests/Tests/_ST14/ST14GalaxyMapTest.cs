@@ -28,8 +28,13 @@ public sealed class ST14GalaxyMapTest
                 var outer = rings[sector.Ring];
                 Assert.That(planet.Radius, Is.InRange(inner, outer), $"{planet.ID} lies outside the ring of {sector.ID}.");
 
+                // a sector may run past 360 degrees
                 if (sector.Ring > 0)
-                    Assert.That(planet.Angle, Is.InRange(sector.Start, sector.End), $"{planet.ID} lies outside the angles of {sector.ID}.");
+                {
+                    var inside = planet.Angle >= sector.Start && planet.Angle <= sector.End ||
+                                 planet.Angle + 360 >= sector.Start && planet.Angle + 360 <= sector.End;
+                    Assert.That(inside, $"{planet.ID} lies outside the angles of {sector.ID}.");
+                }
 
                 foreach (var link in planet.Links)
                 {
@@ -63,7 +68,12 @@ public sealed class ST14GalaxyMapTest
                 Assert.That(war.Grid.Corners.Count(c => c.Length == 5), Is.EqualTo(12), "A sphere of hexagons has twelve pentagons.");
                 Assert.That(war.Grid.Corners.All(c => c.Length is 5 or 6));
                 Assert.That(war.Cells.Any(c => c.Front), "The planet has no front line to land on.");
-                Assert.That(war.CountOf(ST14GalaxyFaction.Federation), Is.GreaterThan(0));
+                if (planet.Liberation <= 0)
+                {
+                    // a planet the Federation has not landed on yet: no held ground and only the landing zones open
+                    Assert.That(war.CountOf(ST14GalaxyFaction.Federation), Is.Zero);
+                    Assert.That(war.Cells.Count(c => c.Front), Is.EqualTo(planet.LandingZones));
+                }
                 Assert.That(war.CountOf(ST14GalaxyFaction.Arachnid), Is.GreaterThan(0));
 
                 // a point of the sphere picks the cell whose centre is closest

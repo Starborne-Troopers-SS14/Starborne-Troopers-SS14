@@ -8,6 +8,7 @@ using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using Robust.Shared.Input;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Timing;
 
 namespace Content.Client._ST14.MainHub.Galaxy;
 
@@ -15,19 +16,22 @@ public enum ST14GalaxyLevel : byte
 {
     Galaxy,
     Sector,
-    Planet,
+    Dive,
     Surface,
 }
 
 /// <summary>
-/// Galactic war map in the way of the war table of Helldivers 2: the Milky Way split into sectors, a sector opens its planets,
-/// a planet can be turned in the side panel, and a war planet opens up into hex sectors where troopers land
+/// Galactic war map in the way of the war table of Helldivers 2: the Milky Way split into rings of sectors around Earth,
+/// a sector opens with its planets, a click on the war planet dives into it, and there the planet turns under the mouse
+/// with its surface split into hex sectors where troopers land
 /// </summary>
 public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
 {
     [Dependency] private IPrototypeManager _prototypes = default!;
 
-    private const float PanelInset = 0.3f;
+    private const float PanelInset = 0.28f;
+    private const float DiveTime = 0.9f;
+    private const float GlobeZoom = 0.8f;
     private static readonly Vector2 PanelSize = new(520, 800);
     private const float PanelPad = 30;
 
@@ -44,6 +48,7 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
     private ST14GalaxyLevel _level;
     private ST14GalaxySectorPrototype? _sector;
     private ST14GalaxyPlanetPrototype? _planet;
+    private float _dive;
 
     /// <summary>
     /// A landing was ordered: into the lobby
@@ -56,7 +61,7 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
 
         _map = new ST14GalaxyMapView(_prototypes, ResCache, _textures);
         _map.OnSectorClicked += SectorClicked;
-        _map.OnPlanetClicked += PlanetClicked;
+        _map.OnPlanetClicked += Dive;
         _map.OnEmptyClicked += () =>
         {
             if (_level != ST14GalaxyLevel.Galaxy)
@@ -68,7 +73,7 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         _surface = new ST14PlanetGlobe(_textures)
         {
             Visible = false,
-            Zoom = 0.8f,
+            Zoom = GlobeZoom,
             MinZoom = 0.6f,
             MaxZoom = 1.05f,
         };
@@ -93,7 +98,7 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
             Align = BoxContainer.AlignMode.End,
             SeparationOverride = 18,
         };
-        foreach (var faction in new[] { ST14GalaxyFaction.Federation, ST14GalaxyFaction.Contested, ST14GalaxyFaction.Arachnid })
+        foreach (var faction in new[] { ST14GalaxyFaction.Federation, ST14GalaxyFaction.Arachnid })
         {
             legend.AddChild(new PanelContainer
             {
@@ -140,11 +145,23 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
             ShowGalaxy();
     }
 
+    protected override void FrameUpdate(FrameEventArgs args)
+    {
+        base.FrameUpdate(args);
+
+        if (_level != ST14GalaxyLevel.Dive || _planet == null)
+            return;
+
+        _dive += args.DeltaSeconds;
+        if (_dive >= DiveTime)
+            ShowSurface(_planet);
+    }
+
     protected override void KeyBindDown(GUIBoundKeyEventArgs args)
     {
         base.KeyBindDown(args);
 
-        if (args.Function != EngineKeyFunctions.UIRightClick || _level == ST14GalaxyLevel.Galaxy)
+        if (args.Function != EngineKeyFunctions.UIRightClick || _level is ST14GalaxyLevel.Galaxy or ST14GalaxyLevel.Dive)
             return;
 
         GoBack();
@@ -155,13 +172,12 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
     {
         switch (_level)
         {
-            case ST14GalaxyLevel.Surface when _planet != null:
-                ShowPlanet(_planet);
+            case ST14GalaxyLevel.Dive:
                 break;
-            case ST14GalaxyLevel.Planet when _sector != null:
+            case ST14GalaxyLevel.Surface when _sector != null:
                 ShowSector(_sector);
                 break;
-            case ST14GalaxyLevel.Planet:
+            case ST14GalaxyLevel.Surface:
             case ST14GalaxyLevel.Sector:
                 ShowGalaxy();
                 break;
@@ -179,18 +195,6 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         ShowSector(sector);
     }
 
-    private void PlanetClicked(ST14GalaxyPlanetPrototype planet)
-    {
-        // a second click on the chosen war planet zooms into it
-        if (_level == ST14GalaxyLevel.Planet && planet == _planet && planet.War)
-        {
-            ShowSurface(planet);
-            return;
-        }
-
-        ShowPlanet(planet);
-    }
-
     #region Levels
 
     private void ShowGalaxy()
@@ -199,7 +203,6 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         _sector = null;
         _planet = null;
         _map.SelectedSector = null;
-        _map.SelectedPlanet = null;
         _map.FocusGalaxy();
         _map.PanelInset = 0;
         ShowMap(true);
@@ -214,7 +217,6 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         _sector = sector;
         _planet = null;
         _map.SelectedSector = sector;
-        _map.SelectedPlanet = null;
         _map.FocusSector(sector);
         _map.PanelInset = PanelInset;
         ShowMap(true);
@@ -223,19 +225,25 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         BuildSectorPanel(sector);
     }
 
-    private void ShowPlanet(ST14GalaxyPlanetPrototype planet)
+    /// <summary>
+    /// The camera falls onto the war planet, the planet itself takes over when the dive ends
+    /// </summary>
+    private void Dive(ST14GalaxyPlanetPrototype planet)
     {
-        _level = ST14GalaxyLevel.Planet;
+        if (!planet.War || _level == ST14GalaxyLevel.Dive)
+            return;
+
+        _level = ST14GalaxyLevel.Dive;
         _planet = planet;
         _sector = _prototypes.TryIndex(planet.Sector, out var sector) ? sector : null;
-        _map.SelectedSector = _sector;
-        _map.SelectedPlanet = planet;
-        _map.FocusPlanet(planet);
+        _dive = 0;
+        _map.SelectedSector = null;
         _map.PanelInset = PanelInset;
+        _map.Dive(planet);
         ShowMap(true);
+        ShowPanel(false);
         SetPath(_sector, planet);
-        _hint.Text = Loc.GetString(planet.War ? "st14-galaxy-hint-planet-war" : "st14-galaxy-hint-planet").ToUpperInvariant();
-        BuildPlanetPanel(planet);
+        _hint.Text = string.Empty;
     }
 
     private void ShowSurface(ST14GalaxyPlanetPrototype planet)
@@ -244,6 +252,7 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         _planet = planet;
         ShowMap(false);
         _surface.SetPlanet(planet, WarOf(planet));
+        _surface.Intro(0.12f, GlobeZoom);
         SetPath(_sector, planet, true);
         _hint.Text = Loc.GetString("st14-galaxy-hint-surface").ToUpperInvariant();
         BuildSurfacePanel(null);
@@ -293,11 +302,6 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         war = new ST14PlanetWar(planet, name.Length > 0 ? name[..1].ToUpperInvariant() : "X");
         _wars[planet.ID] = war;
         return war;
-    }
-
-    private float LiberationOf(ST14GalaxyPlanetPrototype planet)
-    {
-        return WarOf(planet)?.Liberation ?? planet.Liberation;
     }
 
     private static string FactionName(ST14GalaxyFaction faction)
@@ -378,50 +382,23 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         AddText(Loc.GetString("st14-galaxy-sector-planets", ("count", planets.Count)).ToUpperInvariant(), ST14HubFont.Regular, 16,
             new Color(0.85f, 0.88f, 0.92f), 172, 26);
 
+        // only the war planet can be opened, the rest is listed as out of reach
         var y = 214f;
-        foreach (var planet in planets.Take(7))
+        foreach (var planet in planets.OrderByDescending(p => p.War).Take(7))
         {
             var target = planet;
-            var button = AddButton(Loc.GetString(planet.Name), y, Color.InterpolateBetween(ST14GalaxyColors.Of(planet.Faction), Color.White, 0.35f));
-            button.OnPressed += _ => ShowPlanet(target);
+            var button = AddButton(Loc.GetString(planet.Name), y, planet.War ? ST14HubStyle.Orange : null, disabled: !planet.War);
+            if (planet.War)
+                button.OnPressed += _ => Dive(target);
+            else
+                button.ToolTip = Loc.GetString("st14-galaxy-planet-locked");
             y += 76;
         }
 
         if (planets.Count == 0)
             AddText(Wrap(Loc.GetString("st14-galaxy-sector-empty"), 40), ST14HubFont.Regular, 15, new Color(0.7f, 0.74f, 0.8f), y, 120);
-
-        FinishPanel();
-    }
-
-    private void BuildPlanetPanel(ST14GalaxyPlanetPrototype planet)
-    {
-        ClearPanel();
-
-        AddText(Loc.GetString(planet.Name).ToUpperInvariant(), ST14HubFont.Black, 30, ST14HubStyle.GoldLight, PanelPad, 46);
-        AddText((_sector != null ? Loc.GetString(_sector.Name) : string.Empty).ToUpperInvariant(), ST14HubFont.Regular, 16,
-            ST14HubStyle.Gold, 80, 26);
-        AddDivider(114);
-
-        // the planet itself, turned with the mouse
-        var globe = new ST14PlanetGlobe(_textures) { Zoom = 0.8f };
-        globe.SetPlanet(planet, WarOf(planet));
-        _panel.AddAt(globe, Vector2.Zero, new Vector2(PanelSize.X / 2, 122), new Vector2(360, 360), new Vector2(0.5f, 0));
-
-        AddFaction(planet.Faction, 494);
-        AddBar(LiberationOf(planet), 530);
-
-        if (planet.Description is { } description)
-            AddText(Wrap(Loc.GetString(description), 44), ST14HubFont.Regular, 14, new Color(0.82f, 0.85f, 0.9f), 578, 120);
-
-        if (planet.War)
-        {
-            var button = AddButton(Loc.GetString("st14-galaxy-zoom-planet"), 712, ST14HubStyle.Blue);
-            button.OnPressed += _ => ShowSurface(planet);
-        }
-        else
-        {
-            AddButton(Loc.GetString("st14-galaxy-no-intel"), 712, null, disabled: true);
-        }
+        else if (!planets.Any(p => p.War))
+            AddText(Wrap(Loc.GetString("st14-galaxy-planet-locked"), 40), ST14HubFont.Regular, 15, new Color(0.7f, 0.74f, 0.8f), y, 120);
 
         FinishPanel();
     }
@@ -441,21 +418,29 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
             AddDivider(114);
             AddBar(war.Liberation, 134);
 
-            var y = 190f;
-            foreach (var faction in new[] { ST14GalaxyFaction.Federation, ST14GalaxyFaction.Contested, ST14GalaxyFaction.Arachnid })
+            AddText(Loc.GetString("st14-galaxy-surface-bugs", ("count", war.CountOf(ST14GalaxyFaction.Arachnid))).ToUpperInvariant(),
+                ST14HubFont.Medium, 17, ST14GalaxyColors.Arachnid, 190, 28);
+            AddText(Loc.GetString("st14-galaxy-surface-available", ("count", war.Cells.Count(c => c.Front))).ToUpperInvariant(),
+                ST14HubFont.Medium, 17, ST14HubStyle.GoldLight, 226, 28);
+            AddText(Loc.GetString("st14-galaxy-surface-hives", ("count", war.Cells.Count(c => c.Hive))).ToUpperInvariant(),
+                ST14HubFont.Regular, 16, new Color(1f, 0.45f, 0.3f), 268, 26);
+
+            if (_planet.Description is { } description)
+                AddText(Wrap(Loc.GetString(description), 44), ST14HubFont.Regular, 14, new Color(0.82f, 0.85f, 0.9f), 316, 90);
+
+            AddText(Wrap(Loc.GetString("st14-galaxy-surface-help"), 44), ST14HubFont.Regular, 14, new Color(0.82f, 0.85f, 0.9f), 420, 160);
+
+            if (war.FirstLanding is { } landing)
             {
-                AddText(Loc.GetString("st14-galaxy-surface-count", ("faction", FactionName(faction)), ("count", war.CountOf(faction)))
-                    .ToUpperInvariant(), ST14HubFont.Medium, 17, ST14GalaxyColors.Of(faction), y, 28);
-                y += 36;
+                var go = AddButton(Loc.GetString("st14-galaxy-to-landing"), 712, ST14HubStyle.Orange);
+                go.OnPressed += _ =>
+                {
+                    _surface.FaceCell(landing);
+                    _surface.SelectedCell = landing;
+                    BuildSurfacePanel(landing);
+                };
             }
 
-            AddText(Loc.GetString("st14-galaxy-surface-hives", ("count", war.Cells.Count(c => c.Hive))).ToUpperInvariant(),
-                ST14HubFont.Regular, 16, new Color(1f, 0.45f, 0.3f), y + 6, 26);
-            AddText(Wrap(Loc.GetString("st14-galaxy-surface-help"), 44), ST14HubFont.Regular, 14, new Color(0.82f, 0.85f, 0.9f),
-                y + 56, 160);
-
-            var land = AddButton(Loc.GetString("st14-galaxy-land-front"), 712, ST14HubStyle.Blue);
-            land.OnPressed += _ => OnLanding?.Invoke();
             FinishPanel();
             return;
         }
@@ -465,28 +450,30 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
             ST14HubStyle.GoldLight, PanelPad, 44);
         AddText(Loc.GetString(_planet.Name).ToUpperInvariant(), ST14HubFont.Regular, 16, ST14HubStyle.Gold, 78, 26);
         AddDivider(114);
-        AddFaction(cell.Faction, 132);
+        AddText(Loc.GetString(cell.Front ? "st14-galaxy-cell-available" : "st14-galaxy-control",
+                ("faction", FactionName(cell.Faction))).ToUpperInvariant(), ST14HubFont.Medium, 17,
+            cell.Front ? ST14HubStyle.GoldLight : ST14GalaxyColors.Of(cell.Faction), 132, 28);
         AddBar(cell.Liberation, 170);
         AddText(Loc.GetString("st14-galaxy-cell-terrain", ("terrain", Loc.GetString($"st14-galaxy-terrain-{cell.Terrain + 1}")))
             .ToUpperInvariant(), ST14HubFont.Regular, 16, new Color(0.85f, 0.88f, 0.92f), 222, 26);
 
-        var y2 = 258f;
+        var y = 258f;
         if (cell.Hive)
         {
-            AddText(Loc.GetString("st14-galaxy-cell-hive").ToUpperInvariant(), ST14HubFont.Medium, 16, new Color(1f, 0.45f, 0.3f), y2, 26);
-            y2 += 34;
+            AddText(Loc.GetString("st14-galaxy-cell-hive").ToUpperInvariant(), ST14HubFont.Medium, 16, new Color(1f, 0.45f, 0.3f), y, 26);
+            y += 34;
         }
 
         if (cell.Base)
         {
-            AddText(Loc.GetString("st14-galaxy-cell-base").ToUpperInvariant(), ST14HubFont.Medium, 16, ST14GalaxyColors.Federation, y2, 26);
-            y2 += 34;
+            AddText(Loc.GetString("st14-galaxy-cell-base").ToUpperInvariant(), ST14HubFont.Medium, 16, ST14GalaxyColors.Federation, y, 26);
+            y += 34;
         }
 
         var status = cell.Faction == ST14GalaxyFaction.Federation ? "st14-galaxy-cell-held"
             : cell.Front ? "st14-galaxy-cell-front"
             : "st14-galaxy-cell-deep";
-        AddText(Wrap(Loc.GetString(status), 44), ST14HubFont.Regular, 14, new Color(0.82f, 0.85f, 0.9f), y2 + 10, 160);
+        AddText(Wrap(Loc.GetString(status), 44), ST14HubFont.Regular, 14, new Color(0.82f, 0.85f, 0.9f), y + 10, 160);
 
         if (cell.Front)
         {

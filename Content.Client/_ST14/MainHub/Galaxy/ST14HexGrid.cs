@@ -187,10 +187,11 @@ public sealed class ST14PlanetWar
             score[i] = Vector3.Dot(c, landing) + (ST14Noise.Fbm(c * 2.5f + new Vector3(seed % 17), 3, seed) - 0.5f) * 0.7f;
         }
 
-        // the best placed cells go to the Federation until the liberation of the planet is reached, a band of contested ones follows
+        // the best placed cells go to the Federation until the liberation of the planet is reached, a band of contested ones follows.
+        // A planet the Federation has not set foot on yet only gets its landing zones
         var order = Enumerable.Range(0, Grid.Count).OrderByDescending(i => score[i]).ToArray();
         var held = (int) MathF.Round(Grid.Count * Math.Clamp(planet.Liberation, 0, 100) / 100f * 0.75f);
-        var contested = held + (int) MathF.Round(Grid.Count * 0.1f);
+        var contested = held + (held > 0 ? (int) MathF.Round(Grid.Count * 0.1f) : Math.Max(1, planet.LandingZones));
 
         for (var rank = 0; rank < order.Length; rank++)
         {
@@ -211,7 +212,7 @@ public sealed class ST14PlanetWar
             else if (rank < contested)
             {
                 cell.Faction = ST14GalaxyFaction.Contested;
-                cell.Liberation = 15 + MathF.Round(hash * 70);
+                cell.Liberation = held > 0 ? 15 + MathF.Round(hash * 70) : 0;
             }
             else
             {
@@ -235,6 +236,18 @@ public sealed class ST14PlanetWar
     /// Liberation of the whole planet, in percent
     /// </summary>
     public float Liberation => Cells.Sum(c => c.Liberation) / Cells.Length;
+
+    /// <summary>
+    /// First cell troopers can land on, null when the planet has no front
+    /// </summary>
+    public int? FirstLanding
+    {
+        get
+        {
+            var index = Array.FindIndex(Cells, c => c.Front);
+            return index >= 0 ? index : null;
+        }
+    }
 
     public int CountOf(ST14GalaxyFaction faction)
     {
