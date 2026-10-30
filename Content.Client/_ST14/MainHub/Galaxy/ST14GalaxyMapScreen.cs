@@ -201,30 +201,70 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         if (newVisible)
         {
             ShowGalaxy();
-            if (WarSystem is not { } system)
-                return;
-
-            if (!_listening)
-            {
-                system.StateReceived += OnWarState;
-                system.OrdersReceived += OnOrders;
-                _listening = true;
-            }
-
-            foreach (var orders in system.Orders.Values)
-            {
-                OnOrders(orders);
-            }
-
-            system.Request();
+            StartListening();
         }
-        else if (_listening && WarSystem is { } system)
+        else
+        {
+            StopListening();
+        }
+    }
+
+    private void StartListening()
+    {
+        if (_listening || WarSystem is not { } system)
+            return;
+
+        system.StateReceived += OnWarState;
+        system.OrdersReceived += OnOrders;
+        _listening = true;
+
+        foreach (var orders in system.Orders.Values)
+        {
+            OnOrders(orders);
+        }
+
+        system.Request();
+    }
+
+    /// <summary>
+    /// Drops the subscriptions to the war system. Called when the map is hidden and also when it leaves the UI tree or is
+    /// disposed, for example when the hub closes with the map open: orphaning a control does not change its visibility
+    /// </summary>
+    private void StopListening()
+    {
+        if (!_listening)
+            return;
+
+        _listening = false;
+        if (WarSystem is { } system)
         {
             system.StateReceived -= OnWarState;
             system.OrdersReceived -= OnOrders;
-            _listening = false;
-            SetCommandMode(false);
         }
+
+        SetCommandMode(false);
+    }
+
+    protected override void EnteredTree()
+    {
+        base.EnteredTree();
+        // a map put back on screen while already visible gets no VisibilityChanged
+        if (Visible)
+            StartListening();
+    }
+
+    protected override void ExitedTree()
+    {
+        base.ExitedTree();
+        StopListening();
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+            StopListening();
+
+        base.Dispose(disposing);
     }
 
     protected override void FrameUpdate(FrameEventArgs args)
