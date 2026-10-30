@@ -1,0 +1,48 @@
+# One mob per caste that has art. The castes in _ST14/Hive/castes.yml point at these.
+
+- type: entity
+  parent: [ ST14MobBugBase, ST14MobBugWarriorLook ]
+  id: ST14MobBugWarrior
+  name: warrior bug
+  description: "The common soldier of the hive: four legs, a pair of claws and no fear."
+  components:
+  - type: MobThresholds
+    thresholds:
+      0: Alive
+      120: Dead
+  - type: DamageVisuals
+    damageDivisor: 24
+  - type: MovementSpeedModifier
+    baseWalkSpeed: 3
+    baseSprintSpeed: 4.5
+  - type: MeleeWeapon
+    damage:
+      types:
+        Slash: 12
+  - type: ST14HiveMember
+    caste: ST14CasteWarrior
+
+- type: entity
+  parent: [ ST14MobBugBase, ST14MobBugTigerLook, ST14MobBugSizeMedium ]
+  id: ST14MobBugTiger
+  name: tiger bug
+  description: "A striped killer, fast and terribly sharp."
+  components:
+  - type: MobThresholds
+    thresholds:
+      0: Alive
+      300: Dead
+  - type: DamageVisuals
+    damageDivisor: 60
+  - type: MovementSpeedModifier
+    baseWalkSpeed: 3.5
+    baseSprintSpeed: 5.5
+  - type: MeleeWeapon
+    soundHit:
+      collection: ST14BugTigerAttack
+    damage:
+      types:
+        Slash: 22
+  - type: ST14HiveMember
+    caste: ST14CasteTiger
+

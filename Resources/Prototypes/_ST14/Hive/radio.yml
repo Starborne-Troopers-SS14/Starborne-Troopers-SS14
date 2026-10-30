@@ -1,0 +1,8 @@
+# The hive mind: every bug hears every other bug, anywhere. Say ":h" in chat.
+- type: radioChannel
+  id: ST14Hive
+  name: st14-chat-radio-hive
+  keycode: 'h'
+  frequency: 666.6
+  color: "#FF9A52"
+  longRange: true

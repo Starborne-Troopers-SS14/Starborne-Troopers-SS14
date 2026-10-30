@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "license": "All-Rights-Reserved",
+  "copyright": "(c) Starborne Troopers. All rights reserved.",
+  "size": {
+    "x": 64,
+    "y": 64
+  },
+  "states": [
+    {
+      "name": "alive",
+      "directions": 4
+    },
+    {
+      "name": "dead"
+    },
+    {
+      "name": "DamageOverlay_1",
+      "directions": 4
+    },
+    {
+      "name": "DamageOverlay_2",
+      "directions": 4
+    },
+    {
+      "name": "DamageOverlay_3",
+      "directions": 4
+    },
+    {
+      "name": "DamageOverlay_4",
+      "directions": 4
+    }
+  ]
+}
