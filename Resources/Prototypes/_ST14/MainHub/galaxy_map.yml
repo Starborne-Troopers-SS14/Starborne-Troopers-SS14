@@ -204,6 +204,7 @@
   hexFrequency: 5
   landingZones: 1
   seed: 16
+  surfaceTexture: /Textures/_ST14/Interface/Hub/War/klendathu_surface.png
   surface: ["#2A140C", "#5A2E18", "#8C5230", "#C08A58", "#E8C898"]
   atmosphere: "#E8A070"
   links: [ ST14PlanetQuarantine ]

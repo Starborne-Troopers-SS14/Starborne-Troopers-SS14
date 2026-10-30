@@ -127,7 +127,8 @@ public sealed class ST14GalaxyMapTest
 
             var textures = new ST14GalaxyTextures();
             var surface = textures.Surface(planets[0]);
-            Assert.That(surface.Size, Is.EqualTo(new Robust.Shared.Maths.Vector2i(ST14GalaxyTextures.SurfaceWidth, ST14GalaxyTextures.SurfaceHeight)));
+            // a painted or generated map of the whole sphere is twice as wide as it is high
+            Assert.That(surface.Size.X, Is.EqualTo(surface.Size.Y * 2));
 
             var screen = new ST14GalaxyMapScreen();
             Assert.That(screen.Visible, Is.False);

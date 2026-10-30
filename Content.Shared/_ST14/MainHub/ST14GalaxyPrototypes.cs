@@ -1,4 +1,5 @@
 using Robust.Shared.Prototypes;
+using Robust.Shared.Utility;
 
 namespace Content.Shared._ST14.MainHub;
 
@@ -117,6 +118,12 @@ public sealed partial class ST14GalaxyPlanetPrototype : IPrototype
     /// </summary>
     [DataField]
     public List<Color> Surface = new() { Color.FromHex("#3B2A20"), Color.FromHex("#8A5A3A"), Color.FromHex("#D9B48A") };
+
+    /// <summary>
+    /// Painted surface of the planet, an equirectangular map twice as wide as it is high. Without it the surface is made from the seed
+    /// </summary>
+    [DataField]
+    public ResPath? SurfaceTexture;
 
     [DataField]
     public Color Atmosphere = Color.FromHex("#7FB8E6");

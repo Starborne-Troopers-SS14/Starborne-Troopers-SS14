@@ -1,6 +1,7 @@
 using System.Numerics;
 using Content.Shared._ST14.MainHub;
 using Robust.Client.Graphics;
+using Robust.Client.ResourceManagement;
 using Robust.Shared.Graphics;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
@@ -245,6 +246,14 @@ public sealed class ST14GalaxyTextures
     {
         if (_surfaces.TryGetValue(planet.ID, out var cached))
             return cached;
+
+        // a painted map wins over the generated one
+        if (planet.SurfaceTexture is { } path &&
+            IoCManager.Resolve<IResourceCache>().TryGetResource<TextureResource>(path, out var painted))
+        {
+            _surfaces[planet.ID] = painted.Texture;
+            return painted.Texture;
+        }
 
         var colors = planet.Surface.Count > 0 ? planet.Surface : new List<Color> { Color.Gray, Color.White };
         using var image = new Image<Rgba32>(SurfaceWidth, SurfaceHeight);
