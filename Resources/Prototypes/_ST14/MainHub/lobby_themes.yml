@@ -12,7 +12,7 @@
 - type: st14LobbyTheme
   id: ST14Arachnids
   scene: ST14LobbyHorde
-  jobs: []
+  jobs: [ ST14BrainBug ]
   locPrefix: st14-lobby-bugs
   accent: "#FF9A52"
   standLight: "#FF5A2A"

@@ -1,0 +1,31 @@
+# The brain bug: one per round, whitelisted. Put one ST14SpawnPointBrainBug on the map and give the station a slot.
+- type: job
+  id: ST14BrainBug
+  name: st14-job-name-brain-bug
+  description: st14-job-description-brain-bug
+  playTimeTracker: JobST14BrainBug
+  icon: JobIconST14BrainBug
+  supervisors: st14-job-supervisors-brain-bug
+  jobEntity: ST14MobBrainBug
+  whitelisted: true
+  applyTraits: false
+  setPreference: true
+
+- type: department
+  id: ST14Hive
+  name: st14-department-hive
+  description: st14-department-hive-description
+  color: "#FF9A52"
+  roles:
+  - ST14BrainBug
+
+- type: playTimeTracker
+  id: JobST14BrainBug
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconST14BrainBug
+  icon:
+    sprite: /Textures/Interface/Misc/job_icons.rsi
+    state: Zombie
+  jobName: st14-job-name-brain-bug

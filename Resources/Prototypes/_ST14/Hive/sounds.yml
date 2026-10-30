@@ -1,0 +1,346 @@
+# Bug sounds, all from the Yakisoba set.
+
+- type: soundCollection
+  id: ST14BugWarriorAttack
+  files:
+  - /Audio/_ST14/Mobs/Bugs/warrior_attack_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_attack_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_attack_3.ogg
+
+- type: soundCollection
+  id: ST14BugTigerAttack
+  files:
+  - /Audio/_ST14/Mobs/Bugs/tiger_attack_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/tiger_attack_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/tiger_attack_3.ogg
+
+- type: soundCollection
+  id: ST14BugSwing
+  files:
+  - /Audio/_ST14/Mobs/Bugs/swing_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/swing_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/swing_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/swing_4.ogg
+
+- type: soundCollection
+  id: ST14BugWarriorDeath
+  files:
+  - /Audio/_ST14/Mobs/Bugs/warrior_die_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_die_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_die_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_die_4.ogg
+
+- type: soundCollection
+  id: ST14BugTigerDeath
+  files:
+  - /Audio/_ST14/Mobs/Bugs/tiger_die_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/tiger_die_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/tiger_die_3.ogg
+
+- type: soundCollection
+  id: ST14BugWarriorPain
+  files:
+  - /Audio/_ST14/Mobs/Bugs/warrior_pain_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_pain_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_pain_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_pain_4.ogg
+
+- type: soundCollection
+  id: ST14BugTigerPain
+  files:
+  - /Audio/_ST14/Mobs/Bugs/tiger_pain_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/tiger_pain_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/tiger_pain_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/tiger_pain_4.ogg
+
+- type: soundCollection
+  id: ST14BugBrainPain
+  files:
+  - /Audio/_ST14/Mobs/Bugs/brain_pain_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/brain_pain_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/brain_pain_3.ogg
+
+- type: soundCollection
+  id: ST14BugWarriorScream
+  files:
+  - /Audio/_ST14/Mobs/Bugs/warrior_scream_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_scream_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_scream_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_scream_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_scream_5.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_scream_6.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_scream_7.ogg
+
+- type: soundCollection
+  id: ST14BugTigerScream
+  files:
+  - /Audio/_ST14/Mobs/Bugs/tiger_scream_1.ogg
+
+- type: soundCollection
+  id: ST14BugCarapaceHit
+  files:
+  - /Audio/_ST14/Mobs/Bugs/carapace_hit_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/carapace_hit_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/carapace_hit_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/carapace_hit_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/carapace_hit_5.ogg
+  - /Audio/_ST14/Mobs/Bugs/carapace_hit_6.ogg
+  - /Audio/_ST14/Mobs/Bugs/carapace_hit_7.ogg
+
+- type: soundCollection
+  id: ST14BugWarriorWalkConcrete
+  files:
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_concrete_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_concrete_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_concrete_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_concrete_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_concrete_5.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_concrete_6.ogg
+
+- type: soundCollection
+  id: ST14BugWarriorWalkMetal
+  files:
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_metal_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_metal_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_metal_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_metal_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_metal_5.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_metal_6.ogg
+
+- type: soundCollection
+  id: ST14BugWarriorWalkMetalThin
+  files:
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_metal_thin_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_metal_thin_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_metal_thin_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_metal_thin_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_metal_thin_5.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_metal_thin_6.ogg
+
+- type: soundCollection
+  id: ST14BugWarriorWalkSand
+  files:
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_sand_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_sand_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_sand_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_sand_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_sand_5.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_sand_6.ogg
+
+- type: soundCollection
+  id: ST14BugWarriorWalkGore
+  files:
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_gore_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_gore_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_gore_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_gore_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_gore_5.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_walk_gore_6.ogg
+
+- type: soundCollection
+  id: ST14BugWarriorRunConcrete
+  files:
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_concrete_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_concrete_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_concrete_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_concrete_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_concrete_5.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_concrete_6.ogg
+
+- type: soundCollection
+  id: ST14BugWarriorRunMetal
+  files:
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_metal_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_metal_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_metal_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_metal_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_metal_5.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_metal_6.ogg
+
+- type: soundCollection
+  id: ST14BugWarriorRunMetalThin
+  files:
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_metal_thin_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_metal_thin_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_metal_thin_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_metal_thin_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_metal_thin_5.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_metal_thin_6.ogg
+
+- type: soundCollection
+  id: ST14BugWarriorRunSand
+  files:
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_sand_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_sand_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_sand_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_sand_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_sand_5.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_sand_6.ogg
+
+- type: soundCollection
+  id: ST14BugWarriorRunGore
+  files:
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_gore_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_gore_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_gore_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_gore_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_gore_5.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/warrior_run_gore_6.ogg
+
+- type: soundCollection
+  id: ST14BugTigerWalkConcrete
+  files:
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_concrete_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_concrete_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_concrete_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_concrete_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_concrete_5.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_concrete_6.ogg
+
+- type: soundCollection
+  id: ST14BugTigerWalkMetal
+  files:
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_metal_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_metal_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_metal_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_metal_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_metal_5.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_metal_6.ogg
+
+- type: soundCollection
+  id: ST14BugTigerWalkMetalThin
+  files:
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_metal_thin_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_metal_thin_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_metal_thin_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_metal_thin_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_metal_thin_5.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_metal_thin_6.ogg
+
+- type: soundCollection
+  id: ST14BugTigerWalkSand
+  files:
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_sand_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_sand_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_sand_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_sand_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_sand_5.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_sand_6.ogg
+
+- type: soundCollection
+  id: ST14BugTigerWalkGore
+  files:
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_gore_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_gore_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_gore_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_gore_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_gore_5.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_walk_gore_6.ogg
+
+- type: soundCollection
+  id: ST14BugTigerRunConcrete
+  files:
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_concrete_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_concrete_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_concrete_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_concrete_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_concrete_5.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_concrete_6.ogg
+
+- type: soundCollection
+  id: ST14BugTigerRunMetal
+  files:
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_metal_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_metal_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_metal_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_metal_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_metal_5.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_metal_6.ogg
+
+- type: soundCollection
+  id: ST14BugTigerRunMetalThin
+  files:
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_metal_thin_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_metal_thin_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_metal_thin_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_metal_thin_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_metal_thin_5.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_metal_thin_6.ogg
+
+- type: soundCollection
+  id: ST14BugTigerRunSand
+  files:
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_sand_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_sand_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_sand_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_sand_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_sand_5.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_sand_6.ogg
+
+- type: soundCollection
+  id: ST14BugTigerRunGore
+  files:
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_gore_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_gore_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_gore_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_gore_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_gore_5.ogg
+  - /Audio/_ST14/Mobs/Bugs/Steps/tiger_run_gore_6.ogg
+
+- type: soundCollection
+  id: ST14BugWarriorRoar
+  files:
+  - /Audio/_ST14/Mobs/Bugs/warrior_roar_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_roar_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_roar_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_roar_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_roar_5.ogg
+
+- type: soundCollection
+  id: ST14BugWarriorTaunt
+  files:
+  - /Audio/_ST14/Mobs/Bugs/warrior_taunt_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_taunt_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_taunt_3.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_taunt_4.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_taunt_5.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_taunt_6.ogg
+
+- type: soundCollection
+  id: ST14BugWarriorAlarm
+  files:
+  - /Audio/_ST14/Mobs/Bugs/warrior_alarm_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_alarm_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_alarm_3.ogg
+
+- type: soundCollection
+  id: ST14BugTigerRoar
+  files:
+  - /Audio/_ST14/Mobs/Bugs/tiger_roar_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/tiger_roar_2.ogg
+
+- type: soundCollection
+  id: ST14BugTigerTaunt
+  files:
+  - /Audio/_ST14/Mobs/Bugs/tiger_taunt_1.ogg
+
+- type: soundCollection
+  id: ST14BugDroneTaunt
+  files:
+  - /Audio/_ST14/Mobs/Bugs/drone_taunt_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/drone_taunt_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/drone_taunt_3.ogg
+
+- type: soundCollection
+  id: ST14BugDroneRoar
+  files:
+  - /Audio/_ST14/Mobs/Bugs/drone_roar_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/drone_roar_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/drone_roar_3.ogg
+
+- type: soundCollection
+  id: ST14BugDroneAlarm
+  files:
+  - /Audio/_ST14/Mobs/Bugs/drone_alarm_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/drone_alarm_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/drone_alarm_3.ogg
