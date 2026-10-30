@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using System.Linq;
 using Content.Server.Administration;
 using Content.Server.Database;
@@ -28,7 +29,28 @@ public sealed partial class ST14CommandRoleCommand : IConsoleCommand
     public string Description => Loc.GetString("st14-command-role-description");
     public string Help => Loc.GetString("st14-command-role-help");
 
-    public async void Execute(IConsoleShell shell, string argStr, string[] args)
+    public void Execute(IConsoleShell shell, string argStr, string[] args)
+    {
+        _ = ExecuteAsync(shell, args);
+    }
+
+    /// <summary>
+    /// The database lookups are awaited here, so a failure ends up in front of the admin instead of being lost
+    /// </summary>
+    private async Task ExecuteAsync(IConsoleShell shell, string[] args)
+    {
+        try
+        {
+            await Run(shell, args);
+        }
+        catch (Exception e)
+        {
+            Logger.GetSawmill("st14.war").Error($"st14_command failed: {e}");
+            shell.WriteError(Loc.GetString("st14-command-role-failed", ("error", e.Message)));
+        }
+    }
+
+    private async Task Run(IConsoleShell shell, string[] args)
     {
         if (args.Length != 3 || args[0] is not ("give" or "take") || !Sides.Contains(args[2]))
         {

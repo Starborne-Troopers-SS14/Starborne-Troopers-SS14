@@ -38,6 +38,17 @@ public sealed class ST14GalaxyMapView : Control
     private readonly List<(float Angle, string Text)> _zoneLabels = new();
 
     private static readonly (Vector2 Pos, float Size, Color Color, float Phase)[] Stars;
+
+    // square grid over the galaxy, with the indices of the stars in each cell
+    private const int StarGrid = 32;
+    private const float StarGridExtent = 1.1f;
+    private static readonly int[][] StarBuckets;
+
+    private static (int X, int Y) StarCell(Vector2 pos)
+    {
+        var cell = (pos + new Vector2(StarGridExtent)) / (StarGridExtent * 2) * StarGrid;
+        return (Math.Clamp((int) cell.X, 0, StarGrid - 1), Math.Clamp((int) cell.Y, 0, StarGrid - 1));
+    }
     private static readonly (Vector2 Pos, float Radius, Color Color)[] Clouds;
 
     private Vector2 _cam;
@@ -158,6 +169,21 @@ public sealed class ST14GalaxyMapView : Control
 
         // colours are converted to linear once here, the stars are redrawn every frame
         Stars = stars.Select(s => (s.Item1, s.Item2, Color.FromSrgb(s.Item3), s.Item4)).ToArray();
+
+        // stars are bucketed by position once, a frame only walks the buckets on screen
+        var buckets = new List<int>[StarGrid * StarGrid];
+        for (var i = 0; i < buckets.Length; i++)
+        {
+            buckets[i] = new List<int>();
+        }
+
+        for (var i = 0; i < Stars.Length; i++)
+        {
+            var (x, y) = StarCell(Stars[i].Pos);
+            buckets[y * StarGrid + x].Add(i);
+        }
+
+        StarBuckets = buckets.Select(b => b.ToArray()).ToArray();
 
         var clouds = new List<(Vector2, float, Color)>
         {
@@ -595,14 +621,23 @@ public sealed class ST14GalaxyMapView : Control
 
         var starScale = ui * Math.Clamp(MathF.Sqrt(_zoom), 1, 2.4f);
         var bounds = new Box2(-20, -20, PixelSize.X + 20, PixelSize.Y + 20);
-        foreach (var (pos, size, color, phase) in Stars)
+        var (minX, minY) = StarCell(Vector2.Min(ToGalaxy(bounds.BottomLeft), ToGalaxy(bounds.TopRight)));
+        var (maxX, maxY) = StarCell(Vector2.Max(ToGalaxy(bounds.BottomLeft), ToGalaxy(bounds.TopRight)));
+        for (var y = minY; y <= maxY; y++)
         {
-            var screen = ToScreen(pos);
-            if (!bounds.Contains(screen))
-                continue;
+            for (var x = minX; x <= maxX; x++)
+            {
+                foreach (var index in StarBuckets[y * StarGrid + x])
+                {
+                    var (pos, size, color, phase) = Stars[index];
+                    var screen = ToScreen(pos);
+                    if (!bounds.Contains(screen))
+                        continue;
 
-            var twinkle = 0.75f + 0.25f * MathF.Sin(_time * 1.7f + phase);
-            _glow.SpriteLinear(screen, size * 2.2f * starScale, color.WithAlpha(color.A * twinkle));
+                    var twinkle = 0.75f + 0.25f * MathF.Sin(_time * 1.7f + phase);
+                    _glow.SpriteLinear(screen, size * 2.2f * starScale, color.WithAlpha(color.A * twinkle));
+                }
+            }
         }
 
         _glow.Draw(handle, _textures.Glow);
