@@ -85,7 +85,7 @@ st14-galaxy-planet-quarantine-desc = Dead world in the quarantine zone. The bug 
 st14-galaxy-planet-planet-p = Planet P
 st14-galaxy-planet-planet-p-desc = Ice planet where a brain bug was seen. The data is classified.
 
-st14-galaxy-sector-core = 
+st14-galaxy-sector-core = Galactic core
 st14-galaxy-sector-centaurus = Centaurus
 st14-galaxy-sector-sirius = Sirius
 st14-galaxy-sector-procyon = Procyon

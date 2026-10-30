@@ -85,7 +85,7 @@ st14-galaxy-planet-quarantine-desc = Мёртвый мир в карантинн
 st14-galaxy-planet-planet-p = Планета П
 st14-galaxy-planet-planet-p-desc = Ледяная планета, где замечен мозговой жук. Данные засекречены.
 
-st14-galaxy-sector-core = 
+st14-galaxy-sector-core = Ядро галактики
 st14-galaxy-sector-centaurus = Центавр
 st14-galaxy-sector-sirius = Сириус
 st14-galaxy-sector-procyon = Процион
