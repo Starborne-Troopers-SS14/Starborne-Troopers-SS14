@@ -155,6 +155,12 @@ public sealed class ST14HexCell
     /// Not held by the Federation but next to its ground: troopers can land here
     /// </summary>
     public bool Front;
+
+    /// <summary>
+    /// Dead counted in the rounds fought in this sector
+    /// </summary>
+    public int BugsKilled;
+    public int TroopersKilled;
 }
 
 /// <summary>
@@ -276,7 +282,7 @@ public sealed class ST14PlanetWar
 
     public ST14HexCellState[] ExportState()
     {
-        return Cells.Select(c => new ST14HexCellState(c.Faction, c.Liberation, c.Hive, c.Base)).ToArray();
+        return Cells.Select(c => new ST14HexCellState(c.Faction, c.Liberation, c.Hive, c.Base, c.BugsKilled, c.TroopersKilled)).ToArray();
     }
 
     /// <summary>
@@ -294,6 +300,8 @@ public sealed class ST14PlanetWar
             Cells[i].Liberation = state.Liberation;
             Cells[i].Hive = state.Hive;
             Cells[i].Base = state.Base;
+            Cells[i].BugsKilled = state.BugsKilled;
+            Cells[i].TroopersKilled = state.TroopersKilled;
         }
 
         RefreshFront();
@@ -316,6 +324,10 @@ public sealed class ST14PlanetWar
             return index >= 0 ? index : null;
         }
     }
+
+    public int BugsKilled => Cells.Sum(c => c.BugsKilled);
+
+    public int TroopersKilled => Cells.Sum(c => c.TroopersKilled);
 
     public int CountOf(ST14GalaxyFaction faction)
     {

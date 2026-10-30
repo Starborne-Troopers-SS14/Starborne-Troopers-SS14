@@ -64,6 +64,26 @@ public sealed class ST14GalaxyMapView : Control
     public event Action? OnEmptyClicked;
     public event Action? OnBackClicked;
 
+    /// <summary>
+    /// Plan of the High Command drawn over the map
+    /// </summary>
+    public IReadOnlyList<ST14WarMark> Marks = Array.Empty<ST14WarMark>();
+
+    /// <summary>
+    /// Drawing tool of the High Command, null when the map is only looked at
+    /// </summary>
+    public ST14WarMarkKind? Tool;
+
+    public bool Eraser;
+
+    public event Action<ST14WarMark>? OnMarkPlaced;
+    public event Action<int>? OnMarkErased;
+    public event Action? OnToolCancelled;
+
+    private bool Drawing => Tool != null || Eraser;
+
+    private bool DrawsArrow => Tool is ST14WarMarkKind.Attack or ST14WarMarkKind.Defend;
+
     static ST14GalaxyMapView()
     {
         var random = new Random(1984);
@@ -304,7 +324,12 @@ public sealed class ST14GalaxyMapView : Control
 
         if (args.Function == EngineKeyFunctions.UIRightClick)
         {
-            OnBackClicked?.Invoke();
+            // the right button puts the drawing tool away first
+            if (Drawing)
+                OnToolCancelled?.Invoke();
+            else
+                OnBackClicked?.Invoke();
+
             args.Handle();
             return;
         }
@@ -327,6 +352,14 @@ public sealed class ST14GalaxyMapView : Control
             return;
 
         _pressed = false;
+        if (Drawing)
+        {
+            ReleaseTool(args.RelativePixelPosition);
+            _dragging = false;
+            args.Handle();
+            return;
+        }
+
         if (_dragging)
         {
             _dragging = false;
@@ -365,7 +398,8 @@ public sealed class ST14GalaxyMapView : Control
             if (!_dragging && (pos - _pressPos).Length() > DragThreshold)
                 _dragging = true;
 
-            if (_dragging)
+            // an arrow is drawn with the drag, the other tools keep panning
+            if (_dragging && !DrawsArrow)
             {
                 _camTarget = ClampCamera(_camTarget - (pos - _lastPos) / Scale);
                 _cam = _camTarget;
@@ -454,6 +488,81 @@ public sealed class ST14GalaxyMapView : Control
     private static bool InRange(float angle, ST14GalaxySectorPrototype sector)
     {
         return angle >= sector.Start && angle < sector.End;
+    }
+
+    private void ReleaseTool(Vector2 pixel)
+    {
+        if (Eraser)
+        {
+            if (MarkAt(pixel) is { } index)
+            {
+                Sounds.Play(ST14HubSound.Back);
+                OnMarkErased?.Invoke(index);
+            }
+
+            return;
+        }
+
+        if (Tool is not { } kind)
+            return;
+
+        if (DrawsArrow)
+        {
+            if (!_dragging)
+                return;
+
+            Sounds.Play(ST14HubSound.Click);
+            OnMarkPlaced?.Invoke(new ST14WarMark(kind, ToGalaxy(_pressPos), ToGalaxy(pixel)));
+            return;
+        }
+
+        // a drag pans the map, only a click places the mark
+        if (_dragging)
+            return;
+
+        Sounds.Play(ST14HubSound.Click);
+        var point = ToGalaxy(pixel);
+        OnMarkPlaced?.Invoke(new ST14WarMark(kind, point, point));
+    }
+
+    /// <summary>
+    /// Mark under the cursor for the eraser: close to the sign, or to any point along an arrow
+    /// </summary>
+    private int? MarkAt(Vector2 pixel)
+    {
+        int? best = null;
+        var bestDistance = 18f * MathF.Max(UiScale, 0.5f);
+        for (var i = 0; i < Marks.Count; i++)
+        {
+            var mark = Marks[i];
+            var steps = mark.IsArrow ? 16 : 0;
+            for (var s = 0; s <= steps; s++)
+            {
+                var point = mark.IsArrow ? ArrowPoint(mark, s / 16f) : ToScreen(mark.From);
+                var distance = (point - pixel).Length();
+                if (distance >= bestDistance)
+                    continue;
+
+                bestDistance = distance;
+                best = i;
+            }
+        }
+
+        return best;
+    }
+
+    /// <summary>
+    /// Arrows bend a little to the side so crossing ones stay readable
+    /// </summary>
+    private Vector2 ArrowPoint(ST14WarMark mark, float t)
+    {
+        var from = ToScreen(mark.From);
+        var to = ToScreen(mark.To);
+        var dir = to - from;
+        var bend = new Vector2(-dir.Y, dir.X) * 0.15f;
+        var control = (from + to) / 2 + bend;
+        var u = 1 - t;
+        return from * (u * u) + control * (2 * u * t) + to * (t * t);
     }
 
     #endregion
@@ -545,6 +654,7 @@ public sealed class ST14GalaxyMapView : Control
         _shapes.Draw(handle, Texture.White);
 
         DrawPlanets(handle, ui);
+        DrawMarks(handle, ui);
         DrawLabels(handle, ui, focused);
     }
 
@@ -673,6 +783,109 @@ public sealed class ST14GalaxyMapView : Control
 
         _glow.Draw(handle, _textures.Glow);
         _shapes.Draw(handle, Texture.White);
+    }
+
+    private static Color MarkColor(ST14WarMarkKind kind)
+    {
+        return kind switch
+        {
+            ST14WarMarkKind.Attack => Color.FromHex("#FF4A2E"),
+            ST14WarMarkKind.Defend => ST14GalaxyColors.Federation,
+            ST14WarMarkKind.Rally => Color.FromHex("#5CD67A"),
+            ST14WarMarkKind.Danger => Color.FromHex("#FFD23A"),
+            _ => Color.White,
+        };
+    }
+
+    /// <summary>
+    /// The plan of the High Command: bent arrows with heads and signs for rally points, danger and objectives
+    /// </summary>
+    private void DrawMarks(DrawingHandleScreen handle, float ui)
+    {
+        if (_diving != null)
+            return;
+
+        _glow.Clear();
+        _shapes.Clear();
+        var width = MathF.Max(2.5f, 5f * ui);
+        var pulse = 0.5f + 0.5f * MathF.Sin(_time * 4f);
+
+        foreach (var mark in Marks)
+        {
+            AddMark(mark, width, pulse, 1f);
+        }
+
+        // the arrow being drawn follows the cursor
+        if (_pressed && _dragging && DrawsArrow && Tool is { } kind)
+            AddMark(new ST14WarMark(kind, ToGalaxy(_pressPos), ToGalaxy(_lastPos)), width, pulse, 0.55f);
+
+        _glow.Draw(handle, _textures.Glow);
+        _shapes.Draw(handle, Texture.White);
+    }
+
+    private void AddMark(ST14WarMark mark, float width, float pulse, float alpha)
+    {
+        var color = MarkColor(mark.Kind);
+        if (mark.IsArrow)
+        {
+            const int segments = 20;
+            var points = new Vector2[segments + 1];
+            for (var i = 0; i <= segments; i++)
+            {
+                points[i] = ArrowPoint(mark, i / (float) segments);
+            }
+
+            // the body stops short of the tip, the head covers the rest
+            var head = width * 4.2f;
+            var tip = points[segments];
+            var back = tip - Vector2.Normalize(tip - points[segments - 2]) * head;
+            for (var i = 0; i < segments; i++)
+            {
+                var a = points[i];
+                var b = i == segments - 1 ? back : points[i + 1];
+                _shapes.Line(a, b, width * 2.6f, color.WithAlpha(0.18f * alpha));
+                _shapes.Line(a, b, width, color.WithAlpha(0.9f * alpha));
+            }
+
+            // light runs along an attack arrow towards its head
+            if (mark.Kind == ST14WarMarkKind.Attack)
+            {
+                var run = (_time * 0.8f) % 1f;
+                var p = ArrowPoint(mark, run * 0.9f);
+                _glow.Sprite(p, width * 2.5f, Color.White.WithAlpha(0.7f * alpha));
+            }
+
+            var dir = Vector2.Normalize(tip - back);
+            var side = new Vector2(-dir.Y, dir.X) * head * 0.6f;
+            _shapes.Triangle(tip, back + side, back - side, color.WithAlpha(alpha));
+            _glow.Sprite(tip, head * 1.4f, color.WithAlpha(0.35f * alpha));
+            return;
+        }
+
+        var center = ToScreen(mark.From);
+        var size = width * 3.2f;
+        _glow.Sprite(center, size * 2.2f, color.WithAlpha((0.25f + 0.15f * pulse) * alpha));
+        switch (mark.Kind)
+        {
+            case ST14WarMarkKind.Rally:
+                // a flag on a pole
+                _shapes.Line(center + new Vector2(-size * 0.4f, size), center + new Vector2(-size * 0.4f, -size), width * 0.6f,
+                    color.WithAlpha(alpha));
+                _shapes.Triangle(center + new Vector2(-size * 0.4f, -size), center + new Vector2(size * 0.9f, -size * 0.55f),
+                    center + new Vector2(-size * 0.4f, -size * 0.1f), color.WithAlpha(alpha));
+                break;
+            case ST14WarMarkKind.Danger:
+                // a warning triangle with an exclamation mark
+                _shapes.Triangle(center + new Vector2(0, -size), center + new Vector2(size, size * 0.8f), center + new Vector2(-size, size * 0.8f),
+                    color.WithAlpha(alpha));
+                var dark = Color.FromHex("#141A22").WithAlpha(alpha);
+                _shapes.Line(center + new Vector2(0, -size * 0.45f), center + new Vector2(0, size * 0.2f), width * 0.55f, dark);
+                _shapes.Circle(center + new Vector2(0, size * 0.48f), width * 0.32f, dark, 8);
+                break;
+            default:
+                DrawTarget(center, size, 1f);
+                break;
+        }
     }
 
     /// <summary>

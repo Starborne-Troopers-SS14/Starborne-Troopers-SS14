@@ -154,3 +154,22 @@ st14-war-command-no-target = The planet has no target sector.
 st14-war-command-bad-target = This sector cannot be the target: it is not on the front line.
 st14-war-command-done = Done, the clients got the new state.
 st14-war-command-status = { $planet }: liberation { $liberation }%, target { $target } ({ $targetLiberation }%), sectors on the front: { $front }
+
+st14-galaxy-command = High Command
+st14-galaxy-command-close = Close planning
+st14-galaxy-tool-attack = Attack arrow
+st14-galaxy-tool-defend = Defence arrow
+st14-galaxy-tool-rally = Rally point
+st14-galaxy-tool-danger = Danger
+st14-galaxy-tool-objective = Objective
+st14-galaxy-tool-eraser = Eraser
+st14-galaxy-tool-clear = Erase all
+st14-galaxy-order-title = Order for everyone
+st14-galaxy-order-placeholder = For example: hold Klendathu
+st14-galaxy-order-send = Give the order
+st14-galaxy-order-line = Command order: { $order }
+st14-galaxy-hint-command = Pick a tool on the left  ·  RMB: back
+st14-galaxy-hint-drawing = Drag to draw arrows, click to place marks  ·  RMB: put the tool away
+
+st14-galaxy-kills-bugs = Bugs killed: { $count }
+st14-galaxy-kills-troopers = Troopers lost: { $count }

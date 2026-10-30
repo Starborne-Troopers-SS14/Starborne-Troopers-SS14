@@ -1,9 +1,16 @@
 using System.Linq;
 using System.Text.Json;
+using System.Numerics;
 using Content.Server.Administration.Managers;
+using Content.Server.GameTicking;
 using Content.Server.Players.JobWhitelist;
 using Content.Shared._ST14.MainHub;
 using Content.Shared.Administration;
+using Content.Shared.GameTicking;
+using Content.Shared.Humanoid;
+using Content.Shared.Mobs;
+using Content.Shared.NPC.Prototypes;
+using Content.Shared.NPC.Systems;
 using Robust.Server.Player;
 using Robust.Shared.ContentPack;
 using Robust.Shared.Enums;
@@ -16,6 +23,7 @@ namespace Content.Server._ST14.MainHub;
 /// <summary>
 /// Keeps the war on the war planets of the galaxy map: who holds every hex sector, how far its bar is, and which sector
 /// the High Command picked for the next attack. The state is saved in the server data folder and survives restarts.
+/// It also counts the dead of the rounds fought in the target sector and keeps the plan the High Command draws on the map.
 /// There is no game mode deciding the winner yet, so results come in through <see cref="ApplyResult"/> and the st14_war command
 /// </summary>
 public sealed partial class ST14GalaxyWarSystem : EntitySystem
@@ -25,11 +33,25 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
     [Dependency] private IPrototypeManager _protoMan = default!;
     [Dependency] private IResourceManager _resources = default!;
     [Dependency] private JobWhitelistManager _whitelist = default!;
+    [Dependency] private GameTicker _ticker = default!;
+    [Dependency] private NpcFactionSystem _faction = default!;
 
     private static readonly ResPath SavePath = new("/st14_galaxy_war.json");
 
     private readonly Dictionary<string, ST14PlanetWar> _wars = new();
     private readonly Dictionary<string, int> _targets = new();
+    private readonly List<ST14WarMark> _marks = new();
+    private string _order = string.Empty;
+
+    // deaths come in bursts, the save and the update to the clients wait a little
+    private static readonly TimeSpan KillFlush = TimeSpan.FromSeconds(5);
+    private TimeSpan _killTimer;
+    private bool _killsDirty;
+
+    /// <summary>
+    /// NPC factions counted as bugs when they die, everything humanoid is counted as a trooper
+    /// </summary>
+    private static readonly ProtoId<NpcFactionPrototype>[] BugFactions = { "Xeno" };
     private ISawmill _sawmill = default!;
 
     public override void Initialize()
@@ -39,6 +61,10 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
 
         SubscribeNetworkEvent<ST14GalaxyWarRequestEvent>(OnRequest);
         SubscribeNetworkEvent<ST14GalaxyWarOrderEvent>(OnOrder);
+        SubscribeNetworkEvent<ST14GalaxyMarkAddEvent>(OnMarkAdd);
+        SubscribeNetworkEvent<ST14GalaxyMarkRemoveEvent>(OnMarkRemove);
+        SubscribeNetworkEvent<ST14GalaxyOrderTextEvent>(OnOrderText);
+        SubscribeLocalEvent<MobStateChangedEvent>(OnMobState);
 
         Load();
     }
@@ -112,7 +138,135 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
     private void OnRequest(ST14GalaxyWarRequestEvent ev, EntitySessionEventArgs args)
     {
         Send(args.SenderSession);
+        SendOrders(args.SenderSession);
     }
+
+    #region Kills
+
+    private void OnMobState(MobStateChangedEvent ev)
+    {
+        if (ev.NewMobState != MobState.Dead || _ticker.RunLevel != GameRunLevel.InRound)
+            return;
+
+        // every round is fought in the target sector of the war planet for now, there is one war planet
+        var (planet, war) = _wars.FirstOrDefault();
+        if (war == null)
+            return;
+
+        var target = _targets.GetValueOrDefault(planet, -1);
+        if (target < 0)
+            return;
+
+        if (_faction.IsMemberOfAny(ev.Target, BugFactions))
+            war.Cells[target].BugsKilled++;
+        else if (HasComp<HumanoidProfileComponent>(ev.Target))
+            war.Cells[target].TroopersKilled++;
+        else
+            return;
+
+        _killsDirty = true;
+    }
+
+    public override void Update(float frameTime)
+    {
+        base.Update(frameTime);
+
+        if (!_killsDirty)
+            return;
+
+        _killTimer += TimeSpan.FromSeconds(frameTime);
+        if (_killTimer < KillFlush)
+            return;
+
+        _killTimer = TimeSpan.Zero;
+        _killsDirty = false;
+        Changed();
+    }
+
+    #endregion
+
+    #region High Command plan
+
+    private bool Commands(EntitySessionEventArgs args)
+    {
+        if (CanCommand(args.SenderSession))
+            return true;
+
+        _sawmill.Warning($"{args.SenderSession.Name} tried to change the plan of the High Command without being in it");
+        return false;
+    }
+
+    private void OnMarkAdd(ST14GalaxyMarkAddEvent ev, EntitySessionEventArgs args)
+    {
+        if (!Commands(args) || _marks.Count >= ST14GalaxyOrdersEvent.MaxMarks || !Enum.IsDefined(ev.Mark.Kind))
+            return;
+
+        // marks stay on the table, a little past its rim at most
+        var mark = ev.Mark with { From = ClampToMap(ev.Mark.From), To = ClampToMap(ev.Mark.To) };
+        if (mark.IsArrow && (mark.To - mark.From).Length() < 0.01f)
+            return;
+
+        _marks.Add(mark);
+        OrdersChanged();
+    }
+
+    private void OnMarkRemove(ST14GalaxyMarkRemoveEvent ev, EntitySessionEventArgs args)
+    {
+        if (!Commands(args))
+            return;
+
+        if (ev.Index < 0)
+            _marks.Clear();
+        else if (ev.Index < _marks.Count)
+            _marks.RemoveAt(ev.Index);
+        else
+            return;
+
+        OrdersChanged();
+    }
+
+    private void OnOrderText(ST14GalaxyOrderTextEvent ev, EntitySessionEventArgs args)
+    {
+        if (!Commands(args))
+            return;
+
+        _order = Clean(ev.Order);
+        _sawmill.Info($"{args.SenderSession.Name} set the order of the High Command: {_order}");
+        OrdersChanged();
+    }
+
+    private static Vector2 ClampToMap(Vector2 point)
+    {
+        if (!float.IsFinite(point.X) || !float.IsFinite(point.Y))
+            return Vector2.Zero;
+
+        return point.Length() > 1.1f ? Vector2.Normalize(point) * 1.1f : point;
+    }
+
+    private static string Clean(string? order)
+    {
+        if (string.IsNullOrWhiteSpace(order))
+            return string.Empty;
+
+        var line = order.Replace('\n', ' ').Replace('\r', ' ').Trim();
+        return line.Length > ST14GalaxyOrdersEvent.MaxOrderLength ? line[..ST14GalaxyOrdersEvent.MaxOrderLength] : line;
+    }
+
+    private void OrdersChanged()
+    {
+        Save();
+        foreach (var session in _player.Sessions.Where(s => s.Status == SessionStatus.InGame))
+        {
+            SendOrders(session);
+        }
+    }
+
+    private void SendOrders(ICommonSession session)
+    {
+        RaiseNetworkEvent(new ST14GalaxyOrdersEvent(_marks.ToArray(), _order, CanCommand(session)), session);
+    }
+
+    #endregion
 
     private void OnOrder(ST14GalaxyWarOrderEvent ev, EntitySessionEventArgs args)
     {
@@ -151,6 +305,8 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
     private sealed class SaveData
     {
         public Dictionary<string, PlanetSave> Planets { get; set; } = new();
+        public List<MarkSave> Marks { get; set; } = new();
+        public string Order { get; set; } = string.Empty;
     }
 
     private sealed class PlanetSave
@@ -159,12 +315,23 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
         public List<CellSave> Cells { get; set; } = new();
     }
 
+    private sealed class MarkSave
+    {
+        public ST14WarMarkKind Kind { get; set; }
+        public float FromX { get; set; }
+        public float FromY { get; set; }
+        public float ToX { get; set; }
+        public float ToY { get; set; }
+    }
+
     private sealed class CellSave
     {
         public ST14GalaxyFaction Faction { get; set; }
         public float Liberation { get; set; }
         public bool Hive { get; set; }
         public bool Base { get; set; }
+        public int BugsKilled { get; set; }
+        public int TroopersKilled { get; set; }
     }
 
     private void Load()
@@ -189,13 +356,22 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
             var target = war.FirstLanding ?? -1;
 
             if (save != null && save.Planets.TryGetValue(planet.ID, out var saved) &&
-                war.ImportState(saved.Cells.Select(c => new ST14HexCellState(c.Faction, c.Liberation, c.Hive, c.Base)).ToList()))
+                war.ImportState(saved.Cells.Select(c => new ST14HexCellState(c.Faction, c.Liberation, c.Hive, c.Base, c.BugsKilled, c.TroopersKilled)).ToList()))
             {
                 target = saved.Target >= 0 && saved.Target < war.Cells.Length && war.Cells[saved.Target].Front ? saved.Target : target;
             }
 
             _wars[planet.ID] = war;
             _targets[planet.ID] = target;
+        }
+
+        if (save == null)
+            return;
+
+        _order = Clean(save.Order);
+        foreach (var mark in save.Marks.Take(ST14GalaxyOrdersEvent.MaxMarks))
+        {
+            _marks.Add(new ST14WarMark(mark.Kind, new Vector2(mark.FromX, mark.FromY), new Vector2(mark.ToX, mark.ToY)));
         }
     }
 
@@ -213,9 +389,21 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
                     Liberation = c.Liberation,
                     Hive = c.Hive,
                     Base = c.Base,
+                    BugsKilled = c.BugsKilled,
+                    TroopersKilled = c.TroopersKilled,
                 }).ToList(),
             };
         }
+
+        save.Order = _order;
+        save.Marks = _marks.Select(m => new MarkSave
+        {
+            Kind = m.Kind,
+            FromX = m.From.X,
+            FromY = m.From.Y,
+            ToX = m.To.X,
+            ToY = m.To.Y,
+        }).ToList();
 
         try
         {

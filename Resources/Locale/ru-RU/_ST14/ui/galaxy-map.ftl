@@ -154,3 +154,22 @@ st14-war-command-no-target = У планеты нет целевого сект�
 st14-war-command-bad-target = Этот сектор нельзя сделать целью: он не на линии фронта.
 st14-war-command-done = Готово, клиенты получили новое состояние.
 st14-war-command-status = { $planet }: освобождение { $liberation }%, цель { $target } ({ $targetLiberation }%), секторов на фронте: { $front }
+
+st14-galaxy-command = Высшее командование
+st14-galaxy-command-close = Закрыть планирование
+st14-galaxy-tool-attack = Стрелка атаки
+st14-galaxy-tool-defend = Стрелка обороны
+st14-galaxy-tool-rally = Точка сбора
+st14-galaxy-tool-danger = Опасность
+st14-galaxy-tool-objective = Цель
+st14-galaxy-tool-eraser = Ластик
+st14-galaxy-tool-clear = Стереть всё
+st14-galaxy-order-title = Приказ для всех
+st14-galaxy-order-placeholder = Например: держать Клендату
+st14-galaxy-order-send = Отдать приказ
+st14-galaxy-order-line = Приказ командования: { $order }
+st14-galaxy-hint-command = Выберите инструмент слева  ·  ПКМ: назад
+st14-galaxy-hint-drawing = Стрелки тянутся мышью, метки ставятся щелчком  ·  ПКМ: убрать инструмент
+
+st14-galaxy-kills-bugs = Убито жуков: { $count }
+st14-galaxy-kills-troopers = Погибло десанта: { $count }

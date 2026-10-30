@@ -1,3 +1,4 @@
+using System.Numerics;
 using Content.Shared.Roles;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
@@ -25,8 +26,71 @@ public static class ST14GalaxyWarRules
     public static readonly ProtoId<JobPrototype> HighCommand = "ST14HighCommand";
 }
 
+/// <summary>
+/// One hex sector as the server keeps it, with the dead counted in the rounds fought there
+/// </summary>
 [Serializable, NetSerializable]
-public readonly record struct ST14HexCellState(ST14GalaxyFaction Faction, float Liberation, bool Hive, bool Base);
+public readonly record struct ST14HexCellState(
+    ST14GalaxyFaction Faction,
+    float Liberation,
+    bool Hive,
+    bool Base,
+    int BugsKilled,
+    int TroopersKilled);
+
+/// <summary>
+/// What the High Command can draw on the galaxy map. Arrows go from a point to a point, the rest are single marks
+/// </summary>
+public enum ST14WarMarkKind : byte
+{
+    Attack,
+    Defend,
+    Rally,
+    Danger,
+    Objective,
+}
+
+[Serializable, NetSerializable]
+public readonly record struct ST14WarMark(ST14WarMarkKind Kind, Vector2 From, Vector2 To)
+{
+    public bool IsArrow => Kind is ST14WarMarkKind.Attack or ST14WarMarkKind.Defend;
+}
+
+/// <summary>
+/// The plan of the High Command on the galaxy map: arrows and marks in galaxy coordinates and the standing order
+/// shown to everyone at the top of the map
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class ST14GalaxyOrdersEvent(ST14WarMark[] marks, string order, bool canCommand) : EntityEventArgs
+{
+    public const int MaxMarks = 40;
+    public const int MaxOrderLength = 140;
+
+    public readonly ST14WarMark[] Marks = marks;
+    public readonly string Order = order;
+    public readonly bool CanCommand = canCommand;
+}
+
+[Serializable, NetSerializable]
+public sealed class ST14GalaxyMarkAddEvent(ST14WarMark mark) : EntityEventArgs
+{
+    public readonly ST14WarMark Mark = mark;
+}
+
+/// <summary>
+/// Removes one mark by its index, or all of them with -1
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class ST14GalaxyMarkRemoveEvent(int index) : EntityEventArgs
+{
+    public readonly int Index = index;
+}
+
+[Serializable, NetSerializable]
+public sealed class ST14GalaxyOrderTextEvent(string order) : EntityEventArgs
+{
+    public readonly string Order = order;
+}
 
 /// <summary>
 /// Client opened the galaxy map and wants the state of the war
