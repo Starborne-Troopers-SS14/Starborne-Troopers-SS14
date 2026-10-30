@@ -94,3 +94,16 @@ st14-job-supervisors-bug = мозговому жуку
 ent-ST14SpawnPointBug = жук
 ent-ST14BugWarriorPreview = жук-воин
 ent-ST14BrainBugPreview = мозговой жук
+
+st14-alerts-bug-health-name = Панцирь
+st14-alerts-bug-health-desc = Сколько твоего тела ещё цело. Зелёный: здоров, красный: на грани смерти.
+st14-alerts-bug-dead-name = Мёртв
+st14-alerts-bug-dead-desc = Улей продолжит жить без тебя.
+
+st14-bug-lunge-hit = Жук врезается в {$target}!
+st14-bug-rend-hit = Жук кружится вихрем лезвий!
+st14-bug-rend-miss = Жук рассекает пустоту.
+ent-ST14ActionBugLunge = Рывок
+    .desc = Прыгнуть в точку. Первый десантник на пути сбит с ног и ранен.
+ent-ST14ActionBugRend = Вихрь лезвий
+    .desc = Крутануться и рассечь всех десантников вокруг. Задетые на миг теряют равновесие.
