@@ -61,7 +61,8 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
     private ST14GalaxyFaction _commandSide = ST14GalaxyFaction.Federation;
     private bool _listening;
     private bool _commandMode;
-    private string _orderDraft = string.Empty;
+    // unsent order text of each command, so switching sides never carries one side's order into the other
+    private readonly Dictionary<ST14GalaxyFaction, string> _orderDrafts = new();
 
     /// <summary>
     /// A landing was ordered: into the lobby
@@ -342,7 +343,11 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         if (on)
             BuildToolbar();
         else
+        {
+            // a closed panel forgets what was typed and not sent
+            _orderDrafts.Clear();
             SetTool(null, false);
+        }
     }
 
     private void SetTool(ST14WarMarkKind? tool, bool eraser)
@@ -351,6 +356,13 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         _map.Eraser = eraser;
         if (_commandMode)
             BuildToolbar();
+    }
+
+    private void SendOrder(ST14GalaxyFaction side, string order)
+    {
+        WarSystem?.SetOrder(side, order);
+        // sent: the order now shows on the map, the draft is done
+        _orderDrafts.Remove(side);
     }
 
     private void BuildToolbar()
@@ -410,18 +422,20 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         _toolbar.AddAt(orderTitle, Vector2.Zero, new Vector2(24, y), new Vector2(300, 26), Vector2.Zero);
         y += 30;
 
+        // the panel is rebuilt for the side picked now, the input and the button stay bound to it
+        var orderSide = _commandSide;
         var input = new LineEdit
         {
-            Text = _orderDraft,
+            Text = _orderDrafts.GetValueOrDefault(orderSide, string.Empty),
             PlaceHolder = Loc.GetString("st14-galaxy-order-placeholder"),
         };
-        input.OnTextChanged += args => _orderDraft = args.Text;
-        input.OnTextEntered += args => WarSystem?.SetOrder(_commandSide, args.Text);
+        input.OnTextChanged += args => _orderDrafts[orderSide] = args.Text;
+        input.OnTextEntered += args => SendOrder(orderSide, args.Text);
         _toolbar.AddAt(input, Vector2.Zero, new Vector2(24, y), new Vector2(292, 40), Vector2.Zero);
         y += 50;
 
         var send = new ST14HubButton(ResCache, Loc.GetString("st14-galaxy-order-send"), 16, ST14HubStyle.Blue, ST14HubStyle.BlueText);
-        send.OnPressed += _ => WarSystem?.SetOrder(_commandSide, _orderDraft);
+        send.OnPressed += _ => SendOrder(orderSide, input.Text);
         _toolbar.AddAt(send, Vector2.Zero, new Vector2(ToolbarSize.X / 2, y), new Vector2(290, 54), new Vector2(0.5f, 0));
 
         ST14HubStyle.ScaleLabels(_toolbar, Canvas.CanvasScale);
