@@ -5,6 +5,7 @@ using Content.Server.Administration.Managers;
 using Content.Server.GameTicking;
 using Content.Server.Players.JobWhitelist;
 using Content.Server.Preferences.Managers;
+using Content.Shared._ST14.CCVar;
 using Content.Shared._ST14.MainHub;
 using Content.Shared.Administration;
 using Content.Shared.GameTicking;
@@ -14,6 +15,7 @@ using Content.Shared.NPC.Prototypes;
 using Content.Shared.NPC.Systems;
 using Content.Shared.Preferences;
 using Robust.Server.Player;
+using Robust.Shared.Configuration;
 using Robust.Shared.ContentPack;
 using Robust.Shared.Enums;
 using Robust.Shared.Player;
@@ -30,6 +32,7 @@ namespace Content.Server._ST14.MainHub;
 /// </summary>
 public sealed partial class ST14GalaxyWarSystem : EntitySystem
 {
+    [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private IAdminManager _admin = default!;
     [Dependency] private IPlayerManager _player = default!;
     [Dependency] private IPrototypeManager _protoMan = default!;
@@ -114,13 +117,15 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
         if (_whitelist.IsWhitelisted(session.UserId, ST14GalaxyWarRules.HiveCommand))
             return ST14GalaxyFaction.Arachnid;
 
+        // a player without characters has no selected one, the indexer would throw
         if (!_prefs.TryGetCachedPreferences(session.UserId, out var prefs) ||
+            !prefs.Characters.TryGetValue(prefs.SelectedCharacterIndex, out var character) ||
             !_protoMan.TryIndex(ST14GalaxyWarRules.BugTheme, out var bugs))
         {
             return ST14GalaxyFaction.Federation;
         }
 
-        var high = prefs.SelectedCharacter.JobPriorities.Where(j => j.Value == JobPriority.High).Select(j => j.Key);
+        var high = character.JobPriorities.Where(j => j.Value == JobPriority.High).Select(j => j.Key);
         return high.Any(job => bugs.Jobs.Contains(job)) ? ST14GalaxyFaction.Arachnid : ST14GalaxyFaction.Federation;
     }
 
@@ -194,9 +199,7 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
         if (ev.NewMobState != MobState.Dead || _ticker.RunLevel != GameRunLevel.InRound)
             return;
 
-        // every round is fought in the target sector of the war planet for now, there is one war planet
-        var (planet, war) = _wars.FirstOrDefault();
-        if (war == null)
+        if (CurrentPlanet() is not { } planet || !_wars.TryGetValue(planet, out var war))
             return;
 
         var target = _targets.GetValueOrDefault(planet, -1);
@@ -211,6 +214,19 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
             return;
 
         _killsDirty = true;
+    }
+
+    /// <summary>
+    /// War planet of the current round: the one set in st14.war_planet, or the only war planet when there is one.
+    /// Null when it cannot be told, then deaths are not counted rather than counted on the wrong planet
+    /// </summary>
+    public string? CurrentPlanet()
+    {
+        var planet = _cfg.GetCVar(ST14CVars.WarPlanet);
+        if (!string.IsNullOrEmpty(planet))
+            return _wars.ContainsKey(planet) ? planet : null;
+
+        return _wars.Count == 1 ? _wars.Keys.First() : null;
     }
 
     public override void Update(float frameTime)
@@ -307,7 +323,7 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
     private void OrdersChanged()
     {
         Save();
-        foreach (var session in _player.Sessions.Where(s => s.Status == SessionStatus.InGame))
+        foreach (var session in Listeners())
         {
             SendOrders(session);
         }
@@ -349,11 +365,20 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
     private void Changed()
     {
         Save();
-        // players still connecting have no whitelist loaded yet, they ask for the state when they open the map
-        foreach (var session in _player.Sessions.Where(s => s.Status == SessionStatus.InGame))
+        foreach (var session in Listeners())
         {
             Send(session);
         }
+    }
+
+    /// <summary>
+    /// Players the war and the plans go out to: in the round and in the main menu, where the galaxy map is open
+    /// (the menu is the Connected status). Players still connecting have no whitelist loaded yet,
+    /// they ask for the state when they open the map
+    /// </summary>
+    private IEnumerable<ICommonSession> Listeners()
+    {
+        return _player.Sessions.Where(s => s.Status is SessionStatus.Connected or SessionStatus.InGame);
     }
 
     private void Send(ICommonSession session)

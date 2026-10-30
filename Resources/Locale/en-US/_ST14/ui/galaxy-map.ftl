@@ -187,3 +187,6 @@ st14-command-role-already = { $player } is already in the { $side }.
 st14-command-role-not-in = { $player } is not in the { $side }.
 st14-command-role-given = { $player } joined the { $side }.
 st14-command-role-taken = { $player } left the { $side }.
+
+st14-war-command-reset-failed = Could not reset the war on { $planet }: it is not a war planet.
+st14-command-role-failed = The command failed: { $error }

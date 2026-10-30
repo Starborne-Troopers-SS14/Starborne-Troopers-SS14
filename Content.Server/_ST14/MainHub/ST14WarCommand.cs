@@ -72,7 +72,12 @@ public sealed partial class ST14WarCommand : IConsoleCommand
                 return;
 
             case "reset":
-                war.Reset(planet);
+                if (!war.Reset(planet))
+                {
+                    shell.WriteError(Loc.GetString("st14-war-command-reset-failed", ("planet", planet)));
+                    return;
+                }
+
                 shell.WriteLine(Loc.GetString("st14-war-command-done"));
                 return;
 

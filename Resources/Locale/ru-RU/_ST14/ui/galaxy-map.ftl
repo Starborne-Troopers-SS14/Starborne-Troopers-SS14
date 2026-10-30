@@ -187,3 +187,6 @@ st14-command-role-already = { $player } уже в роли «{ $side }».
 st14-command-role-not-in = У { $player } нет роли «{ $side }».
 st14-command-role-given = { $player }: выдана роль «{ $side }».
 st14-command-role-taken = { $player }: роль «{ $side }» снята.
+
+st14-war-command-reset-failed = Не удалось сбросить войну на { $planet }: это не планета войны.
+st14-command-role-failed = Команда не выполнена: { $error }
