@@ -1,0 +1,72 @@
+# Roles of the hive. Put ST14SpawnPointBug and ST14SpawnPointBrainBug on the map and give the station slots.
+# The brain bug is one per round and whitelisted.
+- type: job
+  id: ST14Bug
+  name: st14-job-name-bug
+  description: st14-job-description-bug
+  playTimeTracker: JobST14Bug
+  icon: JobIconST14Bug
+  supervisors: st14-job-supervisors-bug
+  jobEntity: ST14MobBugWarrior
+  jobPreviewEntity: ST14BugWarriorPreview
+  applyTraits: false
+
+- type: job
+  id: ST14BrainBug
+  name: st14-job-name-brain-bug
+  description: st14-job-description-brain-bug
+  playTimeTracker: JobST14BrainBug
+  icon: JobIconST14BrainBug
+  supervisors: st14-job-supervisors-brain-bug
+  jobEntity: ST14MobBrainBug
+  jobPreviewEntity: ST14BrainBugPreview
+  whitelisted: true
+  applyTraits: false
+
+- type: department
+  id: ST14Hive
+  name: st14-department-hive
+  description: st14-department-hive-description
+  color: "#FF9A52"
+  roles:
+  - ST14Bug
+  - ST14BrainBug
+
+- type: playTimeTracker
+  id: JobST14Bug
+
+- type: playTimeTracker
+  id: JobST14BrainBug
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconST14Bug
+  icon:
+    sprite: /Textures/Interface/Misc/job_icons.rsi
+    state: Zombie
+  jobName: st14-job-name-bug
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconST14BrainBug
+  icon:
+    sprite: /Textures/Interface/Misc/job_icons.rsi
+    state: Zombie
+  jobName: st14-job-name-brain-bug
+
+# Lobby previews: only the look of the bug, nothing that runs
+- type: entity
+  id: ST14BugWarriorPreview
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    sprite: _ST14/Mobs/Bugs/warrior.rsi
+    state: alive
+
+- type: entity
+  id: ST14BrainBugPreview
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    sprite: _ST14/Mobs/Bugs/brain.rsi
+    state: alive

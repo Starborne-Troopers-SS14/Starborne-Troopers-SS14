@@ -1,0 +1,92 @@
+- type: entity
+  parent: BaseAction
+  id: ST14ActionHiveEvolve
+  name: Evolution
+  description: Open the evolution menu of the hive.
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    checkCanInteract: false
+    checkConsciousness: false
+  - type: Sprite
+    sprite: _ST14/Mobs/Bugs/warrior.rsi
+    layers:
+    - state: alive
+  - type: InstantAction
+    event: !type:ST14HiveEvolveActionEvent
+
+- type: entity
+  parent: BaseAction
+  id: ST14ActionEatCorpse
+  name: Eat corpse
+  description: Tear biomass out of a corpse to grow into your first caste.
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+  - type: Sprite
+    sprite: Interface/Actions/devour.rsi
+    layers:
+    - state: icon
+  - type: TargetAction
+  - type: EntityTargetAction
+    canTargetSelf: false
+    whitelist:
+      components:
+      - MobState
+    event: !type:ST14EatCorpseActionEvent
+
+- type: entity
+  parent: BaseAction
+  id: ST14ActionBrainSuck
+  name: Suck the brain
+  description: Pierce the skull of a live trooper and suck out the brain. The hive gets points, the trooper is gone for good.
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 5
+  - type: Sprite
+    sprite: _ST14/Mobs/Bugs/brain.rsi
+    layers:
+    - state: sucking
+  - type: TargetAction
+  - type: EntityTargetAction
+    canTargetSelf: false
+    whitelist:
+      components:
+      - HumanoidProfile
+    event: !type:ST14BrainSuckActionEvent
+
+- type: entity
+  parent: BaseAction
+  id: ST14ActionBugLunge
+  name: Lunge
+  description: Leap at a point. The first trooper in the way is knocked down and wounded.
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 8
+  - type: Sprite
+    sprite: _ST14/Mobs/Bugs/warrior.rsi
+    layers:
+    - state: alive
+  - type: TargetAction
+    range: 6
+    checkCanAccess: false
+  - type: WorldTargetAction
+    event: !type:ST14BugLungeActionEvent
+
+- type: entity
+  parent: BaseAction
+  id: ST14ActionBugRend
+  name: Rend
+  description: Spin and slash every trooper around you. Those caught are staggered.
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 12
+  - type: Sprite
+    sprite: _ST14/Mobs/Bugs/tiger.rsi
+    layers:
+    - state: alive
+  - type: InstantAction
+    event: !type:ST14BugRendActionEvent

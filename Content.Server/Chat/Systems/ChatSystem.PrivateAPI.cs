@@ -56,7 +56,16 @@ public sealed partial class ChatSystem
             ("fontSize", speech.FontSize),
             ("message", FormattedMessage.EscapeText(message)));
 
-        SendInVoiceRange(ChatChannel.Local, message, wrappedMessage, source, range);
+        // ST14: bugs and people hear each other as noise
+        var foreignMessage = _st14Language.Garble(source, message);
+        var foreignWrapped = Loc.GetString(speech.Bold ? "chat-manager-entity-say-bold-wrap-message" : "chat-manager-entity-say-wrap-message",
+            ("entityName", messageName),
+            ("verb", Loc.GetString(_random.Pick(speech.SpeechVerbStrings))),
+            ("fontType", speech.FontId),
+            ("fontSize", speech.FontSize),
+            ("message", FormattedMessage.EscapeText(foreignMessage)));
+
+        SendInVoiceRange(ChatChannel.Local, message, wrappedMessage, source, range, foreignMessage: foreignMessage, foreignWrapped: foreignWrapped);
 
         var ev = new EntitySpokeEvent(source, message, null, null);
         RaiseLocalEvent(source, ev, true);
@@ -139,6 +148,16 @@ public sealed partial class ChatSystem
 
             if (MessageRangeCheck(session, data, range) != MessageRangeCheckResult.Full)
                 continue; // Won't get logged to chat, and ghosts are too far away to see the pop-up, so we just won't send it to them.
+
+            // ST14: a whisper of the other kind is noise too
+            if (!_st14Language.Understands(listener, source))
+            {
+                var foreign = _st14Language.Garble(source, message);
+                _chatManager.ChatMessageToOne(ChatChannel.Whisper, foreign,
+                    Loc.GetString("chat-manager-entity-whisper-wrap-message", ("entityName", nameIdentity), ("message", FormattedMessage.EscapeText(foreign))),
+                    source, false, session.Channel);
+                continue;
+            }
 
             if (data.Range <= WhisperClearRange || data.Observer)
                 _chatManager.ChatMessageToOne(ChatChannel.Whisper, message, wrappedMessage, source, false, session.Channel);

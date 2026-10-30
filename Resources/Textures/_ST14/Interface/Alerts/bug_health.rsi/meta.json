@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "license": "All-Rights-Reserved",
+  "copyright": "(c) Starborne Troopers. All rights reserved.",
+  "size": {
+    "x": 32,
+    "y": 32
+  },
+  "states": [
+    {
+      "name": "health0"
+    },
+    {
+      "name": "health1"
+    },
+    {
+      "name": "health2"
+    },
+    {
+      "name": "health3"
+    },
+    {
+      "name": "health4"
+    },
+    {
+      "name": "dead"
+    }
+  ]
+}
