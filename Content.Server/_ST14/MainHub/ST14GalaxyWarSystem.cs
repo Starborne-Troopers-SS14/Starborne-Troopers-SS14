@@ -175,8 +175,16 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
 
     private void OnRequest(ST14GalaxyWarRequestEvent ev, EntitySessionEventArgs args)
     {
-        Send(args.SenderSession);
-        SendOrders(args.SenderSession);
+        Resend(args.SenderSession);
+    }
+
+    /// <summary>
+    /// Sends the war and the plans again, after the commands this player belongs to changed
+    /// </summary>
+    public void Resend(ICommonSession session)
+    {
+        Send(session);
+        SendOrders(session);
     }
 
     #region Kills
@@ -314,8 +322,12 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
         foreach (var (side, plan) in _plans)
         {
             var command = CanCommand(session, side);
+            // a hidden plan still goes out empty, so a player who just left a command loses its plan on the map too
             if (side != own && !command)
+            {
+                RaiseNetworkEvent(new ST14GalaxyOrdersEvent(side, Array.Empty<ST14WarMark>(), string.Empty, false), session);
                 continue;
+            }
 
             RaiseNetworkEvent(new ST14GalaxyOrdersEvent(side, plan.Marks.ToArray(), plan.Order, command), session);
         }

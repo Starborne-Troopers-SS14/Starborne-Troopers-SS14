@@ -178,3 +178,12 @@ st14-galaxy-hint-drawing = Стрелки тянутся мышью, метки 
 
 st14-galaxy-kills-bugs = Убито жуков: { $count }
 st14-galaxy-kills-troopers = Погибло десанта: { $count }
+
+st14-command-role-description = Выдаёт или снимает высшее командование Федерации или жуков.
+st14-command-role-help = st14_command give|take <ник> federation|bugs
+st14-command-role-arg-player = ник игрока
+st14-command-role-no-player = Игрок { $player } не найден.
+st14-command-role-already = { $player } уже в роли «{ $side }».
+st14-command-role-not-in = У { $player } нет роли «{ $side }».
+st14-command-role-given = { $player }: выдана роль «{ $side }».
+st14-command-role-taken = { $player }: роль «{ $side }» снята.

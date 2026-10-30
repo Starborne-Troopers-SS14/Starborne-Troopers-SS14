@@ -178,3 +178,12 @@ st14-galaxy-hint-drawing = Drag to draw arrows, click to place marks  ·  RMB: p
 
 st14-galaxy-kills-bugs = Bugs killed: { $count }
 st14-galaxy-kills-troopers = Troopers lost: { $count }
+
+st14-command-role-description = Gives or takes the High Command of the Federation or of the bugs.
+st14-command-role-help = st14_command give|take <player> federation|bugs
+st14-command-role-arg-player = player name
+st14-command-role-no-player = Player { $player } not found.
+st14-command-role-already = { $player } is already in the { $side }.
+st14-command-role-not-in = { $player } is not in the { $side }.
+st14-command-role-given = { $player } joined the { $side }.
+st14-command-role-taken = { $player } left the { $side }.
