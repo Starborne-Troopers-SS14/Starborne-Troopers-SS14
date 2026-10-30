@@ -50,6 +50,12 @@ public sealed partial class JobWhitelistManager : IPostInjectInit
 
     public async void AddWhitelist(NetUserId player, ProtoId<JobPrototype> job)
     {
+        await AddWhitelistAsync(player, job);
+    }
+
+    // ST14: awaitable, so a caller can see the database fail
+    public async Task AddWhitelistAsync(NetUserId player, ProtoId<JobPrototype> job)
+    {
         if (_whitelists.TryGetValue(player, out var whitelists))
             whitelists.Add(job);
 
@@ -91,6 +97,12 @@ public sealed partial class JobWhitelistManager : IPostInjectInit
     }
 
     public async void RemoveWhitelist(NetUserId player, ProtoId<JobPrototype> job)
+    {
+        await RemoveWhitelistAsync(player, job);
+    }
+
+    // ST14: awaitable, so a caller can see the database fail
+    public async Task RemoveWhitelistAsync(NetUserId player, ProtoId<JobPrototype> job)
     {
         _whitelists.GetValueOrDefault(player)?.Remove(job);
         await _db.RemoveJobWhitelist(player, job);

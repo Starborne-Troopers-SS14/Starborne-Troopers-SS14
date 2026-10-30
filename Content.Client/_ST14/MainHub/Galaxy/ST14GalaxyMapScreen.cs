@@ -35,6 +35,16 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
     private const float GlobeZoom = 0.8f;
     private static readonly Vector2 PanelSize = new(520, 800);
     private const float PanelPad = 30;
+
+    // action buttons of a panel sit on its bottom edge, counted up from it, so whatever is laid out above can grow without them moving
+    private const float ButtonHeight = 62;
+    private const float ButtonGap = 14;
+    private const float BottomMargin = 26;
+
+    private static float BottomButton(int row)
+    {
+        return PanelSize.Y - BottomMargin - ButtonHeight - row * (ButtonHeight + ButtonGap);
+    }
     private static readonly Vector2 ToolbarSize = new(340, 800);
 
     private readonly ST14GalaxyTextures _textures = new();
@@ -430,12 +440,21 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
             PlaceHolder = Loc.GetString("st14-galaxy-order-placeholder"),
         };
         input.OnTextChanged += args => _orderDrafts[orderSide] = args.Text;
-        input.OnTextEntered += args => SendOrder(orderSide, args.Text);
+        input.OnTextEntered += args =>
+        {
+            SendOrder(orderSide, args.Text);
+            input.Text = string.Empty;
+        };
         _toolbar.AddAt(input, Vector2.Zero, new Vector2(24, y), new Vector2(292, 40), Vector2.Zero);
         y += 50;
 
         var send = new ST14HubButton(ResCache, Loc.GetString("st14-galaxy-order-send"), 16, ST14HubStyle.Blue, ST14HubStyle.BlueText);
-        send.OnPressed += _ => SendOrder(orderSide, input.Text);
+        send.OnPressed += _ =>
+        {
+            // an emptied field cannot send the same order twice
+            SendOrder(orderSide, input.Text);
+            input.Text = string.Empty;
+        };
         _toolbar.AddAt(send, Vector2.Zero, new Vector2(ToolbarSize.X / 2, y), new Vector2(290, 54), new Vector2(0.5f, 0));
 
         ST14HubStyle.ScaleLabels(_toolbar, Canvas.CanvasScale);
@@ -627,7 +646,7 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         {
             Disabled = disabled,
         };
-        _panel.AddAt(button, Vector2.Zero, new Vector2(PanelSize.X / 2, y), new Vector2(PanelSize.X - PanelPad * 2 - 40, 62),
+        _panel.AddAt(button, Vector2.Zero, new Vector2(PanelSize.X / 2, y), new Vector2(PanelSize.X - PanelPad * 2 - 40, ButtonHeight),
             new Vector2(0.5f, 0));
         return button;
     }
@@ -729,8 +748,8 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
             if ((TargetOf(_planet) ?? war.FirstLanding) is { } landing)
             {
                 AddText(Loc.GetString("st14-galaxy-target", ("code", war.Cells[landing].Code)).ToUpperInvariant(), ST14HubFont.Medium, 16,
-                    ST14HubStyle.GoldLight, 650, 26);
-                var go = AddButton(Loc.GetString("st14-galaxy-to-landing"), 712, ST14HubStyle.Orange);
+                    ST14HubStyle.GoldLight, BottomButton(0) - ButtonHeight, 26);
+                var go = AddButton(Loc.GetString("st14-galaxy-to-landing"), BottomButton(0), ST14HubStyle.Orange);
                 go.OnPressed += _ =>
                 {
                     _surface.FaceCell(landing);
@@ -780,28 +799,29 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         if (cell.Front && (target == null || target == index))
         {
             if (target == index)
-                AddText(Loc.GetString("st14-galaxy-cell-target").ToUpperInvariant(), ST14HubFont.Medium, 16, ST14HubStyle.GoldLight, 590, 26);
+                AddText(Loc.GetString("st14-galaxy-cell-target").ToUpperInvariant(), ST14HubFont.Medium, 16, ST14HubStyle.GoldLight,
+                    BottomButton(1) - 46, 26);
 
-            var land = AddButton(Loc.GetString("st14-galaxy-land"), 712, ST14HubStyle.Orange);
+            var land = AddButton(Loc.GetString("st14-galaxy-land"), BottomButton(0), ST14HubStyle.Orange);
             land.OnPressed += _ => OnLanding?.Invoke();
         }
         else if (cell.Front && _canCommand)
         {
             var planetId = _planet.ID;
-            var order = AddButton(Loc.GetString("st14-galaxy-order"), 712, ST14HubStyle.Blue);
+            var order = AddButton(Loc.GetString("st14-galaxy-order"), BottomButton(0), ST14HubStyle.Blue);
             order.OnPressed += _ => WarSystem?.Order(planetId, index);
         }
         else if (cell.Front)
         {
-            AddButton(Loc.GetString("st14-galaxy-land-not-target"), 712, null, disabled: true);
+            AddButton(Loc.GetString("st14-galaxy-land-not-target"), BottomButton(0), null, disabled: true);
         }
         else
         {
             AddButton(Loc.GetString(cell.Faction == ST14GalaxyFaction.Federation ? "st14-galaxy-land-held" : "st14-galaxy-land-no-path"),
-                712, null, disabled: true);
+                BottomButton(0), null, disabled: true);
         }
 
-        var back = AddButton(Loc.GetString("st14-galaxy-cell-back"), 636);
+        var back = AddButton(Loc.GetString("st14-galaxy-cell-back"), BottomButton(1));
         back.OnPressed += _ =>
         {
             _surface.SelectedCell = null;

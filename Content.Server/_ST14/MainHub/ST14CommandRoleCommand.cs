@@ -79,9 +79,9 @@ public sealed partial class ST14CommandRoleCommand : IConsoleCommand
         }
 
         if (give)
-            _whitelist.AddWhitelist(data.UserId, job);
+            await _whitelist.AddWhitelistAsync(data.UserId, job);
         else
-            _whitelist.RemoveWhitelist(data.UserId, job);
+            await _whitelist.RemoveWhitelistAsync(data.UserId, job);
 
         // the player sees the planning panel appear or go without reopening the map
         if (_player.TryGetSessionById(data.UserId, out var session))

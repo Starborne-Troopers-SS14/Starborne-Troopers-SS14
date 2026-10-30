@@ -9,11 +9,14 @@ using Content.Shared._ST14.CCVar;
 using Content.Shared._ST14.MainHub;
 using Content.Shared.Administration;
 using Content.Shared.GameTicking;
+using Content.Shared.GameTicking.Events;
 using Content.Shared.Humanoid;
 using Content.Shared.Mobs;
+using Content.Shared.Mind;
 using Content.Shared.NPC.Prototypes;
 using Content.Shared.NPC.Systems;
 using Content.Shared.Preferences;
+using Content.Shared.Roles.Jobs;
 using Robust.Server.Player;
 using Robust.Shared.Configuration;
 using Robust.Shared.ContentPack;
@@ -41,6 +44,8 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
     [Dependency] private IServerPreferencesManager _prefs = default!;
     [Dependency] private GameTicker _ticker = default!;
     [Dependency] private NpcFactionSystem _faction = default!;
+    [Dependency] private SharedMindSystem _mind = default!;
+    [Dependency] private SharedJobSystem _jobs = default!;
 
     private static readonly ResPath SavePath = new("/st14_galaxy_war.json");
 
@@ -79,6 +84,8 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
         SubscribeNetworkEvent<ST14GalaxyMarkRemoveEvent>(OnMarkRemove);
         SubscribeNetworkEvent<ST14GalaxyOrderTextEvent>(OnOrderText);
         SubscribeLocalEvent<MobStateChangedEvent>(OnMobState);
+        SubscribeLocalEvent<RoundStartingEvent>(OnRoundStarting);
+        SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundCleanup);
 
         Load();
     }
@@ -194,26 +201,68 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
 
     #region Kills
 
+    /// <summary>
+    /// Sector the current round is fought in, fixed when the round starts: the High Command may pick the next target
+    /// during the round, the dead of this round still count where they fell
+    /// </summary>
+    private (string Planet, int Cell)? _battle;
+
+    private void OnRoundStarting(RoundStartingEvent ev)
+    {
+        _battle = PickBattle();
+    }
+
+    private void OnRoundCleanup(RoundRestartCleanupEvent ev)
+    {
+        _battle = null;
+    }
+
+    private (string Planet, int Cell)? PickBattle()
+    {
+        if (CurrentPlanet() is not { } planet)
+            return null;
+
+        var target = _targets.GetValueOrDefault(planet, -1);
+        return target < 0 ? null : (planet, target);
+    }
+
     private void OnMobState(MobStateChangedEvent ev)
     {
         if (ev.NewMobState != MobState.Dead || _ticker.RunLevel != GameRunLevel.InRound)
             return;
 
-        if (CurrentPlanet() is not { } planet || !_wars.TryGetValue(planet, out var war))
+        // a war loaded in the middle of a round still gets its battle sector, once
+        _battle ??= PickBattle();
+        if (_battle is not { } battle || !_wars.TryGetValue(battle.Planet, out var war) || battle.Cell >= war.Cells.Length)
             return;
 
-        var target = _targets.GetValueOrDefault(planet, -1);
-        if (target < 0)
-            return;
+        var target = battle.Cell;
 
         if (_faction.IsMemberOfAny(ev.Target, BugFactions))
             war.Cells[target].BugsKilled++;
-        else if (HasComp<HumanoidProfileComponent>(ev.Target))
+        else if (IsTrooper(ev.Target))
             war.Cells[target].TroopersKilled++;
         else
             return;
 
         _killsDirty = true;
+    }
+
+    /// <summary>
+    /// A trooper is a player in a Federation role: a humanoid with a mind that holds a job outside the bug lobby.
+    /// NPCs, ghosts and jobless humanoids do not count
+    /// </summary>
+    private bool IsTrooper(EntityUid uid)
+    {
+        if (!HasComp<HumanoidProfileComponent>(uid) ||
+            !_mind.TryGetMind(uid, out var mindId, out _) ||
+            !_jobs.MindTryGetJobId(mindId, out var job) ||
+            job is not { } jobId)
+        {
+            return false;
+        }
+
+        return !_protoMan.TryIndex(ST14GalaxyWarRules.BugTheme, out var bugs) || !bugs.Jobs.Contains(jobId);
     }
 
     /// <summary>
