@@ -79,6 +79,10 @@ public sealed partial class ST14BrainBugSystem : EntitySystem
             return;
 
         _appearance.SetData(ent, ST14BrainBugVisuals.Sucking, true);
+
+        if (ent.Comp.SuckStartSound != null)
+            _audio.PlayPvs(ent.Comp.SuckStartSound, ent);
+
         _popup.PopupEntity(Loc.GetString("st14-brain-suck-start", ("target", args.Target)), ent, PopupType.LargeCaution);
     }
 

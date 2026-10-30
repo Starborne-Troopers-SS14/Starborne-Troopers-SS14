@@ -75,3 +75,9 @@
   license: "Custom"
   copyright: "Starship Troopers game audio (Yakisoba sound set), all rights reserved by their owners. Used in Starborne Troopers with permission."
   source: "https://github.com/Starborne-Troopers-SS14/Starborne-Troopers-SS14"
+
+- files:
+  - "brain_suck_start.wav"
+  license: "Custom"
+  copyright: "(c) Starborne Troopers. All rights reserved."
+  source: "https://github.com/Starborne-Troopers-SS14/Starborne-Troopers-SS14"

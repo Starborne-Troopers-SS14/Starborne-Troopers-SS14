@@ -87,3 +87,10 @@ st14-emote-msg-bug-taunt = шипит
 st14-emote-msg-bug-alarm = стрекочет
 
 st14-ui-options-bug-footsteps-volume = Шаги жуков:
+
+st14-job-name-bug = жук
+st14-job-description-bug = Воин улья. Охоться на десантников, тащи живых к мозговому жуку и эволюционируй.
+st14-job-supervisors-bug = мозговому жуку
+ent-ST14SpawnPointBug = жук
+ent-ST14BugWarriorPreview = жук-воин
+ent-ST14BrainBugPreview = мозговой жук

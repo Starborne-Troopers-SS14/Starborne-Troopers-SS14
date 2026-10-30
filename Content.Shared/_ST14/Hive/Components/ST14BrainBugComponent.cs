@@ -37,6 +37,15 @@ public sealed partial class ST14BrainBugComponent : Component
     [DataField]
     public HashSet<ProtoId<DepartmentPrototype>> CommandDepartments = new() { "Command" };
 
+    /// <summary>
+    /// Played when the proboscis goes in, while the brain is being sucked
+    /// </summary>
+    [DataField]
+    public SoundSpecifier? SuckStartSound;
+
+    /// <summary>
+    /// Played when the brain is gone
+    /// </summary>
     [DataField]
     public SoundSpecifier? SuckSound;
 

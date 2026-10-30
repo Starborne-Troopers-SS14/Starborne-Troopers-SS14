@@ -68,3 +68,7 @@ st14-emote-msg-bug-taunt = hisses
 st14-emote-msg-bug-alarm = chitters
 
 st14-ui-options-bug-footsteps-volume = Bug footsteps:
+
+st14-job-name-bug = bug
+st14-job-description-bug = A warrior of the hive. Hunt troopers, drag the live ones to the brain bug and evolve.
+st14-job-supervisors-bug = the brain bug

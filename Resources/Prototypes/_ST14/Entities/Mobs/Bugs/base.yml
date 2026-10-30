@@ -355,6 +355,8 @@
       sand:
         collection: ST14BugTigerRunSand
   - type: ST14BrainBug
+    suckStartSound:
+      path: /Audio/_ST14/Mobs/Bugs/brain_suck_start.wav
     suckSound:
       path: /Audio/_ST14/Mobs/Bugs/brain_suck.ogg
 
@@ -396,3 +398,17 @@
     - sprite: _ST14/Mobs/Bugs/brain.rsi
       state: alive
       scale: 0.33, 0.33
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: ST14SpawnPointBug
+  name: bug
+  components:
+  - type: SpawnPoint
+    job_id: ST14Bug
+  - type: Sprite
+    layers:
+    - state: green
+    - sprite: _ST14/Mobs/Bugs/warrior.rsi
+      state: alive
+      scale: 0.5, 0.5
