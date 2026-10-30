@@ -55,3 +55,38 @@
       components:
       - HumanoidProfile
     event: !type:ST14BrainSuckActionEvent
+
+- type: entity
+  parent: BaseAction
+  id: ST14ActionBugLunge
+  name: Lunge
+  description: Leap at a point. The first trooper in the way is knocked down and wounded.
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 8
+  - type: Sprite
+    sprite: _ST14/Mobs/Bugs/warrior.rsi
+    layers:
+    - state: alive
+  - type: TargetAction
+    range: 6
+    checkCanAccess: false
+  - type: WorldTargetAction
+    event: !type:ST14BugLungeActionEvent
+
+- type: entity
+  parent: BaseAction
+  id: ST14ActionBugRend
+  name: Rend
+  description: Spin and slash every trooper around you. Those caught are staggered.
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 12
+  - type: Sprite
+    sprite: _ST14/Mobs/Bugs/tiger.rsi
+    layers:
+    - state: alive
+  - type: InstantAction
+    event: !type:ST14BugRendActionEvent

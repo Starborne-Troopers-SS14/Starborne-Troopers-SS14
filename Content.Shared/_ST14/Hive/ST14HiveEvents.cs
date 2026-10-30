@@ -21,3 +21,7 @@ public enum ST14BrainBugVisuals : byte
 {
     Sucking,
 }
+
+public sealed partial class ST14BugLungeActionEvent : WorldTargetActionEvent;
+
+public sealed partial class ST14BugRendActionEvent : InstantActionEvent;

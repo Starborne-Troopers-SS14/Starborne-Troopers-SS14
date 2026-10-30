@@ -72,3 +72,12 @@ st14-ui-options-bug-footsteps-volume = Bug footsteps:
 st14-job-name-bug = bug
 st14-job-description-bug = A warrior of the hive. Hunt troopers, drag the live ones to the brain bug and evolve.
 st14-job-supervisors-bug = the brain bug
+
+st14-alerts-bug-health-name = Carapace
+st14-alerts-bug-health-desc = How much of your body is still whole. Green is healthy, red is close to death.
+st14-alerts-bug-dead-name = Dead
+st14-alerts-bug-dead-desc = The hive will go on without you.
+
+st14-bug-lunge-hit = The bug slams into {THE($target)}!
+st14-bug-rend-hit = The bug spins in a storm of blades!
+st14-bug-rend-miss = The bug slashes the empty air.

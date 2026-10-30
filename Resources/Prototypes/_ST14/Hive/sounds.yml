@@ -344,3 +344,16 @@
   - /Audio/_ST14/Mobs/Bugs/drone_alarm_1.ogg
   - /Audio/_ST14/Mobs/Bugs/drone_alarm_2.ogg
   - /Audio/_ST14/Mobs/Bugs/drone_alarm_3.ogg
+
+- type: soundCollection
+  id: ST14BugWarriorLunge
+  files:
+  - /Audio/_ST14/Mobs/Bugs/warrior_lunge_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_lunge_2.ogg
+  - /Audio/_ST14/Mobs/Bugs/warrior_lunge_3.ogg
+
+- type: soundCollection
+  id: ST14BugTigerRend
+  files:
+  - /Audio/_ST14/Mobs/Bugs/tiger_rend_1.ogg
+  - /Audio/_ST14/Mobs/Bugs/tiger_rend_2.ogg

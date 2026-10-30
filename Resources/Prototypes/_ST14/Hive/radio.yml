@@ -1,8 +1,9 @@
-# The hive mind: every bug hears every other bug, anywhere. Say ":h" in chat.
+# The hive mind: every bug hears every other bug, anywhere. For a bug ";", ":h" and ":g" all go here,
+# so the Radio channel of the chat works without remembering a key.
 - type: radioChannel
   id: ST14Hive
   name: st14-chat-radio-hive
-  keycode: 'h'
+  keycode: 'g'
   frequency: 666.6
   color: "#FF9A52"
   longRange: true

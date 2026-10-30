@@ -5,7 +5,6 @@
   abstract: true
   parent:
   - BaseControllable
-  - MobDamageable
   - MobAtmosExposed
   - MobFlammable
   - MobNightVision
@@ -35,12 +34,47 @@
     - Xeno
   - type: Sprite
     drawdepth: Mobs
+  # what MobDamageable gives a mob, without stamina and crit: a bug fights until it drops dead
+  - type: Damageable
+  - type: Injurable
+    damageContainer: Biological
+  - type: DamageOverlay
+  - type: RadiationReceiver
+  - type: StunVisuals
   - type: MobState
     allowedStates:
     - Alive
     - Dead
-  - type: Stamina
-    baseCritThreshold: 300
+  - type: MobThresholds
+    thresholds:
+      0: Alive
+      100: Dead
+    stateAlertDict:
+      Alive: ST14BugHealth
+      Dead: ST14BugDead
+  - type: StoreDamageTakenOnMind
+  - type: HealthExaminable
+    examinableTypes:
+    - Blunt
+    - Slash
+    - Piercing
+    - Heat
+    - Shock
+    - Cold
+    - Caustic
+    - Radiation
+  - type: DamageOnHighSpeedImpact
+    damage:
+      types:
+        Blunt: 5
+    soundHit:
+      path: /Audio/Effects/hit_kick.ogg
+  - type: Pullable
+  - type: LightningTarget
+    priority: 2
+    lightningExplode: false
+  - type: GhostOnMove
+    mustBeDead: true
   - type: DamageStateVisuals
     states:
       Alive:
@@ -57,6 +91,8 @@
   - type: NoSlip
   - type: Speech
     speechVerb: LargeMob
+  # emotes from the wheel need it; a ghost role adds it, but evolved and job bugs never become ghost roles
+  - type: Emoting
   - type: TypingIndicator
     proto: alien
   - type: RangedDamageSound
@@ -250,14 +286,14 @@
   - type: MobThresholds
     thresholds:
       0: Alive
-      30: Dead
+      50: Dead
   - type: MovementSpeedModifier
     baseWalkSpeed: 3.5
     baseSprintSpeed: 4.5
   - type: MeleeWeapon
     damage:
       types:
-        Piercing: 3
+        Piercing: 5
   - type: ST14HiveMember
     caste: ST14CasteLarva
     emoteSounds: ST14BugLarva
@@ -324,14 +360,14 @@
   - type: MobThresholds
     thresholds:
       0: Alive
-      600: Dead
+      800: Dead
   - type: MovementSpeedModifier
     baseWalkSpeed: 1.5
     baseSprintSpeed: 2.5
   - type: MeleeWeapon
     damage:
       types:
-        Blunt: 10
+        Blunt: 15
   - type: ST14HiveMember
     caste: ST14CasteBrainBug
     emoteSounds: ST14BugBrain

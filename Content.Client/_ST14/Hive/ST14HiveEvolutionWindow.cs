@@ -80,6 +80,9 @@ public sealed partial class ST14HiveEvolutionWindow : DefaultWindow
     public void UpdateState(ST14HiveEvolutionState state)
     {
         _state = state;
+        if (!state.IsBrain && _page == null)
+            _page = ST14HiveTab.T1;
+
         Rebuild();
     }
 
@@ -114,19 +117,23 @@ public sealed partial class ST14HiveEvolutionWindow : DefaultWindow
         AddTabButton(state, ST14HiveTab.T2);
         AddTabButton(state, ST14HiveTab.T3);
 
-        var hive = new Button
+        // only the brain bug decides where the hive evolves, the others do not even see the upgrades
+        if (state.IsBrain)
         {
-            Text = Loc.GetString("st14-hive-ui-tab-hive"),
-            ToggleMode = true,
-            Pressed = _page == null,
-            MinWidth = 140,
-        };
-        hive.OnPressed += _ =>
-        {
-            _page = null;
-            Rebuild();
-        };
-        _tabBar.AddChild(hive);
+            var hive = new Button
+            {
+                Text = Loc.GetString("st14-hive-ui-tab-hive"),
+                ToggleMode = true,
+                Pressed = _page == null,
+                MinWidth = 140,
+            };
+            hive.OnPressed += _ =>
+            {
+                _page = null;
+                Rebuild();
+            };
+            _tabBar.AddChild(hive);
+        }
 
         AddTabButton(state, ST14HiveTab.T4);
         AddTabButton(state, ST14HiveTab.T5);
