@@ -67,7 +67,13 @@ public sealed class ST14GalaxyMapView : Control
     /// <summary>
     /// Plan of the High Command drawn over the map
     /// </summary>
-    public IReadOnlyList<ST14WarMark> Marks = Array.Empty<ST14WarMark>();
+    public IReadOnlyList<(ST14GalaxyFaction Side, int Index, ST14WarMark Mark)> Marks =
+        Array.Empty<(ST14GalaxyFaction, int, ST14WarMark)>();
+
+    /// <summary>
+    /// Side whose plan the tools draw into and erase from
+    /// </summary>
+    public ST14GalaxyFaction ToolSide = ST14GalaxyFaction.Federation;
 
     /// <summary>
     /// Drawing tool of the High Command, null when the map is only looked at
@@ -77,7 +83,7 @@ public sealed class ST14GalaxyMapView : Control
     public bool Eraser;
 
     public event Action<ST14WarMark>? OnMarkPlaced;
-    public event Action<int>? OnMarkErased;
+    public event Action<ST14GalaxyFaction, int>? OnMarkErased;
     public event Action? OnToolCancelled;
 
     private bool Drawing => Tool != null || Eraser;
@@ -497,7 +503,7 @@ public sealed class ST14GalaxyMapView : Control
             if (MarkAt(pixel) is { } index)
             {
                 Sounds.Play(ST14HubSound.Back);
-                OnMarkErased?.Invoke(index);
+                OnMarkErased?.Invoke(Marks[index].Side, Marks[index].Index);
             }
 
             return;
@@ -526,7 +532,7 @@ public sealed class ST14GalaxyMapView : Control
     }
 
     /// <summary>
-    /// Mark under the cursor for the eraser: close to the sign, or to any point along an arrow
+    /// Mark under the cursor for the eraser: close to the sign, or to any point along an arrow. Only marks of the side the tools work for
     /// </summary>
     private int? MarkAt(Vector2 pixel)
     {
@@ -534,7 +540,10 @@ public sealed class ST14GalaxyMapView : Control
         var bestDistance = 18f * MathF.Max(UiScale, 0.5f);
         for (var i = 0; i < Marks.Count; i++)
         {
-            var mark = Marks[i];
+            if (Marks[i].Side != ToolSide)
+                continue;
+
+            var mark = Marks[i].Mark;
             var steps = mark.IsArrow ? 16 : 0;
             for (var s = 0; s <= steps; s++)
             {
@@ -785,8 +794,23 @@ public sealed class ST14GalaxyMapView : Control
         _shapes.Draw(handle, Texture.White);
     }
 
-    private static Color MarkColor(ST14WarMarkKind kind)
+    /// <summary>
+    /// The bugs plan in their own colours, so a commander who sees both plans tells them apart
+    /// </summary>
+    private static Color MarkColor(ST14GalaxyFaction side, ST14WarMarkKind kind)
     {
+        if (side == ST14GalaxyFaction.Arachnid)
+        {
+            return kind switch
+            {
+                ST14WarMarkKind.Attack => Color.FromHex("#FF9A2E"),
+                ST14WarMarkKind.Defend => Color.FromHex("#B05CE0"),
+                ST14WarMarkKind.Rally => Color.FromHex("#C8E040"),
+                ST14WarMarkKind.Danger => Color.FromHex("#FF5A5A"),
+                _ => Color.FromHex("#FFC890"),
+            };
+        }
+
         return kind switch
         {
             ST14WarMarkKind.Attack => Color.FromHex("#FF4A2E"),
@@ -810,22 +834,22 @@ public sealed class ST14GalaxyMapView : Control
         var width = MathF.Max(2.5f, 5f * ui);
         var pulse = 0.5f + 0.5f * MathF.Sin(_time * 4f);
 
-        foreach (var mark in Marks)
+        foreach (var (side, _, mark) in Marks)
         {
-            AddMark(mark, width, pulse, 1f);
+            AddMark(side, mark, width, pulse, 1f);
         }
 
         // the arrow being drawn follows the cursor
         if (_pressed && _dragging && DrawsArrow && Tool is { } kind)
-            AddMark(new ST14WarMark(kind, ToGalaxy(_pressPos), ToGalaxy(_lastPos)), width, pulse, 0.55f);
+            AddMark(ToolSide, new ST14WarMark(kind, ToGalaxy(_pressPos), ToGalaxy(_lastPos)), width, pulse, 0.55f);
 
         _glow.Draw(handle, _textures.Glow);
         _shapes.Draw(handle, Texture.White);
     }
 
-    private void AddMark(ST14WarMark mark, float width, float pulse, float alpha)
+    private void AddMark(ST14GalaxyFaction side, ST14WarMark mark, float width, float pulse, float alpha)
     {
-        var color = MarkColor(mark.Kind);
+        var color = MarkColor(side, mark.Kind);
         if (mark.IsArrow)
         {
             const int segments = 20;
@@ -856,8 +880,8 @@ public sealed class ST14GalaxyMapView : Control
             }
 
             var dir = Vector2.Normalize(tip - back);
-            var side = new Vector2(-dir.Y, dir.X) * head * 0.6f;
-            _shapes.Triangle(tip, back + side, back - side, color.WithAlpha(alpha));
+            var wing = new Vector2(-dir.Y, dir.X) * head * 0.6f;
+            _shapes.Triangle(tip, back + wing, back - wing, color.WithAlpha(alpha));
             _glow.Sprite(tip, head * 1.4f, color.WithAlpha(0.35f * alpha));
             return;
         }

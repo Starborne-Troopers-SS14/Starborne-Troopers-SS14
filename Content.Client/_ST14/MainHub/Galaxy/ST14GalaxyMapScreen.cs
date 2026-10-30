@@ -35,7 +35,7 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
     private const float GlobeZoom = 0.8f;
     private static readonly Vector2 PanelSize = new(520, 800);
     private const float PanelPad = 30;
-    private static readonly Vector2 ToolbarSize = new(340, 700);
+    private static readonly Vector2 ToolbarSize = new(340, 800);
 
     private readonly ST14GalaxyTextures _textures = new();
     private readonly Dictionary<string, ST14PlanetWar> _wars = new();
@@ -47,7 +47,7 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
     private readonly Label _path;
     private readonly Label _stats;
     private readonly Label _hint;
-    private readonly Label _order;
+    private readonly Dictionary<ST14GalaxyFaction, Label> _orderLines = new();
     private readonly ST14HubButton _commandButton;
     private readonly PanelContainer _toolbarBack;
     private readonly ST14CanvasLayout _toolbar;
@@ -57,6 +57,8 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
     private ST14GalaxyPlanetPrototype? _planet;
     private float _dive;
     private bool _canCommand;
+    private readonly HashSet<ST14GalaxyFaction> _commandSides = new();
+    private ST14GalaxyFaction _commandSide = ST14GalaxyFaction.Federation;
     private bool _listening;
     private bool _commandMode;
     private string _orderDraft = string.Empty;
@@ -79,8 +81,8 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
                 GoBack();
         };
         _map.OnBackClicked += GoBack;
-        _map.OnMarkPlaced += mark => WarSystem?.AddMark(mark);
-        _map.OnMarkErased += index => WarSystem?.RemoveMark(index);
+        _map.OnMarkPlaced += mark => WarSystem?.AddMark(_commandSide, mark);
+        _map.OnMarkErased += (side, index) => WarSystem?.RemoveMark(side, index);
         _map.OnToolCancelled += () => SetTool(null, false);
         Canvas.AddFull(_map);
 
@@ -127,10 +129,17 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         }
         Canvas.AddAt(legend, new Vector2(1, 0), new Vector2(-60, 82), new Vector2(800, 28), new Vector2(1, 0));
 
-        // the standing order of the High Command, for everyone
-        _order = ST14HubStyle.Label(ResCache, string.Empty, ST14HubFont.Medium, 18, ST14HubStyle.Orange, shadow: true);
-        _order.Visible = false;
-        Canvas.AddAt(_order, Vector2.Zero, new Vector2(62, 132), new Vector2(1300, 30), Vector2.Zero);
+        // the standing orders of the commands, each side reads its own
+        var orderY = 132f;
+        foreach (var side in ST14GalaxyWarRules.Sides)
+        {
+            var line = ST14HubStyle.Label(ResCache, string.Empty, ST14HubFont.Medium, 18,
+                side == ST14GalaxyFaction.Arachnid ? ST14GalaxyColors.Arachnid : ST14HubStyle.Orange, shadow: true);
+            line.Visible = false;
+            Canvas.AddAt(line, Vector2.Zero, new Vector2(62, orderY), new Vector2(1300, 30), Vector2.Zero);
+            _orderLines[side] = line;
+            orderY += 30;
+        }
 
         // the planning table of the High Command, only for its members
         _commandButton = new ST14HubButton(ResCache, Loc.GetString("st14-galaxy-command"), 18, ST14HubStyle.Blue, ST14HubStyle.BlueText)
@@ -191,8 +200,10 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
                 _listening = true;
             }
 
-            if (system.Orders is { } orders)
+            foreach (var orders in system.Orders.Values)
+            {
                 OnOrders(orders);
+            }
 
             system.Request();
         }
@@ -270,13 +281,39 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
 
     private void OnOrders(ST14GalaxyOrdersEvent ev)
     {
-        _map.Marks = ev.Marks;
-        _order.Text = string.IsNullOrEmpty(ev.Order)
-            ? string.Empty
-            : Loc.GetString("st14-galaxy-order-line", ("order", ev.Order)).ToUpperInvariant();
-        _order.Visible = ev.Order.Length > 0;
-        _canCommand = ev.CanCommand;
+        if (ev.CanCommand)
+            _commandSides.Add(ev.Side);
+        else
+            _commandSides.Remove(ev.Side);
+
+        if (_orderLines.TryGetValue(ev.Side, out var line))
+        {
+            line.Text = ev.Order.Length == 0
+                ? string.Empty
+                : Loc.GetString($"st14-galaxy-order-line-{SideKey(ev.Side)}", ("order", ev.Order)).ToUpperInvariant();
+            line.Visible = ev.Order.Length > 0;
+        }
+
+        // every plan this player may see goes on the map, each remembers its side and its index on the server
+        var marks = new List<(ST14GalaxyFaction, int, ST14WarMark)>();
+        if (WarSystem is { } system)
+        {
+            foreach (var (side, orders) in system.Orders)
+            {
+                for (var i = 0; i < orders.Marks.Length; i++)
+                {
+                    marks.Add((side, i, orders.Marks[i]));
+                }
+            }
+        }
+
+        _map.Marks = marks;
         UpdateCommand();
+    }
+
+    private static string SideKey(ST14GalaxyFaction side)
+    {
+        return side == ST14GalaxyFaction.Arachnid ? "bugs" : "federation";
     }
 
     #region High Command
@@ -286,7 +323,11 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
     /// </summary>
     private void UpdateCommand()
     {
-        var available = _canCommand && _level is ST14GalaxyLevel.Galaxy or ST14GalaxyLevel.Sector;
+        var available = _commandSides.Count > 0 && _level is ST14GalaxyLevel.Galaxy or ST14GalaxyLevel.Sector;
+        if (_commandSides.Count > 0 && !_commandSides.Contains(_commandSide))
+            _commandSide = _commandSides.First();
+
+        _map.ToolSide = _commandSide;
         _commandButton.Visible = available;
         if (!available && _commandMode)
             SetCommandMode(false);
@@ -316,11 +357,33 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
     {
         _toolbar.RemoveAllChildren();
 
-        var title = ST14HubStyle.Label(ResCache, Loc.GetString("st14-galaxy-command").ToUpperInvariant(), ST14HubFont.Black, 20,
-            ST14HubStyle.GoldLight, shadow: true);
+        var title = ST14HubStyle.Label(ResCache, Loc.GetString($"st14-galaxy-command-{SideKey(_commandSide)}").ToUpperInvariant(),
+            ST14HubFont.Black, 18, _commandSide == ST14GalaxyFaction.Arachnid ? ST14GalaxyColors.Arachnid : ST14HubStyle.GoldLight, shadow: true);
         _toolbar.AddAt(title, Vector2.Zero, new Vector2(24, 20), new Vector2(300, 32), Vector2.Zero);
 
         var y = 66f;
+
+        // someone in both commands, like an admin, switches between the plans
+        if (_commandSides.Count > 1)
+        {
+            var x = 24f;
+            foreach (var side in ST14GalaxyWarRules.Sides)
+            {
+                var target = side;
+                var pick = new ST14HubButton(ResCache, Loc.GetString($"st14-galaxy-side-{SideKey(side)}"), 14,
+                    side == _commandSide ? ST14HubStyle.Orange : null);
+                pick.OnPressed += _ =>
+                {
+                    _commandSide = target;
+                    _map.ToolSide = target;
+                    SetTool(null, false);
+                };
+                _toolbar.AddAt(pick, Vector2.Zero, new Vector2(x, y), new Vector2(142, 46), Vector2.Zero);
+                x += 150;
+            }
+
+            y += 56;
+        }
         foreach (var kind in Enum.GetValues<ST14WarMarkKind>())
         {
             var tool = kind;
@@ -338,7 +401,7 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         y += 62;
 
         var clear = new ST14HubButton(ResCache, Loc.GetString("st14-galaxy-tool-clear"), 16, Color.FromHex("#C0503A"));
-        clear.OnPressed += _ => WarSystem?.RemoveMark(-1);
+        clear.OnPressed += _ => WarSystem?.RemoveMark(_commandSide, -1);
         _toolbar.AddAt(clear, Vector2.Zero, new Vector2(ToolbarSize.X / 2, y), new Vector2(290, 54), new Vector2(0.5f, 0));
         y += 74;
 
@@ -353,12 +416,12 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
             PlaceHolder = Loc.GetString("st14-galaxy-order-placeholder"),
         };
         input.OnTextChanged += args => _orderDraft = args.Text;
-        input.OnTextEntered += args => WarSystem?.SetOrder(args.Text);
+        input.OnTextEntered += args => WarSystem?.SetOrder(_commandSide, args.Text);
         _toolbar.AddAt(input, Vector2.Zero, new Vector2(24, y), new Vector2(292, 40), Vector2.Zero);
         y += 50;
 
         var send = new ST14HubButton(ResCache, Loc.GetString("st14-galaxy-order-send"), 16, ST14HubStyle.Blue, ST14HubStyle.BlueText);
-        send.OnPressed += _ => WarSystem?.SetOrder(_orderDraft);
+        send.OnPressed += _ => WarSystem?.SetOrder(_commandSide, _orderDraft);
         _toolbar.AddAt(send, Vector2.Zero, new Vector2(ToolbarSize.X / 2, y), new Vector2(290, 54), new Vector2(0.5f, 0));
 
         ST14HubStyle.ScaleLabels(_toolbar, Canvas.CanvasScale);

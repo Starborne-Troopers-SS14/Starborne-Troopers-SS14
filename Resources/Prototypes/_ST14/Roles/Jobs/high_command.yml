@@ -10,3 +10,16 @@
 
 - type: playTimeTracker
   id: JobST14HighCommand
+
+# Command of the bugs: plans the war of the hives on the galaxy map, like the High Command does for the Federation.
+# Give it with: jobwhitelistadd <player> ST14HiveCommand
+- type: job
+  id: ST14HiveCommand
+  name: st14-job-name-hive-command
+  description: st14-job-description-hive-command
+  playTimeTracker: JobST14HiveCommand
+  setPreference: false
+  whitelisted: true
+
+- type: playTimeTracker
+  id: JobST14HiveCommand

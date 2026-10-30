@@ -167,7 +167,12 @@ st14-galaxy-tool-clear = Стереть всё
 st14-galaxy-order-title = Приказ для всех
 st14-galaxy-order-placeholder = Например: держать Клендату
 st14-galaxy-order-send = Отдать приказ
-st14-galaxy-order-line = Приказ командования: { $order }
+st14-galaxy-order-line-federation = Приказ командования: { $order }
+st14-galaxy-order-line-bugs = Воля улья: { $order }
+st14-galaxy-command-federation = Командование Федерации
+st14-galaxy-command-bugs = Командование жуков
+st14-galaxy-side-federation = Федерация
+st14-galaxy-side-bugs = Жуки
 st14-galaxy-hint-command = Выберите инструмент слева  ·  ПКМ: назад
 st14-galaxy-hint-drawing = Стрелки тянутся мышью, метки ставятся щелчком  ·  ПКМ: убрать инструмент
 

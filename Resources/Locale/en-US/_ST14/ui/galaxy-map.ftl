@@ -167,7 +167,12 @@ st14-galaxy-tool-clear = Erase all
 st14-galaxy-order-title = Order for everyone
 st14-galaxy-order-placeholder = For example: hold Klendathu
 st14-galaxy-order-send = Give the order
-st14-galaxy-order-line = Command order: { $order }
+st14-galaxy-order-line-federation = Command order: { $order }
+st14-galaxy-order-line-bugs = Will of the hive: { $order }
+st14-galaxy-command-federation = Federation command
+st14-galaxy-command-bugs = Bug command
+st14-galaxy-side-federation = Federation
+st14-galaxy-side-bugs = Bugs
 st14-galaxy-hint-command = Pick a tool on the left  ·  RMB: back
 st14-galaxy-hint-drawing = Drag to draw arrows, click to place marks  ·  RMB: put the tool away
 

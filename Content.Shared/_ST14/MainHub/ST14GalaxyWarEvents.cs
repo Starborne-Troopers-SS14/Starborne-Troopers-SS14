@@ -24,6 +24,26 @@ public static class ST14GalaxyWarRules
     /// Whitelist of the High Command: players who pick the sector to attack
     /// </summary>
     public static readonly ProtoId<JobPrototype> HighCommand = "ST14HighCommand";
+
+    /// <summary>
+    /// Whitelist of the command of the bugs: they plan the war of the hives on the same map
+    /// </summary>
+    public static readonly ProtoId<JobPrototype> HiveCommand = "ST14HiveCommand";
+
+    /// <summary>
+    /// Lobby theme of the bugs: a player whose high priority job is in it plays for the bugs
+    /// </summary>
+    public static readonly ProtoId<ST14LobbyThemePrototype> BugTheme = "ST14Arachnids";
+
+    /// <summary>
+    /// The sides that have a command of their own
+    /// </summary>
+    public static readonly ST14GalaxyFaction[] Sides = { ST14GalaxyFaction.Federation, ST14GalaxyFaction.Arachnid };
+
+    public static ProtoId<JobPrototype> CommandOf(ST14GalaxyFaction side)
+    {
+        return side == ST14GalaxyFaction.Arachnid ? HiveCommand : HighCommand;
+    }
 }
 
 /// <summary>
@@ -57,12 +77,13 @@ public readonly record struct ST14WarMark(ST14WarMarkKind Kind, Vector2 From, Ve
 }
 
 /// <summary>
-/// The plan of the High Command on the galaxy map: arrows and marks in galaxy coordinates and the standing order
-/// shown to everyone at the top of the map
+/// The plan of the command of one side on the galaxy map: arrows and marks in galaxy coordinates and the standing order
+/// shown at the top of the map. Each side only sees its own plan
 /// </summary>
 [Serializable, NetSerializable]
-public sealed class ST14GalaxyOrdersEvent(ST14WarMark[] marks, string order, bool canCommand) : EntityEventArgs
+public sealed class ST14GalaxyOrdersEvent(ST14GalaxyFaction side, ST14WarMark[] marks, string order, bool canCommand) : EntityEventArgs
 {
+    public readonly ST14GalaxyFaction Side = side;
     public const int MaxMarks = 40;
     public const int MaxOrderLength = 140;
 
@@ -72,8 +93,9 @@ public sealed class ST14GalaxyOrdersEvent(ST14WarMark[] marks, string order, boo
 }
 
 [Serializable, NetSerializable]
-public sealed class ST14GalaxyMarkAddEvent(ST14WarMark mark) : EntityEventArgs
+public sealed class ST14GalaxyMarkAddEvent(ST14GalaxyFaction side, ST14WarMark mark) : EntityEventArgs
 {
+    public readonly ST14GalaxyFaction Side = side;
     public readonly ST14WarMark Mark = mark;
 }
 
@@ -81,14 +103,16 @@ public sealed class ST14GalaxyMarkAddEvent(ST14WarMark mark) : EntityEventArgs
 /// Removes one mark by its index, or all of them with -1
 /// </summary>
 [Serializable, NetSerializable]
-public sealed class ST14GalaxyMarkRemoveEvent(int index) : EntityEventArgs
+public sealed class ST14GalaxyMarkRemoveEvent(ST14GalaxyFaction side, int index) : EntityEventArgs
 {
+    public readonly ST14GalaxyFaction Side = side;
     public readonly int Index = index;
 }
 
 [Serializable, NetSerializable]
-public sealed class ST14GalaxyOrderTextEvent(string order) : EntityEventArgs
+public sealed class ST14GalaxyOrderTextEvent(ST14GalaxyFaction side, string order) : EntityEventArgs
 {
+    public readonly ST14GalaxyFaction Side = side;
     public readonly string Order = order;
 }
 

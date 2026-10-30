@@ -4,6 +4,7 @@ using System.Numerics;
 using Content.Server.Administration.Managers;
 using Content.Server.GameTicking;
 using Content.Server.Players.JobWhitelist;
+using Content.Server.Preferences.Managers;
 using Content.Shared._ST14.MainHub;
 using Content.Shared.Administration;
 using Content.Shared.GameTicking;
@@ -11,6 +12,7 @@ using Content.Shared.Humanoid;
 using Content.Shared.Mobs;
 using Content.Shared.NPC.Prototypes;
 using Content.Shared.NPC.Systems;
+using Content.Shared.Preferences;
 using Robust.Server.Player;
 using Robust.Shared.ContentPack;
 using Robust.Shared.Enums;
@@ -23,7 +25,7 @@ namespace Content.Server._ST14.MainHub;
 /// <summary>
 /// Keeps the war on the war planets of the galaxy map: who holds every hex sector, how far its bar is, and which sector
 /// the High Command picked for the next attack. The state is saved in the server data folder and survives restarts.
-/// It also counts the dead of the rounds fought in the target sector and keeps the plan the High Command draws on the map.
+/// It also counts the dead of the rounds fought in the target sector and keeps the plans the commands of both sides draw on the map.
 /// There is no game mode deciding the winner yet, so results come in through <see cref="ApplyResult"/> and the st14_war command
 /// </summary>
 public sealed partial class ST14GalaxyWarSystem : EntitySystem
@@ -33,6 +35,7 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
     [Dependency] private IPrototypeManager _protoMan = default!;
     [Dependency] private IResourceManager _resources = default!;
     [Dependency] private JobWhitelistManager _whitelist = default!;
+    [Dependency] private IServerPreferencesManager _prefs = default!;
     [Dependency] private GameTicker _ticker = default!;
     [Dependency] private NpcFactionSystem _faction = default!;
 
@@ -40,8 +43,16 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
 
     private readonly Dictionary<string, ST14PlanetWar> _wars = new();
     private readonly Dictionary<string, int> _targets = new();
-    private readonly List<ST14WarMark> _marks = new();
-    private string _order = string.Empty;
+    private readonly Dictionary<ST14GalaxyFaction, Plan> _plans = ST14GalaxyWarRules.Sides.ToDictionary(s => s, _ => new Plan());
+
+    /// <summary>
+    /// Arrows, marks and the standing order of one command
+    /// </summary>
+    private sealed class Plan
+    {
+        public readonly List<ST14WarMark> Marks = new();
+        public string Order = string.Empty;
+    }
 
     // deaths come in bursts, the save and the update to the clients wait a little
     private static readonly TimeSpan KillFlush = TimeSpan.FromSeconds(5);
@@ -78,12 +89,39 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
     }
 
     /// <summary>
-    /// High Command: players on the whitelist of the role, and admins so the map can be tested
+    /// The Federation High Command picks the sector of the landing
     /// </summary>
     public bool CanCommand(ICommonSession session)
     {
+        return CanCommand(session, ST14GalaxyFaction.Federation);
+    }
+
+    /// <summary>
+    /// Command of a side: players on the whitelist of its role, and admins for both sides so the map can be tested
+    /// </summary>
+    public bool CanCommand(ICommonSession session, ST14GalaxyFaction side)
+    {
         return _admin.HasAdminFlag(session, AdminFlags.Round) ||
-               _whitelist.IsWhitelisted(session.UserId, ST14GalaxyWarRules.HighCommand);
+               _whitelist.IsWhitelisted(session.UserId, ST14GalaxyWarRules.CommandOf(side));
+    }
+
+    /// <summary>
+    /// Side a player fights for: the bugs when the high priority job of the selected character belongs to the bug lobby,
+    /// the Federation otherwise. A member of a command always belongs to its side
+    /// </summary>
+    public ST14GalaxyFaction SideOf(ICommonSession session)
+    {
+        if (_whitelist.IsWhitelisted(session.UserId, ST14GalaxyWarRules.HiveCommand))
+            return ST14GalaxyFaction.Arachnid;
+
+        if (!_prefs.TryGetCachedPreferences(session.UserId, out var prefs) ||
+            !_protoMan.TryIndex(ST14GalaxyWarRules.BugTheme, out var bugs))
+        {
+            return ST14GalaxyFaction.Federation;
+        }
+
+        var high = prefs.SelectedCharacter.JobPriorities.Where(j => j.Value == JobPriority.High).Select(j => j.Key);
+        return high.Any(job => bugs.Jobs.Contains(job)) ? ST14GalaxyFaction.Arachnid : ST14GalaxyFaction.Federation;
     }
 
     /// <summary>
@@ -185,20 +223,24 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
 
     #endregion
 
-    #region High Command plan
+    #region Plans of the commands
 
-    private bool Commands(EntitySessionEventArgs args)
+    private bool Commands(EntitySessionEventArgs args, ST14GalaxyFaction side)
     {
-        if (CanCommand(args.SenderSession))
+        if (_plans.ContainsKey(side) && CanCommand(args.SenderSession, side))
             return true;
 
-        _sawmill.Warning($"{args.SenderSession.Name} tried to change the plan of the High Command without being in it");
+        _sawmill.Warning($"{args.SenderSession.Name} tried to change the plan of the {side} command without being in it");
         return false;
     }
 
     private void OnMarkAdd(ST14GalaxyMarkAddEvent ev, EntitySessionEventArgs args)
     {
-        if (!Commands(args) || _marks.Count >= ST14GalaxyOrdersEvent.MaxMarks || !Enum.IsDefined(ev.Mark.Kind))
+        if (!Commands(args, ev.Side) || !Enum.IsDefined(ev.Mark.Kind))
+            return;
+
+        var plan = _plans[ev.Side];
+        if (plan.Marks.Count >= ST14GalaxyOrdersEvent.MaxMarks)
             return;
 
         // marks stay on the table, a little past its rim at most
@@ -206,19 +248,20 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
         if (mark.IsArrow && (mark.To - mark.From).Length() < 0.01f)
             return;
 
-        _marks.Add(mark);
+        plan.Marks.Add(mark);
         OrdersChanged();
     }
 
     private void OnMarkRemove(ST14GalaxyMarkRemoveEvent ev, EntitySessionEventArgs args)
     {
-        if (!Commands(args))
+        if (!Commands(args, ev.Side))
             return;
 
+        var marks = _plans[ev.Side].Marks;
         if (ev.Index < 0)
-            _marks.Clear();
-        else if (ev.Index < _marks.Count)
-            _marks.RemoveAt(ev.Index);
+            marks.Clear();
+        else if (ev.Index < marks.Count)
+            marks.RemoveAt(ev.Index);
         else
             return;
 
@@ -227,11 +270,12 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
 
     private void OnOrderText(ST14GalaxyOrderTextEvent ev, EntitySessionEventArgs args)
     {
-        if (!Commands(args))
+        if (!Commands(args, ev.Side))
             return;
 
-        _order = Clean(ev.Order);
-        _sawmill.Info($"{args.SenderSession.Name} set the order of the High Command: {_order}");
+        var plan = _plans[ev.Side];
+        plan.Order = Clean(ev.Order);
+        _sawmill.Info($"{args.SenderSession.Name} set the order of the {ev.Side} command: {plan.Order}");
         OrdersChanged();
     }
 
@@ -261,13 +305,23 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
         }
     }
 
+    /// <summary>
+    /// A player sees the plan of their own side and of every command they belong to, never the plan of the enemy
+    /// </summary>
     private void SendOrders(ICommonSession session)
     {
-        RaiseNetworkEvent(new ST14GalaxyOrdersEvent(_marks.ToArray(), _order, CanCommand(session)), session);
+        var own = SideOf(session);
+        foreach (var (side, plan) in _plans)
+        {
+            var command = CanCommand(session, side);
+            if (side != own && !command)
+                continue;
+
+            RaiseNetworkEvent(new ST14GalaxyOrdersEvent(side, plan.Marks.ToArray(), plan.Order, command), session);
+        }
     }
 
     #endregion
-
     private void OnOrder(ST14GalaxyWarOrderEvent ev, EntitySessionEventArgs args)
     {
         if (!CanCommand(args.SenderSession))
@@ -305,6 +359,11 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
     private sealed class SaveData
     {
         public Dictionary<string, PlanetSave> Planets { get; set; } = new();
+        public Dictionary<ST14GalaxyFaction, PlanSave> Plans { get; set; } = new();
+    }
+
+    private sealed class PlanSave
+    {
         public List<MarkSave> Marks { get; set; } = new();
         public string Order { get; set; } = string.Empty;
     }
@@ -368,10 +427,16 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
         if (save == null)
             return;
 
-        _order = Clean(save.Order);
-        foreach (var mark in save.Marks.Take(ST14GalaxyOrdersEvent.MaxMarks))
+        foreach (var (side, saved) in save.Plans)
         {
-            _marks.Add(new ST14WarMark(mark.Kind, new Vector2(mark.FromX, mark.FromY), new Vector2(mark.ToX, mark.ToY)));
+            if (!_plans.TryGetValue(side, out var plan))
+                continue;
+
+            plan.Order = Clean(saved.Order);
+            foreach (var mark in saved.Marks.Take(ST14GalaxyOrdersEvent.MaxMarks))
+            {
+                plan.Marks.Add(new ST14WarMark(mark.Kind, new Vector2(mark.FromX, mark.FromY), new Vector2(mark.ToX, mark.ToY)));
+            }
         }
     }
 
@@ -395,15 +460,21 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
             };
         }
 
-        save.Order = _order;
-        save.Marks = _marks.Select(m => new MarkSave
+        foreach (var (side, plan) in _plans)
         {
-            Kind = m.Kind,
-            FromX = m.From.X,
-            FromY = m.From.Y,
-            ToX = m.To.X,
-            ToY = m.To.Y,
-        }).ToList();
+            save.Plans[side] = new PlanSave
+            {
+                Order = plan.Order,
+                Marks = plan.Marks.Select(m => new MarkSave
+                {
+                    Kind = m.Kind,
+                    FromX = m.From.X,
+                    FromY = m.From.Y,
+                    ToX = m.To.X,
+                    ToY = m.To.Y,
+                }).ToList(),
+            };
+        }
 
         try
         {
