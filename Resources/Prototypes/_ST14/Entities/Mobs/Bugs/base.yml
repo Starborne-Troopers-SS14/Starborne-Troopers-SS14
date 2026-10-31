@@ -34,6 +34,9 @@
     - Xeno
   - type: Sprite
     drawdepth: Mobs
+  # bugs sense the troopers through rock and walls
+  - type: Eye
+    drawFov: false
   # what MobDamageable gives a mob, without stamina and crit: a bug fights until it drops dead
   - type: Damageable
   - type: Injurable

@@ -13,6 +13,12 @@ public sealed partial class ST14BrainBugComponent : Component
     [DataField]
     public float SuckTime = 8f;
 
+    /// <summary>
+    /// A brain is being sucked out right now
+    /// </summary>
+    [DataField]
+    public bool Sucking;
+
     [DataField]
     public int RegularMin = 15;
 

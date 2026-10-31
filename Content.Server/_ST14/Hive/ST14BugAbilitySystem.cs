@@ -13,7 +13,7 @@ using Robust.Shared.Audio.Systems;
 namespace Content.Server._ST14.Hive;
 
 /// <summary>
-/// Combat abilities of the castes: the warrior's lunge and the tiger's rending spin
+/// Combat abilities of the castes. The warrior lives in the .Warrior part, the tiger in the .Tiger part
 /// </summary>
 public sealed partial class ST14BugAbilitySystem : EntitySystem
 {
@@ -44,6 +44,17 @@ public sealed partial class ST14BugAbilitySystem : EntitySystem
         SubscribeLocalEvent<ST14BugRendComponent, MapInitEvent>(OnRendMapInit);
         SubscribeLocalEvent<ST14BugRendComponent, ComponentShutdown>(OnRendShutdown);
         SubscribeLocalEvent<ST14BugRendComponent, ST14BugRendActionEvent>(OnRend);
+
+        InitializeWarrior();
+        InitializeTiger();
+    }
+
+    public override void Update(float frameTime)
+    {
+        base.Update(frameTime);
+
+        UpdateWarrior(frameTime);
+        UpdateTiger(frameTime);
     }
 
     #region Lunge
@@ -145,7 +156,7 @@ public sealed partial class ST14BugAbilitySystem : EntitySystem
             if (victim.Owner == ent.Owner || _hive.IsHive(victim) || _mobState.IsDead(victim))
                 continue;
 
-            _damage.TryChangeDamage(victim.Owner, ent.Comp.Damage, origin: ent);
+            _damage.TryChangeDamage(victim.Owner, ent.Comp.Damage * _shared.RageMultiplier(ent), origin: ent);
             _stun.TryAddStunDuration(victim, ent.Comp.Stun);
             hit++;
         }

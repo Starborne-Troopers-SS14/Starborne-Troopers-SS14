@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "license": "All-Rights-Reserved",
+  "copyright": "https://discord.gg/DZWBexCPFX, made from the bug sprites of the hive",
+  "size": {
+    "x": 32,
+    "y": 32
+  },
+  "states": [
+    {
+      "name": "grab"
+    },
+    {
+      "name": "barricade"
+    },
+    {
+      "name": "execute"
+    }
+  ]
+}
