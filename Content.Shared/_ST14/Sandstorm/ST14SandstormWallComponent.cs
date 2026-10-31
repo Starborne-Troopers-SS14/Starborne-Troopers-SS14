@@ -4,7 +4,7 @@ namespace Content.Shared._ST14.Sandstorm;
 
 /// <summary>
 /// A tile of the sandstorm that closes off the edge of the map. Its outer band is the fringe: troopers can wade a little
-/// way in, bullets fly through and it does not block sight. Deeper in the storm is a wall nothing gets through or breaks.
+/// way in and bullets fly through. Deeper in the storm is a wall nothing gets through or breaks.
 /// The client paints the whole storm seamlessly across tiles and fills the screen with dust near it
 /// </summary>
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
