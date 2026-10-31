@@ -84,9 +84,12 @@ st14-bug-rend-miss = The bug slashes the empty air.
 
 st14-bug-grab-invalid = Only a live trooper can be grabbed.
 st14-bug-grab-in-barricade = You are locked in the wall and cannot grab.
-st14-bug-grab-victim = Claws clamp around you! Mash the movement keys to break free!
+st14-bug-grab-victim = Claws clamp around you! Press the keys shown to break free!
 st14-bug-grab-start = The bug clamps {$target} in its claws!
-st14-bug-grab-struggle = You struggle... {$percent}%
+st14-bug-grab-miss = The prey dodged.
+st14-bug-grab-perfect = Perfect!
+st14-bug-grab-ui-title = BREAK FREE!
+st14-bug-grab-ui-hint = Press the key as the ring closes
 st14-bug-grab-broke-free = {$target} breaks free of the claws!
 st14-bug-grab-shot-off = The claws open and {$target} drops to the ground!
 st14-bug-grab-let-go = The bug lets go of {$target}.

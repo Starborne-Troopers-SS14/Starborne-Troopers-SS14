@@ -34,6 +34,8 @@
       collection: ST14BugWarriorLunge
   - type: ST14SwarmResonance
   - type: ST14HiveGrab
+    leapSound:
+      collection: ST14BugWarriorLunge
     sound:
       collection: ST14BugWarriorTaunt
     releaseSound:

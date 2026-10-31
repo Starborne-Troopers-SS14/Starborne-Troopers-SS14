@@ -7,6 +7,7 @@ using Content.Shared.Mobs;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Movement.Events;
 using Content.Shared.Pulling.Events;
+using Content.Shared.Standing;
 using Content.Shared.Movement.Systems;
 using Content.Shared.Popups;
 using Content.Shared.Weapons.Melee.Events;
@@ -44,7 +45,8 @@ public sealed partial class SharedST14BugAbilitySystem : EntitySystem
         SubscribeLocalEvent<ST14HiveGrabbedComponent, UpdateCanMoveEvent>(OnGrabbedCanMove);
         SubscribeLocalEvent<ST14HiveGrabbedComponent, ShotAttemptedEvent>(OnGrabbedShot);
         SubscribeLocalEvent<ST14HiveGrabbedComponent, AttackAttemptEvent>(OnGrabbedAttack);
-        SubscribeLocalEvent<ST14HiveGrabbedComponent, AttemptStopPullingEvent>(OnGrabbedStopPull);
+        SubscribeLocalEvent<ST14HiveGrabbedComponent, StandAttemptEvent>(OnGrabbedStand);
+        SubscribeLocalEvent<ST14HiveGrabbedComponent, BeingPulledAttemptEvent>(OnGrabbedPullAttempt);
         SubscribeLocalEvent<ST14HiveGrabbedComponent, ComponentStartup>(OnBlockMoveChanged);
         SubscribeLocalEvent<ST14HiveGrabbedComponent, ComponentShutdown>(OnBlockMoveChanged);
 
@@ -109,11 +111,16 @@ public sealed partial class SharedST14BugAbilitySystem : EntitySystem
         args.Cancel();
     }
 
-    private void OnGrabbedStopPull(Entity<ST14HiveGrabbedComponent> ent, ref AttemptStopPullingEvent args)
+    private void OnGrabbedStand(Entity<ST14HiveGrabbedComponent> ent, ref StandAttemptEvent args)
     {
-        // only the bug opens its claws, the trooper has to struggle
-        if (args.User == ent.Owner)
-            args.Cancelled = true;
+        // a trooper in the claws hangs there, it does not get up
+        if (ent.Comp.LifeStage <= ComponentLifeStage.Running)
+            args.Cancel();
+    }
+
+    private void OnGrabbedPullAttempt(Entity<ST14HiveGrabbedComponent> ent, ref BeingPulledAttemptEvent args)
+    {
+        args.Cancel();
     }
 
     #endregion
