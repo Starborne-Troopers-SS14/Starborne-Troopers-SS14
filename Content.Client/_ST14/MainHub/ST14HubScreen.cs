@@ -7,6 +7,7 @@ using Content.Client.Lobby;
 using Content.Client.Lobby.UI;
 using Content.Client.UserInterface.Systems.EscapeMenu;
 using Content.Client.UserInterface.Systems.Guidebook;
+using Content.Client._ST14.MainHub.Galaxy;
 using Content.Shared._ST14.MainHub;
 using Content.Shared.CCVar;
 using Robust.Client;
@@ -63,7 +64,7 @@ public sealed partial class ST14HubScreen : Control
     private readonly ST14SettingsScreen _settings;
     private readonly ST14HubLoadingScreen _loading;
     private readonly ST14ModeSelectScreen _modes;
-    private readonly ST14GalaxyScreen _galaxy;
+    private readonly ST14GalaxyMapScreen _galaxy;
     private readonly ST14SupportScreen _support;
 
     private int _newsIndex;
@@ -176,7 +177,7 @@ public sealed partial class ST14HubScreen : Control
         AddLinkIcon(canvas, "discord.png", CCVars.InfoLinksDiscord, new Vector2(-84.2f, -298.2f), 125, 0.53f);
         AddLinkIcon(canvas, "twitter.png", CCVars.InfoLinksWebsite, new Vector2(-84.2f, -165.8f), 103, 0.67f);
 
-        // "To battle!" opens the mode selection, then the galaxy map, Klendathu there leads to the lobby
+        // "To battle!" opens the mode selection, then the galaxy map, a landing on Klendathu there leads to the lobby
         var warButton = AddPlate(canvas, 0, "st14-hub-button-war", ST14HubStyle.Blue, ST14HubStyle.BlueText);
         warButton.OnPressed += _ => ShowOverlay(_modes!);
 
@@ -215,9 +216,9 @@ public sealed partial class ST14HubScreen : Control
         _modes.OnGalacticWar += () => ShowOverlay(_galaxy);
         AddChild(_modes);
 
-        _galaxy = new ST14GalaxyScreen();
+        _galaxy = new ST14GalaxyMapScreen();
         _galaxy.OnBack += () => ShowOverlay(_modes);
-        _galaxy.OnKlendathu += GoToWar;
+        _galaxy.OnLanding += GoToWar;
         AddChild(_galaxy);
 
         _support = new ST14SupportScreen();
@@ -267,7 +268,7 @@ public sealed partial class ST14HubScreen : Control
     }
 
     /// <summary>
-    /// Klendathu on the galaxy map: into the lobby through the loading screen, straight to the join window if the round is on
+    /// Landing on the galaxy map: into the lobby through the loading screen, straight to the join window if the round is on
     /// </summary>
     private void GoToWar()
     {

@@ -1,0 +1,245 @@
+# Planets of the galaxy map. Angles go clockwise from the right side of the map, the galaxy has a radius of 1.
+# The sectors are in galaxy_sectors.yml. Only the war planet can be opened, the others are shown for the picture of the war
+
+# Federation
+- type: st14GalaxyPlanet
+  id: ST14PlanetEarth
+  name: st14-galaxy-planet-earth
+  description: st14-galaxy-planet-earth-desc
+  sector: ST14SectorSol
+  radius: 0.5
+  angle: 120
+  faction: Federation
+  liberation: 100
+  capital: true
+  seed: 1
+  surface: ["#123A6B", "#2E6B9E", "#3F7A3A", "#8A8A5A", "#F2F2F2"]
+  atmosphere: "#8CC8FF"
+  links: [ ST14PlanetMars, ST14PlanetSirius, ST14PlanetPluto ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetMars
+  name: st14-galaxy-planet-mars
+  sector: ST14SectorPerseus
+  radius: 0.36
+  angle: 100
+  faction: Federation
+  liberation: 100
+  seed: 2
+  surface: ["#4A1E12", "#8C3B1E", "#C2643A", "#E0A07A"]
+  atmosphere: "#E0A07A"
+  links: [ ST14PlanetHydra, ST14PlanetZegema ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetSirius
+  name: st14-galaxy-planet-sirius
+  sector: ST14SectorAndromeda
+  radius: 0.34
+  angle: 135
+  faction: Federation
+  liberation: 100
+  seed: 4
+  surface: ["#1E3A2A", "#3E6B3A", "#8AA05A", "#D8D0A0"]
+  atmosphere: "#A0E0C0"
+  links: [ ST14PlanetTauCeti, ST14PlanetSanctuary ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetPluto
+  name: st14-galaxy-planet-pluto
+  sector: ST14SectorCanopus
+  radius: 0.5
+  angle: 150
+  faction: Federation
+  liberation: 100
+  seed: 3
+  surface: ["#3A3540", "#6E6672", "#B8AFA8", "#EDE6DC"]
+  atmosphere: "#B8C8E0"
+  links: [ ST14PlanetGhutana ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetHydra
+  name: st14-galaxy-planet-hydra
+  sector: ST14SectorHydra
+  radius: 0.66
+  angle: 64
+  faction: Federation
+  liberation: 100
+  seed: 9
+  surface: ["#28301A", "#4A5A2A", "#7A7A40", "#B0A070"]
+  atmosphere: "#C0D890"
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetZegema
+  name: st14-galaxy-planet-zegema
+  sector: ST14SectorZegema
+  radius: 0.66
+  angle: 38
+  faction: Federation
+  liberation: 100
+  seed: 8
+  surface: ["#103848", "#2A7A88", "#D8C890", "#F0E8C8"]
+  atmosphere: "#90E0F0"
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetTauCeti
+  name: st14-galaxy-planet-tau-ceti
+  sector: ST14SectorTauCeti
+  radius: 0.66
+  angle: 90
+  faction: Federation
+  liberation: 100
+  seed: 5
+  surface: ["#20304A", "#40607A", "#90A8B0", "#E8F0F0"]
+  atmosphere: "#C0E0FF"
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetSanctuary
+  name: st14-galaxy-planet-sanctuary
+  sector: ST14SectorSanctuary
+  radius: 0.66
+  angle: 116
+  faction: Federation
+  liberation: 100
+  seed: 6
+  surface: ["#0E3050", "#1E6080", "#4A8A50", "#A0B070", "#FFFFFF"]
+  atmosphere: "#8CD0FF"
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetHesperus
+  name: st14-galaxy-planet-hesperus
+  sector: ST14SectorHesperus
+  radius: 0.66
+  angle: 168
+  faction: Federation
+  liberation: 100
+  seed: 7
+  surface: ["#2A2A3A", "#4A5068", "#7A88A0", "#C8D0E0"]
+  atmosphere: "#A8B8FF"
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetGhutana
+  name: st14-galaxy-planet-ghutana
+  sector: ST14SectorPollux
+  radius: 0.5
+  angle: 185
+  faction: Federation
+  liberation: 100
+  seed: 10
+  surface: ["#3A2A1A", "#6A5030", "#A08860", "#E0D0B0"]
+  atmosphere: "#E0C8A0"
+  links: [ ST14PlanetHesperus, ST14PlanetTangoUrilla, ST14PlanetRigel ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetTangoUrilla
+  name: st14-galaxy-planet-tango-urilla
+  sector: ST14SectorTangoUrilla
+  radius: 0.66
+  angle: 193
+  faction: Federation
+  liberation: 100
+  seed: 11
+  surface: ["#202818", "#3A4A28", "#6A6A3A", "#A8A070"]
+  atmosphere: "#B0C880"
+  links: [ ST14PlanetChimera ]
+
+# Arachnid space
+- type: st14GalaxyPlanet
+  id: ST14PlanetRigel
+  name: st14-galaxy-planet-rigel
+  sector: ST14SectorRigel
+  radius: 0.5
+  angle: 220
+  faction: Arachnid
+  seed: 12
+  surface: ["#301010", "#602418", "#904A28", "#C08050"]
+  atmosphere: "#E08060"
+  links: [ ST14PlanetVaruna ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetVaruna
+  name: st14-galaxy-planet-varuna
+  sector: ST14SectorAntares
+  radius: 0.5
+  angle: 285
+  faction: Arachnid
+  seed: 13
+  surface: ["#182838", "#2A4A60", "#5A7A80", "#B0C0C0"]
+  atmosphere: "#80C0E0"
+  links: [ ST14PlanetKlendathu ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetChimera
+  name: st14-galaxy-planet-antares
+  sector: ST14SectorChimera
+  radius: 0.66
+  angle: 220
+  faction: Arachnid
+  seed: 14
+  surface: ["#381818", "#6A2A20", "#A05A3A", "#D8A070"]
+  atmosphere: "#F0A080"
+  links: [ ST14PlanetGehenna ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetGehenna
+  name: st14-galaxy-planet-gehenna
+  sector: ST14SectorGehenna
+  radius: 0.82
+  angle: 245
+  faction: Arachnid
+  seed: 15
+  surface: ["#200808", "#501810", "#A03010", "#F08020"]
+  atmosphere: "#FF7030"
+  links: [ ST14PlanetKlendathu ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetKlendathu
+  name: st14-galaxy-planet-klendathu
+  description: st14-galaxy-planet-klendathu-desc
+  sector: ST14SectorKlendathu
+  radius: 0.82
+  angle: 266
+  faction: Arachnid
+  liberation: 0
+  war: true
+  hexFrequency: 5
+  landingZones: 1
+  seed: 16
+  surfaceTexture: /Textures/_ST14/Interface/Hub/War/klendathu_surface.png
+  surface: ["#2A140C", "#5A2E18", "#8C5230", "#C08A58", "#E8C898"]
+  atmosphere: "#E8A070"
+  links: [ ST14PlanetQuarantine ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetQuarantine
+  name: st14-galaxy-planet-quarantine
+  sector: ST14SectorQuarantine
+  radius: 0.82
+  angle: 288
+  faction: Arachnid
+  seed: 17
+  surface: ["#181010", "#3A2018", "#6A4028", "#9A7050"]
+  atmosphere: "#C08060"
+  links: [ ST14PlanetPlanetP ]
+
+- type: st14GalaxyPlanet
+  id: ST14PlanetPlanetP
+  name: st14-galaxy-planet-planet-p
+  sector: ST14SectorPlanetP
+  radius: 0.82
+  angle: 309
+  faction: Arachnid
+  seed: 18
+  surface: ["#101418", "#283038", "#505860", "#9098A0"]
+  atmosphere: "#90A0B0"
+
+# Background of the galaxy map: only the dark backdrop, the galaxy itself is drawn by the map
+- type: st14HubScene
+  id: ST14HubGalaxyMap
+  layers:
+  - id: background
+    texture: /Textures/_ST14/Interface/Hub/War/galaxy_background.png
+    anchorMin: 0, 0
+    anchorMax: 1, 1
+    position: 0, 0
+    size: 0, 0
+    pivot: 0.5, 0.5

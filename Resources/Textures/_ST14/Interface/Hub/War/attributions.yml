@@ -38,3 +38,8 @@
   license: "Custom"
   copyright: "Starship Troopers: Terran Command, © The Artistocrats / Slitherine / Sony Pictures. Used with permission."
   source: "https://store.steampowered.com/app/1202130/"
+
+- files: [ "klendathu_surface.png" ]
+  license: "Custom"
+  copyright: "(c) Starborne Troopers, Denlero. All rights reserved."
+  source: "https://github.com/Starborne-Troopers-SS14/Starborne-Troopers-SS14"
