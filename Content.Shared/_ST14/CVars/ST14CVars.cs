@@ -66,4 +66,11 @@ public static partial class ST14CVars
     /// </summary>
     public static readonly CVarDef<string> WarPlanet =
         CVarDef.Create("st14.war_planet", string.Empty, CVar.SERVERONLY | CVar.ARCHIVE);
+
+    /// <summary>
+    /// Atmospherics: gas simulation on the grids, breathing and pressure damage. Off on Starborne Troopers servers,
+    /// planets need none of it and it costs a lot of server time. Integration tests turn it on for the stock atmos tests
+    /// </summary>
+    public static readonly CVarDef<bool> Atmospherics =
+        CVarDef.Create("st14.atmospherics", false, CVar.SERVERONLY | CVar.ARCHIVE);
 }
