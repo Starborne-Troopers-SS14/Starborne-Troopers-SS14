@@ -43,8 +43,9 @@ public sealed partial class ST14SandstormSystem : EntitySystem
 
         SubscribeLocalEvent<ST14SandstormWallComponent, AfterAutoHandleStateEvent>(OnHandleState);
 
-        _overlay = new ST14SandstormOverlay(_sprite.Frame0(
-            new SpriteSpecifier.Rsi(new ResPath("/Textures/_ST14/Effects/Sandstorm/screen.rsi"), "screen")));
+        // the texture is loaded on the first draw: a client without graphics, like the test one, never loads it
+        _overlay = new ST14SandstormOverlay(_sprite,
+            new SpriteSpecifier.Rsi(new ResPath("/Textures/_ST14/Effects/Sandstorm/screen.rsi"), "screen"));
         _overlays.AddOverlay(_overlay);
     }
 
@@ -166,7 +167,9 @@ public sealed class ST14SandstormOverlay : Overlay
 {
     public override OverlaySpace Space => OverlaySpace.ScreenSpace;
 
-    private readonly Texture _texture;
+    private readonly SpriteSystem _sprite;
+    private readonly SpriteSpecifier _textureSpec;
+    private Texture? _texture;
     private float _strength;
     private float _time;
 
@@ -175,9 +178,10 @@ public sealed class ST14SandstormOverlay : Overlay
     /// </summary>
     public float Target;
 
-    public ST14SandstormOverlay(Texture texture)
+    public ST14SandstormOverlay(SpriteSystem sprite, SpriteSpecifier texture)
     {
-        _texture = texture;
+        _sprite = sprite;
+        _textureSpec = texture;
         ZIndex = 5;
     }
 
@@ -195,14 +199,15 @@ public sealed class ST14SandstormOverlay : Overlay
 
     protected override void Draw(in OverlayDrawArgs args)
     {
+        _texture ??= _sprite.Frame0(_textureSpec);
         var handle = args.ScreenHandle;
         var bounds = args.ViewportBounds;
 
-        DrawLayer(handle, bounds, 512f, new Vector2(90f, 12f), _strength * 0.7f);
-        DrawLayer(handle, bounds, 320f, new Vector2(170f, -20f), _strength * 0.5f);
+        DrawLayer(handle, _texture, bounds, 512f, new Vector2(90f, 12f), _strength * 0.7f);
+        DrawLayer(handle, _texture, bounds, 320f, new Vector2(170f, -20f), _strength * 0.5f);
     }
 
-    private void DrawLayer(DrawingHandleScreen handle, UIBox2i bounds, float size, Vector2 velocity, float alpha)
+    private void DrawLayer(DrawingHandleScreen handle, Texture texture, UIBox2i bounds, float size, Vector2 velocity, float alpha)
     {
         var offset = new Vector2(Repeat(_time * velocity.X, size), Repeat(_time * velocity.Y, size));
         var color = Color.White.WithAlpha(Math.Clamp(alpha, 0f, 1f));
@@ -211,7 +216,7 @@ public sealed class ST14SandstormOverlay : Overlay
         {
             for (var y = bounds.Top - size + offset.Y; y < bounds.Bottom; y += size)
             {
-                handle.DrawTextureRect(_texture, UIBox2.FromDimensions(new Vector2(x, y), new Vector2(size, size)), color);
+                handle.DrawTextureRect(texture, UIBox2.FromDimensions(new Vector2(x, y), new Vector2(size, size)), color);
             }
         }
     }
