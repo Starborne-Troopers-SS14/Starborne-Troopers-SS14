@@ -1,0 +1,50 @@
+# The edge of the map: a standing wall of sandstorm. Draw it with the mapping tools along the border of a map.
+# Nothing walks, flies, shoots or sees through it, nothing damages it, and it has no way to be unanchored or deconstructed.
+- type: entity
+  id: ST14SandstormWall
+  name: sandstorm
+  description: A howling wall of sand that never settles. Whatever goes in does not come out.
+  placement:
+    mode: SnapgridCenter
+    snap:
+    - Wall
+  components:
+  - type: ST14SandstormWall
+  - type: Transform
+    anchored: true
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,-0.5,0.5,0.5"
+        density: 1000
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+  - type: Occluder
+  - type: Sprite
+    sprite: _ST14/Effects/Sandstorm/storm.rsi
+    drawdepth: Overdoors
+    noRot: true
+    # 64 px pieces drawn on one tile, the haze is twice that and spills half a tile out
+    scale: 0.5, 0.5
+    layers:
+    - map: [ "body" ]
+      state: body_0_0
+    - map: [ "streaks" ]
+      state: streaks_0_0
+    - map: [ "haze" ]
+      sprite: _ST14/Effects/Sandstorm/haze.rsi
+      state: haze
+  - type: AmbientSound
+    volume: -4
+    range: 9
+    sound:
+      path: /Audio/_ST14/Ambience/sandstorm_wind.ogg
+  - type: Tag
+    tags:
+    - ST14Sandstorm
