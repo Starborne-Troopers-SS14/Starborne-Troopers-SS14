@@ -7,3 +7,8 @@
   id: ST14HubGlitch
   kind: source
   path: "/Textures/_ST14/Shaders/hub_glitch.swsl"
+
+- type: shader
+  id: ST14HiveShimmer
+  kind: source
+  path: "/Textures/_ST14/Shaders/hive_shimmer.swsl"

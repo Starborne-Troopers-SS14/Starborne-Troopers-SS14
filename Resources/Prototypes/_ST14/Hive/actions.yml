@@ -90,3 +90,63 @@
     - state: alive
   - type: InstantAction
     event: !type:ST14BugRendActionEvent
+
+- type: entity
+  parent: BaseAction
+  id: ST14ActionBugGrab
+  name: Grip of the hive
+  description: Clamp a trooper in your claws and drag it to the brain bug, who starts sucking right away. Press again to let go.
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 20
+  - type: Sprite
+    sprite: _ST14/Interface/Actions/bug_abilities.rsi
+    layers:
+    - state: grab
+  - type: TargetAction
+    range: 1.5
+  - type: EntityTargetAction
+    canTargetSelf: false
+    whitelist:
+      components:
+      - MobState
+    event: !type:ST14BugGrabActionEvent
+
+- type: entity
+  parent: BaseAction
+  id: ST14ActionBugBarricade
+  name: Living barricade
+  description: Lock bodies with up to three warriors around you into a wall. Bullets break on it and the wounds are shared, but nobody in it can walk. Press again to break the wall.
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+  - type: Sprite
+    sprite: _ST14/Interface/Actions/bug_abilities.rsi
+    layers:
+    - state: barricade
+  - type: InstantAction
+    event: !type:ST14BugBarricadeActionEvent
+
+- type: entity
+  parent: BaseAction
+  id: ST14ActionBugExecute
+  name: Execution
+  description: Leap at a trooper. A badly wounded one dies on the spot, heals you and lets you leap again at once. A healthy one only takes a blow.
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 15
+  - type: Sprite
+    sprite: _ST14/Interface/Actions/bug_abilities.rsi
+    layers:
+    - state: execute
+  - type: TargetAction
+    range: 6
+    checkCanAccess: false
+  - type: EntityTargetAction
+    canTargetSelf: false
+    whitelist:
+      components:
+      - MobState
+    event: !type:ST14BugExecuteActionEvent

@@ -32,6 +32,17 @@
         Slash: 10
     sound:
       collection: ST14BugWarriorLunge
+  - type: ST14SwarmResonance
+  - type: ST14HiveGrab
+    sound:
+      collection: ST14BugWarriorTaunt
+    releaseSound:
+      collection: ST14BugWarriorAlarm
+  - type: ST14LivingBarricade
+    sound:
+      collection: ST14BugWarriorRoar
+    breakSound:
+      collection: ST14BugWarriorAlarm
   - type: ST14HiveMember
     caste: ST14CasteWarrior
 
@@ -68,6 +79,24 @@
         Slash: 22
     sound:
       collection: ST14BugTigerRend
+  - type: ST14BugExecute
+    healthThreshold: 0.3
+    heal: 50
+    damage:
+      types:
+        Slash: 24
+    leapSound:
+      collection: ST14BugTigerRoar
+    killSound:
+      collection: ST14BugTigerAttack
+      params:
+        volume: 4
+  - type: ST14BloodScent
+  - type: ST14LastRush
+    sound:
+      collection: ST14BugTigerScream
+      params:
+        volume: 6
   - type: ST14HiveMember
     caste: ST14CasteTiger
 
@@ -79,3 +108,24 @@
     Blunt: 0.9
     Slash: 0.9
     Heat: 1.2
+
+# Shield around a warrior locked in a living barricade: catches bullets and lasers, lets bodies through.
+# The bullets hurt the wall instead of the shield
+- type: entity
+  id: ST14LivingBarricadeShield
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      shield:
+        shape:
+          !type:PhysShapeCircle
+          radius: 0.75
+        hard: true
+        layer:
+        - Opaque
+        - BulletImpassable
+  - type: Damageable
+  - type: ST14BarricadeShield

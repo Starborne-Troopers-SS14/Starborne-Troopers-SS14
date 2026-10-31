@@ -63,11 +63,18 @@ public sealed partial class ST14BrainBugSystem : EntitySystem
             return;
 
         args.Handled = true;
+        TryStartSuck(ent, args.Target, true);
+    }
 
-        if (!CanSuck(ent, args.Target, true))
-            return;
+    /// <summary>
+    /// Starts sucking the brain of a trooper next to the brain bug
+    /// </summary>
+    public bool TryStartSuck(Entity<ST14BrainBugComponent> ent, EntityUid target, bool popup)
+    {
+        if (ent.Comp.Sucking || _mobState.IsDead(ent) || !CanSuck(ent, target, popup))
+            return false;
 
-        var doAfter = new DoAfterArgs(EntityManager, ent, ent.Comp.SuckTime, new ST14BrainSuckDoAfterEvent(), ent, target: args.Target)
+        var doAfter = new DoAfterArgs(EntityManager, ent, ent.Comp.SuckTime, new ST14BrainSuckDoAfterEvent(), ent, target: target)
         {
             BreakOnMove = true,
             BreakOnDamage = true,
@@ -76,14 +83,16 @@ public sealed partial class ST14BrainBugSystem : EntitySystem
         };
 
         if (!_doAfter.TryStartDoAfter(doAfter))
-            return;
+            return false;
 
+        ent.Comp.Sucking = true;
         _appearance.SetData(ent, ST14BrainBugVisuals.Sucking, true);
 
         if (ent.Comp.SuckStartSound != null)
             _audio.PlayPvs(ent.Comp.SuckStartSound, ent);
 
-        _popup.PopupEntity(Loc.GetString("st14-brain-suck-start", ("target", args.Target)), ent, PopupType.LargeCaution);
+        _popup.PopupEntity(Loc.GetString("st14-brain-suck-start", ("target", target)), ent, PopupType.LargeCaution);
+        return true;
     }
 
     private bool CanSuck(Entity<ST14BrainBugComponent> ent, EntityUid target, bool popup)
@@ -107,6 +116,7 @@ public sealed partial class ST14BrainBugSystem : EntitySystem
 
     private void OnSuckDoAfter(Entity<ST14BrainBugComponent> ent, ref ST14BrainSuckDoAfterEvent args)
     {
+        ent.Comp.Sucking = false;
         _appearance.SetData(ent, ST14BrainBugVisuals.Sucking, false);
 
         if (args.Handled || args.Cancelled || args.Target is not { } target || !CanSuck(ent, target, false))
