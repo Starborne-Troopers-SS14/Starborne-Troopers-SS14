@@ -39,4 +39,10 @@ public sealed partial class ST14SandstormWallComponent : Component
     /// </summary>
     [ViewVariables]
     public bool Computed;
+
+    /// <summary>
+    /// Client side: the menu icon sprite is hidden, the storm in the world is painted by an overlay
+    /// </summary>
+    [ViewVariables]
+    public bool SpriteHidden;
 }

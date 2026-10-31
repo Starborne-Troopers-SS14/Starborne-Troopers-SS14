@@ -54,6 +54,17 @@ public sealed partial class ST14SandstormSystem : EntitySystem
     {
         base.FrameUpdate(frameTime);
 
+        // the sprite is only an icon for menus, in the world the overlay paints the storm
+        var query = EntityQueryEnumerator<ST14SandstormWallComponent, SpriteComponent, TransformComponent>();
+        while (query.MoveNext(out var uid, out var wall, out var sprite, out var xform))
+        {
+            if (wall.SpriteHidden || xform.GridUid == null)
+                continue;
+
+            _sprite.SetVisible((uid, sprite), false);
+            wall.SpriteHidden = true;
+        }
+
         _screenOverlay.Target = HazeTarget();
         _screenOverlay.Advance(frameTime);
         _wallOverlay.Advance(frameTime);
@@ -91,7 +102,9 @@ public sealed partial class ST14SandstormSystem : EntitySystem
 /// </summary>
 public sealed class ST14SandstormWallOverlay : Overlay
 {
-    public override OverlaySpace Space => OverlaySpace.WorldSpaceBelowFOV;
+    // above the field of view: the storm is a landmark seen from afar, and the solid wall tiles occlude, which would
+    // otherwise hide the very tiles the storm is made of
+    public override OverlaySpace Space => OverlaySpace.WorldSpace;
 
     private const string TexturePath = "/Textures/_ST14/Effects/Sandstorm/";
 

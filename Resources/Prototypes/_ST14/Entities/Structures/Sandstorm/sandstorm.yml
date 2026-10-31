@@ -31,14 +31,12 @@
   - type: SpeedModifierContacts
     walkSpeedModifier: 0.35
     sprintSpeedModifier: 0.35
-  # the storm is painted by a client overlay across all tiles at once, the sprite only shows it in menus
+  # the storm is painted by a client overlay across all tiles at once; this sprite is the icon in menus,
+  # the client hides it as soon as the tile is on a grid
   - type: Sprite
     sprite: _ST14/Effects/Sandstorm/screen.rsi
     state: screen
-    visible: false
-  - type: Icon
-    sprite: _ST14/Effects/Sandstorm/screen.rsi
-    state: screen
+    scale: 0.125, 0.125
   - type: AmbientSound
     volume: -4
     range: 9
