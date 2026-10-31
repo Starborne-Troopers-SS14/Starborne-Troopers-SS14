@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "license": "All-Rights-Reserved",
+  "copyright": "(c) Starborne Troopers. All rights reserved.",
+  "size": {
+    "x": 128,
+    "y": 128
+  },
+  "states": [
+    {
+      "name": "haze",
+      "delays": [
+        [
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12,
+          0.12
+        ]
+      ]
+    }
+  ]
+}
