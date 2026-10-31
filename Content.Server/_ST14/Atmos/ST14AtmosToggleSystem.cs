@@ -2,6 +2,7 @@ using Content.Server.Atmos.Components;
 using Content.Server.Atmos.EntitySystems;
 using Content.Server.Body.Components;
 using Content.Shared._ST14.CCVar;
+using Content.Shared.Alert;
 using Content.Shared.Atmos.Components;
 using Robust.Shared.Configuration;
 
@@ -16,6 +17,7 @@ public sealed partial class ST14AtmosToggleSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private AtmosphereSystem _atmos = default!;
+    [Dependency] private AlertsSystem _alerts = default!;
 
     // grids and breathers keep spawning, they are switched off in batches instead of one by one
     private static readonly TimeSpan SweepInterval = TimeSpan.FromSeconds(2);
@@ -78,8 +80,10 @@ public sealed partial class ST14AtmosToggleSystem : EntitySystem
         }
 
         var barotrauma = EntityQueryEnumerator<BarotraumaComponent>();
-        while (barotrauma.MoveNext(out var uid, out _))
+        while (barotrauma.MoveNext(out var uid, out var comp))
         {
+            // the pressure icon stays on screen when the component goes, take it down too
+            _alerts.ClearAlertCategory(uid, comp.PressureAlertCategory);
             RemCompDeferred<BarotraumaComponent>(uid);
         }
     }
