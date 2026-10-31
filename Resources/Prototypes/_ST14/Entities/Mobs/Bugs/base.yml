@@ -1,0 +1,453 @@
+# The bugs of the hive. Everything a bug is made of lives here; the castes in castes.yml only change looks and numbers.
+
+# Body of every bug, including the queen, who cannot move at all. No AI: bugs are players, the queen just lays.
+- type: entity
+  abstract: true
+  parent:
+  - BaseControllable
+  - MobAtmosExposed
+  - MobFlammable
+  - MobNightVision
+  - BaseMobDestructible
+  id: ST14MobBugCoreBase
+  components:
+  - type: MobCollision
+  - type: Physics
+    bodyType: KinematicController
+  - type: MovementSpeedModifier
+  - type: LagCompensation
+  - type: CEZPhysics
+  - type: Reactive
+    groups:
+      Flammable: [Touch]
+      Extinguish: [Touch]
+  - type: StatusEffects
+    allowed:
+    - Electrocution
+    - Flashed
+  - type: StandingState
+  - type: Blindable
+  - type: Climbing
+  - type: Insulated
+  - type: NpcFactionMember
+    factions:
+    - Xeno
+  - type: Sprite
+    drawdepth: Mobs
+  # bugs sense the troopers through rock and walls
+  - type: Eye
+    drawFov: false
+  # what MobDamageable gives a mob, without stamina and crit: a bug fights until it drops dead
+  - type: Damageable
+  - type: Injurable
+    damageContainer: Biological
+  - type: DamageOverlay
+  - type: RadiationReceiver
+  - type: StunVisuals
+  - type: MobState
+    allowedStates:
+    - Alive
+    - Dead
+  - type: MobThresholds
+    thresholds:
+      0: Alive
+      100: Dead
+    stateAlertDict:
+      Alive: ST14BugHealth
+      Dead: ST14BugDead
+  - type: StoreDamageTakenOnMind
+  - type: HealthExaminable
+    examinableTypes:
+    - Blunt
+    - Slash
+    - Piercing
+    - Heat
+    - Shock
+    - Cold
+    - Caustic
+    - Radiation
+  - type: DamageOnHighSpeedImpact
+    damage:
+      types:
+        Blunt: 5
+    soundHit:
+      path: /Audio/Effects/hit_kick.ogg
+  - type: Pullable
+  - type: LightningTarget
+    priority: 2
+    lightningExplode: false
+  - type: GhostOnMove
+    mustBeDead: true
+  - type: DamageStateVisuals
+    states:
+      Alive:
+        Base: alive
+      Dead:
+        Base: dead
+  - type: TemperatureDamage
+    heatDamageThreshold: 360
+    coldDamageThreshold: -150
+  - type: Tag
+    tags:
+    - CannotSuicide
+    - DoorBumpOpener
+  - type: NoSlip
+  - type: Speech
+    speechVerb: LargeMob
+  # emotes from the wheel need it; a ghost role adds it, but evolved and job bugs never become ghost roles
+  - type: Emoting
+  - type: TypingIndicator
+    proto: alien
+  - type: RangedDamageSound
+    soundGroups:
+      Brute:
+        collection: ST14BugCarapaceHit
+
+# A bug a player can be: moves, bites, drags troopers and evolves. Only the larva eats corpses.
+- type: entity
+  abstract: true
+  parent: ST14MobBugCoreBase
+  id: ST14MobBugBase
+  components:
+  - type: CombatMode
+  - type: InputMover
+  - type: MobMover
+  - type: Puller
+    needsHands: false
+  - type: MeleeWeapon
+    altDisarm: false
+    angle: 0
+    animation: WeaponArcBite
+    soundSwing:
+      collection: ST14BugSwing
+    soundHit:
+      collection: ST14BugWarriorAttack
+    damage:
+      types:
+        Slash: 8
+  - type: IntrinsicRadioReceiver
+  - type: IntrinsicRadioTransmitter
+    channels:
+    - ST14Hive
+  - type: ActiveRadio
+    channels:
+    - ST14Hive
+  - type: ST14BugBlood
+  - type: ST14HiveMember
+  - type: UserInterface
+    interfaces:
+      enum.ST14HiveEvolutionUiKey.Key:
+        type: ST14HiveEvolutionBoundUserInterface
+
+# Looks of the warrior line. Damage overlays need damageDivisor set to a fifth of the bug's health.
+- type: entity
+  abstract: true
+  id: ST14MobBugWarriorLook
+  components:
+  - type: Sprite
+    sprite: _ST14/Mobs/Bugs/warrior.rsi
+    layers:
+    - map: [ "enum.DamageStateVisualLayers.Base" ]
+      state: alive
+  - type: DamageVisuals
+    thresholds: [ 1, 2, 3, 4 ]
+    damageDivisor: 20
+    trackAllDamage: true
+    damageOverlay:
+      sprite: _ST14/Mobs/Bugs/warrior.rsi
+  - type: ST14HiveMember
+    emoteSounds: ST14BugWarrior
+    deathSound:
+      collection: ST14BugWarriorDeath
+    painSound:
+      collection: ST14BugWarriorPain
+  - type: ST14BugFootsteps
+    walk:
+      concrete:
+        collection: ST14BugWarriorWalkConcrete
+      metal:
+        collection: ST14BugWarriorWalkMetal
+      metal_thin:
+        collection: ST14BugWarriorWalkMetalThin
+      sand:
+        collection: ST14BugWarriorWalkSand
+      gore:
+        collection: ST14BugWarriorWalkGore
+    run:
+      concrete:
+        collection: ST14BugWarriorRunConcrete
+      metal:
+        collection: ST14BugWarriorRunMetal
+      metal_thin:
+        collection: ST14BugWarriorRunMetalThin
+      sand:
+        collection: ST14BugWarriorRunSand
+      gore:
+        collection: ST14BugWarriorRunGore
+
+- type: entity
+  abstract: true
+  id: ST14MobBugTigerLook
+  components:
+  - type: Sprite
+    sprite: _ST14/Mobs/Bugs/tiger.rsi
+    layers:
+    - map: [ "enum.DamageStateVisualLayers.Base" ]
+      state: alive
+  - type: DamageVisuals
+    thresholds: [ 1, 2, 3, 4 ]
+    damageDivisor: 40
+    trackAllDamage: true
+    damageOverlay:
+      sprite: _ST14/Mobs/Bugs/tiger.rsi
+  - type: ST14HiveMember
+    emoteSounds: ST14BugTiger
+    deathSound:
+      collection: ST14BugTigerDeath
+    painSound:
+      collection: ST14BugTigerPain
+  - type: ST14BugFootsteps
+    walk:
+      concrete:
+        collection: ST14BugTigerWalkConcrete
+      metal:
+        collection: ST14BugTigerWalkMetal
+      metal_thin:
+        collection: ST14BugTigerWalkMetalThin
+      sand:
+        collection: ST14BugTigerWalkSand
+      gore:
+        collection: ST14BugTigerWalkGore
+    run:
+      concrete:
+        collection: ST14BugTigerRunConcrete
+      metal:
+        collection: ST14BugTigerRunMetal
+      metal_thin:
+        collection: ST14BugTigerRunMetalThin
+      sand:
+        collection: ST14BugTigerRunSand
+      gore:
+        collection: ST14BugTigerRunGore
+
+# Collision sizes for bugs bigger than one tile: 96 px and 128 px sprites.
+- type: entity
+  abstract: true
+  id: ST14MobBugSizeMedium
+  components:
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeCircle
+          radius: 0.45
+        density: 400
+        mask:
+        - MobMask
+        layer:
+        - MobLayer
+
+- type: entity
+  abstract: true
+  id: ST14MobBugSizeLarge
+  components:
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeCircle
+          radius: 0.6
+        density: 600
+        mask:
+        - MobMask
+        layer:
+        - MobLayer
+
+# The larva: weak, quick, taken by ghosts. Eats five units of biomass and evolves into its first caste.
+- type: entity
+  parent: ST14MobBugBase
+  id: ST14MobBugLarva
+  name: bug larva
+  description: A pale grub of the hive. It is hungry for the dead.
+  components:
+  - type: Sprite
+    sprite: _ST14/Mobs/Bugs/larva.rsi
+    layers:
+    - map: [ "enum.DamageStateVisualLayers.Base" ]
+      state: alive
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeCircle
+          radius: 0.25
+        density: 100
+        mask:
+        - SmallMobMask
+        layer:
+        - SmallMobLayer
+  - type: MobThresholds
+    thresholds:
+      0: Alive
+      50: Dead
+  - type: MovementSpeedModifier
+    baseWalkSpeed: 3.5
+    baseSprintSpeed: 4.5
+  - type: MeleeWeapon
+    damage:
+      types:
+        Piercing: 5
+  - type: ST14HiveMember
+    caste: ST14CasteLarva
+    emoteSounds: ST14BugLarva
+    painSound:
+      collection: ST14BugWarriorPain
+      params:
+        volume: -6
+        pitch: 1.6
+  - type: ST14BugFootsteps
+    walk:
+      concrete:
+        collection: ST14BugWarriorWalkConcrete
+        params: { volume: -8, pitch: 1.5 }
+      metal:
+        collection: ST14BugWarriorWalkMetal
+        params: { volume: -8, pitch: 1.5 }
+      sand:
+        collection: ST14BugWarriorWalkSand
+        params: { volume: -8, pitch: 1.5 }
+    run:
+      concrete:
+        collection: ST14BugWarriorRunConcrete
+        params: { volume: -8, pitch: 1.5 }
+      metal:
+        collection: ST14BugWarriorRunMetal
+        params: { volume: -8, pitch: 1.5 }
+      sand:
+        collection: ST14BugWarriorRunSand
+        params: { volume: -8, pitch: 1.5 }
+  - type: ST14BugLarva
+  - type: ST14BiomassEater
+  - type: GhostRole
+    allowMovement: true
+    allowSpeech: true
+    makeSentient: true
+    name: st14-ghost-role-larva-name
+    description: st14-ghost-role-larva-description
+    rules: st14-ghost-role-larva-rules
+    raffle:
+      settings: short
+  - type: GhostTakeoverAvailable
+
+# The brain bug: the mind of the hive. Slow and fat, it sucks the brains of troopers the others drag to it.
+- type: entity
+  parent: [ ST14MobBugBase, ST14MobBugSizeLarge ]
+  id: ST14MobBrainBug
+  name: brain bug
+  description: A bloated, pulsing mass with a long proboscis. The hive thinks with it.
+  components:
+  - type: Sprite
+    sprite: _ST14/Mobs/Bugs/brain.rsi
+    layers:
+    - map: [ "enum.DamageStateVisualLayers.Base" ]
+      state: alive
+    - map: [ "sucking" ]
+      state: sucking
+      visible: false
+  - type: GenericVisualizer
+    visuals:
+      enum.ST14BrainBugVisuals.Sucking:
+        sucking:
+          True: { visible: true }
+          False: { visible: false }
+  - type: MobThresholds
+    thresholds:
+      0: Alive
+      800: Dead
+  - type: MovementSpeedModifier
+    baseWalkSpeed: 1.5
+    baseSprintSpeed: 2.5
+  - type: MeleeWeapon
+    damage:
+      types:
+        Blunt: 15
+  - type: ST14HiveMember
+    caste: ST14CasteBrainBug
+    emoteSounds: ST14BugBrain
+    painSound:
+      collection: ST14BugBrainPain
+      params:
+        pitch: 0.7
+  - type: ST14BugFootsteps
+    walk:
+      concrete:
+        collection: ST14BugTigerWalkConcrete
+      metal:
+        collection: ST14BugTigerWalkMetal
+      sand:
+        collection: ST14BugTigerWalkSand
+    run:
+      concrete:
+        collection: ST14BugTigerRunConcrete
+      metal:
+        collection: ST14BugTigerRunMetal
+      sand:
+        collection: ST14BugTigerRunSand
+  - type: ST14BrainBug
+    suckStartSound:
+      path: /Audio/_ST14/Mobs/Bugs/brain_suck_start.wav
+    suckSound:
+      path: /Audio/_ST14/Mobs/Bugs/brain_suck.ogg
+
+# Placeholder queen: a swollen brain bug that never moves and only lays larvae.
+- type: entity
+  parent: [ ST14MobBugCoreBase, ST14MobBugSizeLarge ]
+  id: ST14MobBugQueen
+  name: hive queen
+  description: The heart of the hive, swollen with eggs. Kill it and the hive will never grow back.
+  components:
+  - type: Sprite
+    sprite: _ST14/Mobs/Bugs/brain.rsi
+    scale: 1.4, 1.4
+    color: "#C88CFF"
+    layers:
+    - map: [ "enum.DamageStateVisualLayers.Base" ]
+      state: alive
+  - type: Physics
+    bodyType: Static
+  - type: MobThresholds
+    thresholds:
+      0: Alive
+      1500: Dead
+  - type: MovementSpeedModifier
+    baseWalkSpeed: 0
+    baseSprintSpeed: 0
+  - type: ST14HiveQueen
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: ST14SpawnPointBrainBug
+  name: brain bug
+  components:
+  - type: SpawnPoint
+    job_id: ST14BrainBug
+  - type: Sprite
+    layers:
+    - state: green
+    - sprite: _ST14/Mobs/Bugs/brain.rsi
+      state: alive
+      scale: 0.33, 0.33
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: ST14SpawnPointBug
+  name: bug
+  components:
+  - type: SpawnPoint
+    job_id: ST14Bug
+  - type: Sprite
+    layers:
+    - state: green
+    - sprite: _ST14/Mobs/Bugs/warrior.rsi
+      state: alive
+      scale: 0.5, 0.5

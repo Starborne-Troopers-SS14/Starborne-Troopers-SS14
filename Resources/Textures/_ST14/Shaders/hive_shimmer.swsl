@@ -1,0 +1,25 @@
+// Trembling air around a bug: the screen behind a soft circle is bent by a moving wave and faintly tinted.
+// The texture is the circle, its alpha is how strong the effect is at that spot
+light_mode unshaded;
+
+uniform sampler2D SCREEN_TEXTURE;
+uniform highp vec3 tint;
+uniform highp float strength; // how far the screen is bent, in pixels
+uniform highp float tint_strength;
+
+void fragment() {
+    highp float mask = zTexture(UV).a;
+    if (mask <= 0.01) {
+        discard;
+    }
+
+    highp vec2 screen = SCREEN_UV / SCREEN_PIXEL_SIZE * 0.07;
+    highp float t = TIME * 3.5;
+    highp vec2 wave = vec2(
+        sin(t + screen.y * 1.7 + 1.5 * sin(t * 0.7 + screen.x)),
+        cos(t * 1.3 + screen.x * 1.3 + 1.5 * sin(t * 0.5 - screen.y)));
+
+    highp vec4 background = zTextureSpec(SCREEN_TEXTURE, SCREEN_UV + wave * strength * mask * SCREEN_PIXEL_SIZE);
+    highp float glow = tint_strength * mask * (0.75 + 0.25 * sin(TIME * 5.0));
+    COLOR = vec4(mix(background.rgb, tint, glow), 1.0);
+}

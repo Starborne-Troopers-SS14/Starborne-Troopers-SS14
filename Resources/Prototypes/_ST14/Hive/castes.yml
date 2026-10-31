@@ -1,0 +1,48 @@
+# The caste tree of the hive. evolvesFrom draws the arrows of the evolution menu; fromLarva castes are what a larva grows into.
+# cost is personal evolution points, hiveCost is what the brain bug pays to open the species once its tab is open.
+# Only castes with art are here; add new ones as their sprites arrive.
+
+- type: st14HiveCaste
+  id: ST14CasteLarva
+  name: st14-caste-larva
+  tier: 0
+
+- type: st14HiveCaste
+  id: ST14CasteBrainBug
+  name: st14-caste-brain-bug
+  tier: 6
+
+- type: st14HiveCaste
+  id: ST14CasteWarrior
+  name: st14-caste-warrior
+  description: st14-caste-warrior-desc
+  entity: ST14MobBugWarrior
+  tier: 1
+  tab: T1
+  fromLarva: true
+
+- type: st14HiveCaste
+  id: ST14CasteTiger
+  name: st14-caste-tiger
+  description: st14-caste-tiger-desc
+  entity: ST14MobBugTiger
+  tier: 2
+  tab: T2
+  evolvesFrom: [ ST14CasteWarrior ]
+  cost: 100
+
+# Tab costs are the hive levels: L1 60 opens T2, L2 120 opens T3, L3 200 T4, L4 300 T5, L5 400 X.
+- type: st14HiveSettings
+  id: Default
+  tabCosts:
+    T2: 60
+    T3: 120
+    T4: 200
+    T5: 300
+    X: 400
+  onlineMultipliers:
+  - maxPlayers: 20
+    multiplier: 2
+  - maxPlayers: 60
+    multiplier: 1.5
+  - multiplier: 1

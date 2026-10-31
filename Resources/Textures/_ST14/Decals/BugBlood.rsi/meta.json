@@ -1,0 +1,158 @@
+{
+  "version": 1,
+  "license": "All-Rights-Reserved",
+  "copyright": "(c) Starborne Troopers. All rights reserved.",
+  "size": {
+    "x": 48,
+    "y": 48
+  },
+  "states": [
+    {
+      "name": "bug_blood_1"
+    },
+    {
+      "name": "bug_blood_2"
+    },
+    {
+      "name": "bug_blood_3"
+    },
+    {
+      "name": "bug_blood_4"
+    },
+    {
+      "name": "bug_blood_5"
+    },
+    {
+      "name": "bug_blood_6"
+    },
+    {
+      "name": "bug_blood_7"
+    },
+    {
+      "name": "bug_blood_8"
+    },
+    {
+      "name": "bug_blood_9"
+    },
+    {
+      "name": "bug_blood_10"
+    },
+    {
+      "name": "bug_blood_11"
+    },
+    {
+      "name": "bug_blood_12"
+    },
+    {
+      "name": "bug_blood_13"
+    },
+    {
+      "name": "bug_blood_14"
+    },
+    {
+      "name": "bug_blood_15"
+    },
+    {
+      "name": "bug_blood_16"
+    },
+    {
+      "name": "bug_blood_17"
+    },
+    {
+      "name": "bug_blood_18"
+    },
+    {
+      "name": "bug_blood_19"
+    },
+    {
+      "name": "bug_blood_20"
+    },
+    {
+      "name": "bug_blood_21"
+    },
+    {
+      "name": "bug_blood_22"
+    },
+    {
+      "name": "bug_blood_23"
+    },
+    {
+      "name": "bug_blood_24"
+    },
+    {
+      "name": "bug_blood_25"
+    },
+    {
+      "name": "bug_blood_26"
+    },
+    {
+      "name": "bug_blood_27"
+    },
+    {
+      "name": "bug_blood_28"
+    },
+    {
+      "name": "bug_blood_29"
+    },
+    {
+      "name": "bug_blood_30"
+    },
+    {
+      "name": "bug_blood_31"
+    },
+    {
+      "name": "bug_blood_32"
+    },
+    {
+      "name": "bug_blood_33"
+    },
+    {
+      "name": "bug_blood_34"
+    },
+    {
+      "name": "bug_blood_35"
+    },
+    {
+      "name": "bug_blood_36"
+    },
+    {
+      "name": "bug_blood_37"
+    },
+    {
+      "name": "bug_blood_38"
+    },
+    {
+      "name": "bug_blood_39"
+    },
+    {
+      "name": "bug_blood_40"
+    },
+    {
+      "name": "bug_blood_41"
+    },
+    {
+      "name": "bug_blood_42"
+    },
+    {
+      "name": "bug_blood_43"
+    },
+    {
+      "name": "bug_blood_44"
+    },
+    {
+      "name": "bug_blood_45"
+    },
+    {
+      "name": "bug_blood_46"
+    },
+    {
+      "name": "bug_blood_47"
+    },
+    {
+      "name": "bug_blood_48"
+    },
+    {
+      "name": "bug_blood_49"
+    }
+  ]
+}
