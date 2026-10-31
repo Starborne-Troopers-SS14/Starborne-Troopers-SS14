@@ -21,6 +21,7 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
     private ST14HiveShimmerOverlay _shimmer = default!;
     private ST14BarricadeOverlay _barricade = default!;
     private ST14BloodScentOverlay _scent = default!;
+    private ST14GripStruggleOverlay _struggle = default!;
 
     private readonly HashSet<EntityUid> _raging = new();
 
@@ -33,10 +34,12 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
         _shimmer = new ST14HiveShimmerOverlay();
         _barricade = new ST14BarricadeOverlay();
         _scent = new ST14BloodScentOverlay();
+        _struggle = new ST14GripStruggleOverlay();
 
         _overlays.AddOverlay(_shimmer);
         _overlays.AddOverlay(_barricade);
         _overlays.AddOverlay(_scent);
+        _overlays.AddOverlay(_struggle);
     }
 
     public override void Shutdown()
@@ -46,6 +49,7 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
         _overlays.RemoveOverlay(_shimmer);
         _overlays.RemoveOverlay(_barricade);
         _overlays.RemoveOverlay(_scent);
+        _overlays.RemoveOverlay(_struggle);
     }
 
     private void OnBloodScent(ST14BloodScentEvent args)

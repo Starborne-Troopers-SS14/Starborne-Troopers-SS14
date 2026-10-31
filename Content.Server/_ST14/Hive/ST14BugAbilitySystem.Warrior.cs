@@ -16,18 +16,16 @@ using Robust.Shared.Timing;
 namespace Content.Server._ST14.Hive;
 
 /// <summary>
-/// The warrior: swarm resonance, the grip that drags troopers to the brain bug and the living barricade
+/// The warrior: swarm resonance and the living barricade. The grip lives in the .Grip part
 /// </summary>
 public sealed partial class ST14BugAbilitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private PullingSystem _pulling = default!;
     [Dependency] private SharedST14BugAbilitySystem _shared = default!;
-    [Dependency] private ST14BrainBugSystem _brain = default!;
 
     private readonly HashSet<Entity<ST14SwarmResonanceComponent>> _resonating = new();
     private readonly HashSet<Entity<ST14LivingBarricadeComponent>> _barricadeCandidates = new();
-    private readonly HashSet<Entity<ST14BrainBugComponent>> _brains = new();
     private readonly List<List<EntityUid>> _expiredWalls = new();
 
     // Damage a barricade spreads over its bugs is dealt again to each of them, this keeps it from spreading twice
@@ -37,14 +35,7 @@ public sealed partial class ST14BugAbilitySystem
     {
         SubscribeLocalEvent<ST14SwarmResonanceComponent, MobStateChangedEvent>(OnResonanceMobState);
 
-        SubscribeLocalEvent<ST14HiveGrabComponent, MapInitEvent>(OnGrabMapInit);
-        SubscribeLocalEvent<ST14HiveGrabComponent, ComponentShutdown>(OnGrabShutdown);
-        SubscribeLocalEvent<ST14HiveGrabComponent, ST14BugGrabActionEvent>(OnGrab);
-        SubscribeLocalEvent<ST14HiveGrabComponent, DamageDealtEvent>(OnGrabberDamaged);
-        SubscribeLocalEvent<ST14HiveGrabComponent, MobStateChangedEvent>(OnGrabberMobState);
-        SubscribeLocalEvent<ST14HiveGrabbedComponent, MoveInputEvent>(OnGrabbedMoveInput);
-        SubscribeLocalEvent<ST14HiveGrabbedComponent, PullStoppedMessage>(OnGrabbedPullStopped);
-        SubscribeLocalEvent<ST14HiveGrabbedComponent, MobStateChangedEvent>(OnGrabbedMobState);
+        InitializeGrip();
 
         SubscribeLocalEvent<ST14LivingBarricadeComponent, MapInitEvent>(OnBarricadeMapInit);
         SubscribeLocalEvent<ST14LivingBarricadeComponent, ComponentShutdown>(OnBarricadeShutdown);
@@ -68,19 +59,7 @@ public sealed partial class ST14BugAbilitySystem
             UpdateResonance((uid, comp));
         }
 
-        var grabbed = EntityQueryEnumerator<ST14HiveGrabbedComponent>();
-        while (grabbed.MoveNext(out var uid, out var comp))
-        {
-            comp.Struggle = MathF.Max(0f, comp.Struggle - comp.StruggleDecay * frameTime);
-
-            if (!TryComp<ST14HiveGrabComponent>(comp.Grabber, out var grab) || grab.Victim != uid)
-            {
-                RemCompDeferred<ST14HiveGrabbedComponent>(uid);
-                continue;
-            }
-
-            TryDeliver((comp.Grabber, grab), uid);
-        }
+        UpdateGrip(now, frameTime);
 
         // a shield whose bug is gone or left the wall goes with it
         var shields = EntityQueryEnumerator<ST14BarricadeShieldComponent>();
@@ -128,168 +107,6 @@ public sealed partial class ST14BugAbilitySystem
     {
         if (args.NewMobState == MobState.Dead)
             _shared.SetResonance(ent, 0);
-    }
-
-    #endregion
-
-    #region Grip
-
-    private void OnGrabMapInit(Entity<ST14HiveGrabComponent> ent, ref MapInitEvent args)
-    {
-        _actions.AddAction(ent, ref ent.Comp.ActionEntity, ent.Comp.Action);
-    }
-
-    private void OnGrabShutdown(Entity<ST14HiveGrabComponent> ent, ref ComponentShutdown args)
-    {
-        _actions.RemoveAction(ent.Owner, ent.Comp.ActionEntity);
-        Release(ent, null);
-    }
-
-    private void OnGrab(Entity<ST14HiveGrabComponent> ent, ref ST14BugGrabActionEvent args)
-    {
-        if (args.Handled)
-            return;
-
-        // pressing it again opens the claws
-        if (ent.Comp.Victim != null)
-        {
-            Release(ent, "st14-bug-grab-let-go");
-            return;
-        }
-
-        var target = args.Target;
-        if (!HasComp<MobStateComponent>(target) || _hive.IsHive(target) || _mobState.IsDead(target))
-        {
-            _popup.PopupEntity(Loc.GetString("st14-bug-grab-invalid"), ent, ent);
-            return;
-        }
-
-        if (HasComp<ST14InBarricadeComponent>(ent))
-        {
-            _popup.PopupEntity(Loc.GetString("st14-bug-grab-in-barricade"), ent, ent);
-            return;
-        }
-
-        if (!_pulling.TryStartPull(ent, target))
-            return;
-
-        args.Handled = true;
-
-        ent.Comp.Victim = target;
-        ent.Comp.DamageTaken = 0;
-
-        var grabbed = EnsureComp<ST14HiveGrabbedComponent>(target);
-        grabbed.Grabber = ent;
-        grabbed.Struggle = 0;
-        Dirty(target, grabbed);
-
-        if (ent.Comp.Sound != null)
-            _audio.PlayPvs(ent.Comp.Sound, ent);
-
-        _popup.PopupEntity(Loc.GetString("st14-bug-grab-victim"), target, target, PopupType.LargeCaution);
-        _popup.PopupEntity(Loc.GetString("st14-bug-grab-start", ("target", target)), ent, Filter.PvsExcept(target), true, PopupType.MediumCaution);
-    }
-
-    /// <summary>
-    /// Opens the claws. The reason is shown to everyone around, null for a silent release
-    /// </summary>
-    private void Release(Entity<ST14HiveGrabComponent> ent, string? reason)
-    {
-        if (ent.Comp.Victim is not { } victim)
-            return;
-
-        ent.Comp.Victim = null;
-        RemCompDeferred<ST14HiveGrabbedComponent>(victim);
-
-        if (TryComp<PullableComponent>(victim, out var pullable) && pullable.Puller == ent.Owner)
-            _pulling.TryStopPull(victim, pullable, ent);
-
-        if (reason == null)
-            return;
-
-        if (ent.Comp.ReleaseSound != null)
-            _audio.PlayPvs(ent.Comp.ReleaseSound, ent);
-
-        _popup.PopupEntity(Loc.GetString(reason, ("bug", ent.Owner), ("target", victim)), victim, PopupType.Medium);
-    }
-
-    private void OnGrabberDamaged(Entity<ST14HiveGrabComponent> ent, ref DamageDealtEvent args)
-    {
-        if (ent.Comp.Victim == null)
-            return;
-
-        foreach (var value in args.Damage.DamageDict.Values)
-        {
-            if (value > 0)
-                ent.Comp.DamageTaken += value;
-        }
-
-        if (ent.Comp.DamageTaken >= ent.Comp.BreakDamage)
-            Release(ent, "st14-bug-grab-shot-off");
-    }
-
-    private void OnGrabberMobState(Entity<ST14HiveGrabComponent> ent, ref MobStateChangedEvent args)
-    {
-        if (args.NewMobState != MobState.Alive)
-            Release(ent, "st14-bug-grab-let-go");
-    }
-
-    private void OnGrabbedMoveInput(Entity<ST14HiveGrabbedComponent> ent, ref MoveInputEvent args)
-    {
-        // every newly pressed direction is a jerk against the claws
-        var held = args.Entity.Comp.HeldMoveButtons & MoveButtons.AnyDirection;
-        var old = args.OldMovement & MoveButtons.AnyDirection;
-        if ((held & ~old) == MoveButtons.None)
-            return;
-
-        ent.Comp.Struggle += 1f;
-
-        if (ent.Comp.Struggle < ent.Comp.StruggleNeeded)
-        {
-            if ((int) ent.Comp.Struggle % 4 == 0)
-            {
-                var percent = (int) (ent.Comp.Struggle / ent.Comp.StruggleNeeded * 100);
-                _popup.PopupEntity(Loc.GetString("st14-bug-grab-struggle", ("percent", percent)), ent, ent);
-            }
-
-            return;
-        }
-
-        if (TryComp<ST14HiveGrabComponent>(ent.Comp.Grabber, out var grab))
-            Release((ent.Comp.Grabber, grab), "st14-bug-grab-broke-free");
-    }
-
-    private void OnGrabbedPullStopped(Entity<ST14HiveGrabbedComponent> ent, ref PullStoppedMessage args)
-    {
-        if (TryComp<ST14HiveGrabComponent>(ent.Comp.Grabber, out var grab) && grab.Victim == ent.Owner)
-            grab.Victim = null;
-
-        RemCompDeferred<ST14HiveGrabbedComponent>(ent);
-    }
-
-    private void OnGrabbedMobState(Entity<ST14HiveGrabbedComponent> ent, ref MobStateChangedEvent args)
-    {
-        // a corpse is no use to the brain bug, the claws let go of it
-        if (args.NewMobState == MobState.Dead && TryComp<ST14HiveGrabComponent>(ent.Comp.Grabber, out var grab))
-            Release((ent.Comp.Grabber, grab), null);
-    }
-
-    /// <summary>
-    /// A trooper dragged up to the brain bug gets its skull pierced right away
-    /// </summary>
-    private void TryDeliver(Entity<ST14HiveGrabComponent> grabber, EntityUid victim)
-    {
-        _brains.Clear();
-        _lookup.GetEntitiesInRange(Transform(victim).Coordinates, grabber.Comp.DeliveryRange, _brains);
-
-        foreach (var brain in _brains)
-        {
-            if (brain.Comp.Sucking)
-                return;
-
-            if (_brain.TryStartSuck(brain, victim, false))
-                return;
-        }
     }
 
     #endregion

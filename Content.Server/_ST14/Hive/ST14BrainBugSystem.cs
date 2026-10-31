@@ -130,13 +130,10 @@ public sealed partial class ST14BrainBugSystem : EntitySystem
             : _random.Next(ent.Comp.RegularMin, ent.Comp.RegularMax + 1);
         points = (int) MathF.Round(points * _hive.GetOnlineMultiplier(_player.PlayerCount));
 
-        // Whoever dragged the trooper here gets their share
-        if (TryComp<PullableComponent>(target, out var pullable) &&
-            pullable.Puller is { } puller &&
-            TryComp<ST14HiveMemberComponent>(puller, out var pullerMember))
-        {
-            _hive.AddEvolutionPoints((puller, pullerMember), pullerMember.DeliveryPoints);
-        }
+        // Whoever dragged or carried the trooper here gets their share
+        var deliverer = CompOrNull<ST14HiveGrabbedComponent>(target)?.Grabber ?? CompOrNull<PullableComponent>(target)?.Puller;
+        if (TryComp<ST14HiveMemberComponent>(deliverer, out var delivererMember))
+            _hive.AddEvolutionPoints((deliverer.Value, delivererMember), delivererMember.DeliveryPoints);
 
         // No brain, no revival
         EnsureComp<UnrevivableComponent>(target);

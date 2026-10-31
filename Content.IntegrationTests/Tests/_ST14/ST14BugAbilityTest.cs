@@ -176,6 +176,18 @@ public sealed class ST14BugAbilityTest : InteractionTest
         {
             Assert.That(SEntMan.HasComponent<ST14HiveGrabbedComponent>(human), "The trooper was not grabbed.");
             Assert.That(blocker.CanMove(human), Is.False, "A grabbed trooper can walk.");
+            Assert.That(SEntMan.GetComponent<TransformComponent>(human).ParentUid, Is.EqualTo(warrior), "The trooper is not held in the claws.");
+        });
+
+        // a shot at the trooper in the claws lands on the bug
+        var damageable = SEntMan.System<DamageableSystem>();
+        await Server.WaitPost(() => damageable.TryChangeDamage(human, Damage(Slash, 10), ignoreResistances: true, origin: SPlayer));
+        await RunTicks(2);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(damageable.GetTotalDamage(human), Is.EqualTo(FixedPoint2.Zero), "The trooper in the claws was hurt.");
+            Assert.That(damageable.GetTotalDamage(warrior), Is.GreaterThan(FixedPoint2.Zero), "The shot did not land on the bug.");
         });
 
         var brain = await SpawnAt("ST14MobBrainBug", 3, 2);

@@ -95,17 +95,17 @@
   parent: BaseAction
   id: ST14ActionBugGrab
   name: Grip of the hive
-  description: Clamp a trooper in your claws and drag it to the brain bug, who starts sucking right away. Press again to let go.
+  description: Leap at a trooper, knock it down and carry it in your claws to the brain bug, who starts sucking right away. Shots at it hit you. Press again to drop it.
   components:
   - type: Action
     itemIconStyle: BigAction
-    useDelay: 20
   - type: Sprite
     sprite: _ST14/Interface/Actions/bug_abilities.rsi
     layers:
     - state: grab
   - type: TargetAction
-    range: 1.5
+    range: 5
+    checkCanAccess: false
   - type: EntityTargetAction
     canTargetSelf: false
     whitelist:
