@@ -47,6 +47,10 @@ public sealed partial class ST14SandstormSystem : EntitySystem
     /// </summary>
     private void RefreshAround(Entity<ST14SandstormWallComponent> ent, bool includeSelf)
     {
+        // a map still being loaded or edited uninitialised keeps the prototype data; MapInit works the depth out later
+        if (LifeStage(ent) < EntityLifeStage.MapInitialized)
+            return;
+
         var xform = Transform(ent);
         if (xform.GridUid is not { } gridUid || !TryComp<MapGridComponent>(gridUid, out var grid))
             return;
