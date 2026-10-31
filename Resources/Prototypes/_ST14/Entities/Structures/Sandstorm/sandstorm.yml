@@ -1,5 +1,6 @@
 # The edge of the map: a standing wall of sandstorm. Draw it with the mapping tools along the border of a map.
-# Nothing walks, flies, shoots or sees through it, nothing damages it, and it has no way to be unanchored or deconstructed.
+# The outer tile next to open ground is the fringe: you can wade into it at a crawl, bullets fly through, you see through it.
+# Deeper in nothing walks, shoots or sees through. Nothing damages it, and it cannot be unanchored or deconstructed.
 - type: entity
   id: ST14SandstormWall
   name: sandstorm
@@ -26,6 +27,10 @@
         layer:
         - WallLayer
   - type: Occluder
+  # only the fringe is soft enough to step into
+  - type: SpeedModifierContacts
+    walkSpeedModifier: 0.35
+    sprintSpeedModifier: 0.35
   - type: Sprite
     sprite: _ST14/Effects/Sandstorm/storm.rsi
     drawdepth: Overdoors
