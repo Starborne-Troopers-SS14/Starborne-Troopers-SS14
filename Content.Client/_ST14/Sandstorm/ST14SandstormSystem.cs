@@ -1,5 +1,6 @@
 using System.Numerics;
 using Content.Shared._ST14.Sandstorm;
+using DrawDepth = Content.Shared.DrawDepth.DrawDepth;
 using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
 using Robust.Client.Player;
@@ -102,9 +103,8 @@ public sealed partial class ST14SandstormSystem : EntitySystem
 /// </summary>
 public sealed class ST14SandstormWallOverlay : Overlay
 {
-    // above the field of view: the storm is a landmark seen from afar, and the solid wall tiles occlude, which would
-    // otherwise hide the very tiles the storm is made of
-    public override OverlaySpace Space => OverlaySpace.WorldSpace;
+    // drawn among the entities, over the mobs that wade into it, so it is lit like the rest of the world and does not glow
+    public override OverlaySpace Space => OverlaySpace.WorldSpaceEntities;
 
     private const string TexturePath = "/Textures/_ST14/Effects/Sandstorm/";
 
@@ -148,6 +148,7 @@ public sealed class ST14SandstormWallOverlay : Overlay
         _lookup = lookup;
         _map = map;
         _transform = transform;
+        ZIndex = (int) DrawDepth.Overdoors;
     }
 
     public void Advance(float frameTime)

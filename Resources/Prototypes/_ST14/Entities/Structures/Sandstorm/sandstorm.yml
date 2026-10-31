@@ -1,6 +1,7 @@
 # The edge of the map: a standing wall of sandstorm. Draw it with the mapping tools along the border of a map.
-# The outer tile next to open ground is the fringe: you can wade into it at a crawl, bullets fly through, you see through it.
-# Deeper in nothing walks, shoots or sees through. Nothing damages it, and it cannot be unanchored or deconstructed.
+# The outer tile next to open ground is the fringe: you can wade into it at a crawl, bullets fly through.
+# Deeper in nothing walks or shoots through, and the storm itself hides what is behind it.
+# Nothing damages it, and it cannot be unanchored or deconstructed.
 - type: entity
   id: ST14SandstormWall
   name: sandstorm
@@ -26,7 +27,6 @@
         - FullTileMask
         layer:
         - WallLayer
-  - type: Occluder
   # only the fringe is soft enough to step into
   - type: SpeedModifierContacts
     walkSpeedModifier: 0.35

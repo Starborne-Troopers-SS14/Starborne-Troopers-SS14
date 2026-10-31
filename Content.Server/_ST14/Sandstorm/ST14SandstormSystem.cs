@@ -13,7 +13,6 @@ public sealed partial class ST14SandstormSystem : EntitySystem
 {
     [Dependency] private FixtureSystem _fixtures = default!;
     [Dependency] private SharedMapSystem _map = default!;
-    [Dependency] private OccluderSystem _occluder = default!;
     [Dependency] private SharedPhysicsSystem _physics = default!;
 
     private const string FixtureId = "fix1";
@@ -98,11 +97,10 @@ public sealed partial class ST14SandstormSystem : EntitySystem
         ent.Comp.Fringe = fringe;
         Dirty(ent);
 
-        // the fringe stops being solid: people wade in, bullets fly on, sight goes through
+        // the fringe stops being solid: people wade in and bullets fly on
         if (_fixtures.GetFixtureOrNull(ent, FixtureId) is { } fixture)
             _physics.SetHard(ent, fixture, !fringe);
 
-        _occluder.SetEnabled(ent, !fringe);
     }
 
     private bool HasStorm(EntityUid gridUid, MapGridComponent grid, Vector2i tile, EntityUid? leaving)
