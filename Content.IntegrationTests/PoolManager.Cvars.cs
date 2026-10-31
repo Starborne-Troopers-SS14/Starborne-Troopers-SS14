@@ -37,5 +37,6 @@ public static partial class PoolManager
         (CCVars.MovementMobPushing.Name, "false"),
         (CCVars.ResourceUploadingStoreDeletionDays.Name, "0"),
         (ST14CVars.HubOnConnect.Name, "false"), // ST14: tests expect the stock lobby right after connecting
+        (ST14CVars.Atmospherics.Name, "true"), // ST14: the stock tests of atmos, breathing and pressure need it
     };
 }
