@@ -5,6 +5,7 @@ using Robust.Client.Graphics;
 using Robust.Client.Player;
 using Robust.Shared.Enums;
 using Robust.Shared.Map;
+using Robust.Shared.Timing;
 using Robust.Shared.Utility;
 
 namespace Content.Client._ST14.Sandstorm;
@@ -17,11 +18,21 @@ public sealed partial class ST14SandstormSystem : EntitySystem
 {
     [Dependency] private IOverlayManager _overlays = default!;
     [Dependency] private IPlayerManager _player = default!;
+    [Dependency] private IGameTiming _timing = default!;
     [Dependency] private EntityLookupSystem _lookup = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private SpriteSystem _sprite = default!;
 
     private static readonly string[] TiledLayers = { "body", "streaks" };
+
+    // layer and the length of its animation loop in seconds, as in the RSIs: 12 frames of 0.09 and 8 frames of 0.12
+    private static readonly (string Layer, float Loop)[] AnimatedLayers = { ("body", 1.08f), ("streaks", 1.08f), ("haze", 0.96f) };
+
+    private const float FringeAlpha = 0.72f;
+    private const float SyncInterval = 2f;
+    private const float SyncRange = 24f;
+
+    private float _syncTimer;
 
     private readonly HashSet<Entity<ST14SandstormWallComponent>> _near = new();
     private ST14SandstormOverlay _overlay = default!;
@@ -29,6 +40,8 @@ public sealed partial class ST14SandstormSystem : EntitySystem
     public override void Initialize()
     {
         base.Initialize();
+
+        SubscribeLocalEvent<ST14SandstormWallComponent, AfterAutoHandleStateEvent>(OnHandleState);
 
         _overlay = new ST14SandstormOverlay(_sprite.Frame0(
             new SpriteSpecifier.Rsi(new ResPath("/Textures/_ST14/Effects/Sandstorm/screen.rsi"), "screen")));
@@ -63,11 +76,57 @@ public sealed partial class ST14SandstormSystem : EntitySystem
                     _sprite.LayerSetRsiState((uid, sprite), index, $"{layer}_{x}_{y}");
             }
 
+            // the fringe is thinner: the ground shows through where troopers can still wade in
+            if (_sprite.LayerMapTryGet((uid, sprite), "body", out var body, false))
+                _sprite.LayerSetColor((uid, sprite), body, Color.White.WithAlpha(wall.Fringe ? FringeAlpha : 1f));
+
+            Sync((uid, sprite));
             wall.Tiled = true;
+        }
+
+        // sprites only animate while drawn, so pieces that were off screen drift apart; put them back on one clock
+        _syncTimer -= frameTime;
+        if (_syncTimer <= 0f)
+        {
+            _syncTimer = SyncInterval;
+            SyncNearPlayer();
         }
 
         _overlay.Target = HazeTarget();
         _overlay.Advance(frameTime);
+    }
+
+    private void OnHandleState(Entity<ST14SandstormWallComponent> ent, ref AfterAutoHandleStateEvent args)
+    {
+        // the depth of the tile changed, paint it again
+        ent.Comp.Tiled = false;
+    }
+
+    /// <summary>
+    /// Sets every animated layer of the tile to the frame the shared clock is at, so neighbouring pieces join
+    /// </summary>
+    private void Sync(Entity<SpriteComponent> ent)
+    {
+        var time = (float) _timing.RealTime.TotalSeconds;
+        foreach (var (layer, loop) in AnimatedLayers)
+        {
+            if (_sprite.LayerMapTryGet(ent.AsNullable(), layer, out var index, false))
+                _sprite.LayerSetAnimationTime(ent.AsNullable(), index, time % loop);
+        }
+    }
+
+    private void SyncNearPlayer()
+    {
+        if (_player.LocalEntity is not { } player || !TryComp(player, out TransformComponent? xform))
+            return;
+
+        _near.Clear();
+        _lookup.GetEntitiesInRange(xform.Coordinates, SyncRange, _near);
+        foreach (var wall in _near)
+        {
+            if (TryComp(wall, out SpriteComponent? sprite))
+                Sync((wall, sprite));
+        }
     }
 
     /// <summary>
