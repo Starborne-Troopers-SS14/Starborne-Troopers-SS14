@@ -3,131 +3,60 @@ using Content.Shared._ST14.Sandstorm;
 using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
 using Robust.Client.Player;
+using Robust.Client.ResourceManagement;
 using Robust.Shared.Enums;
 using Robust.Shared.Map;
-using Robust.Shared.Timing;
+using Robust.Shared.Map.Components;
 using Robust.Shared.Utility;
 
 namespace Content.Client._ST14.Sandstorm;
 
 /// <summary>
-/// Draws the sandstorm: every wall tile shows its own piece of one big moving storm, so the wall reads as a single cloud
-/// instead of repeated tiles, and the screen fills with dust as the player gets close to it
+/// Draws the sandstorm. The storm tiles have no sprites of their own: one overlay paints a single storm texture across all
+/// of them in world space, so the wall is one continuous cloud, softens its edge towards open ground, and fills the screen
+/// with dust as the player gets close
 /// </summary>
 public sealed partial class ST14SandstormSystem : EntitySystem
 {
     [Dependency] private IOverlayManager _overlays = default!;
     [Dependency] private IPlayerManager _player = default!;
-    [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private IResourceCache _resources = default!;
     [Dependency] private EntityLookupSystem _lookup = default!;
+    [Dependency] private SharedMapSystem _map = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private SpriteSystem _sprite = default!;
 
-    private static readonly string[] TiledLayers = { "body", "streaks" };
-
-    // layer and the length of its animation loop in seconds, as in the RSIs: 12 frames of 0.09 and 8 frames of 0.12
-    private static readonly (string Layer, float Loop)[] AnimatedLayers = { ("body", 1.08f), ("streaks", 1.08f), ("haze", 0.96f) };
-
-    private const float FringeAlpha = 0.72f;
-    private const float SyncInterval = 2f;
-    private const float SyncRange = 24f;
-
-    private float _syncTimer;
-
     private readonly HashSet<Entity<ST14SandstormWallComponent>> _near = new();
-    private ST14SandstormOverlay _overlay = default!;
+    private ST14SandstormOverlay _screenOverlay = default!;
+    private ST14SandstormWallOverlay _wallOverlay = default!;
 
     public override void Initialize()
     {
         base.Initialize();
 
-        SubscribeLocalEvent<ST14SandstormWallComponent, AfterAutoHandleStateEvent>(OnHandleState);
-
-        // the texture is loaded on the first draw: a client without graphics, like the test one, never loads it
-        _overlay = new ST14SandstormOverlay(_sprite,
+        // textures load on the first draw: a client without graphics, like the test one, never loads them
+        _screenOverlay = new ST14SandstormOverlay(_sprite,
             new SpriteSpecifier.Rsi(new ResPath("/Textures/_ST14/Effects/Sandstorm/screen.rsi"), "screen"));
-        _overlays.AddOverlay(_overlay);
+        _wallOverlay = new ST14SandstormWallOverlay(EntityManager, _resources, _lookup, _map, _transform);
+
+        _overlays.AddOverlay(_screenOverlay);
+        _overlays.AddOverlay(_wallOverlay);
     }
 
     public override void Shutdown()
     {
         base.Shutdown();
-        _overlays.RemoveOverlay(_overlay);
+        _overlays.RemoveOverlay(_screenOverlay);
+        _overlays.RemoveOverlay(_wallOverlay);
     }
 
     public override void FrameUpdate(float frameTime)
     {
         base.FrameUpdate(frameTime);
 
-        var query = EntityQueryEnumerator<ST14SandstormWallComponent, SpriteComponent, TransformComponent>();
-        while (query.MoveNext(out var uid, out var wall, out var sprite, out var xform))
-        {
-            if (wall.Tiled || !xform.Anchored)
-                continue;
-
-            // the piece is picked by the world tile, so neighbours always join into one picture
-            var pos = _transform.GetWorldPosition(xform);
-            var x = Mod((int) MathF.Floor(pos.X), ST14SandstormWallComponent.Period);
-            // texture rows go down while world y goes up
-            var y = Mod(-(int) MathF.Floor(pos.Y) - 1, ST14SandstormWallComponent.Period);
-
-            foreach (var layer in TiledLayers)
-            {
-                if (_sprite.LayerMapTryGet((uid, sprite), layer, out var index, false))
-                    _sprite.LayerSetRsiState((uid, sprite), index, $"{layer}_{x}_{y}");
-            }
-
-            // the fringe is thinner: the ground shows through where troopers can still wade in
-            if (_sprite.LayerMapTryGet((uid, sprite), "body", out var body, false))
-                _sprite.LayerSetColor((uid, sprite), body, Color.White.WithAlpha(wall.Fringe ? FringeAlpha : 1f));
-
-            Sync((uid, sprite));
-            wall.Tiled = true;
-        }
-
-        // sprites only animate while drawn, so pieces that were off screen drift apart; put them back on one clock
-        _syncTimer -= frameTime;
-        if (_syncTimer <= 0f)
-        {
-            _syncTimer = SyncInterval;
-            SyncNearPlayer();
-        }
-
-        _overlay.Target = HazeTarget();
-        _overlay.Advance(frameTime);
-    }
-
-    private void OnHandleState(Entity<ST14SandstormWallComponent> ent, ref AfterAutoHandleStateEvent args)
-    {
-        // the depth of the tile changed, paint it again
-        ent.Comp.Tiled = false;
-    }
-
-    /// <summary>
-    /// Sets every animated layer of the tile to the frame the shared clock is at, so neighbouring pieces join
-    /// </summary>
-    private void Sync(Entity<SpriteComponent> ent)
-    {
-        var time = (float) _timing.RealTime.TotalSeconds;
-        foreach (var (layer, loop) in AnimatedLayers)
-        {
-            if (_sprite.LayerMapTryGet(ent.AsNullable(), layer, out var index, false))
-                _sprite.LayerSetAnimationTime(ent.AsNullable(), index, time % loop);
-        }
-    }
-
-    private void SyncNearPlayer()
-    {
-        if (_player.LocalEntity is not { } player || !TryComp(player, out TransformComponent? xform))
-            return;
-
-        _near.Clear();
-        _lookup.GetEntitiesInRange(xform.Coordinates, SyncRange, _near);
-        foreach (var wall in _near)
-        {
-            if (TryComp(wall, out SpriteComponent? sprite))
-                Sync((wall, sprite));
-        }
+        _screenOverlay.Target = HazeTarget();
+        _screenOverlay.Advance(frameTime);
+        _wallOverlay.Advance(frameTime);
     }
 
     /// <summary>
@@ -153,10 +82,155 @@ public sealed partial class ST14SandstormSystem : EntitySystem
 
         return target;
     }
+}
 
-    private static int Mod(int value, int period)
+/// <summary>
+/// The storm itself. Every storm tile on screen shows the part of one big repeating texture that lies under it,
+/// two layers of sand drift with the wind at different scales, gusts of wind streak over them, and on the sides that
+/// face open ground a ragged band of dust spills out of the tile
+/// </summary>
+public sealed class ST14SandstormWallOverlay : Overlay
+{
+    public override OverlaySpace Space => OverlaySpace.WorldSpaceBelowFOV;
+
+    private const string TexturePath = "/Textures/_ST14/Effects/Sandstorm/";
+
+    // texture pixels per tile: the 256 px textures repeat every 4 tiles, the far layer every 8
+    private const float PixelsPerTile = 64f;
+    private const float FringeAlpha = 0.78f;
+    private const float EdgeReach = 0.75f;
+
+    private static readonly Vector2 NearWind = new(-38f, 6f);
+    private static readonly Vector2 FarWind = new(-16f, -4f);
+    private static readonly Vector2 GustWind = new(-150f, 0f);
+
+    private static readonly (Vector2i Offset, Angle Rotation)[] Sides =
     {
-        return (value % period + period) % period;
+        (new Vector2i(1, 0), Angle.Zero),
+        (new Vector2i(0, 1), Angle.FromDegrees(90)),
+        (new Vector2i(-1, 0), Angle.FromDegrees(180)),
+        (new Vector2i(0, -1), Angle.FromDegrees(270)),
+    };
+
+    private readonly IEntityManager _entMan;
+    private readonly IResourceCache _resources;
+    private readonly EntityLookupSystem _lookup;
+    private readonly SharedMapSystem _map;
+    private readonly SharedTransformSystem _transform;
+
+    private readonly HashSet<Entity<ST14SandstormWallComponent>> _walls = new();
+    private readonly Dictionary<Vector2i, bool> _tiles = new();
+    private List<Entity<MapGridComponent>> _grids = new();
+
+    private Texture? _body;
+    private Texture? _streaks;
+    private Texture? _edge;
+    private float _time;
+
+    public ST14SandstormWallOverlay(IEntityManager entMan, IResourceCache resources, EntityLookupSystem lookup,
+        SharedMapSystem map, SharedTransformSystem transform)
+    {
+        _entMan = entMan;
+        _resources = resources;
+        _lookup = lookup;
+        _map = map;
+        _transform = transform;
+    }
+
+    public void Advance(float frameTime)
+    {
+        // wraps long before float precision suffers, every layer repeats well within a day
+        _time = (_time + frameTime) % 86400f;
+    }
+
+    protected override void Draw(in OverlayDrawArgs args)
+    {
+        _body ??= _resources.GetResource<TextureResource>(new ResPath(TexturePath + "body.png")).Texture;
+        _streaks ??= _resources.GetResource<TextureResource>(new ResPath(TexturePath + "streaks.png")).Texture;
+        _edge ??= _resources.GetResource<TextureResource>(new ResPath(TexturePath + "edge.png")).Texture;
+
+        var handle = args.WorldHandle;
+        _grids.Clear();
+        _map.FindGridsIntersecting(args.MapId, args.WorldAABB, ref _grids);
+
+        foreach (var grid in _grids)
+        {
+            var matrix = _transform.GetWorldMatrix(grid);
+            Matrix3x2.Invert(matrix, out var inverse);
+            var local = inverse.TransformBox(args.WorldAABB).Enlarged(1.5f);
+
+            _walls.Clear();
+            _lookup.GetLocalEntitiesIntersecting(grid.Owner, local, _walls, LookupFlags.Static | LookupFlags.Approximate);
+            if (_walls.Count == 0)
+                continue;
+
+            _tiles.Clear();
+            foreach (var wall in _walls)
+            {
+                var xform = _entMan.GetComponent<TransformComponent>(wall);
+                if (!xform.Anchored)
+                    continue;
+
+                _tiles[_map.TileIndicesFor(grid.Owner, grid.Comp, xform.Coordinates)] = wall.Comp.Fringe;
+            }
+
+            handle.SetTransform(matrix);
+            DrawBody(handle);
+            DrawEdges(handle);
+        }
+
+        handle.SetTransform(Matrix3x2.Identity);
+    }
+
+    private void DrawBody(DrawingHandleWorld handle)
+    {
+        foreach (var (tile, fringe) in _tiles)
+        {
+            var box = Box2.FromDimensions(tile, Vector2.One);
+            var alpha = fringe ? FringeAlpha : 1f;
+
+            handle.DrawTextureRectRegion(_body!, box, Color.White.WithAlpha(alpha), Region(tile, PixelsPerTile, NearWind));
+            // a second, bigger and slower layer of the same sand breaks the four-tile repeat and gives depth
+            handle.DrawTextureRectRegion(_body!, box, Color.White.WithAlpha(alpha * 0.45f), Region(tile, PixelsPerTile / 2f, FarWind));
+            handle.DrawTextureRectRegion(_streaks!, box, Color.White.WithAlpha(alpha), Region(tile, PixelsPerTile, GustWind));
+        }
+    }
+
+    /// <summary>
+    /// Ragged dust spilling out of every side that faces a tile without storm
+    /// </summary>
+    private void DrawEdges(DrawingHandleWorld handle)
+    {
+        var size = _edge!.Size;
+        foreach (var (tile, _) in _tiles)
+        {
+            foreach (var (offset, rotation) in Sides)
+            {
+                if (_tiles.ContainsKey(tile + offset))
+                    continue;
+
+                // the band lies outside the tile on that side; the texture fades along its x, which points away from the storm
+                var center = (Vector2) tile + new Vector2(0.5f) + (Vector2) offset * (0.5f + EdgeReach / 2f);
+                var quad = new Box2Rotated(Box2.CenteredAround(center, new Vector2(EdgeReach, 1f)), rotation, center);
+
+                // along the edge the texture follows the world, so neighbouring bands join; it drifts with the wind
+                var along = offset.X != 0 ? tile.Y : tile.X;
+                var start = along * PixelsPerTile + _time * 24f;
+                var region = new UIBox2(0f, start, size.X, start + PixelsPerTile);
+
+                handle.DrawTextureRectRegion(_edge, quad, Color.White, region);
+            }
+        }
+    }
+
+    /// <summary>
+    /// The part of a repeating texture under a tile, shifted by the wind. Texture rows go down while world y goes up
+    /// </summary>
+    private UIBox2 Region(Vector2i tile, float pixelsPerTile, Vector2 wind)
+    {
+        var x = tile.X * pixelsPerTile + _time * wind.X;
+        var y = -(tile.Y + 1) * pixelsPerTile + _time * wind.Y;
+        return new UIBox2(x, y, x + pixelsPerTile, y + pixelsPerTile);
     }
 }
 

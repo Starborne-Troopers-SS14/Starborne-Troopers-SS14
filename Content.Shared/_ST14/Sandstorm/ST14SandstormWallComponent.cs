@@ -7,14 +7,9 @@ namespace Content.Shared._ST14.Sandstorm;
 /// way in, bullets fly through and it does not block sight. Deeper in the storm is a wall nothing gets through or breaks.
 /// The client paints the whole storm seamlessly across tiles and fills the screen with dust near it
 /// </summary>
-[RegisterComponent, NetworkedComponent, AutoGenerateComponentState(raiseAfterAutoHandleState: true)]
+[RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
 public sealed partial class ST14SandstormWallComponent : Component
 {
-    /// <summary>
-    /// How many tiles one repeat of the storm texture spans, it must match the states of the storm RSI
-    /// </summary>
-    public const int Period = 4;
-
     /// <summary>
     /// How many tiles deep the passable fringe reaches from open ground
     /// </summary>
@@ -44,10 +39,4 @@ public sealed partial class ST14SandstormWallComponent : Component
     /// </summary>
     [ViewVariables]
     public bool Computed;
-
-    /// <summary>
-    /// Client side: the layers already show the piece of the storm for this tile and the look of its depth
-    /// </summary>
-    [ViewVariables]
-    public bool Tiled;
 }

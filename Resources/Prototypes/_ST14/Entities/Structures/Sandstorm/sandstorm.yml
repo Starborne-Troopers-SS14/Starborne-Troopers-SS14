@@ -31,20 +31,14 @@
   - type: SpeedModifierContacts
     walkSpeedModifier: 0.35
     sprintSpeedModifier: 0.35
+  # the storm is painted by a client overlay across all tiles at once, the sprite only shows it in menus
   - type: Sprite
-    sprite: _ST14/Effects/Sandstorm/storm.rsi
-    drawdepth: Overdoors
-    noRot: true
-    # 64 px pieces drawn on one tile, the haze is twice that and spills half a tile out
-    scale: 0.5, 0.5
-    layers:
-    - map: [ "body" ]
-      state: body_0_0
-    - map: [ "streaks" ]
-      state: streaks_0_0
-    - map: [ "haze" ]
-      sprite: _ST14/Effects/Sandstorm/haze.rsi
-      state: haze
+    sprite: _ST14/Effects/Sandstorm/screen.rsi
+    state: screen
+    visible: false
+  - type: Icon
+    sprite: _ST14/Effects/Sandstorm/screen.rsi
+    state: screen
   - type: AmbientSound
     volume: -4
     range: 9
