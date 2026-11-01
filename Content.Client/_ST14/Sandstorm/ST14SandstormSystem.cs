@@ -81,14 +81,15 @@ public sealed partial class ST14SandstormSystem : EntitySystem
 
         var pos = _transform.GetWorldPosition(xform);
         _near.Clear();
-        _lookup.GetEntitiesInRange(xform.Coordinates, 8f, _near);
+        _lookup.GetEntitiesInRange(xform.Coordinates, ST14SandstormWallComponent.MaxHazeRange, _near, LookupFlags.Static);
 
         var target = 0f;
         foreach (var wall in _near)
         {
             // distance to the edge of the tile, not its centre
             var distance = MathF.Max(0f, (_transform.GetWorldPosition(wall) - pos).Length() - 0.5f);
-            var closeness = 1f - Math.Clamp(distance / wall.Comp.HazeRange, 0f, 1f);
+            var range = Math.Clamp(wall.Comp.HazeRange, 0.01f, ST14SandstormWallComponent.MaxHazeRange);
+            var closeness = 1f - Math.Clamp(distance / range, 0f, 1f);
             target = MathF.Max(target, closeness * closeness * wall.Comp.HazeStrength);
         }
 
@@ -110,6 +111,10 @@ public sealed class ST14SandstormWallOverlay : Overlay
 
     // texture pixels per tile: the 256 px textures repeat every 4 tiles, the far layer every 8
     private const float PixelsPerTile = 64f;
+
+    // every storm texture repeats after this many pixels, the edge along its length
+    private const float TextureSize = 256f;
+    private const float EdgeDrift = 24f;
     private const float FringeAlpha = 0.78f;
     private const float EdgeReach = 0.75f;
 
@@ -138,7 +143,11 @@ public sealed class ST14SandstormWallOverlay : Overlay
     private Texture? _body;
     private Texture? _streaks;
     private Texture? _edge;
-    private float _time;
+    // how far each layer has drifted with the wind, kept within one texture so it never grows and loses precision
+    private Vector2 _nearShift;
+    private Vector2 _farShift;
+    private Vector2 _gustShift;
+    private float _edgeShift;
 
     public ST14SandstormWallOverlay(IEntityManager entMan, IResourceCache resources, EntityLookupSystem lookup,
         SharedMapSystem map, SharedTransformSystem transform)
@@ -153,8 +162,10 @@ public sealed class ST14SandstormWallOverlay : Overlay
 
     public void Advance(float frameTime)
     {
-        // wraps long before float precision suffers, every layer repeats well within a day
-        _time = (_time + frameTime) % 86400f;
+        _nearShift = Wrap(_nearShift + NearWind * frameTime);
+        _farShift = Wrap(_farShift + FarWind * frameTime);
+        _gustShift = Wrap(_gustShift + GustWind * frameTime);
+        _edgeShift = Repeat(_edgeShift + EdgeDrift * frameTime, TextureSize);
     }
 
     protected override void Draw(in OverlayDrawArgs args)
@@ -203,10 +214,10 @@ public sealed class ST14SandstormWallOverlay : Overlay
             var box = Box2.FromDimensions(tile, Vector2.One);
             var alpha = fringe ? FringeAlpha : 1f;
 
-            handle.DrawTextureRectRegion(_body!, box, Color.White.WithAlpha(alpha), Region(tile, PixelsPerTile, NearWind));
+            handle.DrawTextureRectRegion(_body!, box, Color.White.WithAlpha(alpha), Region(tile, PixelsPerTile, _nearShift));
             // a second, bigger and slower layer of the same sand breaks the four-tile repeat and gives depth
-            handle.DrawTextureRectRegion(_body!, box, Color.White.WithAlpha(alpha * 0.45f), Region(tile, PixelsPerTile / 2f, FarWind));
-            handle.DrawTextureRectRegion(_streaks!, box, Color.White.WithAlpha(alpha), Region(tile, PixelsPerTile, GustWind));
+            handle.DrawTextureRectRegion(_body!, box, Color.White.WithAlpha(alpha * 0.45f), Region(tile, PixelsPerTile / 2f, _farShift));
+            handle.DrawTextureRectRegion(_streaks!, box, Color.White.WithAlpha(alpha), Region(tile, PixelsPerTile, _gustShift));
         }
     }
 
@@ -229,7 +240,7 @@ public sealed class ST14SandstormWallOverlay : Overlay
 
                 // along the edge the texture follows the world, so neighbouring bands join; it drifts with the wind
                 var along = offset.X != 0 ? tile.Y : tile.X;
-                var start = along * PixelsPerTile + _time * 24f;
+                var start = Repeat(along * PixelsPerTile, TextureSize) + _edgeShift;
                 var region = new UIBox2(0f, start, size.X, start + PixelsPerTile);
 
                 handle.DrawTextureRectRegion(_edge, quad, Color.White, region);
@@ -238,13 +249,24 @@ public sealed class ST14SandstormWallOverlay : Overlay
     }
 
     /// <summary>
-    /// The part of a repeating texture under a tile, shifted by the wind. Texture rows go down while world y goes up
+    /// The part of a repeating texture under a tile, shifted by the wind. Texture rows go down while world y goes up.
+    /// Coordinates stay within a texture or two however far the tile is or however long the server runs
     /// </summary>
-    private UIBox2 Region(Vector2i tile, float pixelsPerTile, Vector2 wind)
+    private static UIBox2 Region(Vector2i tile, float pixelsPerTile, Vector2 shift)
     {
-        var x = tile.X * pixelsPerTile + _time * wind.X;
-        var y = -(tile.Y + 1) * pixelsPerTile + _time * wind.Y;
+        var x = Repeat(tile.X * pixelsPerTile, TextureSize) + shift.X;
+        var y = Repeat(-(tile.Y + 1) * pixelsPerTile, TextureSize) + shift.Y;
         return new UIBox2(x, y, x + pixelsPerTile, y + pixelsPerTile);
+    }
+
+    private static Vector2 Wrap(Vector2 shift)
+    {
+        return new Vector2(Repeat(shift.X, TextureSize), Repeat(shift.Y, TextureSize));
+    }
+
+    private static float Repeat(float value, float length)
+    {
+        return value - MathF.Floor(value / length) * length;
     }
 }
 
@@ -259,7 +281,15 @@ public sealed class ST14SandstormOverlay : Overlay
     private readonly SpriteSpecifier _textureSpec;
     private Texture? _texture;
     private float _strength;
-    private float _time;
+
+    // how far each dust layer has drifted, kept within its own size so it never grows and loses precision
+    private Vector2 _nearOffset;
+    private Vector2 _farOffset;
+
+    private const float NearSize = 512f;
+    private const float FarSize = 320f;
+    private static readonly Vector2 NearVelocity = new(90f, 12f);
+    private static readonly Vector2 FarVelocity = new(170f, -20f);
 
     /// <summary>
     /// Thickness the dust eases towards
@@ -275,7 +305,8 @@ public sealed class ST14SandstormOverlay : Overlay
 
     public void Advance(float frameTime)
     {
-        _time += frameTime;
+        _nearOffset = Wrap(_nearOffset + NearVelocity * frameTime, NearSize);
+        _farOffset = Wrap(_farOffset + FarVelocity * frameTime, FarSize);
         // eases in and out over about a second, walking along the wall does not flicker
         _strength += (Target - _strength) * MathF.Min(1f, frameTime * 2.5f);
     }
@@ -291,13 +322,12 @@ public sealed class ST14SandstormOverlay : Overlay
         var handle = args.ScreenHandle;
         var bounds = args.ViewportBounds;
 
-        DrawLayer(handle, _texture, bounds, 512f, new Vector2(90f, 12f), _strength * 0.7f);
-        DrawLayer(handle, _texture, bounds, 320f, new Vector2(170f, -20f), _strength * 0.5f);
+        DrawLayer(handle, _texture, bounds, NearSize, _nearOffset, _strength * 0.7f);
+        DrawLayer(handle, _texture, bounds, FarSize, _farOffset, _strength * 0.5f);
     }
 
-    private void DrawLayer(DrawingHandleScreen handle, Texture texture, UIBox2i bounds, float size, Vector2 velocity, float alpha)
+    private static void DrawLayer(DrawingHandleScreen handle, Texture texture, UIBox2i bounds, float size, Vector2 offset, float alpha)
     {
-        var offset = new Vector2(Repeat(_time * velocity.X, size), Repeat(_time * velocity.Y, size));
         var color = Color.White.WithAlpha(Math.Clamp(alpha, 0f, 1f));
 
         for (var x = bounds.Left - size + offset.X; x < bounds.Right; x += size)
@@ -307,6 +337,11 @@ public sealed class ST14SandstormOverlay : Overlay
                 handle.DrawTextureRect(texture, UIBox2.FromDimensions(new Vector2(x, y), new Vector2(size, size)), color);
             }
         }
+    }
+
+    private static Vector2 Wrap(Vector2 offset, float size)
+    {
+        return new Vector2(Repeat(offset.X, size), Repeat(offset.Y, size));
     }
 
     private static float Repeat(float value, float length)

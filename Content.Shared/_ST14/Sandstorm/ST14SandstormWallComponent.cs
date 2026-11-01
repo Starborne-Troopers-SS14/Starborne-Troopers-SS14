@@ -23,15 +23,21 @@ public sealed partial class ST14SandstormWallComponent : Component
     public bool Fringe;
 
     /// <summary>
+    /// Farthest any storm tile can reach with its dust, in tiles. The client looks for storm tiles this far around
+    /// the player, a bigger <see cref="HazeRange"/> is cut down to it
+    /// </summary>
+    public const float MaxHazeRange = 8f;
+
+    /// <summary>
     /// From how far away, in tiles, the dust starts covering the screen
     /// </summary>
-    [DataField]
+    [DataField, AutoNetworkedField]
     public float HazeRange = 6f;
 
     /// <summary>
     /// How thick the dust on the screen gets right at the wall, 0 to 1
     /// </summary>
-    [DataField]
+    [DataField, AutoNetworkedField]
     public float HazeStrength = 0.55f;
 
     /// <summary>
