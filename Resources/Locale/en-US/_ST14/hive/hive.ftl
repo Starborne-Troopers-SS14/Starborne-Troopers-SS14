@@ -112,3 +112,4 @@ st14-brain-stupor-far = That mind is too far away.
 st14-brain-stupor-done = You are inside the head of {$target}.
 st14-brain-stupor-victim = Something crawls into your head! You cannot move!
 st14-brain-stupor-free = The visions let go, your body obeys again.
+st14-larva-thrown = You are hurled ahead!

@@ -1,11 +1,23 @@
-// Vision after the brain bug's scream: the picture swims in slow waves, splits into a doubled image that drifts
-// apart and back, smears, and flickers in brightness. strength 0 is a clear picture, 1 the full effect
+// Vision after the brain bug's scream: the picture swims in slow waves, sways and turns a little around the middle,
+// splits into a doubled image and into colour fringes, smears and flickers, and sight narrows to a pulsing tunnel.
+// strength 0 is a clear picture, 1 the full effect; negative turns the colours inside out for a moment
 uniform sampler2D SCREEN_TEXTURE;
 uniform highp float strength;
+uniform highp float negative;
+
+highp vec2 turn(highp vec2 uv, highp float angle) {
+    highp vec2 d = uv - vec2(0.5);
+    highp float c = cos(angle);
+    highp float s = sin(angle);
+    return vec2(d.x * c - d.y * s, d.x * s + d.y * c) + vec2(0.5);
+}
 
 void fragment() {
     highp vec2 uv = FRAGCOORD.xy * SCREEN_PIXEL_SIZE.xy;
     highp float t = TIME;
+
+    // dizziness: the view turns a little one way and back
+    uv = turn(uv, 0.035 * strength * sin(t * 0.6));
 
     // slow heavy waves across the whole picture
     highp vec2 wave = vec2(
@@ -18,14 +30,29 @@ void fragment() {
     // a second image drifts out to the side and back
     highp vec2 split = vec2(sin(t * 1.3), sin(t * 0.8 + 1.0) * 0.5) * 0.03 * strength;
 
-    highp vec4 main = zTextureSpec(SCREEN_TEXTURE, uv + wave + sway);
+    // colours slip apart
+    highp vec2 fringe = vec2(0.006 + 0.004 * sin(t * 4.0), 0.0) * strength;
+
+    highp vec2 at = uv + wave + sway;
+    highp vec3 base = vec3(
+        zTextureSpec(SCREEN_TEXTURE, at + fringe).r,
+        zTextureSpec(SCREEN_TEXTURE, at).g,
+        zTextureSpec(SCREEN_TEXTURE, at - fringe).b);
     highp vec4 ghost = zTextureSpec(SCREEN_TEXTURE, uv - wave + sway + split);
     highp vec4 smear = zTextureSpec(SCREEN_TEXTURE, uv + wave * 2.0 - split * 0.5);
 
-    highp vec3 colour = mix(main.rgb, ghost.rgb, 0.45 * strength);
+    highp vec3 colour = mix(base, ghost.rgb, 0.45 * strength);
     colour = mix(colour, smear.rgb, 0.25 * strength);
 
     // brightness flickers, fast and uneven
     highp float flicker = 1.0 + strength * (0.18 * sin(t * 21.0) * sin(t * 6.3) + 0.1 * sin(t * 37.0));
-    COLOR = vec4(colour * flicker, 1.0);
+    colour *= flicker;
+
+    // tunnel vision: the edges go dark, the tunnel breathes
+    highp float edge = length(FRAGCOORD.xy * SCREEN_PIXEL_SIZE.xy - vec2(0.5)) * 2.0;
+    highp float tunnel = 0.55 + 0.12 * sin(t * 1.9);
+    colour *= 1.0 - strength * 0.85 * smoothstep(tunnel, tunnel + 0.6, edge);
+
+    colour = mix(colour, vec3(1.0) - colour, negative);
+    COLOR = vec4(colour, 1.0);
 }

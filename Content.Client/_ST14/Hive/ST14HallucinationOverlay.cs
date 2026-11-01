@@ -12,7 +12,8 @@ namespace Content.Client._ST14.Hive;
 
 /// <summary>
 /// Visions of the brain stupor: the screen breathes red and violet, the edges sink into a pulsing dark, bugs that
-/// are not there loom up and rush at the middle, and the picture tears in flickering bars
+/// are not there loom up and rush at the middle, and the picture tears in flickering bars. After a scream the
+/// phantoms and tears come too, fainter
 /// </summary>
 public sealed partial class ST14HallucinationOverlay : Overlay
 {
@@ -41,39 +42,47 @@ public sealed partial class ST14HallucinationOverlay : Overlay
     }
 
     /// <summary>
-    /// How strong the stupor visions of the local player are right now, faded out at the end. Zero without a stupor
+    /// How strong the visions of the local player are right now, faded out at the end, and whether they are the
+    /// stupor. The scream gets only a lighter share of these visions, its main effect is the swimming picture
     /// </summary>
-    public float Strength()
+    public float Strength(out bool stupor)
     {
-        if (!_entities.TryGetComponent(_player.LocalEntity, out ST14HallucinatingComponent? visions) || !visions.Paralyzed)
+        stupor = false;
+        if (!_entities.TryGetComponent(_player.LocalEntity, out ST14HallucinatingComponent? visions))
             return 0f;
 
+        stupor = visions.Paralyzed;
         var left = (float) (visions.End - _timing.CurTime).TotalSeconds;
-        return visions.Intensity * Math.Clamp(left / FadeTime, 0f, 1f);
+        var strength = visions.Intensity * Math.Clamp(left / FadeTime, 0f, 1f);
+        return stupor ? strength : strength * 0.4f;
     }
 
     protected override bool BeforeDraw(in OverlayDrawArgs args)
     {
-        return Strength() > 0.01f;
+        return Strength(out _) > 0.01f;
     }
 
     protected override void Draw(in OverlayDrawArgs args)
     {
-        var strength = Strength();
+        var strength = Strength(out var stupor);
         var handle = args.ScreenHandle;
         var screen = new UIBox2(args.ViewportBounds.Left, args.ViewportBounds.Top, args.ViewportBounds.Right, args.ViewportBounds.Bottom);
         var time = (float) _timing.RealTime.TotalSeconds;
 
         _phantoms ??= LoadPhantoms();
 
+        DrawPhantoms(handle, screen, time, strength);
+        DrawTears(handle, screen, time, strength);
+
+        if (!stupor)
+            return;
+
         // the whole screen breathes between blood red and bruise violet
         var breath = 0.5f + 0.5f * MathF.Sin(time * 1.7f);
         var wash = Color.InterpolateBetween(new Color(0.6f, 0f, 0.05f), new Color(0.35f, 0f, 0.5f), breath);
         handle.DrawRect(screen, wash.WithAlpha(0.12f * strength + 0.06f * strength * MathF.Sin(time * 5.3f)));
 
-        DrawPhantoms(handle, screen, time, strength);
         DrawVignette(handle, screen, time, strength);
-        DrawTears(handle, screen, time, strength);
 
         // now and then the whole picture blinks dark
         var blink = Hash((int) (time * 2f), 911);
@@ -183,8 +192,9 @@ public sealed partial class ST14HallucinationOverlay : Overlay
 }
 
 /// <summary>
-/// Vision after the brain bug's scream: the whole picture swims, doubles, sways and flickers, and the eyes keep
-/// blinking shut, so the trooper can hardly see what is in front of it
+/// Vision after the brain bug's scream: the whole picture swims, doubles, spins a little, splits into colours and
+/// flickers, sight narrows to a tunnel, the eyes keep blinking shut, white flashes go off and now and then the
+/// colours turn inside out, so the trooper can hardly see what is in front of it
 /// </summary>
 public sealed partial class ST14ScreamVisionOverlay : Overlay
 {
@@ -231,9 +241,13 @@ public sealed partial class ST14ScreamVisionOverlay : Overlay
         var handle = args.WorldHandle;
         var time = (float) _timing.RealTime.TotalSeconds;
 
+        // now and then the colours turn inside out for a moment
+        var negative = Hash((int) (time * 3f) + 500) > 0.93f ? strength : 0f;
+
         _shader ??= _prototypes.Index(ScreamShader).InstanceUnique();
         _shader.SetParameter("SCREEN_TEXTURE", ScreenTexture);
         _shader.SetParameter("strength", strength);
+        _shader.SetParameter("negative", negative);
         handle.UseShader(_shader);
         handle.DrawRect(args.WorldBounds, Color.White);
         handle.UseShader(null);
@@ -251,6 +265,16 @@ public sealed partial class ST14ScreamVisionOverlay : Overlay
         // and the light comes and goes in waves
         var dim = 0.5f + 0.5f * MathF.Sin(time * 2.3f) * MathF.Sin(time * 0.7f);
         handle.DrawRect(args.WorldBounds, Color.Black.WithAlpha(0.25f * dim * strength));
+
+        // a sudden white flash, like the scream going off again inside the head
+        var flash = (int) (time / 2.7f);
+        var sinceFlash = time / 2.7f - flash;
+        if (Hash(flash + 77) > 0.55f && sinceFlash < 0.12f)
+            handle.DrawRect(args.WorldBounds, Color.White.WithAlpha(0.55f * (1f - sinceFlash / 0.12f) * strength));
+
+        // a bloody tint creeps in and out
+        var tint = 0.5f + 0.5f * MathF.Sin(time * 0.9f + 1f);
+        handle.DrawRect(args.WorldBounds, new Color(0.5f, 0f, 0.05f, 0.12f * tint * strength));
     }
 
     private static float Hash(int i)

@@ -12,7 +12,7 @@ namespace Content.Shared._ST14.Hive.Components;
 public sealed partial class ST14BrainStuporComponent : Component
 {
     [DataField]
-    public TimeSpan Duration = TimeSpan.FromSeconds(8);
+    public TimeSpan Duration = TimeSpan.FromSeconds(12);
 
     /// <summary>
     /// Farthest trooper the mind reaches, in tiles
