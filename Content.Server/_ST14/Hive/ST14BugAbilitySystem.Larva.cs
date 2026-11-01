@@ -23,6 +23,7 @@ public sealed partial class ST14BugAbilitySystem
         SubscribeLocalEvent<ST14RidingComponent, BeforeDamageChangedEvent>(OnRiderBeforeDamage);
         SubscribeLocalEvent<ST14CarryingRiderComponent, MobStateChangedEvent>(OnMountMobState);
         SubscribeLocalEvent<ST14CarryingRiderComponent, EntityTerminatingEvent>(OnMountTerminating);
+        SubscribeLocalEvent<ST14CarryingRiderComponent, ST14ThrowRiderActionEvent>(OnThrowRider);
     }
 
     private void UpdateLarva()
@@ -38,7 +39,7 @@ public sealed partial class ST14BugAbilitySystem
 
         foreach (var mount in _riderChecks)
         {
-            RemComp<ST14CarryingRiderComponent>(mount);
+            FreeMount(mount);
         }
     }
 
@@ -115,6 +116,7 @@ public sealed partial class ST14BugAbilitySystem
         Dirty(larva, riding);
         var carrying = EnsureComp<ST14CarryingRiderComponent>(mount);
         carrying.Rider = larva;
+        _actions.AddAction(mount, ref carrying.ThrowActionEntity, larva.Comp.ThrowAction);
         Dirty(mount, carrying);
 
         _physics.SetCanCollide(larva, false);
@@ -140,7 +142,7 @@ public sealed partial class ST14BugAbilitySystem
         RemComp(larva, riding);
 
         if (TryComp<ST14CarryingRiderComponent>(mount, out var carrying) && carrying.Rider == larva.Owner)
-            RemComp(mount, carrying);
+            FreeMount(mount);
 
         if (TerminatingOrDeleted(larva))
             return;
@@ -153,6 +155,43 @@ public sealed partial class ST14BugAbilitySystem
 
         if (cooldown)
             StartCooldown(larva.Comp.ActionEntity, larva.Comp.Cooldown);
+    }
+
+    /// <summary>
+    /// The mount has no larva on its back any more: it loses the throw
+    /// </summary>
+    private void FreeMount(EntityUid mount)
+    {
+        if (!TryComp<ST14CarryingRiderComponent>(mount, out var carrying))
+            return;
+
+        _actions.RemoveAction(mount, carrying.ThrowActionEntity);
+        RemComp(mount, carrying);
+    }
+
+    private void OnThrowRider(Entity<ST14CarryingRiderComponent> ent, ref ST14ThrowRiderActionEvent args)
+    {
+        if (args.Handled || !TryComp<ST14LarvaRideComponent>(ent.Comp.Rider, out var ride))
+            return;
+
+        var larva = ent.Comp.Rider;
+        var from = _transform.GetMapCoordinates(ent);
+        var to = _transform.ToMapCoordinates(args.Target);
+        var direction = to.Position - from.Position;
+        if (from.MapId != to.MapId || direction.LengthSquared() < 0.01f)
+            return;
+
+        if (direction.Length() > ride.ThrowDistance)
+            direction = direction.Normalized() * ride.ThrowDistance;
+
+        args.Handled = true;
+        Dismount((larva, ride), true);
+        _throwing.TryThrow(larva, direction, ride.ThrowSpeed, ent, recoil: false);
+
+        if (ride.Sound != null)
+            _audio.PlayPvs(ride.Sound, larva);
+
+        _popup.PopupEntity(Loc.GetString("st14-larva-thrown"), larva, larva, PopupType.Medium);
     }
 
     private void OnRiderBeforeDamage(Entity<ST14RidingComponent> ent, ref BeforeDamageChangedEvent args)

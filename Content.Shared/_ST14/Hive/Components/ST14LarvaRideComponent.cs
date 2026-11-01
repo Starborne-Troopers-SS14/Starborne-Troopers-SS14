@@ -30,6 +30,21 @@ public sealed partial class ST14LarvaRideComponent : Component
     [DataField]
     public TimeSpan Cooldown = TimeSpan.FromSeconds(15);
 
+    /// <summary>
+    /// How far the mount can throw the larva off its back, in tiles
+    /// </summary>
+    [DataField]
+    public float ThrowDistance = 5f;
+
+    [DataField]
+    public float ThrowSpeed = 10f;
+
+    /// <summary>
+    /// The action the mount gets while the larva is on its back
+    /// </summary>
+    [DataField]
+    public EntProtoId ThrowAction = "ST14ActionThrowLarva";
+
     [DataField]
     public SoundSpecifier? Sound;
 
@@ -51,11 +66,15 @@ public sealed partial class ST14RidingComponent : Component
 }
 
 /// <summary>
-/// A bug with a larva on its back. Its sprite shows the larva, the larva itself is hidden
+/// A bug with a larva on its back. Its sprite shows the larva, the larva itself is hidden.
+/// The bug can throw the larva off at a spot of its choice
 /// </summary>
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
 public sealed partial class ST14CarryingRiderComponent : Component
 {
     [DataField, AutoNetworkedField]
     public EntityUid Rider;
+
+    [DataField]
+    public EntityUid? ThrowActionEntity;
 }

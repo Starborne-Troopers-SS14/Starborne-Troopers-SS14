@@ -274,4 +274,32 @@ public sealed class ST14BugAbilityTest : InteractionTest
             Assert.That(SEntMan.HasComponent<ST14HallucinatingComponent>(human), "The scream gave the trooper no visions.");
         });
     }
+
+    /// <summary>
+    /// A bug with a larva on its back gets the throw, and the throw puts the larva back on the ground
+    /// </summary>
+    [Test]
+    public async Task ThrowLarvaTest()
+    {
+        await LayFloor();
+        var larva = await SpawnAt("ST14MobBugLarva", 4, 2);
+        var warrior = await SpawnAt("ST14MobBugWarrior", 5, 2);
+        await RunTicks(5);
+
+        await Server.WaitPost(() => SEntMan.EventBus.RaiseLocalEvent(larva,
+            new ST14LarvaRideActionEvent { Performer = larva, Target = SEntMan.GetComponent<TransformComponent>(warrior).Coordinates }));
+        await RunTicks(2);
+
+        Assert.That(SEntMan.GetComponent<ST14CarryingRiderComponent>(warrior).ThrowActionEntity, Is.Not.Null, "The mount got no throw.");
+
+        await Server.WaitPost(() => SEntMan.EventBus.RaiseLocalEvent(warrior,
+            new ST14ThrowRiderActionEvent { Performer = warrior, Target = MapData.GridCoords.Offset(new Vector2(1.5f, 2.5f)) }));
+        await RunTicks(2);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(SEntMan.HasComponent<ST14RidingComponent>(larva), Is.False, "The thrown larva still rides.");
+            Assert.That(SEntMan.HasComponent<ST14CarryingRiderComponent>(warrior), Is.False, "The mount still carries the larva.");
+        });
+    }
 }
