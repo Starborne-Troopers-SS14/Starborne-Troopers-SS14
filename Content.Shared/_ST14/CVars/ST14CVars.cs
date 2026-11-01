@@ -66,4 +66,10 @@ public static partial class ST14CVars
     /// </summary>
     public static readonly CVarDef<string> WarPlanet =
         CVarDef.Create("st14.war_planet", string.Empty, CVar.SERVERONLY | CVar.ARCHIVE);
+
+    /// <summary>
+    /// Volume of bug footsteps, 0 to 1, set in the audio options
+    /// </summary>
+    public static readonly CVarDef<float> BugFootstepsVolume =
+        CVarDef.Create("st14.bug_footsteps_volume", 1f, CVar.CLIENTONLY | CVar.ARCHIVE);
 }

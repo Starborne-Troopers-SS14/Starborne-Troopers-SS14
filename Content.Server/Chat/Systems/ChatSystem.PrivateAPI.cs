@@ -56,7 +56,7 @@ public sealed partial class ChatSystem
             ("fontSize", speech.FontSize),
             ("message", FormattedMessage.EscapeText(message)));
 
-        SendInVoiceRange(ChatChannel.Local, message, wrappedMessage, source, range);
+        SendInVoiceRange(ChatChannel.Local, message, wrappedMessage, source, range, st14Speech: true); // ST14
 
         var ev = new EntitySpokeEvent(source, message, null, null);
         RaiseLocalEvent(source, ev, true);
@@ -139,6 +139,16 @@ public sealed partial class ChatSystem
 
             if (MessageRangeCheck(session, data, range) != MessageRangeCheckResult.Full)
                 continue; // Won't get logged to chat, and ghosts are too far away to see the pop-up, so we just won't send it to them.
+
+            // ST14: deafened ears hear nothing, a whisper of the other kind is only a quiet sound
+            if (_st14Language.IsDeaf(listener))
+                continue;
+
+            if (!_st14Language.Understands(listener, source))
+            {
+                _st14Language.PlayNoise(source, message, session, whisper: true);
+                continue;
+            }
 
             if (data.Range <= WhisperClearRange || data.Observer)
                 _chatManager.ChatMessageToOne(ChatChannel.Whisper, message, wrappedMessage, source, false, session.Channel);

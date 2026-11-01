@@ -1,0 +1,348 @@
+# Green bug blood left on the ground where a bug gets hit. ST14BugBloodSystem picks them by the tag.
+- type: decal
+  abstract: true
+  id: _ST14BugBloodBase
+  tags: ["ST14BugBlood"]
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood1
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_1
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood2
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_2
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood3
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_3
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood4
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_4
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood5
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_5
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood6
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_6
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood7
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_7
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood8
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_8
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood9
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_9
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood10
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_10
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood11
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_11
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood12
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_12
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood13
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_13
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood14
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_14
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood15
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_15
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood16
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_16
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood17
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_17
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood18
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_18
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood19
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_19
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood20
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_20
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood21
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_21
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood22
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_22
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood23
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_23
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood24
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_24
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood25
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_25
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood26
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_26
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood27
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_27
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood28
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_28
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood29
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_29
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood30
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_30
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood31
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_31
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood32
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_32
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood33
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_33
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood34
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_34
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood35
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_35
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood36
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_36
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood37
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_37
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood38
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_38
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood39
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_39
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood40
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_40
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood41
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_41
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood42
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_42
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood43
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_43
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood44
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_44
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood45
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_45
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood46
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_46
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood47
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_47
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood48
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_48
+
+- type: decal
+  parent: _ST14BugBloodBase
+  id: _ST14BugBlood49
+  sprite:
+    sprite: _ST14/Decals/BugBlood.rsi
+    state: bug_blood_49
