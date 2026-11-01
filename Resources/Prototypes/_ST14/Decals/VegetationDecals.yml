@@ -1,0 +1,188 @@
+# Dry grass, reeds, ferns and shrubs of Klendathu. One RSI, every sprite centred on the same canvas.
+- type: decal
+  abstract: true
+  id: _ST14VegetationDecalBase
+  tags: ["Vegetation", "Grass"]
+  defaultSnap: false
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationGrassMound1
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: grassMound1
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationGrassMound2
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: grassMound2
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationGrassMound3
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: grassMound3
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationGrassMound4
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: grassMound4
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationGrassPatch1
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: grassPatch1
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationGrassPatch2
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: grassPatch2
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationGrassPatch3
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: grassPatch3
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationGrassPatch4
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: grassPatch4
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationGrassPiece1
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: grassPiece1
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationGrassPiece2
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: grassPiece2
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationGrassPiece3
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: grassPiece3
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationGrassPiece4
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: grassPiece4
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationGrassPiece5
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: grassPiece5
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationGrassPiece6
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: grassPiece6
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationGrassPiece7
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: grassPiece7
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationReeds1
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: reeds1
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationReeds2
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: reeds2
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationReeds3
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: reeds3
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationReeds4
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: reeds4
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationFernGreen
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: fern_green
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationFernRed
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: fern_red
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationShrub1
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: shrub1
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationShrub2
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: shrub2
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationShrub3
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: shrub3
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationSmallFernGreen
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: smallFern_green
+
+- type: decal
+  parent: _ST14VegetationDecalBase
+  id: _ST14VegetationSmallFernRed
+  sprite:
+    sprite: _ST14/Decals/vegetation.rsi
+    state: smallFern_red

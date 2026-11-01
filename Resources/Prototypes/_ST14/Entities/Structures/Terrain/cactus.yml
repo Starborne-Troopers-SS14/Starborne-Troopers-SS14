@@ -1,0 +1,61 @@
+# Cacti of Klendathu: solid like the rocks, they y-sort with the mobs. The hitbox covers the lower part of the plant.
+- type: entity
+  abstract: true
+  parent: BaseStructure
+  id: ST14CactusBase
+  name: cactus
+  description: A tough desert plant covered in spines.
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Sprite
+    sprite: _ST14/Structures/Terrain/cactus.rsi
+    drawdepth: Mobs
+    offset: 0, 0.5
+  - type: Icon
+    sprite: _ST14/Structures/Terrain/cactus.rsi
+  - type: Physics
+    bodyType: Static
+  - type: Tag
+    tags:
+    - Structure
+
+- type: entity
+  parent: ST14CactusBase
+  id: ST14CactusLarge
+  components:
+  - type: Sprite
+    state: cactusLarge
+  - type: Icon
+    state: cactusLarge
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.6875,-0.3125,0.6875,0.25"
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+        density: 1000
+
+- type: entity
+  parent: ST14CactusBase
+  id: ST14CactusSmall
+  components:
+  - type: Sprite
+    state: smallCactus
+  - type: Icon
+    state: smallCactus
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.275,-0.3125,0.275,-0.25"
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+        density: 1000
