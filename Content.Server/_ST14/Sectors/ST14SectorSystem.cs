@@ -5,13 +5,15 @@ using Content.Server._ST14.MainHub;
 using Content.Server.GameTicking;
 using Content.Shared.Maps;
 using Content.Shared._ST14.CCVar;
-using Content.Shared._ST14.Hive.Components;
 using Content.Shared._ST14.Sectors;
 using Content.Shared.CCVar;
 using Content.Shared.GameTicking;
 using Content.Shared.Humanoid;
 using Content.Shared.Mind.Components;
+using Content.Shared.Mobs.Components;
 using Content.Shared.Mobs.Systems;
+using Content.Shared.NPC.Components;
+using Content.Shared.NPC.Systems;
 using Robust.Shared.Configuration;
 using Robust.Shared.ContentPack;
 using Robust.Shared.Map;
@@ -39,6 +41,7 @@ public sealed partial class ST14SectorSystem : EntitySystem
     [Dependency] private IRobustRandom _random = default!;
     [Dependency] private GameTicker _ticker = default!;
     [Dependency] private MobStateSystem _mobState = default!;
+    [Dependency] private NpcFactionSystem _faction = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private ST14GalaxyWarSystem _war = default!;
 
@@ -140,10 +143,14 @@ public sealed partial class ST14SectorSystem : EntitySystem
         }
 
         _random.Shuffle(slots);
+        // the queen comes with the hive, a server without it leaves the places empty
         var settings = Settings;
+        if (settings.Queen is not { } queen || !_prototype.HasIndex(queen))
+            return;
+
         foreach (var slot in slots.Take(settings.Queens))
         {
-            Spawn(settings.Queen, slot);
+            Spawn(queen, slot);
         }
     }
 
@@ -192,32 +199,24 @@ public sealed partial class ST14SectorSystem : EntitySystem
 
     /// <summary>
     /// Live fighters of both sides on the sector map: troopers are people with a player behind them, the hive is
-    /// every bug with a player and every queen, who keeps laying larvae while she lives
+    /// every live mob of the hive's faction, players or not: a queen keeps laying larvae while she lives
     /// </summary>
     private void CountSides(MapId map, out int troopers, out int hive)
     {
         troopers = 0;
         hive = 0;
+        var faction = Settings.HiveFaction;
 
-        var people = EntityQueryEnumerator<HumanoidProfileComponent, MindContainerComponent, TransformComponent>();
-        while (people.MoveNext(out var uid, out _, out var mind, out var xform))
+        var mobs = EntityQueryEnumerator<MobStateComponent, TransformComponent>();
+        while (mobs.MoveNext(out var uid, out _, out var xform))
         {
-            if (xform.MapID == map && mind.HasMind && !_mobState.IsDead(uid))
+            if (xform.MapID != map || _mobState.IsDead(uid))
+                continue;
+
+            if (TryComp<NpcFactionMemberComponent>(uid, out var member) && _faction.IsMember((uid, member), faction))
+                hive++;
+            else if (HasComp<HumanoidProfileComponent>(uid) && TryComp<MindContainerComponent>(uid, out var mind) && mind.HasMind)
                 troopers++;
-        }
-
-        var bugs = EntityQueryEnumerator<ST14HiveMemberComponent, MindContainerComponent, TransformComponent>();
-        while (bugs.MoveNext(out var uid, out _, out var mind, out var xform))
-        {
-            if (xform.MapID == map && mind.HasMind && !_mobState.IsDead(uid))
-                hive++;
-        }
-
-        var queens = EntityQueryEnumerator<ST14HiveQueenComponent, TransformComponent>();
-        while (queens.MoveNext(out var uid, out _, out var xform))
-        {
-            if (xform.MapID == map && !_mobState.IsDead(uid))
-                hive++;
         }
     }
 

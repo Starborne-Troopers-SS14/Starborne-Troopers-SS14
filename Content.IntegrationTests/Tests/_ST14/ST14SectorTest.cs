@@ -19,6 +19,9 @@ namespace Content.IntegrationTests.Tests._ST14;
 [TestOf(typeof(ST14SectorSystem))]
 public sealed class ST14SectorTest : GameTest
 {
+    // a plain string: on a server without the hive this prototype does not exist
+    private static readonly string BugSpawnPoint = "ST14SpawnPointBug";
+
     /// <summary>
     /// Every terrain of the galaxy map has a sector map, and with sector rounds on the war's target picks one
     /// </summary>
@@ -84,8 +87,12 @@ public sealed class ST14SectorTest : GameTest
             {
                 Assert.That(storm, Is.EqualTo(size * size - inner * inner), "The storm does not close off the whole edge.");
                 Assert.That(points, Does.Contain("ST14Engineer"), "No landing points for the troopers.");
-                Assert.That(points, Does.Contain("ST14Bug"), "No spawn points for the bugs.");
-                Assert.That(points, Does.Contain("ST14BrainBug"), "No spawn point for the brain bug.");
+                // the hive's points come with the hive
+                if (server.ProtoMan.HasIndex<EntityPrototype>(BugSpawnPoint))
+                {
+                    Assert.That(points, Does.Contain("ST14Bug"), "No spawn points for the bugs.");
+                    Assert.That(points, Does.Contain("ST14BrainBug"), "No spawn point for the brain bug.");
+                }
                 Assert.That(queens, Is.GreaterThanOrEqualTo(2), "Too few queen places.");
             });
 

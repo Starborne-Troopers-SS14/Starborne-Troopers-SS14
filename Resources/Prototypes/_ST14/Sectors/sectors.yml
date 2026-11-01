@@ -52,8 +52,6 @@
       - type: StationJobs
         availableJobs:
           ST14Engineer: [ -1, -1 ]
-          ST14Bug: [ -1, -1 ]
-          ST14BrainBug: [ 1, 1 ]
 
 # The station of a sector round: jobs and spawning, nothing of a space station
 - type: entity

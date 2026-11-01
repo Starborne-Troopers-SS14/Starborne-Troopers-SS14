@@ -40,8 +40,17 @@ public sealed partial class ST14SectorSettingsPrototype : IPrototype
     [DataField]
     public int Queens = 2;
 
+    /// <summary>
+    /// The queen put into the queen places. Plain id: the hive may not be on this server
+    /// </summary>
     [DataField]
-    public EntProtoId Queen = "ST14MobBugQueen";
+    public string? Queen;
+
+    /// <summary>
+    /// Mobs of this faction are the hive: the round goes on while one of them lives
+    /// </summary>
+    [DataField]
+    public string HiveFaction = "Xeno";
 
     /// <summary>
     /// No side loses before this much of the round has passed, so a round does not end before everyone has spawned

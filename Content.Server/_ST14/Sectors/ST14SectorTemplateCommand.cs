@@ -113,8 +113,15 @@ public sealed partial class ST14SectorTemplateCommand : IConsoleCommand
         return map;
     }
 
+    /// <summary>
+    /// Puts one thing on the template. The hive's spawn points only exist on a server that has the hive, without it
+    /// they are left out
+    /// </summary>
     private void Place(EntityUid grid, string prototype, int x, int y)
     {
+        if (!_prototype.HasIndex<EntityPrototype>(prototype))
+            return;
+
         _entMan.SpawnAtPosition(prototype, new EntityCoordinates(grid, new Vector2(x + 0.5f, y + 0.5f)));
     }
 }
