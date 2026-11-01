@@ -10,7 +10,7 @@ using Robust.Shared.Timing;
 namespace Content.Client._ST14.Hive;
 
 /// <summary>
-/// Looks of the caste abilities: trembling air around resonating warriors, a green glowing shield on the bugs of a
+/// Looks of the caste abilities: green motes and a pale outline on resonating warriors, a green glowing shield on the bugs of a
 /// living barricade, a red outline and sparks on a tiger in its last rush, and for the bugs that smell blood the red
 /// trails and the reddened bodies of the wounded troopers
 /// </summary>
@@ -28,7 +28,7 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
     [Dependency] private MobStateSystem _mobState = default!;
     [Dependency] private SpriteSystem _sprite = default!;
 
-    private ST14HiveShimmerOverlay _shimmer = default!;
+    private ST14ResonanceOverlay _resonance = default!;
     private ST14RageOverlay _rage = default!;
     private ST14BloodScentOverlay _scent = default!;
     private ST14GripStruggleOverlay _struggle = default!;
@@ -36,6 +36,7 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
     // made on the first frame: a client without graphics, like the test one, never needs them
     private ShaderInstance? _rageShader;
     private ShaderInstance? _shieldShader;
+    private ShaderInstance? _resonanceShader;
 
     // entities this system has painted, so their looks can be put back
     private readonly HashSet<EntityUid> _outlined = new();
@@ -49,12 +50,12 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
 
         SubscribeNetworkEvent<ST14BloodScentEvent>(OnBloodScent);
 
-        _shimmer = new ST14HiveShimmerOverlay();
+        _resonance = new ST14ResonanceOverlay();
         _rage = new ST14RageOverlay();
         _scent = new ST14BloodScentOverlay();
         _struggle = new ST14GripStruggleOverlay();
 
-        _overlays.AddOverlay(_shimmer);
+        _overlays.AddOverlay(_resonance);
         _overlays.AddOverlay(_rage);
         _overlays.AddOverlay(_scent);
         _overlays.AddOverlay(_struggle);
@@ -64,7 +65,7 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
     {
         base.Shutdown();
 
-        _overlays.RemoveOverlay(_shimmer);
+        _overlays.RemoveOverlay(_resonance);
         _overlays.RemoveOverlay(_rage);
         _overlays.RemoveOverlay(_scent);
         _overlays.RemoveOverlay(_struggle);
@@ -83,8 +84,10 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
 
         _rageShader ??= MakeOutline();
         _shieldShader ??= MakeOutline();
+        _resonanceShader ??= MakeOutline(1f);
         _rageShader.SetParameter("outline_color", RageOutline.WithAlpha(0.6f + 0.4f * pulse));
         _shieldShader.SetParameter("outline_color", ShieldOutline.WithAlpha(0.55f + 0.35f * pulse));
+        _resonanceShader.SetParameter("outline_color", ShieldOutline.WithAlpha(0.25f + 0.2f * pulse));
 
         _outlinedNow.Clear();
         _tintedNow.Clear();
@@ -97,6 +100,14 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
 
             Outline((uid, sprite), _rageShader);
             Tint((uid, sprite), Color.InterpolateBetween(Color.White, new Color(1f, 0.45f, 0.4f), pulse));
+        }
+
+        // a warrior at full resonance glows faintly, a wall shield outshines it
+        var resonance = EntityQueryEnumerator<ST14SwarmResonanceComponent, SpriteComponent>();
+        while (resonance.MoveNext(out var uid, out var comp, out var sprite))
+        {
+            if (comp.Allies >= comp.MaxAllies && !_mobState.IsDead(uid) && !HasComp<ST14InBarricadeComponent>(uid))
+                Outline((uid, sprite), _resonanceShader);
         }
 
         var wall = EntityQueryEnumerator<ST14InBarricadeComponent, SpriteComponent>();
@@ -163,10 +174,10 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
         });
     }
 
-    private ShaderInstance MakeOutline()
+    private ShaderInstance MakeOutline(float width = 2f)
     {
         var shader = _prototypes.Index(OutlineShader).InstanceUnique();
-        shader.SetParameter("outline_width", 2f);
+        shader.SetParameter("outline_width", width);
         shader.SetParameter("outline_fullbright", true);
         return shader;
     }

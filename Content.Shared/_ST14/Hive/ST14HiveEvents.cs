@@ -24,10 +24,6 @@ public enum ST14BrainBugVisuals : byte
     Sucking,
 }
 
-public sealed partial class ST14BugLungeActionEvent : WorldTargetActionEvent;
-
-public sealed partial class ST14BugRendActionEvent : InstantActionEvent;
-
 public sealed partial class ST14BugGrabActionEvent : WorldTargetActionEvent;
 
 public sealed partial class ST14BugBarricadeActionEvent : InstantActionEvent;
