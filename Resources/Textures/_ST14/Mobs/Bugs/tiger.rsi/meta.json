@@ -29,6 +29,10 @@
     {
       "name": "DamageOverlay_4",
       "directions": 4
+    },
+    {
+      "name": "alive_larva",
+      "directions": 4
     }
   ]
 }

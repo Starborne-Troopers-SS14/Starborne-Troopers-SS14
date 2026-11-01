@@ -113,7 +113,9 @@ public sealed partial class ST14BugAbilitySystem
         var riding = EnsureComp<ST14RidingComponent>(larva);
         riding.Mount = mount;
         Dirty(larva, riding);
-        EnsureComp<ST14CarryingRiderComponent>(mount).Rider = larva;
+        var carrying = EnsureComp<ST14CarryingRiderComponent>(mount);
+        carrying.Rider = larva;
+        Dirty(mount, carrying);
 
         _physics.SetCanCollide(larva, false);
         _transform.SetCoordinates(larva, new EntityCoordinates(mount, larva.Comp.Offset));

@@ -5,63 +5,35 @@ using Robust.Shared.Prototypes;
 namespace Content.Shared._ST14.Hive.Components;
 
 /// <summary>
-/// Slime spit of the brain bug: every glob that lands sticks to the trooper, and enough of them wrap it in a
-/// cocoon it cannot move in
+/// Brain stupor: the brain bug reaches into the mind of one trooper. Its screen fills with the worst visions
+/// and it cannot move until they let go
 /// </summary>
 [RegisterComponent]
-public sealed partial class ST14BrainSpitComponent : Component
+public sealed partial class ST14BrainStuporComponent : Component
 {
     [DataField]
-    public EntProtoId Projectile = "ST14BrainSlimeSpit";
+    public TimeSpan Duration = TimeSpan.FromSeconds(8);
 
+    /// <summary>
+    /// Farthest trooper the mind reaches, in tiles
+    /// </summary>
     [DataField]
-    public float Speed = 14f;
+    public float Range = 10f;
 
     [DataField]
     public SoundSpecifier? Sound;
 
+    /// <summary>
+    /// What the trooper hears in its head, played only to it
+    /// </summary>
     [DataField]
-    public EntProtoId Action = "ST14ActionBrainSpit";
+    public SoundSpecifier? VictimSound;
+
+    [DataField]
+    public EntProtoId Action = "ST14ActionBrainStupor";
 
     [DataField]
     public EntityUid? ActionEntity;
-}
-
-/// <summary>
-/// A glob of slime in flight. It flies through bugs and sticks to the first trooper it meets
-/// </summary>
-[RegisterComponent]
-public sealed partial class ST14SlimeSpitComponent : Component;
-
-/// <summary>
-/// A trooper with slime on it. Enough globs and it is wrapped in a cocoon: no walking, shooting or hitting
-/// </summary>
-[RegisterComponent, NetworkedComponent, AutoGenerateComponentState(raiseAfterAutoHandleState: true), AutoGenerateComponentPause]
-public sealed partial class ST14SlimedComponent : Component
-{
-    [DataField, AutoNetworkedField]
-    public int Globs;
-
-    [DataField]
-    public int GlobsNeeded = 3;
-
-    /// <summary>
-    /// Globs that do not become a cocoon dry off after this long
-    /// </summary>
-    [DataField]
-    public TimeSpan GlobLifetime = TimeSpan.FromSeconds(10);
-
-    [DataField]
-    public TimeSpan CocoonTime = TimeSpan.FromSeconds(12);
-
-    [DataField, AutoNetworkedField]
-    public bool Cocooned;
-
-    /// <summary>
-    /// When the globs dry off, or the cocoon breaks
-    /// </summary>
-    [DataField, AutoNetworkedField, AutoPausedField]
-    public TimeSpan End;
 }
 
 /// <summary>
@@ -71,16 +43,16 @@ public sealed partial class ST14SlimedComponent : Component
 public sealed partial class ST14BrainScreamComponent : Component
 {
     [DataField]
-    public float Range = 6f;
+    public float Range = 7f;
 
     [DataField]
-    public TimeSpan Hallucinations = TimeSpan.FromSeconds(12);
+    public TimeSpan Duration = TimeSpan.FromSeconds(30);
 
+    /// <summary>
+    /// How hard the visions hit, 1 is the stupor
+    /// </summary>
     [DataField]
-    public TimeSpan Deafness = TimeSpan.FromSeconds(10);
-
-    [DataField]
-    public EntProtoId HallucinationEffect = "StatusEffectSeeingRainbow";
+    public float Intensity = 0.55f;
 
     [DataField]
     public SoundSpecifier? Sound;
@@ -96,6 +68,31 @@ public sealed partial class ST14BrainScreamComponent : Component
 
     [DataField]
     public EntityUid? ActionEntity;
+}
+
+/// <summary>
+/// A trooper whose head the brain bug got into: visions on its screen, and with the stupor no moving at all
+/// </summary>
+[RegisterComponent, NetworkedComponent, AutoGenerateComponentState(raiseAfterAutoHandleState: true), AutoGenerateComponentPause]
+public sealed partial class ST14HallucinatingComponent : Component
+{
+    [DataField, AutoNetworkedField, AutoPausedField]
+    public TimeSpan End;
+
+    /// <summary>
+    /// How hard the visions hit, from 0 to 1
+    /// </summary>
+    [DataField, AutoNetworkedField]
+    public float Intensity;
+
+    /// <summary>
+    /// Frozen in place: no walking, shooting or hitting
+    /// </summary>
+    [DataField, AutoNetworkedField]
+    public bool Paralyzed;
+
+    [DataField, AutoNetworkedField, AutoPausedField]
+    public TimeSpan ParalyzedEnd;
 }
 
 /// <summary>

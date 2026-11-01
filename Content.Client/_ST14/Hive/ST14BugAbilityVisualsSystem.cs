@@ -1,12 +1,14 @@
+using Content.Client.Camera;
+using Content.Client.DamageState;
 using Content.Client.Graphics;
 using Content.Shared._ST14.Hive;
 using Content.Shared._ST14.Hive.Components;
 using Content.Shared.Mobs.Systems;
 using Robust.Client.GameObjects;
-using DrawDepth = Content.Shared.DrawDepth.DrawDepth;
 using Robust.Client.Graphics;
 using Robust.Client.Player;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Random;
 using Robust.Shared.Timing;
 
 namespace Content.Client._ST14.Hive;
@@ -31,11 +33,14 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
     [Dependency] private SpriteSystem _sprite = default!;
     [Dependency] private IPlayerManager _player = default!;
     [Dependency] private SharedST14HiveSystem _hive = default!;
+    [Dependency] private IRobustRandom _random = default!;
+    [Dependency] private CameraRecoilSystem _recoil = default!;
 
     private ST14ResonanceOverlay _resonance = default!;
     private ST14RageOverlay _rage = default!;
     private ST14BloodScentOverlay _scent = default!;
     private ST14GripStruggleOverlay _struggle = default!;
+    private ST14HallucinationOverlay _hallucination = default!;
 
     // made on the first frame: a client without graphics, like the test one, never needs them
     private ShaderInstance? _rageShader;
@@ -49,6 +54,9 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
     private readonly HashSet<EntityUid> _tintedNow = new();
     private readonly HashSet<EntityUid> _riders = new();
     private readonly HashSet<EntityUid> _ridersNow = new();
+    private readonly HashSet<EntityUid> _mounts = new();
+    private readonly HashSet<EntityUid> _mountsNow = new();
+    private TimeSpan _nextShake;
 
     public override void Initialize()
     {
@@ -60,11 +68,13 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
         _rage = new ST14RageOverlay();
         _scent = new ST14BloodScentOverlay();
         _struggle = new ST14GripStruggleOverlay();
+        _hallucination = new ST14HallucinationOverlay();
 
         _overlays.AddOverlay(_resonance);
         _overlays.AddOverlay(_rage);
         _overlays.AddOverlay(_scent);
         _overlays.AddOverlay(_struggle);
+        _overlays.AddOverlay(_hallucination);
     }
 
     public override void Shutdown()
@@ -75,6 +85,7 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
         _overlays.RemoveOverlay(_rage);
         _overlays.RemoveOverlay(_scent);
         _overlays.RemoveOverlay(_struggle);
+        _overlays.RemoveOverlay(_hallucination);
     }
 
     private void OnBloodScent(ST14BloodScentEvent args)
@@ -98,21 +109,33 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
         _outlinedNow.Clear();
         _tintedNow.Clear();
         _ridersNow.Clear();
+        _mountsNow.Clear();
 
-        // seen by everyone: a larva riding sits on top of its mount, a trooper in slime is green with it
+        // seen by everyone: a larva riding is drawn by its mount's sprite, the larva itself is hidden
         var riders = EntityQueryEnumerator<ST14RidingComponent, SpriteComponent>();
         while (riders.MoveNext(out var uid, out _, out var sprite))
         {
             _ridersNow.Add(uid);
             if (_riders.Add(uid))
-                _sprite.SetDrawDepth((uid, sprite), (int) DrawDepth.OverMobs);
+                _sprite.SetVisible((uid, sprite), false);
         }
 
-        var slimed = EntityQueryEnumerator<ST14SlimedComponent, SpriteComponent>();
-        while (slimed.MoveNext(out var uid, out var comp, out var sprite))
+        var mounts = EntityQueryEnumerator<ST14CarryingRiderComponent, SpriteComponent>();
+        while (mounts.MoveNext(out var uid, out _, out var sprite))
         {
-            var slime = comp.Cocooned ? 0.75f + 0.1f * pulse : 0.2f * comp.Globs;
-            Tint((uid, sprite), Color.InterpolateBetween(Color.White, new Color(0.45f, 0.85f, 0.3f), slime));
+            _mountsNow.Add(uid);
+            _mounts.Add(uid);
+            SwapLarvaState((uid, sprite), true);
+        }
+
+        // a trooper frozen in the brain bug's stupor: the camera shudders with it
+        if (_player.LocalEntity is { } me &&
+            TryComp<ST14HallucinatingComponent>(me, out var visions) &&
+            visions.Paralyzed &&
+            _timing.RealTime >= _nextShake)
+        {
+            _nextShake = _timing.RealTime + TimeSpan.FromSeconds(0.12);
+            _recoil.KickCamera(me, _random.NextVector2(0.25f));
         }
 
         // the glow of the hive is for bug eyes only, the troopers see plain bugs
@@ -185,13 +208,24 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
     /// </summary>
     private void Restore()
     {
+        _mounts.RemoveWhere(uid =>
+        {
+            if (_mountsNow.Contains(uid))
+                return false;
+
+            if (TryComp<SpriteComponent>(uid, out var sprite))
+                SwapLarvaState((uid, sprite), false);
+
+            return true;
+        });
+
         _riders.RemoveWhere(uid =>
         {
             if (_ridersNow.Contains(uid))
                 return false;
 
             if (TryComp<SpriteComponent>(uid, out var sprite))
-                _sprite.SetDrawDepth((uid, sprite), (int) DrawDepth.Mobs);
+                _sprite.SetVisible((uid, sprite), true);
 
             return true;
         });
@@ -217,6 +251,34 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
 
             return true;
         });
+    }
+
+    /// <summary>
+    /// Shows or hides the larva drawn on a mount's back: the base sprite and the brain bug's proboscis layer switch to
+    /// their "_larva" states. A dead bug keeps its corpse sprite
+    /// </summary>
+    private void SwapLarvaState(Entity<SpriteComponent> ent, bool larva)
+    {
+        SwapState(ent, DamageStateVisualLayers.Base, larva);
+        SwapState(ent, "sucking", larva);
+    }
+
+    private void SwapState(Entity<SpriteComponent> ent, object key, bool larva)
+    {
+        var found = key is Enum e
+            ? _sprite.LayerMapTryGet(ent.AsNullable(), e, out var index, false)
+            : _sprite.LayerMapTryGet(ent.AsNullable(), (string) key, out index, false);
+        if (!found)
+            return;
+
+        var state = _sprite.LayerGetRsiState(ent.AsNullable(), index).Name;
+        if (state == null)
+            return;
+
+        if (larva && (state == "alive" || state == "sucking"))
+            _sprite.LayerSetRsiState(ent.AsNullable(), index, state + "_larva");
+        else if (!larva && state.EndsWith("_larva"))
+            _sprite.LayerSetRsiState(ent.AsNullable(), index, state[..^"_larva".Length]);
     }
 
     private ShaderInstance MakeOutline(float width = 2f)

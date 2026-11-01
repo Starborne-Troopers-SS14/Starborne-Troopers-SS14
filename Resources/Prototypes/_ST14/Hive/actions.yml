@@ -128,48 +128,35 @@
 
 - type: entity
   parent: BaseAction
-  id: ST14ActionBrainSpit
-  name: Slime spit
-  description: Spit a glob of slime. Three globs on one trooper wrap it in a cocoon for 12 seconds.
+  id: ST14ActionBrainStupor
+  name: Brain stupor
+  description: Click near a trooper anywhere on screen to reach into its mind. It sees the worst visions, hears nothing and cannot move for 8 seconds.
   components:
   - type: Action
     itemIconStyle: BigAction
-    useDelay: 1.5
+    useDelay: 45
   - type: Sprite
-    sprite: Objects/Weapons/Guns/Projectiles/xeno_toxic.rsi
+    sprite: _ST14/Mobs/Bugs/brain.rsi
     layers:
-    - state: xeno_toxic
+    - state: alive
   - type: TargetAction
     range: 0
     checkCanAccess: false
   - type: WorldTargetAction
-    event: !type:ST14BrainSpitActionEvent
+    event: !type:ST14BrainStuporActionEvent
 
 - type: entity
   parent: BaseAction
   id: ST14ActionBrainScream
   name: Hive scream
-  description: A piercing scream. The troopers around see things that are not there and hear nothing but ringing.
+  description: A long piercing scream. For 30 seconds the troopers around see things that are not there and hear nothing but ringing.
   components:
   - type: Action
     itemIconStyle: BigAction
-    useDelay: 40
+    useDelay: 75
   - type: Sprite
     sprite: _ST14/Mobs/Bugs/brain.rsi
     layers:
     - state: sucking
   - type: InstantAction
     event: !type:ST14BrainScreamActionEvent
-
-# Slime spit of the brain bug: flies over the hive, sticks to troopers
-- type: entity
-  parent: BulletAcid
-  id: ST14BrainSlimeSpit
-  categories: [ HideSpawnMenu ]
-  name: slime spit
-  components:
-  - type: Projectile
-    damage:
-      types:
-        Caustic: 2
-  - type: ST14SlimeSpit

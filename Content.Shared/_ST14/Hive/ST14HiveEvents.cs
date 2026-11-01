@@ -32,7 +32,7 @@ public sealed partial class ST14BugExecuteActionEvent : WorldTargetActionEvent;
 
 public sealed partial class ST14LarvaRideActionEvent : WorldTargetActionEvent;
 
-public sealed partial class ST14BrainSpitActionEvent : WorldTargetActionEvent;
+public sealed partial class ST14BrainStuporActionEvent : WorldTargetActionEvent;
 
 public sealed partial class ST14BrainScreamActionEvent : InstantActionEvent;
 

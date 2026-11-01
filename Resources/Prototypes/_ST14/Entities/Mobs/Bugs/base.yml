@@ -399,9 +399,16 @@
         collection: ST14BugTigerRunMetal
       sand:
         collection: ST14BugTigerRunSand
-  - type: ST14BrainSpit
+  - type: ST14BrainStupor
     sound:
-      path: /Audio/Weapons/Xeno/alien_spitacid.ogg
+      collection: ST14BugBrainPain
+      params:
+        pitch: 0.8
+    victimSound:
+      path: /Audio/_ST14/Mobs/Bugs/brain_suck_start.wav
+      params:
+        volume: 4
+        pitch: 0.7
   - type: ST14BrainScream
     sound:
       collection: ST14BugBrainPain

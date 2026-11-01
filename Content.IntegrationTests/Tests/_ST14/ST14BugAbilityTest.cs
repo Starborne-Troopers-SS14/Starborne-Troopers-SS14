@@ -231,39 +231,31 @@ public sealed class ST14BugAbilityTest : InteractionTest
     }
 
     /// <summary>
-    /// Three globs of slime wrap a trooper in a cocoon it cannot walk in
+    /// The stupor freezes a trooper anywhere in reach in its visions
     /// </summary>
     [Test]
-    public async Task SlimeCocoonTest()
+    public async Task StuporTest()
     {
         await LayFloor();
-        var human = await SpawnAt("MobHuman", 4, 2);
+        var human = await SpawnAt("MobHuman", 2, 2);
         var brain = await SpawnAt("ST14MobBrainBug", 7, 2);
         await RunTicks(5);
 
         var blocker = SEntMan.System<ActionBlockerSystem>();
-        for (var i = 0; i < 3; i++)
-        {
-            await Server.WaitPost(() =>
-            {
-                var spit = SEntMan.SpawnEntity("ST14BrainSlimeSpit", SEntMan.GetComponent<TransformComponent>(brain).Coordinates);
-                var ev = new Content.Shared.Projectiles.ProjectileHitEvent(new DamageSpecifier(), human, brain);
-                SEntMan.EventBus.RaiseLocalEvent(spit, ref ev);
-                SEntMan.DeleteEntity(spit);
-            });
-            await RunTicks(1);
-        }
-
+        await Server.WaitPost(() => SEntMan.EventBus.RaiseLocalEvent(brain,
+            new ST14BrainStuporActionEvent { Performer = brain, Target = SEntMan.GetComponent<TransformComponent>(human).Coordinates }));
         await RunTicks(2);
+
         Assert.Multiple(() =>
         {
-            Assert.That(SEntMan.GetComponent<ST14SlimedComponent>(human).Cocooned, "Three globs did not make a cocoon.");
-            Assert.That(blocker.CanMove(human), Is.False, "A cocooned trooper can walk.");
+            Assert.That(SEntMan.TryGetComponent<ST14HallucinatingComponent>(human, out var visions) && visions.Paralyzed, "The trooper is not in a stupor.");
+            Assert.That(blocker.CanMove(human), Is.False, "A trooper in a stupor can walk.");
+            Assert.That(SEntMan.HasComponent<ST14DeafenedComponent>(human), "A trooper in a stupor can hear.");
         });
     }
 
     /// <summary>
-    /// The scream deafens the troopers around the brain bug
+    /// The scream deafens the troopers around the brain bug and fills their heads with visions
     /// </summary>
     [Test]
     public async Task ScreamTest()
@@ -276,6 +268,10 @@ public sealed class ST14BugAbilityTest : InteractionTest
         await Server.WaitPost(() => SEntMan.EventBus.RaiseLocalEvent(brain, new ST14BrainScreamActionEvent { Performer = brain }));
         await RunTicks(2);
 
-        Assert.That(SEntMan.HasComponent<ST14DeafenedComponent>(human), "The scream did not deafen the trooper.");
+        Assert.Multiple(() =>
+        {
+            Assert.That(SEntMan.HasComponent<ST14DeafenedComponent>(human), "The scream did not deafen the trooper.");
+            Assert.That(SEntMan.HasComponent<ST14HallucinatingComponent>(human), "The scream gave the trooper no visions.");
+        });
     }
 }
