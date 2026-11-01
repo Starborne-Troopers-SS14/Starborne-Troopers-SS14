@@ -102,7 +102,7 @@ public sealed partial class ST14HiveGrabLeapComponent : Component
 
 /// <summary>
 /// A trooper held in the claws of a bug: no shooting, no walking, only struggling. Keys to press pop up on its screen,
-/// mashing any key barely helps, the shown key helps more, and hitting it right as the ring closes most of all
+/// mashing any key frees it too but slowly, the shown key is quicker, and hitting it right as the ring closes is the quickest
 /// </summary>
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState, AutoGenerateComponentPause]
 public sealed partial class ST14HiveGrabbedComponent : Component
@@ -123,13 +123,13 @@ public sealed partial class ST14HiveGrabbedComponent : Component
     /// Struggle lost every second, so the trooper has to keep fighting
     /// </summary>
     [DataField]
-    public float StruggleDecay = 1.5f;
+    public float StruggleDecay = 1f;
 
     /// <summary>
     /// Struggle for any key, for the shown key and for the shown key right on time
     /// </summary>
     [DataField]
-    public float MashGain = 0.15f;
+    public float MashGain = 0.45f;
 
     [DataField]
     public float HitGain = 1.5f;

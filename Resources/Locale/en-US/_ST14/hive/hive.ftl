@@ -78,9 +78,6 @@ st14-alerts-bug-health-desc = How much of your body is still whole. Green is hea
 st14-alerts-bug-dead-name = Dead
 st14-alerts-bug-dead-desc = The hive will go on without you.
 
-st14-bug-lunge-hit = The bug slams into {THE($target)}!
-st14-bug-rend-hit = The bug spins in a storm of blades!
-st14-bug-rend-miss = The bug slashes the empty air.
 
 st14-bug-grab-invalid = Only a live trooper can be grabbed.
 st14-bug-grab-in-barricade = You are locked in the wall and cannot grab.

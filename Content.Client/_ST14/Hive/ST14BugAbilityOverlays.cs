@@ -10,33 +10,26 @@ using Robust.Client.Player;
 using Robust.Client.ResourceManagement;
 using Robust.Shared.Enums;
 using Robust.Shared.Input;
-using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
 namespace Content.Client._ST14.Hive;
 
 /// <summary>
-/// Bends the air around warriors at full resonance
+/// Green motes circling warriors at full resonance, the swarm humming as one
 /// </summary>
-public sealed partial class ST14HiveShimmerOverlay : Overlay
+public sealed partial class ST14ResonanceOverlay : Overlay
 {
-    private static readonly ProtoId<ShaderPrototype> ShimmerShader = "ST14HiveShimmer";
+    private const int Motes = 10;
 
     [Dependency] private IEntityManager _entities = default!;
-    [Dependency] private IPrototypeManager _prototypes = default!;
-    [Dependency] private IResourceCache _resources = default!;
+    [Dependency] private IGameTiming _timing = default!;
 
     private readonly SharedTransformSystem _transform;
     private readonly MobStateSystem _mobState;
 
-    // made on the first draw: a client without graphics, like the test one, never needs them
-    private Texture? _circle;
-    private ShaderInstance? _shader;
-
     public override OverlaySpace Space => OverlaySpace.WorldSpace;
-    public override bool RequestScreenTexture => true;
 
-    public ST14HiveShimmerOverlay()
+    public ST14ResonanceOverlay()
     {
         IoCManager.InjectDependencies(this);
         _transform = _entities.System<SharedTransformSystem>();
@@ -46,21 +39,8 @@ public sealed partial class ST14HiveShimmerOverlay : Overlay
 
     protected override void Draw(in OverlayDrawArgs args)
     {
-        if (ScreenTexture == null)
-            return;
-
-        _circle ??= _resources.GetTexture("/Textures/Effects/HeatBlur/soft_circle.png");
-        if (_shader == null)
-        {
-            _shader = _prototypes.Index(ShimmerShader).InstanceUnique();
-            _shader.SetParameter("tint", new Vector3(0.55f, 0.95f, 0.35f));
-            _shader.SetParameter("strength", 5f);
-            _shader.SetParameter("tint_strength", 0.1f);
-        }
-
         var handle = args.WorldHandle;
-        _shader.SetParameter("SCREEN_TEXTURE", ScreenTexture);
-        handle.UseShader(_shader);
+        var time = (float) _timing.RealTime.TotalSeconds;
 
         var query = _entities.EntityQueryEnumerator<ST14SwarmResonanceComponent, TransformComponent>();
         while (query.MoveNext(out var uid, out var comp, out var xform))
@@ -68,12 +48,27 @@ public sealed partial class ST14HiveShimmerOverlay : Overlay
             if (comp.Allies < comp.MaxAllies || xform.MapID != args.MapId || _mobState.IsDead(uid))
                 continue;
 
-            var box = Box2.CenteredAround(_transform.GetWorldPosition(xform), new Vector2(2.2f));
-            if (args.WorldAABB.Intersects(box))
-                handle.DrawTextureRect(_circle, box);
-        }
+            var position = _transform.GetWorldPosition(xform);
+            var seed = uid.Id * 0.731f;
 
-        handle.UseShader(null);
+            for (var i = 0; i < Motes; i++)
+            {
+                // each mote circles the bug on a flat ellipse at its own speed and bobs up and down
+                var speed = 0.8f + (i % 3) * 0.25f;
+                var angle = time * speed + i * MathF.Tau / Motes + seed;
+                var radius = 0.5f + 0.1f * MathF.Sin(time * 1.3f + i);
+                var bob = 0.12f * MathF.Sin(time * 2.1f + i * 1.7f);
+                var mote = position + new Vector2(MathF.Cos(angle) * radius, MathF.Sin(angle) * radius * 0.45f + 0.1f + bob);
+
+                // motes behind the bug are dimmer, so the ring reads as going around it
+                var front = 0.55f + 0.45f * -MathF.Sin(angle);
+                var twinkle = 0.6f + 0.4f * MathF.Sin(time * 5f + i * 2.3f);
+                var size = 0.045f + 0.02f * twinkle;
+
+                handle.DrawRect(Box2.CenteredAround(mote, new Vector2(size * 2.2f)), new Color(0.4f, 1f, 0.3f, 0.12f * front * twinkle));
+                handle.DrawRect(Box2.CenteredAround(mote, new Vector2(size)), new Color(0.7f, 1f, 0.55f, 0.85f * front * twinkle));
+            }
+        }
     }
 }
 
@@ -219,8 +214,12 @@ public sealed partial class ST14BloodScentOverlay : Overlay
                 if (fade <= 0f)
                     continue;
 
+                // drops point the way the trooper went: from this point to the next, the newest one from the one before
                 var point = trail.Points[i];
-                DrawDrop(handle, point, i * 3, fade * glow);
+                var heading = i + 1 < trail.Points.Count ? trail.Points[i + 1] - point
+                    : i > 0 ? point - trail.Points[i - 1]
+                    : new Vector2(0f, 1f);
+                DrawDrop(handle, point, heading, i * 3, fade * glow);
 
                 if (i == 0)
                     continue;
@@ -233,18 +232,24 @@ public sealed partial class ST14BloodScentOverlay : Overlay
                 for (var s = 1; s < steps; s++)
                 {
                     var t = s / (float) steps;
-                    DrawDrop(handle, previous + gap * t, i * 3 + s, MathHelper.Lerp(previousFade, fade, t) * glow);
+                    DrawDrop(handle, previous + gap * t, gap, i * 3 + s, MathHelper.Lerp(previousFade, fade, t) * glow);
                 }
             }
         }
     }
 
-    private void DrawDrop(DrawingHandleWorld handle, Vector2 position, int index, float alpha)
+    private void DrawDrop(DrawingHandleWorld handle, Vector2 position, Vector2 heading, int index, float alpha)
     {
         // drops scatter a little around the path, like blood dripping off a running man
         var jitter = new Vector2(Hash(index) - 0.5f, Hash(index + 17) - 0.5f) * 0.18f;
         var box = Box2.CenteredAround(position + jitter, DropSize);
-        handle.DrawTextureRect(_drop!, box, Color.White.WithAlpha(alpha));
+
+        // the sprite's round head is at its top: turn the top towards where the trooper went
+        var angle = heading.LengthSquared() > 0.0001f
+            ? new Angle(heading) - Angle.FromDegrees(90)
+            : Angle.Zero;
+
+        handle.DrawTextureRect(_drop!, new Box2Rotated(box, angle, box.Center), Color.White.WithAlpha(alpha));
     }
 
     private static float Hash(int i)

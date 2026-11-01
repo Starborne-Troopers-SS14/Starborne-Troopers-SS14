@@ -23,15 +23,6 @@
     damage:
       types:
         Slash: 14
-  - type: ST14BugLunge
-    distance: 4
-    speed: 12
-    knockdown: 1.5
-    damage:
-      types:
-        Slash: 10
-    sound:
-      collection: ST14BugWarriorLunge
   - type: ST14SwarmResonance
   - type: ST14HiveGrab
     leapSound:
@@ -73,14 +64,6 @@
     damage:
       types:
         Slash: 24
-  - type: ST14BugRend
-    range: 1.6
-    stun: 0.6
-    damage:
-      types:
-        Slash: 22
-    sound:
-      collection: ST14BugTigerRend
   - type: ST14BugExecute
     healthThreshold: 0.3
     heal: 50

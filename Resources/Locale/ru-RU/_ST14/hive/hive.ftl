@@ -100,13 +100,6 @@ st14-alerts-bug-health-desc = Сколько твоего тела ещё цел
 st14-alerts-bug-dead-name = Мёртв
 st14-alerts-bug-dead-desc = Улей продолжит жить без тебя.
 
-st14-bug-lunge-hit = Жук врезается в {$target}!
-st14-bug-rend-hit = Жук кружится вихрем лезвий!
-st14-bug-rend-miss = Жук рассекает пустоту.
-ent-ST14ActionBugLunge = Рывок
-    .desc = Прыгнуть в точку. Первый десантник на пути сбит с ног и ранен.
-ent-ST14ActionBugRend = Вихрь лезвий
-    .desc = Крутануться и рассечь всех десантников вокруг. Задетые на миг теряют равновесие.
 
 st14-bug-grab-invalid = Схватить можно только живого десантника.
 st14-bug-grab-in-barricade = Ты сцеплен в стене и не можешь схватить.
