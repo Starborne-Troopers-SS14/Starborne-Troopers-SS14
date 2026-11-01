@@ -11,7 +11,7 @@ namespace Content.IntegrationTests.Tests._ST14;
 public sealed class ST14AtmosToggleTest : GameTest
 {
     /// <summary>
-    /// With atmospherics off a spawned person stops breathing instead of suffocating
+    /// With atmospherics off a spawned person stops breathing instead of suffocating, and breathes again once it is back on
     /// </summary>
     [Test]
     public async Task NoBreathingWithoutAtmosTest()
@@ -34,6 +34,13 @@ public sealed class ST14AtmosToggleTest : GameTest
         {
             Assert.That(entMan.HasComponent<RespiratorComponent>(human), Is.False, "A person still breathes with atmospherics off.");
             server.CfgMan.SetCVar(ST14CVars.Atmospherics, true);
+        });
+
+        await server.WaitRunTicks(2);
+
+        await server.WaitAssertion(() =>
+        {
+            Assert.That(entMan.HasComponent<RespiratorComponent>(human), "Turning atmospherics back on did not give the person its breathing back.");
         });
     }
 }
