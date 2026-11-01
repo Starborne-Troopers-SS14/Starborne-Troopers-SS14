@@ -51,11 +51,11 @@ public sealed partial class ST14RidingComponent : Component
 }
 
 /// <summary>
-/// A bug with a larva on its back
+/// A bug with a larva on its back. Its sprite shows the larva, the larva itself is hidden
 /// </summary>
-[RegisterComponent]
+[RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
 public sealed partial class ST14CarryingRiderComponent : Component
 {
-    [DataField]
+    [DataField, AutoNetworkedField]
     public EntityUid Rider;
 }

@@ -1,32 +1,24 @@
-using Content.Server.Weapons.Ranged.Systems;
 using Content.Shared._ST14.Hive;
 using Content.Shared._ST14.Hive.Components;
 using Content.Shared.Mobs.Components;
 using Content.Shared.Popups;
-using Content.Shared.Projectiles;
-using Content.Shared.StatusEffectNew;
-using Robust.Shared.Physics.Events;
 using Robust.Shared.Player;
 
 namespace Content.Server._ST14.Hive;
 
 /// <summary>
-/// Powers of the brain bug: slime spit that cocoons a trooper, and a scream that fills heads with visions and ringing
+/// Powers of the brain bug: a stupor that freezes one trooper in the worst visions, and a scream that fills
+/// every head around with visions and ringing
 /// </summary>
 public sealed partial class ST14BugAbilitySystem
 {
-    [Dependency] private GunSystem _gun = default!;
-    [Dependency] private StatusEffectsSystem _statusEffects = default!;
-
-    private readonly List<EntityUid> _slimeChecks = new();
+    private readonly List<EntityUid> _mindChecks = new();
 
     private void InitializeBrain()
     {
-        SubscribeLocalEvent<ST14BrainSpitComponent, MapInitEvent>(OnSpitMapInit);
-        SubscribeLocalEvent<ST14BrainSpitComponent, ComponentShutdown>(OnSpitShutdown);
-        SubscribeLocalEvent<ST14BrainSpitComponent, ST14BrainSpitActionEvent>(OnSpit);
-        SubscribeLocalEvent<ST14SlimeSpitComponent, PreventCollideEvent>(OnSpitPreventCollide);
-        SubscribeLocalEvent<ST14SlimeSpitComponent, ProjectileHitEvent>(OnSpitHit);
+        SubscribeLocalEvent<ST14BrainStuporComponent, MapInitEvent>(OnStuporMapInit);
+        SubscribeLocalEvent<ST14BrainStuporComponent, ComponentShutdown>(OnStuporShutdown);
+        SubscribeLocalEvent<ST14BrainStuporComponent, ST14BrainStuporActionEvent>(OnStupor);
 
         SubscribeLocalEvent<ST14BrainScreamComponent, MapInitEvent>(OnScreamMapInit);
         SubscribeLocalEvent<ST14BrainScreamComponent, ComponentShutdown>(OnScreamShutdown);
@@ -35,100 +27,113 @@ public sealed partial class ST14BugAbilitySystem
 
     private void UpdateBrain(TimeSpan now)
     {
-        _slimeChecks.Clear();
-        var slimed = EntityQueryEnumerator<ST14SlimedComponent>();
-        while (slimed.MoveNext(out var uid, out var comp))
+        _mindChecks.Clear();
+        var visions = EntityQueryEnumerator<ST14HallucinatingComponent>();
+        while (visions.MoveNext(out var uid, out var comp))
         {
+            if (now >= comp.End || comp.Paralyzed && now >= comp.ParalyzedEnd)
+                _mindChecks.Add(uid);
+        }
+
+        foreach (var uid in _mindChecks)
+        {
+            if (!TryComp<ST14HallucinatingComponent>(uid, out var comp))
+                continue;
+
+            if (comp.Paralyzed && now >= comp.ParalyzedEnd)
+            {
+                _shared.SetParalyzed((uid, comp), false);
+                _popup.PopupEntity(Loc.GetString("st14-brain-stupor-free"), uid, uid, PopupType.Medium);
+            }
+
             if (now >= comp.End)
-                _slimeChecks.Add(uid);
+                RemComp(uid, comp);
         }
 
-        foreach (var uid in _slimeChecks)
-        {
-            if (TryComp<ST14SlimedComponent>(uid, out var comp) && comp.Cocooned)
-                _popup.PopupEntity(Loc.GetString("st14-brain-spit-free", ("target", uid)), uid, PopupType.Medium);
-
-            RemComp<ST14SlimedComponent>(uid);
-        }
-
-        _slimeChecks.Clear();
+        _mindChecks.Clear();
         var deaf = EntityQueryEnumerator<ST14DeafenedComponent>();
         while (deaf.MoveNext(out var uid, out var comp))
         {
             if (now >= comp.End)
-                _slimeChecks.Add(uid);
+                _mindChecks.Add(uid);
         }
 
-        foreach (var uid in _slimeChecks)
+        foreach (var uid in _mindChecks)
         {
             RemComp<ST14DeafenedComponent>(uid);
         }
     }
 
-    #region Spit
+    /// <summary>
+    /// Fills the trooper's screen with visions. A stronger or longer dose replaces a weaker one, never the other way
+    /// </summary>
+    private ST14HallucinatingComponent Hallucinate(EntityUid target, TimeSpan duration, float intensity)
+    {
+        var end = _timing.CurTime + duration;
+        var visions = EnsureComp<ST14HallucinatingComponent>(target);
+        if (end > visions.End)
+            visions.End = end;
 
-    private void OnSpitMapInit(Entity<ST14BrainSpitComponent> ent, ref MapInitEvent args)
+        visions.Intensity = MathF.Max(visions.Intensity, intensity);
+        Dirty(target, visions);
+        return visions;
+    }
+
+    private void Deafen(EntityUid target, TimeSpan duration)
+    {
+        var end = _timing.CurTime + duration;
+        var deaf = EnsureComp<ST14DeafenedComponent>(target);
+        if (end > deaf.End)
+            deaf.End = end;
+    }
+
+    #region Stupor
+
+    private void OnStuporMapInit(Entity<ST14BrainStuporComponent> ent, ref MapInitEvent args)
     {
         _actions.AddAction(ent, ref ent.Comp.ActionEntity, ent.Comp.Action);
     }
 
-    private void OnSpitShutdown(Entity<ST14BrainSpitComponent> ent, ref ComponentShutdown args)
+    private void OnStuporShutdown(Entity<ST14BrainStuporComponent> ent, ref ComponentShutdown args)
     {
         _actions.RemoveAction(ent.Owner, ent.Comp.ActionEntity);
     }
 
-    private void OnSpit(Entity<ST14BrainSpitComponent> ent, ref ST14BrainSpitActionEvent args)
+    private void OnStupor(Entity<ST14BrainStuporComponent> ent, ref ST14BrainStuporActionEvent args)
     {
         if (args.Handled)
             return;
 
-        var from = _transform.GetMapCoordinates(ent);
-        var to = _transform.ToMapCoordinates(args.Target);
-        var direction = to.Position - from.Position;
-        if (from.MapId != to.MapId || direction.LengthSquared() < 0.01f)
-            return;
-
-        args.Handled = true;
-
-        var spit = Spawn(ent.Comp.Projectile, from);
-        _gun.ShootProjectile(spit, direction, _physics.GetMapLinearVelocity(ent), ent, ent, ent.Comp.Speed);
-
-        if (ent.Comp.Sound != null)
-            _audio.PlayPvs(ent.Comp.Sound, ent);
-    }
-
-    private void OnSpitPreventCollide(Entity<ST14SlimeSpitComponent> ent, ref PreventCollideEvent args)
-    {
-        // the slime flies over the hive and only sticks to troopers
-        if (_hive.IsHive(args.OtherEntity))
-            args.Cancelled = true;
-    }
-
-    private void OnSpitHit(Entity<ST14SlimeSpitComponent> ent, ref ProjectileHitEvent args)
-    {
-        var target = args.Target;
-        if (!HasComp<MobStateComponent>(target) || _hive.IsHive(target) || _mobState.IsDead(target))
-            return;
-
-        var slimed = EnsureComp<ST14SlimedComponent>(target);
-        if (slimed.Cocooned)
-            return;
-
-        var now = _timing.CurTime;
-        slimed.Globs++;
-        slimed.End = now + slimed.GlobLifetime;
-
-        if (slimed.Globs < slimed.GlobsNeeded)
+        var self = ent.Owner;
+        if (PickTarget(args.Target, uid => uid != self && !_hive.IsHive(uid) && !_mobState.IsDead(uid)) is not { } target)
         {
-            Dirty(target, slimed);
-            _popup.PopupEntity(Loc.GetString("st14-brain-spit-glob", ("globs", slimed.Globs), ("needed", slimed.GlobsNeeded)), target, target, PopupType.SmallCaution);
+            _popup.PopupEntity(Loc.GetString("st14-brain-stupor-invalid"), ent, ent);
             return;
         }
 
-        slimed.Globs = 0;
-        slimed.End = now + slimed.CocoonTime;
-        _shared.SetCocooned((target, slimed), true);
-        _popup.PopupEntity(Loc.GetString("st14-brain-spit-cocoon", ("target", target)), target, PopupType.LargeCaution);
+        var from = _transform.GetMapCoordinates(ent);
+        var to = _transform.GetMapCoordinates(target);
+        if (from.MapId != to.MapId || (to.Position - from.Position).Length() > ent.Comp.Range)
+        {
+            _popup.PopupEntity(Loc.GetString("st14-brain-stupor-far"), ent, ent);
+            return;
+        }
+
+        args.Handled = true;
+
+        var visions = Hallucinate(target, ent.Comp.Duration + TimeSpan.FromSeconds(2), 1f);
+        visions.ParalyzedEnd = _timing.CurTime + ent.Comp.Duration;
+        _shared.SetParalyzed((target, visions), true);
+        Deafen(target, ent.Comp.Duration);
+
+        if (ent.Comp.Sound != null)
+            _audio.PlayPvs(ent.Comp.Sound, ent);
+
+        if (ent.Comp.VictimSound != null)
+            _audio.PlayEntity(ent.Comp.VictimSound, Filter.Entities(target), target, false);
+
+        _popup.PopupEntity(Loc.GetString("st14-brain-stupor-victim"), target, target, PopupType.LargeCaution);
+        _popup.PopupEntity(Loc.GetString("st14-brain-stupor-done", ("target", target)), ent, ent, PopupType.Medium);
     }
 
     #endregion
@@ -157,7 +162,6 @@ public sealed partial class ST14BugAbilitySystem
 
         _popup.PopupEntity(Loc.GetString("st14-brain-scream"), ent, PopupType.LargeCaution);
 
-        var end = _timing.CurTime + ent.Comp.Deafness;
         _victims.Clear();
         _lookup.GetEntitiesInRange(Transform(ent).Coordinates, ent.Comp.Range, _victims);
         foreach (var victim in _victims)
@@ -165,8 +169,8 @@ public sealed partial class ST14BugAbilitySystem
             if (_hive.IsHive(victim) || _mobState.IsDead(victim))
                 continue;
 
-            _statusEffects.TryUpdateStatusEffectDuration(victim, ent.Comp.HallucinationEffect, ent.Comp.Hallucinations);
-            EnsureComp<ST14DeafenedComponent>(victim).End = end;
+            Hallucinate(victim, ent.Comp.Duration, ent.Comp.Intensity);
+            Deafen(victim, ent.Comp.Duration);
 
             if (ent.Comp.RingingSound != null)
                 _audio.PlayEntity(ent.Comp.RingingSound, Filter.Entities(victim.Owner), victim, false);

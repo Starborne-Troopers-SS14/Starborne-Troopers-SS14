@@ -17,6 +17,14 @@
     },
     {
       "name": "dead"
+    },
+    {
+      "name": "alive_larva",
+      "directions": 4
+    },
+    {
+      "name": "sucking_larva",
+      "directions": 4
     }
   ]
 }

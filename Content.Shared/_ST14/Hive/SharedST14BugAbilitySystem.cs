@@ -54,11 +54,11 @@ public sealed partial class SharedST14BugAbilitySystem : EntitySystem
         SubscribeLocalEvent<ST14RidingComponent, ComponentStartup>(OnBlockMoveChanged);
         SubscribeLocalEvent<ST14RidingComponent, ComponentShutdown>(OnBlockMoveChanged);
 
-        SubscribeLocalEvent<ST14SlimedComponent, UpdateCanMoveEvent>(OnSlimedCanMove);
-        SubscribeLocalEvent<ST14SlimedComponent, ShotAttemptedEvent>(OnSlimedShot);
-        SubscribeLocalEvent<ST14SlimedComponent, AttackAttemptEvent>(OnSlimedAttack);
-        SubscribeLocalEvent<ST14SlimedComponent, AfterAutoHandleStateEvent>(OnSlimedState);
-        SubscribeLocalEvent<ST14SlimedComponent, ComponentShutdown>(OnBlockMoveChanged);
+        SubscribeLocalEvent<ST14HallucinatingComponent, UpdateCanMoveEvent>(OnStuporCanMove);
+        SubscribeLocalEvent<ST14HallucinatingComponent, ShotAttemptedEvent>(OnStuporShot);
+        SubscribeLocalEvent<ST14HallucinatingComponent, AttackAttemptEvent>(OnStuporAttack);
+        SubscribeLocalEvent<ST14HallucinatingComponent, AfterAutoHandleStateEvent>(OnStuporState);
+        SubscribeLocalEvent<ST14HallucinatingComponent, ComponentShutdown>(OnBlockMoveChanged);
 
         SubscribeLocalEvent<ST14InBarricadeComponent, UpdateCanMoveEvent>(OnBarricadeCanMove);
         SubscribeLocalEvent<ST14InBarricadeComponent, ComponentStartup>(OnBlockMoveChanged);
@@ -135,7 +135,7 @@ public sealed partial class SharedST14BugAbilitySystem : EntitySystem
 
     #endregion
 
-    #region Riding and slime
+    #region Riding and the brain bug
 
     private void OnRidingCanMove(Entity<ST14RidingComponent> ent, ref UpdateCanMoveEvent args)
     {
@@ -144,35 +144,35 @@ public sealed partial class SharedST14BugAbilitySystem : EntitySystem
             args.Cancel();
     }
 
-    private void OnSlimedCanMove(Entity<ST14SlimedComponent> ent, ref UpdateCanMoveEvent args)
+    private void OnStuporCanMove(Entity<ST14HallucinatingComponent> ent, ref UpdateCanMoveEvent args)
     {
-        if (ent.Comp.Cocooned && ent.Comp.LifeStage <= ComponentLifeStage.Running)
+        if (ent.Comp.Paralyzed && ent.Comp.LifeStage <= ComponentLifeStage.Running)
             args.Cancel();
     }
 
-    private void OnSlimedShot(Entity<ST14SlimedComponent> ent, ref ShotAttemptedEvent args)
+    private void OnStuporShot(Entity<ST14HallucinatingComponent> ent, ref ShotAttemptedEvent args)
     {
-        if (ent.Comp.Cocooned)
+        if (ent.Comp.Paralyzed)
             args.Cancel();
     }
 
-    private void OnSlimedAttack(Entity<ST14SlimedComponent> ent, ref AttackAttemptEvent args)
+    private void OnStuporAttack(Entity<ST14HallucinatingComponent> ent, ref AttackAttemptEvent args)
     {
-        if (ent.Comp.Cocooned)
+        if (ent.Comp.Paralyzed)
             args.Cancel();
     }
 
-    private void OnSlimedState(Entity<ST14SlimedComponent> ent, ref AfterAutoHandleStateEvent args)
+    private void OnStuporState(Entity<ST14HallucinatingComponent> ent, ref AfterAutoHandleStateEvent args)
     {
         _blocker.UpdateCanMove(ent);
     }
 
     /// <summary>
-    /// Wraps the trooper in a cocoon or lets it out
+    /// Freezes the trooper in its visions or lets it move again
     /// </summary>
-    public void SetCocooned(Entity<ST14SlimedComponent> ent, bool cocooned)
+    public void SetParalyzed(Entity<ST14HallucinatingComponent> ent, bool paralyzed)
     {
-        ent.Comp.Cocooned = cocooned;
+        ent.Comp.Paralyzed = paralyzed;
         Dirty(ent);
         _blocker.UpdateCanMove(ent);
     }
