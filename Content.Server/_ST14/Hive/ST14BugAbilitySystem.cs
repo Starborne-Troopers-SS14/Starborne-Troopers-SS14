@@ -37,6 +37,8 @@ public sealed partial class ST14BugAbilitySystem : EntitySystem
 
         InitializeWarrior();
         InitializeTiger();
+        InitializeLarva();
+        InitializeBrain();
     }
 
     public override void Update(float frameTime)
@@ -53,6 +55,8 @@ public sealed partial class ST14BugAbilitySystem : EntitySystem
 
         UpdateWarrior(frameTime);
         UpdateTiger(frameTime);
+        UpdateLarva();
+        UpdateBrain(_timing.CurTime);
     }
 
     /// <summary>

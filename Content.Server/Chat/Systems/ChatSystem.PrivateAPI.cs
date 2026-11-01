@@ -56,14 +56,7 @@ public sealed partial class ChatSystem
             ("fontSize", speech.FontSize),
             ("message", FormattedMessage.EscapeText(message)));
 
-        // ST14: bugs and people do not see each other's words, only what sound was made
-        var foreignMessage = _st14Language.Noise(source, message);
-        var foreignWrapped = Loc.GetString("chat-manager-entity-me-wrap-message",
-            ("entityName", FormattedMessage.EscapeText(name)),
-            ("entity", source),
-            ("message", FormattedMessage.EscapeText(foreignMessage)));
-
-        SendInVoiceRange(ChatChannel.Local, message, wrappedMessage, source, range, foreignMessage: foreignMessage, foreignWrapped: foreignWrapped);
+        SendInVoiceRange(ChatChannel.Local, message, wrappedMessage, source, range, st14Speech: true); // ST14
 
         var ev = new EntitySpokeEvent(source, message, null, null);
         RaiseLocalEvent(source, ev, true);
@@ -147,16 +140,13 @@ public sealed partial class ChatSystem
             if (MessageRangeCheck(session, data, range) != MessageRangeCheckResult.Full)
                 continue; // Won't get logged to chat, and ghosts are too far away to see the pop-up, so we just won't send it to them.
 
-            // ST14: a whisper of the other kind is only a quiet sound too
+            // ST14: deafened ears hear nothing, a whisper of the other kind is only a quiet sound
+            if (_st14Language.IsDeaf(listener))
+                continue;
+
             if (!_st14Language.Understands(listener, source))
             {
-                var foreign = _st14Language.Noise(source, message, whisper: true);
-                _chatManager.ChatMessageToOne(ChatChannel.Emotes, foreign,
-                    Loc.GetString("chat-manager-entity-me-wrap-message",
-                        ("entityName", FormattedMessage.EscapeText(nameIdentity)),
-                        ("entity", source),
-                        ("message", FormattedMessage.EscapeText(foreign))),
-                    source, false, session.Channel);
+                _st14Language.PlayNoise(source, message, session, whisper: true);
                 continue;
             }
 

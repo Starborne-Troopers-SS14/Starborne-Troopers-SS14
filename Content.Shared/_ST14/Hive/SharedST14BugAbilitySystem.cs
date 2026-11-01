@@ -50,6 +50,16 @@ public sealed partial class SharedST14BugAbilitySystem : EntitySystem
         SubscribeLocalEvent<ST14HiveGrabbedComponent, ComponentStartup>(OnBlockMoveChanged);
         SubscribeLocalEvent<ST14HiveGrabbedComponent, ComponentShutdown>(OnBlockMoveChanged);
 
+        SubscribeLocalEvent<ST14RidingComponent, UpdateCanMoveEvent>(OnRidingCanMove);
+        SubscribeLocalEvent<ST14RidingComponent, ComponentStartup>(OnBlockMoveChanged);
+        SubscribeLocalEvent<ST14RidingComponent, ComponentShutdown>(OnBlockMoveChanged);
+
+        SubscribeLocalEvent<ST14SlimedComponent, UpdateCanMoveEvent>(OnSlimedCanMove);
+        SubscribeLocalEvent<ST14SlimedComponent, ShotAttemptedEvent>(OnSlimedShot);
+        SubscribeLocalEvent<ST14SlimedComponent, AttackAttemptEvent>(OnSlimedAttack);
+        SubscribeLocalEvent<ST14SlimedComponent, AfterAutoHandleStateEvent>(OnSlimedState);
+        SubscribeLocalEvent<ST14SlimedComponent, ComponentShutdown>(OnBlockMoveChanged);
+
         SubscribeLocalEvent<ST14InBarricadeComponent, UpdateCanMoveEvent>(OnBarricadeCanMove);
         SubscribeLocalEvent<ST14InBarricadeComponent, ComponentStartup>(OnBlockMoveChanged);
         SubscribeLocalEvent<ST14InBarricadeComponent, ComponentShutdown>(OnBlockMoveChanged);
@@ -121,6 +131,50 @@ public sealed partial class SharedST14BugAbilitySystem : EntitySystem
     private void OnGrabbedPullAttempt(Entity<ST14HiveGrabbedComponent> ent, ref BeingPulledAttemptEvent args)
     {
         args.Cancel();
+    }
+
+    #endregion
+
+    #region Riding and slime
+
+    private void OnRidingCanMove(Entity<ST14RidingComponent> ent, ref UpdateCanMoveEvent args)
+    {
+        // the mount does the walking
+        if (ent.Comp.LifeStage <= ComponentLifeStage.Running)
+            args.Cancel();
+    }
+
+    private void OnSlimedCanMove(Entity<ST14SlimedComponent> ent, ref UpdateCanMoveEvent args)
+    {
+        if (ent.Comp.Cocooned && ent.Comp.LifeStage <= ComponentLifeStage.Running)
+            args.Cancel();
+    }
+
+    private void OnSlimedShot(Entity<ST14SlimedComponent> ent, ref ShotAttemptedEvent args)
+    {
+        if (ent.Comp.Cocooned)
+            args.Cancel();
+    }
+
+    private void OnSlimedAttack(Entity<ST14SlimedComponent> ent, ref AttackAttemptEvent args)
+    {
+        if (ent.Comp.Cocooned)
+            args.Cancel();
+    }
+
+    private void OnSlimedState(Entity<ST14SlimedComponent> ent, ref AfterAutoHandleStateEvent args)
+    {
+        _blocker.UpdateCanMove(ent);
+    }
+
+    /// <summary>
+    /// Wraps the trooper in a cocoon or lets it out
+    /// </summary>
+    public void SetCocooned(Entity<ST14SlimedComponent> ent, bool cocooned)
+    {
+        ent.Comp.Cocooned = cocooned;
+        Dirty(ent);
+        _blocker.UpdateCanMove(ent);
     }
 
     #endregion

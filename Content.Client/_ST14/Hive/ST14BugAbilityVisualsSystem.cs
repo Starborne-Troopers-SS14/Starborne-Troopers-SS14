@@ -3,6 +3,7 @@ using Content.Shared._ST14.Hive;
 using Content.Shared._ST14.Hive.Components;
 using Content.Shared.Mobs.Systems;
 using Robust.Client.GameObjects;
+using DrawDepth = Content.Shared.DrawDepth.DrawDepth;
 using Robust.Client.Graphics;
 using Robust.Client.Player;
 using Robust.Shared.Prototypes;
@@ -11,7 +12,7 @@ using Robust.Shared.Timing;
 namespace Content.Client._ST14.Hive;
 
 /// <summary>
-/// Looks of the caste abilities, seen only by bugs: green motes and a pale outline on resonating warriors, a green glowing shield on the bugs of a
+/// Looks of the caste abilities. A larva riding a bug and a trooper in slime are seen by all, the rest only by bugs: green motes and a pale outline on resonating warriors, a green glowing shield on the bugs of a
 /// living barricade, a red outline and sparks on a tiger in its last rush, and for the bugs that smell blood the red
 /// trails and the reddened bodies of the wounded troopers
 /// </summary>
@@ -46,6 +47,8 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
     private readonly HashSet<EntityUid> _tinted = new();
     private readonly HashSet<EntityUid> _outlinedNow = new();
     private readonly HashSet<EntityUid> _tintedNow = new();
+    private readonly HashSet<EntityUid> _riders = new();
+    private readonly HashSet<EntityUid> _ridersNow = new();
 
     public override void Initialize()
     {
@@ -94,6 +97,23 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
 
         _outlinedNow.Clear();
         _tintedNow.Clear();
+        _ridersNow.Clear();
+
+        // seen by everyone: a larva riding sits on top of its mount, a trooper in slime is green with it
+        var riders = EntityQueryEnumerator<ST14RidingComponent, SpriteComponent>();
+        while (riders.MoveNext(out var uid, out _, out var sprite))
+        {
+            _ridersNow.Add(uid);
+            if (_riders.Add(uid))
+                _sprite.SetDrawDepth((uid, sprite), (int) DrawDepth.OverMobs);
+        }
+
+        var slimed = EntityQueryEnumerator<ST14SlimedComponent, SpriteComponent>();
+        while (slimed.MoveNext(out var uid, out var comp, out var sprite))
+        {
+            var slime = comp.Cocooned ? 0.75f + 0.1f * pulse : 0.2f * comp.Globs;
+            Tint((uid, sprite), Color.InterpolateBetween(Color.White, new Color(0.45f, 0.85f, 0.3f), slime));
+        }
 
         // the glow of the hive is for bug eyes only, the troopers see plain bugs
         var bugEyes = _player.LocalEntity is { } local && _hive.IsHive(local);
@@ -165,6 +185,17 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
     /// </summary>
     private void Restore()
     {
+        _riders.RemoveWhere(uid =>
+        {
+            if (_ridersNow.Contains(uid))
+                return false;
+
+            if (TryComp<SpriteComponent>(uid, out var sprite))
+                _sprite.SetDrawDepth((uid, sprite), (int) DrawDepth.Mobs);
+
+            return true;
+        });
+
         _outlined.RemoveWhere(uid =>
         {
             if (_outlinedNow.Contains(uid))
