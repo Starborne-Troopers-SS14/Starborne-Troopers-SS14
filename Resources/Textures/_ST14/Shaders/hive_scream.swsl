@@ -1,0 +1,31 @@
+// Vision after the brain bug's scream: the picture swims in slow waves, splits into a doubled image that drifts
+// apart and back, smears, and flickers in brightness. strength 0 is a clear picture, 1 the full effect
+uniform sampler2D SCREEN_TEXTURE;
+uniform highp float strength;
+
+void fragment() {
+    highp vec2 uv = FRAGCOORD.xy * SCREEN_PIXEL_SIZE.xy;
+    highp float t = TIME;
+
+    // slow heavy waves across the whole picture
+    highp vec2 wave = vec2(
+        sin(uv.y * 9.0 + t * 2.1) + 0.5 * sin(uv.y * 23.0 - t * 3.7),
+        cos(uv.x * 7.0 + t * 1.7) + 0.5 * cos(uv.x * 19.0 + t * 2.9)) * 0.009 * strength;
+
+    // the whole view sways back and forth
+    highp vec2 sway = vec2(sin(t * 0.9), cos(t * 0.73)) * 0.018 * strength;
+
+    // a second image drifts out to the side and back
+    highp vec2 split = vec2(sin(t * 1.3), sin(t * 0.8 + 1.0) * 0.5) * 0.03 * strength;
+
+    highp vec4 main = zTextureSpec(SCREEN_TEXTURE, uv + wave + sway);
+    highp vec4 ghost = zTextureSpec(SCREEN_TEXTURE, uv - wave + sway + split);
+    highp vec4 smear = zTextureSpec(SCREEN_TEXTURE, uv + wave * 2.0 - split * 0.5);
+
+    highp vec3 colour = mix(main.rgb, ghost.rgb, 0.45 * strength);
+    colour = mix(colour, smear.rgb, 0.25 * strength);
+
+    // brightness flickers, fast and uneven
+    highp float flicker = 1.0 + strength * (0.18 * sin(t * 21.0) * sin(t * 6.3) + 0.1 * sin(t * 37.0));
+    COLOR = vec4(colour * flicker, 1.0);
+}

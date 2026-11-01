@@ -4,15 +4,15 @@ using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
 using Robust.Client.Player;
 using Robust.Shared.Enums;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 using Robust.Shared.Utility;
 
 namespace Content.Client._ST14.Hive;
 
 /// <summary>
-/// Visions the brain bug puts in a trooper's head: the screen breathes red and violet, the edges sink into a dark
-/// full of eyes, bugs that are not there loom up and rush at the middle, and the picture tears in flickering bars.
-/// The intensity of the visions sets how much of it there is
+/// Visions of the brain stupor: the screen breathes red and violet, the edges sink into a pulsing dark, bugs that
+/// are not there loom up and rush at the middle, and the picture tears in flickering bars
 /// </summary>
 public sealed partial class ST14HallucinationOverlay : Overlay
 {
@@ -41,11 +41,11 @@ public sealed partial class ST14HallucinationOverlay : Overlay
     }
 
     /// <summary>
-    /// How strong the visions of the local player are right now, faded at both ends. Zero without visions
+    /// How strong the stupor visions of the local player are right now, faded out at the end. Zero without a stupor
     /// </summary>
     public float Strength()
     {
-        if (!_entities.TryGetComponent(_player.LocalEntity, out ST14HallucinatingComponent? visions))
+        if (!_entities.TryGetComponent(_player.LocalEntity, out ST14HallucinatingComponent? visions) || !visions.Paralyzed)
             return 0f;
 
         var left = (float) (visions.End - _timing.CurTime).TotalSeconds;
@@ -73,7 +73,6 @@ public sealed partial class ST14HallucinationOverlay : Overlay
 
         DrawPhantoms(handle, screen, time, strength);
         DrawVignette(handle, screen, time, strength);
-        DrawEyes(handle, screen, time, strength);
         DrawTears(handle, screen, time, strength);
 
         // now and then the whole picture blinks dark
@@ -143,50 +142,6 @@ public sealed partial class ST14HallucinationOverlay : Overlay
     }
 
     /// <summary>
-    /// Pairs of red eyes open in the dark at the edges, stare, blink and close
-    /// </summary>
-    private static void DrawEyes(DrawingHandleScreen handle, UIBox2 screen, float time, float strength)
-    {
-        var count = (int) MathF.Round(3 + 9 * strength);
-        const float life = 2.6f;
-
-        for (var i = 0; i < count; i++)
-        {
-            var phase = time / life + i * 0.53f;
-            var cycle = (int) MathF.Floor(phase);
-            var t = phase - cycle;
-
-            // eyes keep to the rim of the screen
-            var side = (int) (Hash(cycle, i + 7) * 4f);
-            var along = Hash(cycle, i + 41);
-            var inward = 0.03f + 0.1f * Hash(cycle, i + 59);
-            var position = side switch
-            {
-                0 => new Vector2(screen.Left + screen.Width * along, screen.Top + screen.Height * inward),
-                1 => new Vector2(screen.Left + screen.Width * along, screen.Bottom - screen.Height * inward),
-                2 => new Vector2(screen.Left + screen.Width * inward, screen.Top + screen.Height * along),
-                _ => new Vector2(screen.Right - screen.Width * inward, screen.Top + screen.Height * along),
-            };
-
-            var open = MathF.Sin(t * MathF.PI);
-            if (MathF.Abs(t - 0.5f) < 0.04f)
-                open = 0f;
-
-            var radius = screen.Height * 0.006f * (1f + Hash(cycle, i + 3));
-            var gap = radius * 3f;
-            var glow = new Color(1f, 0.1f, 0.05f, 0.25f * open * strength);
-            var core = new Color(1f, 0.35f, 0.2f, 0.9f * open);
-
-            foreach (var x in new[] { -gap, gap })
-            {
-                var eye = position + new Vector2(x, 0f);
-                handle.DrawCircle(eye, radius * 3f, glow);
-                handle.DrawCircle(eye, radius * open + 0.5f, core);
-            }
-        }
-    }
-
-    /// <summary>
     /// The picture tears: thin bars of noise flicker across the screen
     /// </summary>
     private static void DrawTears(DrawingHandleScreen handle, UIBox2 screen, float time, float strength)
@@ -223,6 +178,84 @@ public sealed partial class ST14HallucinationOverlay : Overlay
     private static float Hash(int a, int b)
     {
         var v = MathF.Sin(a * 12.9898f + b * 78.233f) * 43758.547f;
+        return v - MathF.Floor(v);
+    }
+}
+
+/// <summary>
+/// Vision after the brain bug's scream: the whole picture swims, doubles, sways and flickers, and the eyes keep
+/// blinking shut, so the trooper can hardly see what is in front of it
+/// </summary>
+public sealed partial class ST14ScreamVisionOverlay : Overlay
+{
+    private const float FadeTime = 2f;
+    private static readonly ProtoId<ShaderPrototype> ScreamShader = "ST14HiveScream";
+
+    [Dependency] private IEntityManager _entities = default!;
+    [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private IPlayerManager _player = default!;
+    [Dependency] private IPrototypeManager _prototypes = default!;
+
+    // made on the first draw: a client without graphics, like the test one, never needs it
+    private ShaderInstance? _shader;
+
+    public override OverlaySpace Space => OverlaySpace.WorldSpace;
+    public override bool RequestScreenTexture => true;
+
+    public ST14ScreamVisionOverlay()
+    {
+        IoCManager.InjectDependencies(this);
+        ZIndex = 50;
+    }
+
+    private float Strength()
+    {
+        if (!_entities.TryGetComponent(_player.LocalEntity, out ST14HallucinatingComponent? visions) || visions.Paralyzed)
+            return 0f;
+
+        var left = (float) (visions.End - _timing.CurTime).TotalSeconds;
+        return visions.Intensity * Math.Clamp(left / FadeTime, 0f, 1f);
+    }
+
+    protected override bool BeforeDraw(in OverlayDrawArgs args)
+    {
+        return Strength() > 0.01f;
+    }
+
+    protected override void Draw(in OverlayDrawArgs args)
+    {
+        if (ScreenTexture == null)
+            return;
+
+        var strength = Strength();
+        var handle = args.WorldHandle;
+        var time = (float) _timing.RealTime.TotalSeconds;
+
+        _shader ??= _prototypes.Index(ScreamShader).InstanceUnique();
+        _shader.SetParameter("SCREEN_TEXTURE", ScreenTexture);
+        _shader.SetParameter("strength", strength);
+        handle.UseShader(_shader);
+        handle.DrawRect(args.WorldBounds, Color.White);
+        handle.UseShader(null);
+
+        // the eyes keep blinking shut: a quick dark flash every second or two, a longer one now and then
+        var slot = (int) (time / 1.4f);
+        var into = time / 1.4f - slot;
+        var length = Hash(slot) > 0.7f ? 0.35f : 0.14f;
+        if (into < length)
+        {
+            var close = MathF.Sin(into / length * MathF.PI);
+            handle.DrawRect(args.WorldBounds, Color.Black.WithAlpha(0.85f * close * strength));
+        }
+
+        // and the light comes and goes in waves
+        var dim = 0.5f + 0.5f * MathF.Sin(time * 2.3f) * MathF.Sin(time * 0.7f);
+        handle.DrawRect(args.WorldBounds, Color.Black.WithAlpha(0.25f * dim * strength));
+    }
+
+    private static float Hash(int i)
+    {
+        var v = MathF.Sin(i * 12.9898f) * 43758.547f;
         return v - MathF.Floor(v);
     }
 }

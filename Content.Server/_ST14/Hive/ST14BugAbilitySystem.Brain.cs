@@ -121,7 +121,7 @@ public sealed partial class ST14BugAbilitySystem
 
         args.Handled = true;
 
-        var visions = Hallucinate(target, ent.Comp.Duration + TimeSpan.FromSeconds(2), 1f);
+        var visions = Hallucinate(target, ent.Comp.Duration, 1f);
         visions.ParalyzedEnd = _timing.CurTime + ent.Comp.Duration;
         _shared.SetParalyzed((target, visions), true);
         Deafen(target, ent.Comp.Duration);
