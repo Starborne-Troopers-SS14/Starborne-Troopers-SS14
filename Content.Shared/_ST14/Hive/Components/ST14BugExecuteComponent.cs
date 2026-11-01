@@ -1,4 +1,3 @@
-using Content.Shared.Damage;
 using Content.Shared.FixedPoint;
 using Robust.Shared.Audio;
 using Robust.Shared.Prototypes;
@@ -7,7 +6,7 @@ namespace Content.Shared._ST14.Hive.Components;
 
 /// <summary>
 /// Execution: the bug leaps at a trooper. A badly wounded one is finished on the spot, the bug heals
-/// and may leap at the next one right away. A healthy one only takes a normal blow
+/// and may leap at the next one right away. The bug will not leap at a trooper that is not wounded badly enough
 /// </summary>
 [RegisterComponent]
 public sealed partial class ST14BugExecuteComponent : Component
@@ -22,10 +21,10 @@ public sealed partial class ST14BugExecuteComponent : Component
     public FixedPoint2 Heal = 50;
 
     /// <summary>
-    /// The blow a trooper takes when it is too healthy to be executed
+    /// Longest leap, in tiles
     /// </summary>
-    [DataField(required: true)]
-    public DamageSpecifier Damage = new();
+    [DataField]
+    public float MaxLeap = 10f;
 
     /// <summary>
     /// How far from the victim the bug may land and still strike, in tiles

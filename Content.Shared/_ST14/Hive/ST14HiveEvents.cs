@@ -28,11 +28,11 @@ public sealed partial class ST14BugLungeActionEvent : WorldTargetActionEvent;
 
 public sealed partial class ST14BugRendActionEvent : InstantActionEvent;
 
-public sealed partial class ST14BugGrabActionEvent : EntityTargetActionEvent;
+public sealed partial class ST14BugGrabActionEvent : WorldTargetActionEvent;
 
 public sealed partial class ST14BugBarricadeActionEvent : InstantActionEvent;
 
-public sealed partial class ST14BugExecuteActionEvent : EntityTargetActionEvent;
+public sealed partial class ST14BugExecuteActionEvent : WorldTargetActionEvent;
 
 /// <summary>
 /// Blood trails of the wounded troopers, sent only to the bugs that can smell them

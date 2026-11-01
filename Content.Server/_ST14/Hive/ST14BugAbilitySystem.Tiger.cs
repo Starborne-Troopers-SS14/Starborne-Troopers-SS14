@@ -94,10 +94,31 @@ public sealed partial class ST14BugAbilitySystem
         if (args.Handled)
             return;
 
-        var target = args.Target;
-        if (!HasComp<MobStateComponent>(target) || _hive.IsHive(target) || _mobState.IsDead(target))
+        var threshold = ent.Comp.HealthThreshold;
+        var self = ent.Owner;
+        bool Alive(EntityUid uid) => uid != self && !_hive.IsHive(uid) && !_mobState.IsDead(uid);
+
+        // a click near a wounded trooper picks it even when a healthy one stands closer to the cursor
+        if ((PickTarget(args.Target, uid => Alive(uid) && CanExecute(uid, threshold)) ?? PickTarget(args.Target, Alive)) is not { } target)
         {
             _popup.PopupEntity(Loc.GetString("st14-bug-execute-invalid"), ent, ent);
+            return;
+        }
+
+        // only the badly wounded are worth the leap
+        if (!CanExecute(target, threshold))
+        {
+            _popup.PopupEntity(Loc.GetString("st14-bug-execute-healthy", ("target", target), ("percent", (int) (threshold * 100))), ent, ent);
+            return;
+        }
+
+        var from = _transform.GetMapCoordinates(ent);
+        var to = _transform.GetMapCoordinates(target);
+        var direction = to.Position - from.Position;
+
+        if (from.MapId != to.MapId || direction.Length() > ent.Comp.MaxLeap)
+        {
+            _popup.PopupEntity(Loc.GetString("st14-bug-leap-too-far"), ent, ent);
             return;
         }
 
@@ -107,13 +128,8 @@ public sealed partial class ST14BugAbilitySystem
         if (ent.Comp.LeapSound != null)
             _audio.PlayPvs(ent.Comp.LeapSound, ent);
 
-        var from = _transform.GetMapCoordinates(ent);
-        var to = _transform.GetMapCoordinates(target);
-        var direction = to.Position - from.Position;
-
         // right next to the victim there is nothing to leap over
-        if (from.MapId != to.MapId ||
-            direction.Length() <= ent.Comp.StrikeRange ||
+        if (direction.Length() <= ent.Comp.StrikeRange ||
             !_throwing.TryThrow(ent, direction, ent.Comp.Speed, ent, recoil: false, doSpin: false))
         {
             Strike(ent);
@@ -159,10 +175,10 @@ public sealed partial class ST14BugAbilitySystem
             return;
         }
 
+        // healed up during the leap
         if (!CanExecute(target, execute.HealthThreshold))
         {
-            _damage.TryChangeDamage(target, execute.Damage * _shared.RageMultiplier(bug), origin: bug);
-            _popup.PopupEntity(Loc.GetString("st14-bug-execute-healthy", ("target", target)), bug, bug);
+            _popup.PopupEntity(Loc.GetString("st14-bug-execute-miss"), bug, bug);
             return;
         }
 

@@ -22,8 +22,8 @@ public sealed partial class ST14BugBloodSystem : EntitySystem
     [Dependency] private DecalSystem _decals = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
 
-    // Splash sprites are 48 px, a decal is placed by its corner
-    private static readonly Vector2 DecalCenter = new(0.75f, 0.75f);
+    // Splash sprites are 52 px (48 px with a clear border, so a turned decal shows no stray lines), a decal is placed by its corner
+    private static readonly Vector2 DecalCenter = new(0.8125f, 0.8125f);
 
     private readonly Dictionary<string, List<string>> _decalsByTag = new();
 

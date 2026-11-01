@@ -1,29 +1,47 @@
+using Content.Client.Graphics;
 using Content.Shared._ST14.Hive;
 using Content.Shared._ST14.Hive.Components;
 using Content.Shared.Mobs.Systems;
 using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
 namespace Content.Client._ST14.Hive;
 
 /// <summary>
-/// Looks of the caste abilities: trembling air around resonating warriors and raging tigers, the sinews of a living
-/// barricade, the blood trails a tiger smells and the red pulse of its last rush
+/// Looks of the caste abilities: trembling air around resonating warriors, a green glowing shield on the bugs of a
+/// living barricade, a red outline and sparks on a tiger in its last rush, and for the bugs that smell blood the red
+/// trails and the reddened bodies of the wounded troopers
 /// </summary>
 public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
 {
+    private const string OutlineId = "st14-ability-outline";
+    private static readonly ProtoId<ShaderPrototype> OutlineShader = "SelectionOutlineInrange";
+
+    private static readonly Color RageOutline = new(1f, 0.1f, 0.05f);
+    private static readonly Color ShieldOutline = new(0.4f, 1f, 0.3f);
+
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IOverlayManager _overlays = default!;
+    [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private MobStateSystem _mobState = default!;
     [Dependency] private SpriteSystem _sprite = default!;
 
     private ST14HiveShimmerOverlay _shimmer = default!;
-    private ST14BarricadeOverlay _barricade = default!;
+    private ST14RageOverlay _rage = default!;
     private ST14BloodScentOverlay _scent = default!;
     private ST14GripStruggleOverlay _struggle = default!;
 
-    private readonly HashSet<EntityUid> _raging = new();
+    // made on the first frame: a client without graphics, like the test one, never needs them
+    private ShaderInstance? _rageShader;
+    private ShaderInstance? _shieldShader;
+
+    // entities this system has painted, so their looks can be put back
+    private readonly HashSet<EntityUid> _outlined = new();
+    private readonly HashSet<EntityUid> _tinted = new();
+    private readonly HashSet<EntityUid> _outlinedNow = new();
+    private readonly HashSet<EntityUid> _tintedNow = new();
 
     public override void Initialize()
     {
@@ -32,12 +50,12 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
         SubscribeNetworkEvent<ST14BloodScentEvent>(OnBloodScent);
 
         _shimmer = new ST14HiveShimmerOverlay();
-        _barricade = new ST14BarricadeOverlay();
+        _rage = new ST14RageOverlay();
         _scent = new ST14BloodScentOverlay();
         _struggle = new ST14GripStruggleOverlay();
 
         _overlays.AddOverlay(_shimmer);
-        _overlays.AddOverlay(_barricade);
+        _overlays.AddOverlay(_rage);
         _overlays.AddOverlay(_scent);
         _overlays.AddOverlay(_struggle);
     }
@@ -47,7 +65,7 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
         base.Shutdown();
 
         _overlays.RemoveOverlay(_shimmer);
-        _overlays.RemoveOverlay(_barricade);
+        _overlays.RemoveOverlay(_rage);
         _overlays.RemoveOverlay(_scent);
         _overlays.RemoveOverlay(_struggle);
     }
@@ -61,22 +79,95 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
     {
         base.FrameUpdate(frameTime);
 
-        // the raging tiger glows red in the beat of its heart
-        var pulse = 0.5f + 0.5f * MathF.Sin((float) _timing.RealTime.TotalSeconds * 12f);
-        var rage = Color.InterpolateBetween(Color.White, new Color(1f, 0.25f, 0.2f), 0.35f + 0.45f * pulse);
+        var pulse = 0.5f + 0.5f * MathF.Sin((float) _timing.RealTime.TotalSeconds * 6f);
 
-        var query = EntityQueryEnumerator<ST14LastRushComponent, SpriteComponent>();
-        while (query.MoveNext(out var uid, out var rush, out var sprite))
+        _rageShader ??= MakeOutline();
+        _shieldShader ??= MakeOutline();
+        _rageShader.SetParameter("outline_color", RageOutline.WithAlpha(0.6f + 0.4f * pulse));
+        _shieldShader.SetParameter("outline_color", ShieldOutline.WithAlpha(0.55f + 0.35f * pulse));
+
+        _outlinedNow.Clear();
+        _tintedNow.Clear();
+
+        var rush = EntityQueryEnumerator<ST14LastRushComponent, SpriteComponent>();
+        while (rush.MoveNext(out var uid, out var comp, out var sprite))
         {
-            if (rush.Active && !_mobState.IsDead(uid))
-            {
-                _sprite.SetColor((uid, sprite), rage);
-                _raging.Add(uid);
-            }
-            else if (_raging.Remove(uid))
-            {
-                _sprite.SetColor((uid, sprite), Color.White);
-            }
+            if (!comp.Active || _mobState.IsDead(uid))
+                continue;
+
+            Outline((uid, sprite), _rageShader);
+            Tint((uid, sprite), Color.InterpolateBetween(Color.White, new Color(1f, 0.45f, 0.4f), pulse));
         }
+
+        var wall = EntityQueryEnumerator<ST14InBarricadeComponent, SpriteComponent>();
+        while (wall.MoveNext(out var uid, out _, out var sprite))
+        {
+            Outline((uid, sprite), _shieldShader);
+            Tint((uid, sprite), Color.InterpolateBetween(Color.White, new Color(0.7f, 1f, 0.6f), 0.5f * pulse));
+        }
+
+        // the wounded troopers a tiger smells glow red to it
+        foreach (var net in _scent.Troopers())
+        {
+            if (TryGetEntity(net, out var trooper) && TryComp<SpriteComponent>(trooper, out var sprite))
+                Tint((trooper.Value, sprite), Color.InterpolateBetween(new Color(1f, 0.55f, 0.55f), new Color(1f, 0.25f, 0.25f), pulse));
+        }
+
+        Restore();
+    }
+
+    private void Outline(Entity<SpriteComponent> ent, ShaderInstance shader)
+    {
+        _outlinedNow.Add(ent);
+        if (_outlined.Add(ent) || !_sprite.TryGetPostShader(ent.AsNullable(), OutlineId, out var entry) || entry.Shader != shader)
+        {
+            _sprite.SetPostShader(ent.AsNullable(), new SpriteComponent.PostShaderArgs(OutlineId, shader)
+            {
+                After = ContentPostShaderIds.AfterBaseEffects,
+            });
+        }
+    }
+
+    private void Tint(Entity<SpriteComponent> ent, Color color)
+    {
+        _tintedNow.Add(ent);
+        _tinted.Add(ent);
+        _sprite.SetColor(ent.AsNullable(), color);
+    }
+
+    /// <summary>
+    /// Puts back the looks of everything that lost its effect this frame
+    /// </summary>
+    private void Restore()
+    {
+        _outlined.RemoveWhere(uid =>
+        {
+            if (_outlinedNow.Contains(uid))
+                return false;
+
+            if (TryComp<SpriteComponent>(uid, out var sprite))
+                _sprite.RemovePostShader((uid, sprite), OutlineId);
+
+            return true;
+        });
+
+        _tinted.RemoveWhere(uid =>
+        {
+            if (_tintedNow.Contains(uid))
+                return false;
+
+            if (TryComp<SpriteComponent>(uid, out var sprite))
+                _sprite.SetColor((uid, sprite), Color.White);
+
+            return true;
+        });
+    }
+
+    private ShaderInstance MakeOutline()
+    {
+        var shader = _prototypes.Index(OutlineShader).InstanceUnique();
+        shader.SetParameter("outline_width", 2f);
+        shader.SetParameter("outline_fullbright", true);
+        return shader;
     }
 }

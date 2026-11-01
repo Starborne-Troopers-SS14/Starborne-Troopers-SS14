@@ -84,9 +84,6 @@
   - type: ST14BugExecute
     healthThreshold: 0.3
     heal: 50
-    damage:
-      types:
-        Slash: 24
     leapSound:
       collection: ST14BugTigerRoar
     killSound:

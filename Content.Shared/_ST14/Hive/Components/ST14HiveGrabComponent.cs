@@ -36,6 +36,12 @@ public sealed partial class ST14HiveGrabComponent : Component
     public float Speed = 12f;
 
     /// <summary>
+    /// Longest leap, in tiles
+    /// </summary>
+    [DataField]
+    public float MaxLeap = 10f;
+
+    /// <summary>
     /// Where the trooper hangs in the claws, in front of the bug
     /// </summary>
     [DataField]
@@ -96,7 +102,7 @@ public sealed partial class ST14HiveGrabLeapComponent : Component
 
 /// <summary>
 /// A trooper held in the claws of a bug: no shooting, no walking, only struggling. Keys to press pop up on its screen,
-/// any key helps a little, the shown one more, and hitting it right as the ring closes most of all
+/// mashing any key barely helps, the shown key helps more, and hitting it right as the ring closes most of all
 /// </summary>
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState, AutoGenerateComponentPause]
 public sealed partial class ST14HiveGrabbedComponent : Component
@@ -123,7 +129,7 @@ public sealed partial class ST14HiveGrabbedComponent : Component
     /// Struggle for any key, for the shown key and for the shown key right on time
     /// </summary>
     [DataField]
-    public float MashGain = 0.4f;
+    public float MashGain = 0.15f;
 
     [DataField]
     public float HitGain = 1.5f;
@@ -160,6 +166,12 @@ public sealed partial class ST14HiveGrabbedComponent : Component
     /// </summary>
     [DataField]
     public TimeSpan PromptLinger = TimeSpan.FromSeconds(0.5);
+
+    /// <summary>
+    /// When the trooper last hit a key perfectly, its screen flashes the key green
+    /// </summary>
+    [DataField, AutoNetworkedField, AutoPausedField]
+    public TimeSpan LastPerfect;
 
     [DataField, AutoPausedField]
     public TimeSpan NextSync;
