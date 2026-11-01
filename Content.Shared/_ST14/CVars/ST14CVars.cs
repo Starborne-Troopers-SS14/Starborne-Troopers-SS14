@@ -66,4 +66,11 @@ public static partial class ST14CVars
     /// </summary>
     public static readonly CVarDef<string> WarPlanet =
         CVarDef.Create("st14.war_planet", string.Empty, CVar.SERVERONLY | CVar.ARCHIVE);
+
+    /// <summary>
+    /// Rounds are fought on the map of the war's target sector. Off, or with game.map set by hand, the stock map
+    /// rotation is used
+    /// </summary>
+    public static readonly CVarDef<bool> SectorRounds =
+        CVarDef.Create("st14.sector_rounds", true, CVar.SERVERONLY | CVar.ARCHIVE);
 }

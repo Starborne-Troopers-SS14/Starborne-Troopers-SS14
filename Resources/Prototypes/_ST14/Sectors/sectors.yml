@@ -1,0 +1,101 @@
+# Sector rounds of the galactic war: every sector of a war planet is fought on a 200x200 map with the sandstorm all
+# around, the troopers landing on the left and the hive on the right. st14_sector_template makes a blank one.
+
+- type: st14SectorSettings
+  id: Default
+  queens: 2
+  gracePeriod: 120
+  checkInterval: 5
+
+# One kind of ground per terrain of the galaxy map (index = terrain number from 0). Add the mappers' maps to each list.
+- type: st14SectorTerrain
+  id: ST14SectorRockWastes
+  index: 0
+  maps: [ ST14SectorTemplate ]
+
+- type: st14SectorTerrain
+  id: ST14SectorCanyons
+  index: 1
+  maps: [ ST14SectorTemplate ]
+
+- type: st14SectorTerrain
+  id: ST14SectorHiveField
+  index: 2
+  maps: [ ST14SectorTemplate ]
+
+- type: st14SectorTerrain
+  id: ST14SectorCraters
+  index: 3
+  maps: [ ST14SectorTemplate ]
+
+- type: st14SectorTerrain
+  id: ST14SectorDunes
+  index: 4
+  maps: [ ST14SectorTemplate ]
+
+- type: st14SectorTerrain
+  id: ST14SectorPlateau
+  index: 5
+  maps: [ ST14SectorTemplate ]
+
+- type: gameMap
+  id: ST14SectorTemplate
+  mapName: Sector
+  mapPath: /Maps/_ST14/Sectors/template.yml
+  minPlayers: 0
+  stations:
+    Sector:
+      stationProto: ST14SectorStation
+      components:
+      - type: StationNameSetup
+        mapNameTemplate: "Sector"
+      - type: StationJobs
+        availableJobs:
+          ST14Engineer: [ -1, -1 ]
+
+# The station of a sector round: jobs and spawning, nothing of a space station
+- type: entity
+  id: ST14SectorStation
+  parent:
+  - BaseStation
+  - BaseStationJobsSpawning
+  - BaseStationRecords
+  - BaseStationAlertLevels
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Transform
+
+# Components the template command gives the sector grid
+- type: entity
+  id: ST14SectorGrid
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BecomesStation
+    id: Sector
+
+- type: entity
+  parent: SpawnPointJobBase
+  id: ST14SpawnPointEngineer
+  name: engineer
+  components:
+  - type: SpawnPoint
+    job_id: ST14Engineer
+  - type: Sprite
+    layers:
+    - state: green
+
+# A place the hive queen may be put at the start of a sector round
+- type: entity
+  parent: MarkerBase
+  id: ST14SectorQueenSlot
+  name: queen place
+  suffix: Sector
+  components:
+  - type: ST14SectorQueenSlot
+  - type: Sprite
+    layers:
+    - state: red
+    - sprite: _ST14/Mobs/Bugs/brain.rsi
+      state: alive
+      color: "#C88CFF"
+      scale: 0.33, 0.33
