@@ -5,8 +5,7 @@ using Robust.Shared.Prototypes;
 namespace Content.Shared._ST14.Hive.Components;
 
 /// <summary>
-/// Execution: the bug leaps at a trooper. A badly wounded one is finished on the spot, the bug heals
-/// and may leap at the next one right away. The bug will not leap at a trooper that is not wounded badly enough
+/// Execution: the bug leaps at a trooper. A badly wounded one is finished on the spot and the bug heals. The bug will not leap at a trooper that is not wounded badly enough
 /// </summary>
 [RegisterComponent]
 public sealed partial class ST14BugExecuteComponent : Component
@@ -34,12 +33,6 @@ public sealed partial class ST14BugExecuteComponent : Component
 
     [DataField]
     public float Speed = 14f;
-
-    /// <summary>
-    /// Cooldown left after a successful execution, so the next one is a moment away
-    /// </summary>
-    [DataField]
-    public TimeSpan ResetCooldown = TimeSpan.FromSeconds(1);
 
     [DataField]
     public SoundSpecifier? LeapSound;

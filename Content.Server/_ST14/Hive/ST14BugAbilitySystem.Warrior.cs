@@ -206,7 +206,7 @@ public sealed partial class ST14BugAbilitySystem
             if (!TryComp<ST14LivingBarricadeComponent>(member, out var barricade))
                 continue;
 
-            _actions.SetCooldown(barricade.ActionEntity, barricade.Cooldown);
+            StartCooldown(barricade.ActionEntity, barricade.Cooldown);
 
             if (!sounded && barricade.BreakSound != null)
             {

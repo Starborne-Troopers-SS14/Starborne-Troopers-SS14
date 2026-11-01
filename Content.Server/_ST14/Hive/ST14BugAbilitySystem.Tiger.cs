@@ -196,7 +196,6 @@ public sealed partial class ST14BugAbilitySystem
             _mobState.ChangeMobState(target, MobState.Dead, origin: bug);
 
         _damage.HealEvenly(bug, -execute.Heal, origin: bug);
-        _actions.SetCooldown(execute.ActionEntity, execute.ResetCooldown);
 
         if (execute.KillSound != null)
             _audio.PlayPvs(execute.KillSound, bug);

@@ -1,17 +1,17 @@
-using System.Text;
 using Content.Shared._ST14.Hive.Components;
 using Content.Shared.Mobs.Components;
 
 namespace Content.Server._ST14.Hive;
 
 /// <summary>
-/// Bugs and people do not understand each other's speech: a bug hears a trooper as noise and a trooper hears a bug
-/// as chitter. Ghosts and anything that is not a living mob understand everyone
+/// Bugs and people do not understand each other's speech: neither sees the words of the other, only a line about the
+/// sound it made, like a bug chittering or a trooper burbling. Ghosts and anything that is not a living mob understand
+/// everyone
 /// </summary>
 public sealed partial class ST14HiveLanguageSystem : EntitySystem
 {
-    private static readonly string[] BugSyllables = { "кх", "тсс", "щёлк", "скр", "ххш", "трр", "кл", "ик", "чк", "ззт" };
-    private static readonly string[] HumanSyllables = { "бу", "гра", "ду", "ох", "рам", "ву", "на", "го", "ба", "хм" };
+    private const int BugNoises = 5;
+    private const int HumanNoises = 4;
 
     /// <summary>
     /// Whether the listener makes out what the speaker says
@@ -25,41 +25,28 @@ public sealed partial class ST14HiveLanguageSystem : EntitySystem
     }
 
     /// <summary>
-    /// What a listener of the other kind hears instead. Each word turns into the same noise every time,
-    /// so the same phrase sounds the same, and the length of the speech stays about the same
+    /// The sound a listener of the other kind hears instead of the words, like "chitters" or "burbles something".
+    /// The same phrase makes the same sound, a question sounds like a question
     /// </summary>
-    public string Garble(EntityUid speaker, string message)
+    public string Noise(EntityUid speaker, string message, bool whisper = false)
     {
-        var syllables = IsBug(speaker) ? BugSyllables : HumanSyllables;
-        var builder = new StringBuilder();
-
-        foreach (var word in message.Split(' ', StringSplitOptions.RemoveEmptyEntries))
+        var hash = 17;
+        foreach (var c in message.ToLowerInvariant())
         {
-            if (builder.Length > 0)
-                builder.Append(' ');
-
-            var hash = 17;
-            foreach (var c in word.ToLowerInvariant())
-            {
-                hash = unchecked(hash * 31 + c);
-            }
-
-            var count = Math.Clamp((word.Length + 2) / 3, 1, 4);
-            for (var i = 0; i < count; i++)
-            {
-                if (i > 0)
-                    builder.Append('-');
-
-                builder.Append(syllables[(int) ((uint) unchecked(hash + i * 7919) % syllables.Length)]);
-            }
-
-            // keep the end of the sentence, a question still sounds like one
-            var last = word[^1];
-            if (last is '!' or '?' or '.' or ',')
-                builder.Append(last);
+            hash = unchecked(hash * 31 + c);
         }
 
-        return builder.ToString();
+        var bug = IsBug(speaker);
+        var index = (int) ((uint) hash % (bug ? BugNoises : HumanNoises)) + 1;
+        var noise = Loc.GetString(bug ? $"st14-hive-noise-bug-{index}" : $"st14-hive-noise-human-{index}");
+
+        if (whisper)
+            noise = Loc.GetString("st14-hive-noise-whisper", ("noise", noise));
+
+        if (message.TrimEnd().EndsWith('?'))
+            noise = Loc.GetString("st14-hive-noise-question", ("noise", noise));
+
+        return noise;
     }
 
     private bool IsBug(EntityUid uid)

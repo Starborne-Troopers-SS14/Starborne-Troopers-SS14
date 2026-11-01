@@ -56,13 +56,11 @@ public sealed partial class ChatSystem
             ("fontSize", speech.FontSize),
             ("message", FormattedMessage.EscapeText(message)));
 
-        // ST14: bugs and people hear each other as noise
-        var foreignMessage = _st14Language.Garble(source, message);
-        var foreignWrapped = Loc.GetString(speech.Bold ? "chat-manager-entity-say-bold-wrap-message" : "chat-manager-entity-say-wrap-message",
-            ("entityName", messageName),
-            ("verb", Loc.GetString(_random.Pick(speech.SpeechVerbStrings))),
-            ("fontType", speech.FontId),
-            ("fontSize", speech.FontSize),
+        // ST14: bugs and people do not see each other's words, only what sound was made
+        var foreignMessage = _st14Language.Noise(source, message);
+        var foreignWrapped = Loc.GetString("chat-manager-entity-me-wrap-message",
+            ("entityName", FormattedMessage.EscapeText(name)),
+            ("entity", source),
             ("message", FormattedMessage.EscapeText(foreignMessage)));
 
         SendInVoiceRange(ChatChannel.Local, message, wrappedMessage, source, range, foreignMessage: foreignMessage, foreignWrapped: foreignWrapped);
@@ -149,12 +147,15 @@ public sealed partial class ChatSystem
             if (MessageRangeCheck(session, data, range) != MessageRangeCheckResult.Full)
                 continue; // Won't get logged to chat, and ghosts are too far away to see the pop-up, so we just won't send it to them.
 
-            // ST14: a whisper of the other kind is noise too
+            // ST14: a whisper of the other kind is only a quiet sound too
             if (!_st14Language.Understands(listener, source))
             {
-                var foreign = _st14Language.Garble(source, message);
-                _chatManager.ChatMessageToOne(ChatChannel.Whisper, foreign,
-                    Loc.GetString("chat-manager-entity-whisper-wrap-message", ("entityName", nameIdentity), ("message", FormattedMessage.EscapeText(foreign))),
+                var foreign = _st14Language.Noise(source, message, whisper: true);
+                _chatManager.ChatMessageToOne(ChatChannel.Emotes, foreign,
+                    Loc.GetString("chat-manager-entity-me-wrap-message",
+                        ("entityName", FormattedMessage.EscapeText(nameIdentity)),
+                        ("entity", source),
+                        ("message", FormattedMessage.EscapeText(foreign))),
                     source, false, session.Channel);
                 continue;
             }

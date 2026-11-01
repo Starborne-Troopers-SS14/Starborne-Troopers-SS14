@@ -185,7 +185,7 @@ public sealed partial class ST14BugAbilitySystem
         var to = _transform.GetMapCoordinates(target);
         if (!CanGrab(target) || from.MapId != to.MapId || (to.Position - from.Position).Length() > grab.CatchRange)
         {
-            _actions.SetCooldown(grab.ActionEntity, grab.MissCooldown);
+            StartCooldown(grab.ActionEntity, grab.MissCooldown);
             _popup.PopupEntity(Loc.GetString("st14-bug-grab-miss"), bug, bug);
             return;
         }
@@ -237,7 +237,7 @@ public sealed partial class ST14BugAbilitySystem
             return;
 
         ent.Comp.Victim = null;
-        _actions.SetCooldown(ent.Comp.ActionEntity, ent.Comp.Cooldown);
+        StartCooldown(ent.Comp.ActionEntity, ent.Comp.Cooldown);
 
         if (TerminatingOrDeleted(victim))
             return;

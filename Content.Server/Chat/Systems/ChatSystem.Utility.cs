@@ -72,10 +72,10 @@ public sealed partial class ChatSystem
             if (entRange == MessageRangeCheckResult.Disallowed)
                 continue;
             var entHideChat = entRange == MessageRangeCheckResult.HideChat;
-            // ST14: listeners of the other kind (bugs and people) get the noise version
+            // ST14: listeners of the other kind (bugs and people) only see what sound was made, as an emote
             if (foreignMessage != null && foreignWrapped != null && !_st14Language.Understands(session.AttachedEntity, source))
             {
-                _chatManager.ChatMessageToOne(channel, foreignMessage, foreignWrapped, source, entHideChat, session.Channel, author: author);
+                _chatManager.ChatMessageToOne(ChatChannel.Emotes, foreignMessage, foreignWrapped, source, entHideChat, session.Channel, author: author);
                 continue;
             }
 
