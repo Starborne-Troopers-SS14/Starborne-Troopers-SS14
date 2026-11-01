@@ -98,7 +98,7 @@ public sealed class ST14BugAbilityTest : InteractionTest
 
         await Server.WaitPost(() =>
         {
-            var ev = new ST14BugExecuteActionEvent { Performer = tiger, Target = human };
+            var ev = new ST14BugExecuteActionEvent { Performer = tiger, Target = SEntMan.GetComponent<TransformComponent>(human).Coordinates };
             SEntMan.EventBus.RaiseLocalEvent(tiger, ev);
         });
         await RunTicks(5);
@@ -169,7 +169,7 @@ public sealed class ST14BugAbilityTest : InteractionTest
         var blocker = SEntMan.System<ActionBlockerSystem>();
 
         await Server.WaitPost(() =>
-            SEntMan.EventBus.RaiseLocalEvent(warrior, new ST14BugGrabActionEvent { Performer = warrior, Target = human }));
+            SEntMan.EventBus.RaiseLocalEvent(warrior, new ST14BugGrabActionEvent { Performer = warrior, Target = SEntMan.GetComponent<TransformComponent>(human).Coordinates }));
         await RunTicks(2);
 
         Assert.Multiple(() =>

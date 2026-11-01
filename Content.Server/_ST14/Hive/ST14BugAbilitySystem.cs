@@ -9,6 +9,7 @@ using Content.Shared.Popups;
 using Content.Shared.Stunnable;
 using Content.Shared.Throwing;
 using Robust.Shared.Audio.Systems;
+using Robust.Shared.Map;
 
 namespace Content.Server._ST14.Hive;
 
@@ -55,6 +56,40 @@ public sealed partial class ST14BugAbilitySystem : EntitySystem
 
         UpdateWarrior(frameTime);
         UpdateTiger(frameTime);
+    }
+
+    /// <summary>
+    /// The mob a click points at: the closest one to the clicked spot that fits, so the player does not have to hit
+    /// the sprite exactly
+    /// </summary>
+    private EntityUid? PickTarget(EntityCoordinates click, Func<EntityUid, bool> valid)
+    {
+        const float pickRadius = 1.5f;
+
+        _victims.Clear();
+        _lookup.GetEntitiesInRange(click, pickRadius, _victims);
+
+        var clicked = _transform.ToMapCoordinates(click);
+        EntityUid? best = null;
+        var bestDistance = float.MaxValue;
+        foreach (var mob in _victims)
+        {
+            if (!valid(mob))
+                continue;
+
+            var position = _transform.GetMapCoordinates(mob);
+            if (position.MapId != clicked.MapId)
+                continue;
+
+            var distance = (position.Position - clicked.Position).LengthSquared();
+            if (distance < bestDistance)
+            {
+                best = mob;
+                bestDistance = distance;
+            }
+        }
+
+        return best;
     }
 
     #region Lunge

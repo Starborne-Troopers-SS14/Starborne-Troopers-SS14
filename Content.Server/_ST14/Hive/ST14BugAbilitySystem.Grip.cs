@@ -106,8 +106,8 @@ public sealed partial class ST14BugAbilitySystem
             return;
         }
 
-        var target = args.Target;
-        if (!CanGrab(target))
+        var self = ent.Owner;
+        if (PickTarget(args.Target, uid => uid != self && CanGrab(uid)) is not { } target)
         {
             _popup.PopupEntity(Loc.GetString("st14-bug-grab-invalid"), ent, ent);
             return;
@@ -119,19 +119,24 @@ public sealed partial class ST14BugAbilitySystem
             return;
         }
 
+        var from = _transform.GetMapCoordinates(ent);
+        var to = _transform.GetMapCoordinates(target);
+        var direction = to.Position - from.Position;
+
+        if (from.MapId != to.MapId || direction.Length() > ent.Comp.MaxLeap)
+        {
+            _popup.PopupEntity(Loc.GetString("st14-bug-leap-too-far"), ent, ent);
+            return;
+        }
+
         args.Handled = true;
         EnsureComp<ST14HiveGrabLeapComponent>(ent).Target = target;
 
         if (ent.Comp.LeapSound != null)
             _audio.PlayPvs(ent.Comp.LeapSound, ent);
 
-        var from = _transform.GetMapCoordinates(ent);
-        var to = _transform.GetMapCoordinates(target);
-        var direction = to.Position - from.Position;
-
         // right next to the trooper there is nothing to leap over
-        if (from.MapId != to.MapId ||
-            direction.Length() <= ent.Comp.CatchRange ||
+        if (direction.Length() <= ent.Comp.CatchRange ||
             !_throwing.TryThrow(ent, direction, ent.Comp.Speed, ent, recoil: false, doSpin: false))
         {
             Catch(ent);
@@ -337,6 +342,7 @@ public sealed partial class ST14BugAbilitySystem
             if (off.Duration() <= ent.Comp.PerfectWindow)
             {
                 ent.Comp.Struggle += ent.Comp.PerfectGain;
+                ent.Comp.LastPerfect = _timing.CurTime;
                 _popup.PopupEntity(Loc.GetString("st14-bug-grab-perfect"), ent, ent, PopupType.Medium);
             }
             else

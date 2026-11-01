@@ -95,7 +95,7 @@
   parent: BaseAction
   id: ST14ActionBugGrab
   name: Grip of the hive
-  description: Leap at a trooper, knock it down and carry it in your claws to the brain bug, who starts sucking right away. Shots at it hit you. Press again to drop it.
+  description: Click near a trooper anywhere on screen to leap at it, knock it down and carry it in your claws to the brain bug, who starts sucking right away. Shots at it hit you. Press again to drop it.
   components:
   - type: Action
     itemIconStyle: BigAction
@@ -104,13 +104,9 @@
     layers:
     - state: grab
   - type: TargetAction
-    range: 5
+    range: 0
     checkCanAccess: false
-  - type: EntityTargetAction
-    canTargetSelf: false
-    whitelist:
-      components:
-      - MobState
+  - type: WorldTargetAction
     event: !type:ST14BugGrabActionEvent
 
 - type: entity
@@ -132,7 +128,7 @@
   parent: BaseAction
   id: ST14ActionBugExecute
   name: Execution
-  description: Leap at a trooper. A badly wounded one dies on the spot, heals you and lets you leap again at once. A healthy one only takes a blow.
+  description: Click near a badly wounded trooper anywhere on screen to leap at it. It dies on the spot, heals you and lets you leap again at once. You will not leap at a healthy one.
   components:
   - type: Action
     itemIconStyle: BigAction
@@ -142,11 +138,7 @@
     layers:
     - state: execute
   - type: TargetAction
-    range: 6
+    range: 0
     checkCanAccess: false
-  - type: EntityTargetAction
-    canTargetSelf: false
-    whitelist:
-      components:
-      - MobState
+  - type: WorldTargetAction
     event: !type:ST14BugExecuteActionEvent
