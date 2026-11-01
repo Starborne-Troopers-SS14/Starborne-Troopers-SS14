@@ -30,6 +30,12 @@ public sealed partial class ST14BugBarricadeActionEvent : InstantActionEvent;
 
 public sealed partial class ST14BugExecuteActionEvent : WorldTargetActionEvent;
 
+public sealed partial class ST14LarvaRideActionEvent : WorldTargetActionEvent;
+
+public sealed partial class ST14BrainSpitActionEvent : WorldTargetActionEvent;
+
+public sealed partial class ST14BrainScreamActionEvent : InstantActionEvent;
+
 /// <summary>
 /// Blood trails of the wounded troopers, sent only to the bugs that can smell them
 /// </summary>

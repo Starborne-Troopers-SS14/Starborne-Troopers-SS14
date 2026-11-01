@@ -196,4 +196,86 @@ public sealed class ST14BugAbilityTest : InteractionTest
 
         Assert.That(SEntMan.GetComponent<ST14BrainBugComponent>(brain).Sucking, "The brain bug did not start on the delivered trooper.");
     }
+
+    /// <summary>
+    /// A larva rides on a warrior untouched and falls off when the warrior dies
+    /// </summary>
+    [Test]
+    public async Task LarvaRideTest()
+    {
+        await LayFloor();
+        var larva = await SpawnAt("ST14MobBugLarva", 4, 2);
+        var warrior = await SpawnAt("ST14MobBugWarrior", 5, 2);
+        await RunTicks(5);
+
+        var damageable = SEntMan.System<DamageableSystem>();
+
+        await Server.WaitPost(() => SEntMan.EventBus.RaiseLocalEvent(larva,
+            new ST14LarvaRideActionEvent { Performer = larva, Target = SEntMan.GetComponent<TransformComponent>(warrior).Coordinates }));
+        await RunTicks(2);
+
+        Assert.That(SEntMan.GetComponent<TransformComponent>(larva).ParentUid, Is.EqualTo(warrior), "The larva is not on the warrior's back.");
+
+        await Server.WaitPost(() => damageable.TryChangeDamage(larva, Damage(Slash, 30), ignoreResistances: true, origin: SPlayer));
+        await RunTicks(2);
+        Assert.That(damageable.GetTotalDamage(larva), Is.EqualTo(FixedPoint2.Zero), "The riding larva was hurt.");
+
+        await Server.WaitPost(() => damageable.TryChangeDamage(warrior, Damage(Slash, 1000), ignoreResistances: true));
+        await RunTicks(5);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(SEntMan.HasComponent<ST14RidingComponent>(larva), Is.False, "The larva still rides a dead warrior.");
+            Assert.That(SEntMan.GetComponent<TransformComponent>(larva).ParentUid, Is.Not.EqualTo(warrior), "The larva did not fall off.");
+        });
+    }
+
+    /// <summary>
+    /// Three globs of slime wrap a trooper in a cocoon it cannot walk in
+    /// </summary>
+    [Test]
+    public async Task SlimeCocoonTest()
+    {
+        await LayFloor();
+        var human = await SpawnAt("MobHuman", 4, 2);
+        var brain = await SpawnAt("ST14MobBrainBug", 7, 2);
+        await RunTicks(5);
+
+        var blocker = SEntMan.System<ActionBlockerSystem>();
+        for (var i = 0; i < 3; i++)
+        {
+            await Server.WaitPost(() =>
+            {
+                var spit = SEntMan.SpawnEntity("ST14BrainSlimeSpit", SEntMan.GetComponent<TransformComponent>(brain).Coordinates);
+                var ev = new Content.Shared.Projectiles.ProjectileHitEvent(new DamageSpecifier(), human, brain);
+                SEntMan.EventBus.RaiseLocalEvent(spit, ref ev);
+                SEntMan.DeleteEntity(spit);
+            });
+            await RunTicks(1);
+        }
+
+        await RunTicks(2);
+        Assert.Multiple(() =>
+        {
+            Assert.That(SEntMan.GetComponent<ST14SlimedComponent>(human).Cocooned, "Three globs did not make a cocoon.");
+            Assert.That(blocker.CanMove(human), Is.False, "A cocooned trooper can walk.");
+        });
+    }
+
+    /// <summary>
+    /// The scream deafens the troopers around the brain bug
+    /// </summary>
+    [Test]
+    public async Task ScreamTest()
+    {
+        await LayFloor();
+        var human = await SpawnAt("MobHuman", 4, 2);
+        var brain = await SpawnAt("ST14MobBrainBug", 6, 2);
+        await RunTicks(5);
+
+        await Server.WaitPost(() => SEntMan.EventBus.RaiseLocalEvent(brain, new ST14BrainScreamActionEvent { Performer = brain }));
+        await RunTicks(2);
+
+        Assert.That(SEntMan.HasComponent<ST14DeafenedComponent>(human), "The scream did not deafen the trooper.");
+    }
 }

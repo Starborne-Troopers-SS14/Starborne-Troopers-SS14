@@ -328,6 +328,12 @@
         params: { volume: -8, pitch: 1.5 }
   - type: ST14BugLarva
   - type: ST14BiomassEater
+  - type: ST14LarvaRide
+    sound:
+      collection: ST14BugWarriorTaunt
+      params:
+        volume: -6
+        pitch: 1.6
   - type: GhostRole
     allowMovement: true
     allowSpeech: true
@@ -393,6 +399,17 @@
         collection: ST14BugTigerRunMetal
       sand:
         collection: ST14BugTigerRunSand
+  - type: ST14BrainSpit
+    sound:
+      path: /Audio/Weapons/Xeno/alien_spitacid.ogg
+  - type: ST14BrainScream
+    sound:
+      collection: ST14BugBrainPain
+      params:
+        volume: 8
+        pitch: 0.6
+    ringingSound:
+      path: /Audio/_ST14/Mobs/Bugs/ear_ringing.wav
   - type: ST14BrainBug
     suckStartSound:
       path: /Audio/_ST14/Mobs/Bugs/brain_suck_start.wav
