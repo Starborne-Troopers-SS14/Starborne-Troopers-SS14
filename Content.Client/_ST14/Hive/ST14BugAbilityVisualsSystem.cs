@@ -41,6 +41,7 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
     private ST14BloodScentOverlay _scent = default!;
     private ST14GripStruggleOverlay _struggle = default!;
     private ST14HallucinationOverlay _hallucination = default!;
+    private ST14ScreamVisionOverlay _screamVision = default!;
 
     // made on the first frame: a client without graphics, like the test one, never needs them
     private ShaderInstance? _rageShader;
@@ -69,12 +70,14 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
         _scent = new ST14BloodScentOverlay();
         _struggle = new ST14GripStruggleOverlay();
         _hallucination = new ST14HallucinationOverlay();
+        _screamVision = new ST14ScreamVisionOverlay();
 
         _overlays.AddOverlay(_resonance);
         _overlays.AddOverlay(_rage);
         _overlays.AddOverlay(_scent);
         _overlays.AddOverlay(_struggle);
         _overlays.AddOverlay(_hallucination);
+        _overlays.AddOverlay(_screamVision);
     }
 
     public override void Shutdown()
@@ -86,6 +89,7 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
         _overlays.RemoveOverlay(_scent);
         _overlays.RemoveOverlay(_struggle);
         _overlays.RemoveOverlay(_hallucination);
+        _overlays.RemoveOverlay(_screamVision);
     }
 
     private void OnBloodScent(ST14BloodScentEvent args)

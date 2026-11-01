@@ -149,11 +149,11 @@
   parent: BaseAction
   id: ST14ActionBrainScream
   name: Hive scream
-  description: A long piercing scream. For 30 seconds the troopers around see things that are not there and hear nothing but ringing.
+  description: A long piercing scream. For 15 seconds the troopers around see the world swim and flicker and hear nothing but ringing.
   components:
   - type: Action
     itemIconStyle: BigAction
-    useDelay: 75
+    useDelay: 60
   - type: Sprite
     sprite: _ST14/Mobs/Bugs/brain.rsi
     layers:

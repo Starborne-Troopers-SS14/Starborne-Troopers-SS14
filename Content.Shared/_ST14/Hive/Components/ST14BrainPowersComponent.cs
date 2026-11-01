@@ -46,13 +46,13 @@ public sealed partial class ST14BrainScreamComponent : Component
     public float Range = 7f;
 
     [DataField]
-    public TimeSpan Duration = TimeSpan.FromSeconds(30);
+    public TimeSpan Duration = TimeSpan.FromSeconds(15);
 
     /// <summary>
-    /// How hard the visions hit, 1 is the stupor
+    /// How hard the swimming of the picture hits, from 0 to 1
     /// </summary>
     [DataField]
-    public float Intensity = 0.55f;
+    public float Intensity = 1f;
 
     [DataField]
     public SoundSpecifier? Sound;
