@@ -86,5 +86,4 @@ public static partial class ST14CVars
     /// </summary>
     public static readonly CVarDef<bool> SectorRounds =
         CVarDef.Create("st14.sector_rounds", true, CVar.SERVERONLY | CVar.ARCHIVE);
-
 }
