@@ -22,8 +22,9 @@ public sealed partial class ST14BloodDecalsSystem : EntitySystem
     [Dependency] private DecalSystem _decals = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
 
-    // Blood sprites are 48 px, a decal is placed by its corner and turns around its middle
-    private static readonly Vector2 DecalCenter = new(0.75f, 0.75f);
+    // Blood sprites are 52 px (48 px with a clear border, so a turned decal shows no stray lines), a decal is placed by
+    // its corner and turns around its middle
+    private static readonly Vector2 DecalCenter = new(0.8125f, 0.8125f);
 
     // A single drip event never paints more than this, the rest of the blood is lost on the way
     private const int MaxDripsPerBleed = 4;
