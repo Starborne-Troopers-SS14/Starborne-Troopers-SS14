@@ -4,8 +4,8 @@ meta:
   engineVersion: 290.0.0
   forkId: ""
   forkVersion: ""
-  time: 11/01/2026 17:19:00
-  entityCount: 3163
+  time: 11/01/2026 17:22:54
+  entityCount: 3175
 maps:
 - 1
 grids:
@@ -16485,21 +16485,85 @@ entities:
       pos: 199.5,199.5
 - proto: ST14SectorQueenSlot
   entities:
-  - uid: 3161
+  - uid: 3173
     components:
     - type: Transform
       parent: 2
       pos: 176.5,145.5
-  - uid: 3162
+  - uid: 3174
     components:
     - type: Transform
       parent: 2
       pos: 176.5,55.5
-  - uid: 3163
+  - uid: 3175
     components:
     - type: Transform
       parent: 2
       pos: 161.5,100.5
+- proto: ST14SpawnPointBrainBug
+  entities:
+  - uid: 3172
+    components:
+    - type: Transform
+      parent: 2
+      pos: 184.5,100.5
+- proto: ST14SpawnPointBug
+  entities:
+  - uid: 3161
+    components:
+    - type: Transform
+      parent: 2
+      pos: 189.5,70.5
+  - uid: 3162
+    components:
+    - type: Transform
+      parent: 2
+      pos: 189.5,76.5
+  - uid: 3163
+    components:
+    - type: Transform
+      parent: 2
+      pos: 189.5,82.5
+  - uid: 3164
+    components:
+    - type: Transform
+      parent: 2
+      pos: 189.5,88.5
+  - uid: 3165
+    components:
+    - type: Transform
+      parent: 2
+      pos: 189.5,94.5
+  - uid: 3166
+    components:
+    - type: Transform
+      parent: 2
+      pos: 189.5,100.5
+  - uid: 3167
+    components:
+    - type: Transform
+      parent: 2
+      pos: 189.5,106.5
+  - uid: 3168
+    components:
+    - type: Transform
+      parent: 2
+      pos: 189.5,112.5
+  - uid: 3169
+    components:
+    - type: Transform
+      parent: 2
+      pos: 189.5,118.5
+  - uid: 3170
+    components:
+    - type: Transform
+      parent: 2
+      pos: 189.5,124.5
+  - uid: 3171
+    components:
+    - type: Transform
+      parent: 2
+      pos: 189.5,130.5
 - proto: ST14SpawnPointEngineer
   entities:
   - uid: 3139
