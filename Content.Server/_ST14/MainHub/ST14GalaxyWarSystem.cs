@@ -146,6 +146,9 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
             return false;
 
         war.ApplyResult(target, federationWon, objectives);
+
+        var ev = new ST14SectorResultEvent(planet, target, war.Cells[target].Liberation);
+        RaiseLocalEvent(ref ev);
         // a taken sector is no longer a target, the High Command picks the next one
         if (!war.Cells[target].Front)
             _targets[planet] = war.FirstLanding ?? -1;
@@ -575,3 +578,9 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
 
     #endregion
 }
+
+/// <summary>
+/// Raised after the result of a round was applied to a sector: the share the Federation holds there now, in percent
+/// </summary>
+[ByRefEvent]
+public readonly record struct ST14SectorResultEvent(string Planet, int Cell, float Liberation);

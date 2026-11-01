@@ -68,6 +68,13 @@ public static partial class ST14CVars
         CVarDef.Create("st14.war_planet", string.Empty, CVar.SERVERONLY | CVar.ARCHIVE);
 
     /// <summary>
+    /// Rounds are fought on the map of the war's target sector. Off, or with game.map set by hand, the stock map
+    /// rotation is used
+    /// </summary>
+    public static readonly CVarDef<bool> SectorRounds =
+        CVarDef.Create("st14.sector_rounds", true, CVar.SERVERONLY | CVar.ARCHIVE);
+
+    /// <summary>
     /// Volume of bug footsteps, 0 to 1, set in the audio options
     /// </summary>
     public static readonly CVarDef<float> BugFootstepsVolume =
