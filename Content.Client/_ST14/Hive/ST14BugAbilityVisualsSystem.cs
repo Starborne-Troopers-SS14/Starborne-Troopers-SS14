@@ -4,13 +4,14 @@ using Content.Shared._ST14.Hive.Components;
 using Content.Shared.Mobs.Systems;
 using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
+using Robust.Client.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
 namespace Content.Client._ST14.Hive;
 
 /// <summary>
-/// Looks of the caste abilities: green motes and a pale outline on resonating warriors, a green glowing shield on the bugs of a
+/// Looks of the caste abilities, seen only by bugs: green motes and a pale outline on resonating warriors, a green glowing shield on the bugs of a
 /// living barricade, a red outline and sparks on a tiger in its last rush, and for the bugs that smell blood the red
 /// trails and the reddened bodies of the wounded troopers
 /// </summary>
@@ -27,6 +28,8 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private MobStateSystem _mobState = default!;
     [Dependency] private SpriteSystem _sprite = default!;
+    [Dependency] private IPlayerManager _player = default!;
+    [Dependency] private SharedST14HiveSystem _hive = default!;
 
     private ST14ResonanceOverlay _resonance = default!;
     private ST14RageOverlay _rage = default!;
@@ -91,6 +94,17 @@ public sealed partial class ST14BugAbilityVisualsSystem : EntitySystem
 
         _outlinedNow.Clear();
         _tintedNow.Clear();
+
+        // the glow of the hive is for bug eyes only, the troopers see plain bugs
+        var bugEyes = _player.LocalEntity is { } local && _hive.IsHive(local);
+        _resonance.Visible = bugEyes;
+        _rage.Visible = bugEyes;
+
+        if (!bugEyes)
+        {
+            Restore();
+            return;
+        }
 
         var rush = EntityQueryEnumerator<ST14LastRushComponent, SpriteComponent>();
         while (rush.MoveNext(out var uid, out var comp, out var sprite))

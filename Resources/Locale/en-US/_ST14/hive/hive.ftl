@@ -99,3 +99,15 @@ st14-bug-execute-healthy = {$target} is still too strong. Only troopers below {$
 st14-bug-leap-too-far = Too far to leap.
 st14-bug-execute-kill = The tiger executes {$target}!
 st14-bug-last-rush = The tiger refuses to die and flies into a rage!
+
+st14-hive-noise-bug-1 = screeches
+st14-hive-noise-bug-2 = chitters
+st14-hive-noise-bug-3 = hisses
+st14-hive-noise-bug-4 = clicks its mandibles
+st14-hive-noise-bug-5 = rattles its plates
+st14-hive-noise-human-1 = burbles something
+st14-hive-noise-human-2 = mumbles something
+st14-hive-noise-human-3 = makes strange noises
+st14-hive-noise-human-4 = babbles something
+st14-hive-noise-whisper = quietly {$noise}
+st14-hive-noise-question = {$noise}, as if asking

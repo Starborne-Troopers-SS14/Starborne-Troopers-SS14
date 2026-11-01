@@ -29,6 +29,7 @@ public sealed partial class ST14BugAbilitySystem : EntitySystem
     [Dependency] private SharedST14HiveSystem _hive = default!;
 
     private readonly HashSet<Entity<MobStateComponent>> _victims = new();
+    private readonly List<(EntityUid? Action, TimeSpan Cooldown)> _cooldowns = new();
 
     public override void Initialize()
     {
@@ -42,8 +43,25 @@ public sealed partial class ST14BugAbilitySystem : EntitySystem
     {
         base.Update(frameTime);
 
+        foreach (var (action, cooldown) in _cooldowns)
+        {
+            if (!TerminatingOrDeleted(action))
+                _actions.SetCooldown(action, cooldown);
+        }
+
+        _cooldowns.Clear();
+
         UpdateWarrior(frameTime);
         UpdateTiger(frameTime);
+    }
+
+    /// <summary>
+    /// Puts an action on cooldown on the next tick. Set from inside the action's own handler, a cooldown would be
+    /// wiped right away by the actions system, which restarts the cooldown of every handled action
+    /// </summary>
+    private void StartCooldown(EntityUid? action, TimeSpan cooldown)
+    {
+        _cooldowns.Add((action, cooldown));
     }
 
     /// <summary>

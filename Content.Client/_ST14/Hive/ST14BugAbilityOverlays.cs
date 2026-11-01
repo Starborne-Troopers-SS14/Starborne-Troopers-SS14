@@ -29,12 +29,22 @@ public sealed partial class ST14ResonanceOverlay : Overlay
 
     public override OverlaySpace Space => OverlaySpace.WorldSpace;
 
+    /// <summary>
+    /// Only bugs see the hive's effects
+    /// </summary>
+    public bool Visible;
+
     public ST14ResonanceOverlay()
     {
         IoCManager.InjectDependencies(this);
         _transform = _entities.System<SharedTransformSystem>();
         _mobState = _entities.System<MobStateSystem>();
         ZIndex = 5;
+    }
+
+    protected override bool BeforeDraw(in OverlayDrawArgs args)
+    {
+        return Visible;
     }
 
     protected override void Draw(in OverlayDrawArgs args)
@@ -87,11 +97,21 @@ public sealed partial class ST14RageOverlay : Overlay
 
     public override OverlaySpace Space => OverlaySpace.WorldSpace;
 
+    /// <summary>
+    /// Only bugs see the hive's effects
+    /// </summary>
+    public bool Visible;
+
     public ST14RageOverlay()
     {
         IoCManager.InjectDependencies(this);
         _transform = _entities.System<SharedTransformSystem>();
         ZIndex = 5;
+    }
+
+    protected override bool BeforeDraw(in OverlayDrawArgs args)
+    {
+        return Visible;
     }
 
     protected override void Draw(in OverlayDrawArgs args)
