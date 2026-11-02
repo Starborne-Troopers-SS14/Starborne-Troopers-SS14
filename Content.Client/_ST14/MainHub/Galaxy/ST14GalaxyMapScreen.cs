@@ -49,6 +49,7 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
 
     private readonly ST14GalaxyTextures _textures = new();
     private readonly Dictionary<string, ST14PlanetWar> _wars = new();
+    private readonly Dictionary<string, int> _stagings = new();
     private readonly Dictionary<string, int> _targets = new();
     private readonly ST14GalaxyMapView _map;
     private readonly ST14PlanetGlobe _surface;
@@ -320,13 +321,15 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         _canCommand = ev.CanCommand;
         UpdateCommand();
         _targets[ev.Planet] = ev.Target;
+        _stagings[ev.Planet] = ev.Staging;
         if (_wars.TryGetValue(ev.Planet, out var war))
-            war.ImportState(ev.Cells);
+            war.ImportState(ev.Cells, ev.Turn);
 
         if (_level != ST14GalaxyLevel.Surface || _planet?.ID != ev.Planet)
             return;
 
         _surface.TargetCell = TargetOf(_planet);
+        _surface.StagingCell = StagingOf(_planet);
         BuildSurfacePanel(_surface.SelectedCell);
     }
 
@@ -507,6 +510,11 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
     /// <summary>
     /// Sector the High Command sent the troopers to, null while the server has not said
     /// </summary>
+    private int? StagingOf(ST14GalaxyPlanetPrototype planet)
+    {
+        return _stagings.TryGetValue(planet.ID, out var staging) && staging >= 0 ? staging : null;
+    }
+
     private int? TargetOf(ST14GalaxyPlanetPrototype planet)
     {
         return _targets.TryGetValue(planet.ID, out var target) && target >= 0 ? target : null;
@@ -581,6 +589,7 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         ShowMap(false);
         _surface.SetPlanet(planet, WarOf(planet));
         _surface.TargetCell = TargetOf(planet);
+        _surface.StagingCell = StagingOf(planet);
         if (TargetOf(planet) is { } target)
             _surface.FaceCell(target);
         _surface.Intro(0.12f, GlobeZoom);
@@ -634,8 +643,9 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         war = new ST14PlanetWar(planet, name.Length > 0 ? name[..1].ToUpperInvariant() : "X");
         if (WarSystem?.TryGetState(planet.ID, out var state) == true)
         {
-            war.ImportState(state.Cells);
+            war.ImportState(state.Cells, state.Turn);
             _targets[planet.ID] = state.Target;
+            _stagings[planet.ID] = state.Staging;
         }
 
         _wars[planet.ID] = war;
@@ -776,8 +786,8 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
                 ST14HubFont.Medium, 17, ST14GalaxyColors.Arachnid, 190, 28);
             AddText(Loc.GetString("st14-galaxy-surface-available", ("count", war.Cells.Count(c => c.Front))).ToUpperInvariant(),
                 ST14HubFont.Medium, 17, ST14HubStyle.GoldLight, 226, 28);
-            AddText(Loc.GetString("st14-galaxy-surface-hives", ("count", war.Cells.Count(c => c.Hive))).ToUpperInvariant(),
-                ST14HubFont.Regular, 16, new Color(1f, 0.45f, 0.3f), 262, 26);
+            AddText(Loc.GetString("st14-galaxy-turn", ("faction", FactionName(war.Turn))).ToUpperInvariant(),
+                ST14HubFont.Medium, 16, ST14GalaxyColors.Of(war.Turn), 262, 26);
             AddKills(war.BugsKilled, war.TroopersKilled, 290);
 
             if (_planet.Description is { } description)
@@ -810,11 +820,16 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         AddText(Loc.GetString(cell.Front ? "st14-galaxy-cell-available" : "st14-galaxy-control",
                 ("faction", FactionName(cell.Faction))).ToUpperInvariant(), ST14HubFont.Medium, 17,
             cell.Front ? ST14HubStyle.GoldLight : ST14GalaxyColors.Of(cell.Faction), 132, 28);
-        AddBar(cell.Liberation, 170);
+        AddText(Loc.GetString("st14-galaxy-control", ("faction", FactionName(cell.Faction))).ToUpperInvariant(), ST14HubFont.Regular, 16,
+            ST14GalaxyColors.Of(cell.Faction), 170, 26);
+        AddText(Loc.GetString("st14-galaxy-cell-region", ("code", war.Cells[war.RegionCenters[cell.Region]].Code)).ToUpperInvariant(), ST14HubFont.Regular, 16,
+            new Color(0.85f, 0.88f, 0.92f), 196, 26);
         AddText(Loc.GetString("st14-galaxy-cell-terrain", ("terrain", Loc.GetString($"st14-galaxy-terrain-{cell.Terrain + 1}")))
             .ToUpperInvariant(), ST14HubFont.Regular, 16, new Color(0.85f, 0.88f, 0.92f), 222, 26);
 
-        AddKills(cell.BugsKilled, cell.TroopersKilled, 252);
+        // a round can spread over a whole region, the dead are shown for all of it
+        var kills = war.RegionKills(index);
+        AddKills(kills.Bugs, kills.Troopers, 252);
 
         var y = 286f;
         if (cell.Hive)
@@ -834,8 +849,15 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
             : "st14-galaxy-cell-deep";
         AddText(Wrap(Loc.GetString(status), 44), ST14HubFont.Regular, 14, new Color(0.82f, 0.85f, 0.9f), y + 10, 160);
 
-        // troopers land where the High Command sends them, the High Command can move the attack along the front
+        // the command whose turn it is picks the battle, and the attacker's sector next to it
         var target = TargetOf(_planet);
+        var staging = StagingOf(_planet);
+        if (staging == index)
+        {
+            AddText(Loc.GetString("st14-galaxy-cell-staging").ToUpperInvariant(), ST14HubFont.Medium, 16, ST14HubStyle.GoldLight,
+                BottomButton(1) - 46, 26);
+        }
+
         if (cell.Front && (target == null || target == index))
         {
             if (target == index)
@@ -854,6 +876,12 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         else if (cell.Front)
         {
             AddButton(Loc.GetString("st14-galaxy-land-not-target"), BottomButton(0), null, disabled: true);
+        }
+        else if (_canCommand && staging != index && target is { } battle && war.StagingOptions(battle).Contains(index))
+        {
+            var planetId = _planet.ID;
+            var gather = AddButton(Loc.GetString("st14-galaxy-staging"), BottomButton(0), ST14HubStyle.Blue);
+            gather.OnPressed += _ => WarSystem?.Staging(planetId, index);
         }
         else
         {

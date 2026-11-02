@@ -6,20 +6,10 @@ using Robust.Shared.Serialization;
 namespace Content.Shared._ST14.MainHub;
 
 /// <summary>
-/// How a round moves the bar of the hex sector it was fought in. A sector is taken at 100%,
-/// Federation ground is lost again when its bar falls to 0
+/// The commands and the sides of the war. A round decides one hex sector, see <see cref="ST14PlanetWar.ApplyResult"/>
 /// </summary>
 public static class ST14GalaxyWarRules
 {
-    public const float WinGain = 20;
-
-    /// <summary>
-    /// A win with the objectives done, like a destroyed hive
-    /// </summary>
-    public const float ObjectiveGain = 30;
-
-    public const float LossPenalty = 20;
-
     /// <summary>
     /// Whitelist of the High Command: players who pick the sector to attack
     /// </summary>
@@ -56,7 +46,8 @@ public readonly record struct ST14HexCellState(
     bool Hive,
     bool Base,
     int BugsKilled,
-    int TroopersKilled);
+    int TroopersKilled,
+    bool Initialized);
 
 /// <summary>
 /// What the High Command can draw on the galaxy map. Arrows go from a point to a point, the rest are single marks
@@ -127,7 +118,7 @@ public sealed class ST14GalaxyWarRequestEvent : EntityEventArgs;
 /// and whether the receiving player may change that target
 /// </summary>
 [Serializable, NetSerializable]
-public sealed class ST14GalaxyWarStateEvent(string planet, ST14HexCellState[] cells, int target, bool canCommand) : EntityEventArgs
+public sealed class ST14GalaxyWarStateEvent(string planet, ST14HexCellState[] cells, int target, int staging, ST14GalaxyFaction turn, bool canCommand) : EntityEventArgs
 {
     public readonly string Planet = planet;
     public readonly ST14HexCellState[] Cells = cells;
@@ -137,11 +128,34 @@ public sealed class ST14GalaxyWarStateEvent(string planet, ST14HexCellState[] ce
     /// </summary>
     public readonly int Target = target;
 
+    /// <summary>
+    /// Neighbour of the target the attacker gathers in, -1 when it lands in the target itself
+    /// </summary>
+    public readonly int Staging = staging;
+
+    /// <summary>
+    /// The side whose command picks the next battle
+    /// </summary>
+    public readonly ST14GalaxyFaction Turn = turn;
+
+    /// <summary>
+    /// The player belongs to the command whose turn it is
+    /// </summary>
     public readonly bool CanCommand = canCommand;
 }
 
 /// <summary>
-/// A member of the High Command picks the sector of the next attack. The server checks the whitelist and the front
+/// The command whose turn it is picks the sector the attacker gathers in, next to the target
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class ST14GalaxyWarStagingEvent(string planet, int cell) : EntityEventArgs
+{
+    public readonly string Planet = planet;
+    public readonly int Cell = cell;
+}
+
+/// <summary>
+/// The command whose turn it is picks the sector of the next battle. The server checks the whitelist and the options
 /// </summary>
 [Serializable, NetSerializable]
 public sealed class ST14GalaxyWarOrderEvent(string planet, int cell) : EntityEventArgs

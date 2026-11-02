@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Numerics;
 using Content.Shared._ST14.MainHub;
 using Robust.Client.Graphics;
@@ -117,6 +118,11 @@ public sealed class ST14PlanetGlobe : Control
     /// </summary>
     public int? TargetCell;
 
+    /// <summary>
+    /// Sector the attacker gathers in for the battle over the target
+    /// </summary>
+    public int? StagingCell;
+
     public void SetPlanet(ST14GalaxyPlanetPrototype planet, ST14PlanetWar? war)
     {
         if (_planet != planet)
@@ -131,6 +137,7 @@ public sealed class ST14PlanetGlobe : Control
         _texture = _textures.Surface(planet);
         _selected = null;
         _hovered = null;
+        BuildRegionEdges();
 
         // a war planet turns its front towards the viewer
         if (war != null)
@@ -174,6 +181,33 @@ public sealed class ST14PlanetGlobe : Control
         }
 
         return war.Grid.Nearest(sum.LengthSquared() > 0.0001f ? Vector3.Normalize(sum) : Vector3.UnitZ);
+    }
+
+    /// <summary>
+    /// The sides of the cells that run along the border of a region: finding the cell behind a side takes a look
+    /// through its neighbours, so it is done once
+    /// </summary>
+    private void BuildRegionEdges()
+    {
+        _regionEdges.Clear();
+        if (_war == null)
+            return;
+
+        var grid = _war.Grid;
+        for (var i = 0; i < grid.Count; i++)
+        {
+            var corners = grid.Corners[i];
+            for (var c = 0; c < corners.Length; c++)
+            {
+                var from = corners[c];
+                var to = corners[(c + 1) % corners.Length];
+                var middle = Vector3.Normalize(from + to);
+                var behind = grid.Neighbours[i].OrderByDescending(n => Vector3.Dot(grid.Centers[n], middle)).First();
+                // every border is seen from both sides, one drawing is enough
+                if (behind > i && _war.Cells[behind].Region != _war.Cells[i].Region)
+                    _regionEdges.Add((from, to));
+            }
+        }
     }
 
     private float Radius => MathF.Min(PixelSize.X, PixelSize.Y) / 2 * Zoom;
@@ -409,7 +443,29 @@ public sealed class ST14PlanetGlobe : Control
 
     // drawn every frame, so the buffers are kept between frames instead of allocated per cell
     private readonly List<Vector2> _landings = new();
+    private readonly List<(Vector3 From, Vector3 To)> _regionEdges = new();
     private Vector2[] _hexCorners = new Vector2[6];
+
+    /// <summary>
+    /// A carrier hangs over the centre of every region, the conquest of the region starts under it
+    /// </summary>
+    private void DrawCarriers(DrawingHandleScreen handle, ST14PlanetWar war)
+    {
+        var texture = _textures.Carrier;
+        var aspect = (float) texture.Height / texture.Width;
+        foreach (var cell in war.RegionCenters)
+        {
+            var center = Vector3.Transform(war.Grid.Centers[cell], _rotation);
+            if (center.Z <= 0.25f)
+                continue;
+
+            var width = Radius * 0.15f * (0.55f + 0.45f * center.Z);
+            var size = new Vector2(width, width * aspect);
+            var pos = Project(center) + new Vector2(0, -size.Y * 0.8f);
+            var alpha = MathF.Min(1, (center.Z - 0.25f) * 5);
+            handle.DrawTextureRect(texture, UIBox2.FromDimensions(pos - size / 2, size), Color.White.WithAlpha(alpha));
+        }
+    }
 
     private void DrawHexes(DrawingHandleScreen handle)
     {
@@ -431,8 +487,9 @@ public sealed class ST14PlanetGlobe : Control
 
             var cell = war.Cells[i];
             // the target gets the marker, without one every open landing zone does
-            var landing = TargetCell == null ? cell.Faction == ST14GalaxyFaction.Contested : i == TargetCell;
-            var color = landing ? ST14HubStyle.GoldLight : ST14GalaxyColors.Of(cell.Faction);
+            var landing = i == TargetCell;
+            var staging = i == StagingCell;
+            var color = landing || staging ? ST14HubStyle.GoldLight : ST14GalaxyColors.Of(cell.Faction);
             var light = MathF.Min(1, Lighting(center) + 0.25f);
             // cells near the limb fade out, the edge of the planet stays clean
             var edge = MathF.Min(1, center.Z * 4);
@@ -503,6 +560,18 @@ public sealed class ST14PlanetGlobe : Control
             }
         }
 
+        // the regions stand out from the honeycomb with a bright border
+        foreach (var (from, to) in _regionEdges)
+        {
+            var a = Vector3.Transform(from, _rotation);
+            var b = Vector3.Transform(to, _rotation);
+            if (a.Z <= 0.02f || b.Z <= 0.02f)
+                continue;
+
+            var alpha = MathF.Min(1, MathF.Min(a.Z, b.Z) * 4);
+            _overlay.Line(Project(a), Project(b), width * 2.5f, Color.White.WithAlpha(0.9f * alpha));
+        }
+
         // the landing zones get a marker that stands over the planet
         foreach (var pos in _landings)
         {
@@ -519,5 +588,6 @@ public sealed class ST14PlanetGlobe : Control
 
         _hatch.Draw(handle, _textures.Hatch);
         _overlay.Draw(handle, Texture.White);
+        DrawCarriers(handle, war);
     }
 }

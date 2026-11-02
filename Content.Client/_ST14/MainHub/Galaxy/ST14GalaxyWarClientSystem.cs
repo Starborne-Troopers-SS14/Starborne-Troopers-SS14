@@ -42,6 +42,11 @@ public sealed class ST14GalaxyWarClientSystem : EntitySystem
         RaiseNetworkEvent(new ST14GalaxyWarOrderEvent(planet, cell));
     }
 
+    public void Staging(string planet, int cell)
+    {
+        RaiseNetworkEvent(new ST14GalaxyWarStagingEvent(planet, cell));
+    }
+
     public void AddMark(ST14GalaxyFaction side, ST14WarMark mark)
     {
         RaiseNetworkEvent(new ST14GalaxyMarkAddEvent(side, mark));
