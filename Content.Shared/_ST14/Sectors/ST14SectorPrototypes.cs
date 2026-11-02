@@ -1,10 +1,11 @@
 using Robust.Shared.Prototypes;
+using Robust.Shared.Utility;
 
 namespace Content.Shared._ST14.Sectors;
 
 /// <summary>
-/// A kind of ground a sector of a war planet can have. Every sector of that kind is fought on one of these maps:
-/// the sector number picks which, so a sector always looks the same and its neighbours differ
+/// A kind of ground a sector of a war planet can have. The first time a sector of that kind is fought over one of these
+/// maps is picked at random, from then on the sector keeps it in its save
 /// </summary>
 [Prototype("st14SectorTerrain")]
 public sealed partial class ST14SectorTerrainPrototype : IPrototype
@@ -19,10 +20,10 @@ public sealed partial class ST14SectorTerrainPrototype : IPrototype
     public int Index;
 
     /// <summary>
-    /// Game maps the sectors of this kind are fought on. Plain ids: game maps are not loaded on the client
+    /// Map files of the sectors of this kind
     /// </summary>
     [DataField(required: true)]
-    public List<string> Maps = new();
+    public List<ResPath> Maps = new();
 }
 
 /// <summary>
@@ -63,4 +64,22 @@ public sealed partial class ST14SectorSettingsPrototype : IPrototype
     /// </summary>
     [DataField]
     public TimeSpan CheckInterval = TimeSpan.FromSeconds(5);
+
+    /// <summary>
+    /// A battle not decided by this time is an attack that failed
+    /// </summary>
+    [DataField]
+    public TimeSpan RoundLimit = TimeSpan.FromHours(4);
+
+    /// <summary>
+    /// Components of the things a saved sector does not keep. Corpses, ghosts and spent casings go anyway
+    /// </summary>
+    [DataField]
+    public List<string> TrashComponents = new();
+
+    /// <summary>
+    /// Tags of the decals a saved sector does not keep. Plain strings: blood decals may not be on this server
+    /// </summary>
+    [DataField]
+    public List<string> TrashDecalTags = new();
 }

@@ -48,7 +48,8 @@ public sealed class ST14GalaxyMapTest
     }
 
     /// <summary>
-    /// Wins fill the bar of the target sector until it is taken, then the front moves to its neighbours and the target follows
+    /// The war of the design document: the Federation lands on a region centre, a lost landing passes the turn, a win takes
+    /// the sector, the bugs strike back from a neighbour, and troopers who wipe the bugs out take that neighbour too
     /// </summary>
     [Test]
     public async Task ServerWarTest()
@@ -62,26 +63,54 @@ public sealed class ST14GalaxyMapTest
             var planet = war.Planets.First();
             Assert.That(war.Reset(planet));
             Assert.That(war.TryGetWar(planet, out var state, out var target));
-            Assert.That(target, Is.GreaterThanOrEqualTo(0), "The planet starts without a landing target.");
+            Assert.That(state.Turn, Is.EqualTo(ST14GalaxyFaction.Federation), "The Federation moves first.");
+            Assert.That(state.RegionCenters, Does.Contain(target), "The first landing is not on the centre of a region.");
+            Assert.That(state.Cells.Count(c => c.Front), Is.EqualTo(state.RegionCenters.Length), "Only the centres of the regions are open at first.");
 
-            Assert.That(war.ApplyResult(planet, false, false));
-            Assert.That(state.Cells[target].Liberation, Is.Zero, "A lost landing must not go below zero.");
-            Assert.That(state.Cells[target].Front, "A lost landing zone must stay open.");
+            // the landing is lost: the turn passes, the bugs can only choose the sector to hold again
+            Assert.That(war.ApplyResult(planet, ST14GalaxyFaction.Arachnid));
+            Assert.That(state.Cells[target].Faction, Is.EqualTo(ST14GalaxyFaction.Arachnid));
+            Assert.That(state.Turn, Is.EqualTo(ST14GalaxyFaction.Arachnid));
 
-            var rounds = 0;
-            while (state.Cells[target].Faction != ST14GalaxyFaction.Federation && rounds++ < 10)
+            state.Cells[target].Initialized = true;
+            state.RefreshFront();
+            Assert.That(state.Cells.Count(c => c.Front), Is.EqualTo(1), "The bugs should only be able to hold what was fought over.");
+            Assert.That(war.SetTarget(planet, target));
+
+            // this time the troopers win it, a time out on the next battle changes no hands
+            Assert.That(war.ApplyResult(planet, ST14GalaxyFaction.Federation));
+            Assert.That(state.Cells[target].Faction, Is.EqualTo(ST14GalaxyFaction.Federation));
+            Assert.That(state.Cells[target].Liberation, Is.EqualTo(100));
+            Assert.That(state.Turn, Is.EqualTo(ST14GalaxyFaction.Federation));
+
+            Assert.That(war.ApplyResult(planet, null));
+            Assert.That(state.Turn, Is.EqualTo(ST14GalaxyFaction.Arachnid));
+            Assert.That(state.Cells[target].Faction, Is.EqualTo(ST14GalaxyFaction.Federation), "A battle that ran out of time changed the holder.");
+
+            // the bugs strike back and pick the sector they gather in, the troopers wipe them out
+            Assert.That(war.SetTarget(planet, target));
+            var from = state.StagingOptions(target).Last();
+            Assert.That(war.SetStaging(planet, from));
+            Assert.That(war.StagingOf(planet), Is.EqualTo(from));
+            Assert.That(state.StartOf(ST14GalaxyFaction.Arachnid, target, from), Is.EqualTo(from));
+            Assert.That(state.StartOf(ST14GalaxyFaction.Federation, target, from), Is.EqualTo(target));
+            Assert.That(war.ApplyResult(planet, ST14GalaxyFaction.Federation));
+            Assert.That(state.Cells[from].Faction, Is.EqualTo(ST14GalaxyFaction.Federation), "The sector the bugs gathered in did not fall.");
+
+            // the region goes on from what is held, only inside the region
+            state.Turn = ST14GalaxyFaction.Federation;
+            state.RefreshFront();
+            var region = state.Cells[target].Region;
+            for (var i = 0; i < state.Cells.Length; i++)
             {
-                war.ApplyResult(planet, true, false);
+                if (state.Cells[i].Region != region || !state.Cells[i].Front)
+                    continue;
+
+                Assert.That(state.Grid.Neighbours[i].Any(n => state.Cells[n].Region == region && state.Cells[n].Faction == ST14GalaxyFaction.Federation),
+                    "A sector far from the held ground of the region is open.");
             }
 
-            Assert.That(rounds, Is.EqualTo((int) MathF.Ceiling(100 / ST14GalaxyWarRules.WinGain)));
-            Assert.That(war.TryGetWar(planet, out state, out var next));
-            Assert.That(next, Is.Not.EqualTo(target), "The target stayed on a taken sector.");
-            Assert.That(state.Cells[next].Front);
-            Assert.That(state.Grid.Neighbours[target].All(n => state.Cells[n].Front || state.Cells[n].Faction == ST14GalaxyFaction.Federation),
-                "The neighbours of a taken sector did not open.");
-
-            Assert.That(war.SetTarget(planet, target), Is.False, "A Federation sector can not be attacked.");
+            Assert.That(war.SetTarget(planet, target), Is.False, "A Federation sector can not be attacked by the Federation.");
             war.Reset(planet);
         });
 
@@ -109,12 +138,30 @@ public sealed class ST14GalaxyMapTest
                 Assert.That(war.Cells, Has.Length.EqualTo(10 * frequency * frequency + 2));
                 Assert.That(war.Grid.Corners.Count(c => c.Length == 5), Is.EqualTo(12), "A sphere of hexagons has twelve pentagons.");
                 Assert.That(war.Grid.Corners.All(c => c.Length is 5 or 6));
-                Assert.That(war.Cells.Any(c => c.Front), "The planet has no front line to land on.");
+                Assert.That(war.Cells.Any(c => c.Front), "The planet has nothing to land on.");
+
+                // every cell lies in a region around a centre, most of them are the full seven
+                var sizes = war.Cells.GroupBy(c => c.Region).Select(g => g.Count()).ToList();
+                TestContext.Out.WriteLine($"{planet.ID}: {war.Cells.Length} cells, regions {string.Join(",", sizes.OrderBy(x => x))}");
+                Assert.That(war.Cells.All(c => c.Region >= 0 && c.Region < war.RegionCenters.Length));
+                Assert.That(sizes.Count(x => x is 6 or 7), Is.GreaterThan(sizes.Count / 2), "Most regions should be a centre with its neighbours.");
+                for (var r = 0; r < war.RegionCenters.Length; r++)
+                {
+                    Assert.That(war.Cells[war.RegionCenters[r]].Region, Is.EqualTo(r));
+                }
+
+                // the edges of the cells name their neighbours, and a neighbour knows the way back
+                for (var i = 0; i < war.Grid.Count; i++)
+                {
+                    Assert.That(war.Grid.Edges[i], Is.EquivalentTo(war.Grid.Neighbours[i]));
+                    Assert.That(war.Grid.Edges[i].All(n => war.Grid.Edges[n].Contains(i)));
+                }
+
                 if (planet.Liberation <= 0)
                 {
-                    // a planet the Federation has not landed on yet: no held ground and only the landing zones open
+                    // a planet the Federation has not landed on yet: no held ground and only the region centres open
                     Assert.That(war.CountOf(ST14GalaxyFaction.Federation), Is.Zero);
-                    Assert.That(war.Cells.Count(c => c.Front), Is.EqualTo(planet.LandingZones));
+                    Assert.That(war.Cells.Count(c => c.Front), Is.EqualTo(war.RegionCenters.Length));
                 }
                 Assert.That(war.CountOf(ST14GalaxyFaction.Arachnid), Is.GreaterThan(0));
 
