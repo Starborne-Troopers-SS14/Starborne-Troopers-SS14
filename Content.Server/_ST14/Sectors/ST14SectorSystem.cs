@@ -456,30 +456,81 @@ public sealed partial class ST14SectorSystem : EntitySystem
         MarkOwners();
         _resources.UserData.CreateDir(SaveRoot);
 
-        foreach (var (cell, map) in _maps)
+        var unsaved = AllowLivingMobs();
+        try
         {
-            if (TerminatingOrDeleted(map))
-                continue;
+            foreach (var (cell, map) in _maps)
+            {
+                if (TerminatingOrDeleted(map))
+                    continue;
 
-            // minds and the station stay out of the save: they belong to the round, not to the map
-            var options = new SerializationOptions
-            {
-                MissingEntityBehaviour = MissingEntityBehaviour.Ignore,
-                LogAutoInclude = null,
-            };
+                // minds and the station stay out of the save: they belong to the round, not to the map
+                var options = new SerializationOptions
+                {
+                    MissingEntityBehaviour = MissingEntityBehaviour.Ignore,
+                    LogAutoInclude = null,
+                };
 
-            try
-            {
-                if (_mapLoader.TrySaveMap(map, SavePath(planet, cell), options))
-                    _war.MarkInitialized(planet, cell);
-                else
-                    Log.Error($"Could not save sector {cell} of {planet}");
-            }
-            catch (Exception e)
-            {
-                Log.Error($"Could not save sector {cell} of {planet}: {e}");
+                try
+                {
+                    if (_mapLoader.TrySaveMap(map, SavePath(planet, cell), options))
+                        _war.MarkInitialized(planet, cell);
+                    else
+                        Log.Error($"Could not save sector {cell} of {planet}");
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"Could not save sector {cell} of {planet}: {e}");
+                }
             }
         }
+        finally
+        {
+            foreach (var proto in unsaved)
+            {
+                proto.MapSavable = false;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Mobs and much of what they are made of are marked to never go into a map file, so a mapper's save does not catch
+    /// a player. A sector save wants the living with all they carry, so for the time of the save it lets those through.
+    /// Returns the prototypes to mark again
+    /// </summary>
+    private HashSet<EntityPrototype> AllowLivingMobs()
+    {
+        var unsaved = new HashSet<EntityPrototype>();
+        var maps = _maps.Values.ToHashSet();
+        var strip = Settings.UnsaveableComponents.Select(name => Factory.GetRegistration(name).Type).ToList();
+
+        void Allow(EntityUid uid, TransformComponent xform)
+        {
+            if (MetaData(uid).EntityPrototype is { MapSavable: false } proto && unsaved.Add(proto))
+                proto.MapSavable = true;
+
+            var children = xform.ChildEnumerator;
+            while (children.MoveNext(out var child))
+            {
+                Allow(child, Transform(child));
+            }
+        }
+
+        var mobs = EntityQueryEnumerator<MobStateComponent, TransformComponent>();
+        while (mobs.MoveNext(out var uid, out _, out var xform))
+        {
+            if (xform.MapUid is not { } map || !maps.Contains(map) || _mobState.IsDead(uid))
+                continue;
+
+            Allow(uid, xform);
+            foreach (var type in strip)
+            {
+                if (HasComp(uid, type))
+                    RemComp(uid, type);
+            }
+        }
+
+        return unsaved;
     }
 
     /// <summary>
@@ -498,7 +549,7 @@ public sealed partial class ST14SectorSystem : EntitySystem
             }
 
             var owner = EnsureComp<ST14SectorOwnerComponent>(uid);
-            owner.UserId = user.UserId;
+            owner.UserId = user.UserId.ToString();
             _jobs.MindTryGetJobId(mindId, out var job);
             owner.Job = job?.Id;
         }

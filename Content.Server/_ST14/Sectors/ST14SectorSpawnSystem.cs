@@ -34,7 +34,7 @@ public sealed partial class ST14SectorSpawnSystem : EntitySystem
     /// <summary>
     /// The player being spawned: the spawning event itself does not say who it is
     /// </summary>
-    private Guid? _spawning;
+    private string? _spawning;
 
     public override void Initialize()
     {
@@ -46,7 +46,7 @@ public sealed partial class ST14SectorSpawnSystem : EntitySystem
 
     private void OnBeforeSpawn(PlayerBeforeSpawnEvent ev)
     {
-        _spawning = ev.Player.UserId.UserId;
+        _spawning = ev.Player.UserId.UserId.ToString();
     }
 
     private void OnPlayerSpawning(PlayerSpawningEvent args)
@@ -101,7 +101,7 @@ public sealed partial class ST14SectorSpawnSystem : EntitySystem
     /// <summary>
     /// The living body the player left in a sector last round, if it waits for the same job and nobody took it
     /// </summary>
-    private EntityUid? OwnBody(Guid user, ProtoId<JobPrototype>? job)
+    private EntityUid? OwnBody(string user, ProtoId<JobPrototype>? job)
     {
         var query = EntityQueryEnumerator<ST14SectorOwnerComponent, MindContainerComponent, TransformComponent>();
         while (query.MoveNext(out var uid, out var owner, out var mind, out var xform))

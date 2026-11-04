@@ -9,6 +9,7 @@
   checkInterval: 5
   roundLimit: 14400
   trashComponents: [ Puddle ]
+  unsaveableComponents: [ KillTracker ]
   trashDecalTags: [ ST14BloodSplatter, ST14BloodDrip, ST14BloodPool, ST14BugBlood ]
 
 # One kind of ground per terrain of the galaxy map (index = terrain number from 0). Add the mappers' map files to each list.

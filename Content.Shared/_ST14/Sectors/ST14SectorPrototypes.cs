@@ -78,6 +78,12 @@ public sealed partial class ST14SectorSettingsPrototype : IPrototype
     public List<string> TrashComponents = new();
 
     /// <summary>
+    /// Components of living mobs that cannot be written to a map file: they go from the mob when the sector is saved
+    /// </summary>
+    [DataField]
+    public List<string> UnsaveableComponents = new();
+
+    /// <summary>
     /// Tags of the decals a saved sector does not keep. Plain strings: blood decals may not be on this server
     /// </summary>
     [DataField]

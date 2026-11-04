@@ -24,7 +24,7 @@ public sealed partial class ST14SectorGateComponent : Component
 public sealed partial class ST14SectorOwnerComponent : Component
 {
     [DataField]
-    public Guid UserId;
+    public string UserId = string.Empty;
 
     [DataField]
     public string? Job;
