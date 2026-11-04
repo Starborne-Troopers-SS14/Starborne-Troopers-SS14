@@ -1,5 +1,6 @@
 using Content.Shared.Damage.Prototypes;
 using Content.Shared.FixedPoint;
+using System.Numerics;
 using Robust.Shared.Prototypes;
 
 namespace Content.Shared._ST14.Blood;
@@ -19,6 +20,13 @@ public sealed partial class ST14BloodDecalsComponent : Component
 
     [DataField]
     public string PoolTag = "ST14BloodPool";
+
+    /// <summary>
+    /// Half the size of the blood sprites in tiles: a decal is placed by its corner and turns around its middle.
+    /// The server has no sprites to measure, a test compares this with the sprites of the tags above
+    /// </summary>
+    [DataField]
+    public Vector2 DecalCenter = new(0.8125f, 0.8125f);
 
     /// <summary>
     /// Damage types that spill blood on a hit and how much each one counts
@@ -71,10 +79,34 @@ public sealed partial class ST14BloodDecalsComponent : Component
     public float DripSpread = 0.35f;
 
     /// <summary>
-    /// Pools left under the body when it dies
+    /// Pools under a body in critical condition
+    /// </summary>
+    [DataField]
+    public int CriticalPools = 1;
+
+    /// <summary>
+    /// Pools under a dead body, the ones from its critical condition count
     /// </summary>
     [DataField]
     public int DeathPools = 2;
+
+    /// <summary>
+    /// Pools left by a gibbed body, the ones it already left count
+    /// </summary>
+    [DataField]
+    public int GibPools = 3;
+
+    /// <summary>
+    /// Splatters thrown around by a gibbed body
+    /// </summary>
+    [DataField]
+    public int GibSplatters = 4;
+
+    /// <summary>
+    /// Pools left since the mob went down, starts over when it is back on its feet
+    /// </summary>
+    [DataField]
+    public int Pools;
 }
 
 /// <summary>
