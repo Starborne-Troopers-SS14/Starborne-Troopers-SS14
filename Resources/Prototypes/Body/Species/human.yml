@@ -94,6 +94,7 @@
   id: MobHuman
   name: Urist McHands
   components:
+  - type: ST14BloodDecals # ST14: blood decals instead of puddles
   - type: Butcherable
     spawned:
     - id: FoodMeatHuman

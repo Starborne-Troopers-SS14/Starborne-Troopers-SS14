@@ -1,0 +1,442 @@
+# Human blood on the floor. Splatters point along +X and get turned to the direction of the hit
+
+- type: decal
+  id: ST14BloodSplatter1
+  tags: ["ST14BloodSplatter"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: splatter1
+
+- type: decal
+  id: ST14BloodSplatter2
+  tags: ["ST14BloodSplatter"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: splatter2
+
+- type: decal
+  id: ST14BloodSplatter3
+  tags: ["ST14BloodSplatter"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: splatter3
+
+- type: decal
+  id: ST14BloodSplatter4
+  tags: ["ST14BloodSplatter"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: splatter4
+
+- type: decal
+  id: ST14BloodSplatter5
+  tags: ["ST14BloodSplatter"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: splatter5
+
+- type: decal
+  id: ST14BloodSplatter6
+  tags: ["ST14BloodSplatter"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: splatter6
+
+- type: decal
+  id: ST14BloodSplatter7
+  tags: ["ST14BloodSplatter"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: splatter7
+
+- type: decal
+  id: ST14BloodSplatter8
+  tags: ["ST14BloodSplatter"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: splatter8
+
+- type: decal
+  id: ST14BloodSplatter9
+  tags: ["ST14BloodSplatter"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: splatter9
+
+- type: decal
+  id: ST14BloodSplatter10
+  tags: ["ST14BloodSplatter"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: splatter10
+
+- type: decal
+  id: ST14BloodDrip1
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip1
+
+- type: decal
+  id: ST14BloodDrip2
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip2
+
+- type: decal
+  id: ST14BloodDrip3
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip3
+
+- type: decal
+  id: ST14BloodDrip4
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip4
+
+- type: decal
+  id: ST14BloodDrip5
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip5
+
+- type: decal
+  id: ST14BloodDrip6
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip6
+
+- type: decal
+  id: ST14BloodDrip7
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip7
+
+- type: decal
+  id: ST14BloodDrip8
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip8
+
+- type: decal
+  id: ST14BloodDrip9
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip9
+
+- type: decal
+  id: ST14BloodDrip10
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip10
+
+- type: decal
+  id: ST14BloodDrip11
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip11
+
+- type: decal
+  id: ST14BloodDrip12
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip12
+
+- type: decal
+  id: ST14BloodDrip13
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip13
+
+- type: decal
+  id: ST14BloodDrip14
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip14
+
+- type: decal
+  id: ST14BloodDrip15
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip15
+
+- type: decal
+  id: ST14BloodDrip16
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip16
+
+- type: decal
+  id: ST14BloodDrip17
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip17
+
+- type: decal
+  id: ST14BloodDrip18
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip18
+
+- type: decal
+  id: ST14BloodDrip19
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip19
+
+- type: decal
+  id: ST14BloodDrip20
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip20
+
+- type: decal
+  id: ST14BloodDrip21
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip21
+
+- type: decal
+  id: ST14BloodDrip22
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip22
+
+- type: decal
+  id: ST14BloodDrip23
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip23
+
+- type: decal
+  id: ST14BloodDrip24
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip24
+
+- type: decal
+  id: ST14BloodDrip25
+  tags: ["ST14BloodDrip"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: drip25
+
+- type: decal
+  id: ST14BloodPool1
+  tags: ["ST14BloodPool"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: pool1
+
+- type: decal
+  id: ST14BloodPool2
+  tags: ["ST14BloodPool"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: pool2
+
+- type: decal
+  id: ST14BloodPool3
+  tags: ["ST14BloodPool"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: pool3
+
+- type: decal
+  id: ST14BloodPool4
+  tags: ["ST14BloodPool"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: pool4
+
+- type: decal
+  id: ST14BloodPool5
+  tags: ["ST14BloodPool"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: pool5
+
+- type: decal
+  id: ST14BloodPool6
+  tags: ["ST14BloodPool"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: pool6
+
+- type: decal
+  id: ST14BloodPool7
+  tags: ["ST14BloodPool"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: pool7
+
+- type: decal
+  id: ST14BloodPool8
+  tags: ["ST14BloodPool"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: pool8
+
+- type: decal
+  id: ST14BloodPool9
+  tags: ["ST14BloodPool"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: pool9
+
+- type: decal
+  id: ST14BloodPool10
+  tags: ["ST14BloodPool"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: pool10
+
+- type: decal
+  id: ST14BloodPool11
+  tags: ["ST14BloodPool"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: pool11
+
+- type: decal
+  id: ST14BloodPool12
+  tags: ["ST14BloodPool"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: pool12
+
+- type: decal
+  id: ST14BloodPool13
+  tags: ["ST14BloodPool"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: pool13
+
+- type: decal
+  id: ST14BloodPool14
+  tags: ["ST14BloodPool"]
+  showMenu: false
+  defaultCleanable: true
+  sprite:
+    sprite: _ST14/Decals/blood.rsi
+    state: pool14

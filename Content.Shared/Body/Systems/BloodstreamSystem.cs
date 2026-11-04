@@ -1,3 +1,4 @@
+using Content.Shared._ST14.Blood; // ST14
 using Content.Shared.Alert;
 using Content.Shared.Body.Components;
 using Content.Shared.Body.Events;
@@ -493,6 +494,15 @@ public sealed partial class BloodstreamSystem : EntitySystem
 
         var leakedBlood = _solutionContainer.SplitSolution(ent.Comp.BloodSolution.Value, amount);
 
+        // ST14 begin: blood leaves decals instead of puddles, so nothing collects for a puddle
+        if (HasComp<ST14BloodDecalsComponent>(ent))
+        {
+            var bleedEv = new ST14BleedOutEvent(leakedBlood.Volume);
+            RaiseLocalEvent(ent, ref bleedEv);
+            return true;
+        }
+        // ST14 end
+
         if (!_solutionContainer.ResolveSolution(ent.Owner, ent.Comp.BloodTemporarySolutionName, ref ent.Comp.TemporarySolution, out var tempSolution))
             return true;
 
@@ -558,6 +568,15 @@ public sealed partial class BloodstreamSystem : EntitySystem
             tempSol.AddSolution(tempSolution, ProtoMan);
             _solutionContainer.RemoveAllSolution(ent.Comp.TemporarySolution.Value);
         }
+
+        // ST14 begin: blood leaves decals instead of puddles
+        if (HasComp<ST14BloodDecalsComponent>(ent))
+        {
+            var bleedEv = new ST14BleedOutEvent(tempSol.Volume, Burst: true);
+            RaiseLocalEvent(ent, ref bleedEv);
+            return;
+        }
+        // ST14 end
 
         _puddle.TrySpillAt(ent, tempSol, out _);
     }
