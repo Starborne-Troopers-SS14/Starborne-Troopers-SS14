@@ -358,6 +358,9 @@ public sealed partial class ST14SectorSystem : EntitySystem
             var settings = Settings;
             _nextCheck = _timing.CurTime + settings.GracePeriod;
             _timeUp = _timing.CurTime + settings.RoundLimit;
+
+            if (_planet != null)
+                _war.BeginBattle(_planet, _timeUp);
         }
 
         // the round is over, however it ended: every sector it touched goes back to its save
