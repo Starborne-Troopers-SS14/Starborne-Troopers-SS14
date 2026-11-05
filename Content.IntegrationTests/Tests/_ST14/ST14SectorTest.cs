@@ -51,7 +51,7 @@ public sealed class ST14SectorTest : GameTest
                 Assert.That(resources.ContentFileExists(file), $"The sector map {file} does not exist.");
             }
 
-            Assert.That(protoMan.HasIndex<GameMapPrototype>("ST14SectorWar"), "The sector rounds have no game map.");
+            Assert.That(protoMan.EnumeratePrototypes<GameMapPrototype>().Any(map => map.ID == "ST14SectorWar"), "The sector rounds have no game map.");
 
             server.CfgMan.SetCVar(ST14CVars.SectorRounds, true);
             var forced = server.CfgMan.GetCVar(CCVars.GameMap);
@@ -125,10 +125,10 @@ public sealed class ST14SectorTest : GameTest
         var first = -1;
         var builtAt = new Vector2(100.5f, 100.5f);
         var standsAt = new Vector2(90.5f, 95.5f);
-        string? firstJob = null;
+        string firstJob = null;
 
         // the test player has no job preferences and may draw another job next round, then the body rightly stays behind
-        string? JobOf(EntityUid body)
+        string JobOf(EntityUid body)
         {
             var mind = server.System<Content.Shared.Mind.SharedMindSystem>();
             if (!mind.TryGetMind(body, out var mindId, out _))

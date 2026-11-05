@@ -242,6 +242,9 @@ binds:
 - function: OpenEngineerBuildMenu
   type: State
   key: G
+- function: OpenBattleMap
+  type: State
+  key: M
 - function: OpenGuidebook
   type: State
   key: NumpadNum0

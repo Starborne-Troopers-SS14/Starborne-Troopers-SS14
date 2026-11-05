@@ -1,0 +1,15 @@
+st14-battle-map-title = Карта боя
+st14-battle-map-button-tooltip = Карта боя
+ui-options-function-open-battle-map = Открыть карту боя
+st14-battle-map-inactive = Карта работает только в бою за соту
+st14-battle-map-sector = Сота { $code }
+st14-battle-map-open = Зелёные стрелки: проход открыт
+st14-battle-map-closed = В этом бою сота закрыта
+st14-battle-map-sectors = Соты этого боя
+st14-battle-map-plan = Меток в плане: { $count } из { $max }
+st14-battle-map-you = Вы
+st14-battle-map-tag-here = вы здесь
+st14-battle-map-tag-target = цель
+st14-battle-map-tag-staging = плацдарм
+st14-battle-map-side-federation = Десант
+st14-battle-map-side-bugs = Жуки
