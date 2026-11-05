@@ -25,8 +25,6 @@ namespace Content.IntegrationTests.Tests._ST14;
 [TestOf(typeof(ST14SectorSystem))]
 public sealed class ST14SectorTest : GameTest
 {
-    private static readonly ProtoId<GameMapPrototype> SectorMap = "ST14SectorWar";
-
     // a plain string: on a server without the hive this prototype does not exist
     private static readonly string BugSpawnPoint = "ST14SpawnPointBug";
 
@@ -53,7 +51,7 @@ public sealed class ST14SectorTest : GameTest
                 Assert.That(resources.ContentFileExists(file), $"The sector map {file} does not exist.");
             }
 
-            Assert.That(protoMan.HasIndex(SectorMap), "The sector rounds have no game map.");
+            Assert.That(protoMan.EnumeratePrototypes<GameMapPrototype>().Any(map => map.ID == "ST14SectorWar"), "The sector rounds have no game map.");
 
             server.CfgMan.SetCVar(ST14CVars.SectorRounds, true);
             var forced = server.CfgMan.GetCVar(CCVars.GameMap);
