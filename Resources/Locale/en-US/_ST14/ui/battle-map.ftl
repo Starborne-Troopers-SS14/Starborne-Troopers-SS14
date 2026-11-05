@@ -1,0 +1,15 @@
+st14-battle-map-title = Battle map
+st14-battle-map-button-tooltip = Battle map
+ui-options-function-open-battle-map = Open battle map
+st14-battle-map-inactive = The map only works in a battle for a sector
+st14-battle-map-sector = Sector { $code }
+st14-battle-map-open = Green arrows: the passage is open
+st14-battle-map-closed = This sector is closed in this battle
+st14-battle-map-sectors = Sectors of this battle
+st14-battle-map-plan = Marks in the plan: { $count } of { $max }
+st14-battle-map-you = You
+st14-battle-map-tag-here = you are here
+st14-battle-map-tag-target = target
+st14-battle-map-tag-staging = staging
+st14-battle-map-side-federation = Troopers
+st14-battle-map-side-bugs = Bugs
