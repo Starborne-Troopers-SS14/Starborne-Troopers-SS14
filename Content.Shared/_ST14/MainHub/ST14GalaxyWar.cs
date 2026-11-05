@@ -12,6 +12,12 @@ public sealed class ST14HexGrid
     public readonly Vector3[][] Corners;
     public readonly int[][] Neighbours;
 
+    /// <summary>
+    /// The neighbours of each cell by the edge they lie behind, as a pointy-top hex map sees them: 0 is east, then
+    /// counter-clockwise. The twelve pentagons have one edge less
+    /// </summary>
+    public readonly int[][] Edges;
+
     private static readonly float T = (1 + MathF.Sqrt(5)) / 2;
 
     private static readonly Vector3[] IcoVertices =
@@ -98,6 +104,7 @@ public sealed class ST14HexGrid
         Centers = points.ToArray();
         Corners = new Vector3[points.Count][];
         Neighbours = new int[points.Count][];
+        Edges = new int[points.Count][];
         for (var i = 0; i < points.Count; i++)
         {
             // corners go around the cell centre in one direction
@@ -108,10 +115,43 @@ public sealed class ST14HexGrid
                 .OrderBy(p => MathF.Atan2(Vector3.Dot(p - normal, bitangent), Vector3.Dot(p - normal, tangent)))
                 .ToArray();
             Neighbours[i] = neighbours[i].ToArray();
+            Edges[i] = SortEdges(i, points);
         }
     }
 
     public int Count => Centers.Length;
+
+    private int[] SortEdges(int cell, List<Vector3> points)
+    {
+        // east and north of the cell on the globe, near a pole any stable frame will do
+        var normal = points[cell];
+        var east = Vector3.Cross(Vector3.UnitY, normal);
+        east = east.LengthSquared() > 0.0001f ? Vector3.Normalize(east) : Vector3.UnitX;
+        var north = Vector3.Cross(normal, east);
+
+        float Angle(int other)
+        {
+            var angle = MathF.Atan2(Vector3.Dot(points[other] - normal, north), Vector3.Dot(points[other] - normal, east));
+            return angle < 0 ? angle + MathF.Tau : angle;
+        }
+
+        // the first edge is the one closest to east whichever way the cell lies in the honeycomb
+        var sorted = Neighbours[cell].OrderBy(Angle).ToArray();
+        var first = 0;
+        var best = float.MaxValue;
+        for (var i = 0; i < sorted.Length; i++)
+        {
+            var angle = Angle(sorted[i]);
+            var off = MathF.Min(angle, MathF.Tau - angle);
+            if (off >= best)
+                continue;
+
+            best = off;
+            first = i;
+        }
+
+        return sorted.Skip(first).Concat(sorted.Take(first)).ToArray();
+    }
 
     /// <summary>
     /// Cell whose centre is closest to the point of the unit sphere
@@ -148,11 +188,22 @@ public sealed class ST14HexCell
 
     public string Code = string.Empty;
     public int Terrain;
+
+    /// <summary>
+    /// The region of seven cells this cell belongs to, see <see cref="ST14PlanetWar.RegionCenters"/>
+    /// </summary>
+    public int Region;
+
+    /// <summary>
+    /// Has been fought in: it has a saved map, which loads every round and can be walked into
+    /// </summary>
+    public bool Initialized;
+
     public bool Hive;
     public bool Base;
 
     /// <summary>
-    /// Not held by the Federation but next to its ground: troopers can land here
+    /// The command whose turn it is can pick this cell as the sector of the next battle
     /// </summary>
     public bool Front;
 
@@ -170,9 +221,20 @@ public sealed class ST14HexCell
 public sealed class ST14PlanetWar
 {
     public const int TerrainKinds = 6;
+    private const int MinRegionSize = 3;
 
     public readonly ST14HexGrid Grid;
     public readonly ST14HexCell[] Cells;
+
+    /// <summary>
+    /// The central cell of every region: a carrier hangs over it and the conquest of the region starts there
+    /// </summary>
+    public readonly int[] RegionCenters;
+
+    /// <summary>
+    /// The side whose command picks the sector of the next battle. The initiative changes after every round
+    /// </summary>
+    public ST14GalaxyFaction Turn = ST14GalaxyFaction.Federation;
 
     public ST14PlanetWar(ST14GalaxyPlanetPrototype planet, string codePrefix)
     {
@@ -197,7 +259,6 @@ public sealed class ST14PlanetWar
         // A planet the Federation has not set foot on yet only gets its landing zones
         var order = Enumerable.Range(0, Grid.Count).OrderByDescending(i => score[i]).ToArray();
         var held = (int) MathF.Round(Grid.Count * Math.Clamp(planet.Liberation, 0, 100) / 100f * 0.75f);
-        var contested = held + (held > 0 ? (int) MathF.Round(Grid.Count * 0.1f) : Math.Max(1, planet.LandingZones));
 
         for (var rank = 0; rank < order.Length; rank++)
         {
@@ -215,11 +276,6 @@ public sealed class ST14PlanetWar
                 cell.Liberation = 100;
                 cell.Base = hash < 0.12f;
             }
-            else if (rank < contested)
-            {
-                cell.Faction = ST14GalaxyFaction.Contested;
-                cell.Liberation = held > 0 ? 15 + MathF.Round(hash * 70) : 0;
-            }
             else
             {
                 cell.Faction = ST14GalaxyFaction.Arachnid;
@@ -229,66 +285,289 @@ public sealed class ST14PlanetWar
             Cells[i] = cell;
         }
 
+        RegionCenters = planet.Regions.Count == Cells.Length ? UseRegions(planet.Regions) : BuildRegions();
         RefreshFront();
     }
 
     /// <summary>
-    /// Marks the cells troopers can land on: the contested ones and bug ground next to the Federation
+    /// Takes the regions from the prototype. The centre of a region is its cell with the most of the region around it
+    /// </summary>
+    private int[] UseRegions(List<int> regions)
+    {
+        var centers = new int[regions.Max() + 1];
+        for (var r = 0; r < centers.Length; r++)
+        {
+            var best = -1;
+            for (var i = 0; i < regions.Count; i++)
+            {
+                if (regions[i] != r)
+                    continue;
+
+                Cells[i].Region = r;
+                var around = Grid.Neighbours[i].Count(n => regions[n] == r);
+                if (around <= best)
+                    continue;
+
+                best = around;
+                centers[r] = i;
+            }
+        }
+
+        return centers;
+    }
+
+    /// <summary>
+    /// Splits the honeycomb into regions: a centre with its neighbours. Twelve pentagons keep a sphere from dividing
+    /// evenly, so some cells are left between the regions: a group of three or more makes a smaller region of its own,
+    /// a lone cell or two join the smallest region next to them. Deterministic, the server and the clients build the
+    /// same regions from the same grid
+    /// </summary>
+    private int[] BuildRegions()
+    {
+        var region = new int[Cells.Length];
+        Array.Fill(region, -1);
+        var centers = new List<int>();
+
+        while (true)
+        {
+            // the free centre that touches the taken ground most: the regions grow tightly side by side
+            var best = -1;
+            var bestScore = -1;
+            for (var i = 0; i < Cells.Length; i++)
+            {
+                if (region[i] >= 0 || Grid.Neighbours[i].Any(n => region[n] >= 0))
+                    continue;
+
+                var score = Grid.Neighbours[i].Sum(n => Grid.Neighbours[n].Count(m => region[m] >= 0));
+                if (score <= bestScore)
+                    continue;
+
+                bestScore = score;
+                best = i;
+            }
+
+            if (best < 0)
+                break;
+
+            region[best] = centers.Count;
+            foreach (var n in Grid.Neighbours[best])
+            {
+                region[n] = centers.Count;
+            }
+
+            centers.Add(best);
+        }
+
+        // what is left between the regions, group by group
+        var seen = new bool[region.Length];
+        for (var i = 0; i < region.Length; i++)
+        {
+            if (region[i] >= 0 || seen[i])
+                continue;
+
+            var group = new List<int> { i };
+            seen[i] = true;
+            for (var g = 0; g < group.Count; g++)
+            {
+                foreach (var n in Grid.Neighbours[group[g]])
+                {
+                    if (region[n] >= 0 || seen[n])
+                        continue;
+
+                    seen[n] = true;
+                    group.Add(n);
+                }
+            }
+
+            if (group.Count < MinRegionSize)
+                continue;
+
+            // the cell with the most of the group around it is the centre
+            var center = group.OrderByDescending(c => Grid.Neighbours[c].Count(group.Contains)).ThenBy(c => c).First();
+            foreach (var cell in group)
+            {
+                region[cell] = centers.Count;
+            }
+
+            centers.Add(center);
+        }
+
+        var sizes = new int[centers.Count];
+        foreach (var r in region)
+        {
+            if (r >= 0)
+                sizes[r]++;
+        }
+
+        var left = true;
+        while (left)
+        {
+            left = false;
+            for (var i = 0; i < region.Length; i++)
+            {
+                if (region[i] >= 0)
+                    continue;
+
+                var taken = Grid.Neighbours[i].Where(n => region[n] >= 0).Select(n => region[n]).ToArray();
+                if (taken.Length == 0)
+                {
+                    left = true;
+                    continue;
+                }
+
+                region[i] = taken.OrderBy(r => sizes[r]).ThenBy(r => r).First();
+                sizes[region[i]]++;
+            }
+        }
+
+        for (var i = 0; i < Cells.Length; i++)
+        {
+            Cells[i].Region = region[i];
+        }
+
+        return centers.ToArray();
+    }
+
+    public static ST14GalaxyFaction Enemy(ST14GalaxyFaction side)
+    {
+        return side == ST14GalaxyFaction.Arachnid ? ST14GalaxyFaction.Federation : ST14GalaxyFaction.Arachnid;
+    }
+
+    /// <summary>
+    /// Marks the cells the command of the side whose turn it is can pick
     /// </summary>
     public void RefreshFront()
     {
+        var options = TargetOptions(Turn);
         for (var i = 0; i < Cells.Length; i++)
         {
-            var cell = Cells[i];
-            cell.Front = cell.Faction == ST14GalaxyFaction.Contested ||
-                         cell.Faction == ST14GalaxyFaction.Arachnid &&
-                         Grid.Neighbours[i].Any(n => Cells[n].Faction == ST14GalaxyFaction.Federation);
+            Cells[i].Front = options.Contains(i);
         }
     }
 
     /// <summary>
-    /// Moves the bar of a cell after a round fought in it, see <see cref="ST14GalaxyWarRules"/>
+    /// The cells a side can start the battle of the next round in.
+    /// The Federation takes a region from its centre outwards: the centre first, then what lies next to its ground there.
+    /// The bugs strike back at the Federation's ground. With no such ground left they only choose which of the sectors
+    /// already fought over to hold, and the Federation lands there again
     /// </summary>
-    public void ApplyResult(int index, bool federationWon, bool objectives)
+    public HashSet<int> TargetOptions(ST14GalaxyFaction side)
     {
-        var cell = Cells[index];
-        if (federationWon)
+        var options = new HashSet<int>();
+        if (side == ST14GalaxyFaction.Federation)
         {
-            cell.Liberation = MathF.Min(100, cell.Liberation +
-                (objectives ? ST14GalaxyWarRules.ObjectiveGain : ST14GalaxyWarRules.WinGain));
-            if (cell.Liberation >= 100)
+            for (var r = 0; r < RegionCenters.Length; r++)
             {
-                cell.Faction = ST14GalaxyFaction.Federation;
-                cell.Hive = false;
+                var held = false;
+                for (var i = 0; i < Cells.Length; i++)
+                {
+                    if (Cells[i].Region != r || Cells[i].Faction != ST14GalaxyFaction.Federation)
+                        continue;
+
+                    held = true;
+                    foreach (var n in Grid.Neighbours[i])
+                    {
+                        if (Cells[n].Region == r && Cells[n].Faction != ST14GalaxyFaction.Federation)
+                            options.Add(n);
+                    }
+                }
+
+                if (!held)
+                    options.Add(RegionCenters[r]);
             }
-            else if (cell.Faction == ST14GalaxyFaction.Arachnid)
-            {
-                cell.Faction = ST14GalaxyFaction.Contested;
-            }
-        }
-        else
-        {
-            cell.Liberation = MathF.Max(0, cell.Liberation - ST14GalaxyWarRules.LossPenalty);
-            // Federation ground is lost once its bar runs out, a contested cell stays open for the next landing
-            if (cell.Faction == ST14GalaxyFaction.Federation && cell.Liberation <= 0)
-            {
-                cell.Faction = ST14GalaxyFaction.Arachnid;
-                cell.Base = false;
-            }
+
+            return options;
         }
 
+        for (var i = 0; i < Cells.Length; i++)
+        {
+            if (Cells[i].Faction == ST14GalaxyFaction.Federation)
+                options.Add(i);
+        }
+
+        if (options.Count > 0)
+            return options;
+
+        for (var i = 0; i < Cells.Length; i++)
+        {
+            if (Cells[i].Initialized)
+                options.Add(i);
+        }
+
+        if (options.Count == 0)
+            options.UnionWith(RegionCenters);
+
+        return options;
+    }
+
+    /// <summary>
+    /// Neighbours of the target the attacking side can gather in: cells it holds there. The attacker is whoever does not hold the target
+    /// </summary>
+    public IEnumerable<int> StagingOptions(int target)
+    {
+        var attacker = Enemy(Cells[target].Faction);
+        return Grid.Edges[target].Where(n => Cells[n].Faction == attacker);
+    }
+
+    /// <summary>
+    /// The sector a side starts the battle in: the target if it holds it, otherwise the staging sector,
+    /// and with neither the target itself, as a landing from the carrier
+    /// </summary>
+    public int StartOf(ST14GalaxyFaction side, int target, int staging)
+    {
+        return Cells[target].Faction != side && staging >= 0 ? staging : target;
+    }
+
+    /// <summary>
+    /// Result of a round: one sector changes hands at most and the initiative goes to the other side. A null winner
+    /// is a battle that ran out of time, the attack has failed. A staging sector of the bugs falls to troopers who
+    /// wipe the bugs out even though it was the bugs who were attacking
+    /// </summary>
+    public void ApplyResult(int target, int staging, ST14GalaxyFaction? winner)
+    {
+        var holder = Cells[target].Faction;
+        if (winner is { } side)
+        {
+            if (side != holder)
+                SetHolder(target, side);
+            else if (side == ST14GalaxyFaction.Federation && staging >= 0)
+                SetHolder(staging, side);
+        }
+
+        Turn = Enemy(Turn);
         RefreshFront();
+    }
+
+    private void SetHolder(int index, ST14GalaxyFaction side)
+    {
+        var cell = Cells[index];
+        cell.Faction = side;
+        cell.Liberation = side == ST14GalaxyFaction.Federation ? 100 : 0;
+        if (side == ST14GalaxyFaction.Federation)
+            cell.Hive = false;
+        else
+            cell.Base = false;
     }
 
     public ST14HexCellState[] ExportState()
     {
-        return Cells.Select(c => new ST14HexCellState(c.Faction, c.Liberation, c.Hive, c.Base, c.BugsKilled, c.TroopersKilled)).ToArray();
+        return Cells.Select(c => new ST14HexCellState(c.Faction, c.Liberation, c.Hive, c.Base, c.BugsKilled, c.TroopersKilled, c.Initialized)).ToArray();
+    }
+
+    /// <summary>
+    /// The dead of all the cells of the region of a cell: a round may be fought over several of them
+    /// </summary>
+    public (int Bugs, int Troopers) RegionKills(int index)
+    {
+        var region = Cells[index].Region;
+        var cells = Cells.Where(c => c.Region == region).ToArray();
+        return (cells.Sum(c => c.BugsKilled), cells.Sum(c => c.TroopersKilled));
     }
 
     /// <summary>
     /// Takes the state of the cells from the server or from a save. A state made for another grid is ignored
     /// </summary>
-    public bool ImportState(IReadOnlyList<ST14HexCellState> states)
+    public bool ImportState(IReadOnlyList<ST14HexCellState> states, ST14GalaxyFaction turn)
     {
         if (states.Count != Cells.Length)
             return false;
@@ -302,8 +581,10 @@ public sealed class ST14PlanetWar
             Cells[i].Base = state.Base;
             Cells[i].BugsKilled = state.BugsKilled;
             Cells[i].TroopersKilled = state.TroopersKilled;
+            Cells[i].Initialized = state.Initialized;
         }
 
+        Turn = turn;
         RefreshFront();
         return true;
     }
@@ -314,7 +595,7 @@ public sealed class ST14PlanetWar
     public float Liberation => Cells.Sum(c => c.Liberation) / Cells.Length;
 
     /// <summary>
-    /// First cell troopers can land on, null when the planet has no front
+    /// First cell the command can pick, null when there is none
     /// </summary>
     public int? FirstLanding
     {

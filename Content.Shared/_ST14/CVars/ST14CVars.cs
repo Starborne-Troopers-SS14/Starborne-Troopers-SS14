@@ -34,10 +34,11 @@ public static partial class ST14CVars
         CVarDef.Create("st14.hub_debug", false, CVar.CLIENTONLY);
 
     /// <summary>
-    /// Forces a lobby theme by id, for example ST14Arachnids, empty picks it from the selected character
+    /// Forces a lobby theme by id for a preview, for example ST14Arachnids, empty picks it from the selected character.
+    /// Lives until the client closes: a saved value would switch the automatic theme off for good
     /// </summary>
     public static readonly CVarDef<string> LobbyTheme =
-        CVarDef.Create("st14.lobby_theme", string.Empty, CVar.CLIENTONLY | CVar.ARCHIVE);
+        CVarDef.Create("st14.lobby_theme_preview", string.Empty, CVar.CLIENTONLY);
 
     /// <summary>
     /// Supporter perks picked on the support screen, sent to the server on connect. Empty means not picked
@@ -66,6 +67,13 @@ public static partial class ST14CVars
     /// </summary>
     public static readonly CVarDef<string> WarPlanet =
         CVarDef.Create("st14.war_planet", string.Empty, CVar.SERVERONLY | CVar.ARCHIVE);
+
+    /// <summary>
+    /// Rounds are fought on the map of the war's target sector. Off, or with game.map set by hand, the stock map
+    /// rotation is used
+    /// </summary>
+    public static readonly CVarDef<bool> SectorRounds =
+        CVarDef.Create("st14.sector_rounds", true, CVar.SERVERONLY | CVar.ARCHIVE);
 
     /// <summary>
     /// Atmospherics: gas simulation on the grids, breathing and pressure damage. Off on Starborne Troopers servers,
