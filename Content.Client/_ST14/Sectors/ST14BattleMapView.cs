@@ -24,7 +24,7 @@ public sealed class ST14BattleMapView : Control
     private const float MaxZoom = 8f;
 
     private static readonly Color Back = Color.FromHex("#0C0D0B");
-    private static readonly Color Unknown = Color.FromHex("#26241F");
+    private static readonly Color Unknown = Color.FromHex("#14130F");
     private static readonly Color Open = Color.FromHex("#6FE08A");
     private static readonly Color Closed = Color.FromHex("#A8A49A");
     private static readonly Color Mate = Color.FromHex("#5CD6FF");
@@ -439,6 +439,43 @@ public sealed class ST14BattleMapView : Control
         }
     }
 
+    /// <summary>
+    /// Faint hexes over the whole view where the sectors of the planet would lie, with a cross in each middle
+    /// </summary>
+    private void AddLattice()
+    {
+        var step = ST14SectorGeometry.Apothem * 2;
+        var across = new Vector2(step, 0);
+        var up = new Vector2(step / 2, step * MathF.Sqrt(3) / 2);
+
+        var min = ScreenToWorld(new Vector2(0, PixelSize.Y));
+        var max = ScreenToWorld(new Vector2(PixelSize.X, 0));
+        var rowFrom = (int) MathF.Floor(min.Y / up.Y) - 1;
+        var rowTo = (int) MathF.Ceiling(max.Y / up.Y) + 1;
+        if ((rowTo - rowFrom) * ((max.X - min.X) / step + 3) > 600)
+            return;
+
+        var line = ST14HubStyle.Gold.WithAlpha(0.07f);
+        var cross = ST14HubStyle.Gold.WithAlpha(0.14f);
+        var arm = MathF.Max(3f, 6f * _zoom);
+        for (var row = rowFrom; row <= rowTo; row++)
+        {
+            var from = (int) MathF.Floor((min.X - row * up.X) / step) - 1;
+            var to = (int) MathF.Ceiling((max.X - row * up.X) / step) + 1;
+            for (var column = from; column <= to; column++)
+            {
+                var center = across * column + up * row;
+                if (_layout.Values.Any(v => (v.Position - center).Length() < ST14SectorGeometry.Apothem))
+                    continue;
+
+                AddHexOutline(center, 1f, line);
+                var middle = ToScreen(center);
+                _buffer.Line(middle - new Vector2(arm, 0), middle + new Vector2(arm, 0), 1f, cross);
+                _buffer.Line(middle - new Vector2(0, arm), middle + new Vector2(0, arm), 1f, cross);
+            }
+        }
+    }
+
     protected override void Draw(DrawingHandleScreen handle)
     {
         base.Draw(handle);
@@ -453,18 +490,32 @@ public sealed class ST14BattleMapView : Control
 
         ApplyFocus();
 
-        // the ground first, each sector turned to its place
+        // the table under the map: the hexes of the planet going on past what is known
         _buffer.Clear();
-        foreach (var (cell, place) in _layout)
+        AddLattice();
+        _buffer.Draw(handle, Texture.White);
+
+        // the ground, each sector turned to its place; the sectors seen only from afar are hatched in the colour of their owner
+        _buffer.Clear();
+        foreach (var (_, place) in _layout)
         {
-            var sector = Sector(cell);
             AddHex(place.Position, Unknown);
-            if (sector is not { Loaded: true })
-                AddHex(place.Position, ST14GalaxyColors.Of(sector?.Faction ?? ST14GalaxyFaction.Contested).WithAlpha(0.07f));
         }
 
         _buffer.Draw(handle, Texture.White);
+        var hatch = _system.Hatch();
+        foreach (var (cell, place) in _layout)
+        {
+            if (Sector(cell) is { Loaded: true } && _system.Terrain(cell) != null)
+                continue;
+
+            var size = new Vector2(ST14SectorGeometry.Size) * _zoom;
+            var tint = ST14GalaxyColors.Of(Sector(cell)?.Faction ?? ST14GalaxyFaction.Contested);
+            handle.DrawTextureRect(hatch, UIBox2.FromDimensions(ToScreen(place.Position) - size / 2, size), tint.WithAlpha(0.6f));
+        }
+
         DrawTerrain(handle);
+        handle.DrawTextureRect(_system.Vignette(), new UIBox2(Vector2.Zero, PixelSize));
 
         _buffer.Clear();
         foreach (var (cell, place) in _layout)
