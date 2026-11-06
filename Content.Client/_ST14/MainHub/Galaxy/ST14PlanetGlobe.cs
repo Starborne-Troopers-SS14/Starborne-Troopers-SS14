@@ -93,6 +93,11 @@ public sealed class ST14PlanetGlobe : Control
     public event Action<int?>? OnCellSelected;
     public event Action<int?>? OnCellHovered;
 
+    /// <summary>
+    /// The wheel turned on to zoom in once the planet was as close as it gets
+    /// </summary>
+    public event Action? OnZoomPastMax;
+
     static ST14PlanetGlobe()
     {
         var points = new List<Vector3>();
@@ -460,6 +465,9 @@ public sealed class ST14PlanetGlobe : Control
 
         if (MaxZoom <= MinZoom)
             return;
+
+        if (args.Delta.Y > 0 && Zoom >= MaxZoom - 0.001f)
+            OnZoomPastMax?.Invoke();
 
         Zoom = Math.Clamp(Zoom * MathF.Pow(1.1f, args.Delta.Y), MinZoom, MaxZoom);
         args.Handle();

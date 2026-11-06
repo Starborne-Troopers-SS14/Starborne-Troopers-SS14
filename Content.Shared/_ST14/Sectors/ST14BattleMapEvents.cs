@@ -74,6 +74,7 @@ public sealed class ST14BattleMapRequestEvent(ST14GalaxyFaction? side) : EntityE
 public sealed class ST14BattleMapStateEvent(
     bool active,
     int round,
+    string planet,
     ST14GalaxyFaction side,
     ST14GalaxyFaction[] commands,
     int here,
@@ -90,6 +91,12 @@ public sealed class ST14BattleMapStateEvent(
     public readonly bool Active = active;
 
     public readonly int Round = round;
+
+    /// <summary>
+    /// The war planet of the round, empty without a sector round
+    /// </summary>
+    public readonly string Planet = planet;
+
     public readonly ST14GalaxyFaction Side = side;
 
     /// <summary>
@@ -176,11 +183,56 @@ public sealed class ST14BattleMapClosedEvent : EntityEventArgs;
 [Serializable, NetSerializable]
 public readonly record struct ST14MapIconInfo(int Cell, Vector2 Position, string Prototype);
 
+public enum ST14SquadMemberStatus : byte
+{
+    Alive,
+    Critical,
+    Dead,
+
+    /// <summary>
+    /// Not in the round: no body, or not on the server
+    /// </summary>
+    Away,
+}
+
+[Serializable, NetSerializable]
+public readonly record struct ST14SquadMember(string Name, ST14SquadMemberStatus Status, bool Leader);
+
 /// <summary>
-/// A squad of one side. The number names it, the leader made it
+/// A squad of one side. The number names it
 /// </summary>
 [Serializable, NetSerializable]
-public readonly record struct ST14SquadInfo(int Id, int Number, string Leader, string[] Members);
+public readonly record struct ST14SquadInfo(int Id, int Number, ST14SquadMember[] Members);
+
+/// <summary>
+/// Somebody of the squad asked this player to join it
+/// </summary>
+[Serializable, NetSerializable]
+public readonly record struct ST14SquadInvite(int Squad, int Number, string From);
+
+/// <summary>
+/// The squads of the side of the player, sent whenever one of them changes
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class ST14SquadStateEvent(bool active, int round, ST14SquadInfo[] squads, int squad, ST14SquadInvite? invite) : EntityEventArgs
+{
+    public const int MaxSquadSize = 8;
+
+    /// <summary>
+    /// A sector round is being fought, squads only exist in one
+    /// </summary>
+    public readonly bool Active = active;
+
+    public readonly int Round = round;
+    public readonly ST14SquadInfo[] Squads = squads;
+
+    /// <summary>
+    /// Id of the squad of the player, -1 without one
+    /// </summary>
+    public readonly int Squad = squad;
+
+    public readonly ST14SquadInvite? Invite = invite;
+}
 
 /// <summary>
 /// A member of the squad of the player on the map, the player among them
@@ -189,25 +241,18 @@ public readonly record struct ST14SquadInfo(int Id, int Number, string Leader, s
 public readonly record struct ST14SquadMate(string Name, int Cell, Vector2 Position, bool Leader, bool Me);
 
 /// <summary>
-/// What changes while the map is open, sent every second: the icons, the squads of the side and where the squad is
+/// What moves on the map, sent every second while it is open: the icons and where the squad is
 /// </summary>
 [Serializable, NetSerializable]
-public sealed class ST14BattleMapLiveEvent(int round, ST14MapIconInfo[] icons, ST14SquadInfo[] squads, int squad, ST14SquadMate[] mates)
-    : EntityEventArgs
+public sealed class ST14BattleMapLiveEvent(int round, ST14MapIconInfo[] icons, ST14SquadMate[] mates) : EntityEventArgs
 {
-    public const int MaxSquadSize = 8;
-
     public readonly int Round = round;
     public readonly ST14MapIconInfo[] Icons = icons;
-    public readonly ST14SquadInfo[] Squads = squads;
-
-    /// <summary>
-    /// Id of the squad of the player, -1 without one
-    /// </summary>
-    public readonly int Squad = squad;
-
     public readonly ST14SquadMate[] Mates = mates;
 }
+
+[Serializable, NetSerializable]
+public sealed class ST14SquadRequestEvent : EntityEventArgs;
 
 [Serializable, NetSerializable]
 public sealed class ST14SquadCreateEvent : EntityEventArgs;
@@ -220,3 +265,9 @@ public sealed class ST14SquadJoinEvent(int id) : EntityEventArgs
 
 [Serializable, NetSerializable]
 public sealed class ST14SquadLeaveEvent : EntityEventArgs;
+
+[Serializable, NetSerializable]
+public sealed class ST14SquadInviteAnswerEvent(bool accept) : EntityEventArgs
+{
+    public readonly bool Accept = accept;
+}

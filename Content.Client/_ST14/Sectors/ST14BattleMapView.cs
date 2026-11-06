@@ -56,6 +56,16 @@ public sealed class ST14BattleMapView : Control
     public event Action<int>? OnMarkErased;
     public event Action? OnToolCancelled;
 
+    /// <summary>
+    /// The wheel turned on to zoom out once the whole battle was in view: the sector in the middle of the view
+    /// </summary>
+    public event Action<int?>? OnZoomPastMin;
+
+    public event Action<int?>? OnCellHovered;
+    public event Action<int>? OnCellClicked;
+
+    private int? _hovered;
+
     public ST14BattleMapView(IResourceCache cache, ST14BattleMapClientSystem system, SpriteSystem sprite)
     {
         _cache = cache;
@@ -172,19 +182,45 @@ public sealed class ST14BattleMapView : Control
     }
 
     /// <summary>
+    /// The sector on the flat map a point lies in, loaded or not
+    /// </summary>
+    private int? NearestCell(Vector2 world)
+    {
+        int? best = null;
+        var bestDistance = ST14SectorGeometry.Radius;
+        foreach (var (cell, place) in _layout)
+        {
+            var distance = (place.Position - world).Length();
+            if (distance >= bestDistance)
+                continue;
+
+            bestDistance = distance;
+            best = cell;
+        }
+
+        return best;
+    }
+
+    /// <summary>
     /// Puts a sector in the middle of the view, close enough to read its ground
     /// </summary>
     public void Focus(int cell)
     {
-        if (_system.State is { } state)
-            UpdateLayout(state);
+        // a hidden view has no size yet, the focus waits for the first frame it is drawn in
+        _pendingFocus = cell;
+        _framed = true;
+    }
 
-        if (!_layout.TryGetValue(cell, out var place))
+    private int? _pendingFocus;
+
+    private void ApplyFocus()
+    {
+        if (_pendingFocus is not { } cell || PixelSize.X <= 0 || !_layout.TryGetValue(cell, out var place))
             return;
 
         _camera = place.Position;
         _zoom = FitZoom();
-        _framed = true;
+        _pendingFocus = null;
     }
 
     /// <summary>
@@ -233,6 +269,13 @@ public sealed class ST14BattleMapView : Control
         var pixel = args.RelativePixelPosition;
         var before = ScreenToWorld(pixel);
         var min = FitZoom() / (1 + _layout.Count * 0.5f);
+        if (args.Delta.Y < 0 && _zoom <= min * 1.001f)
+        {
+            OnZoomPastMin?.Invoke(NearestCell(_camera));
+            args.Handle();
+            return;
+        }
+
         _zoom = Math.Clamp(_zoom * MathF.Pow(1.15f, args.Delta.Y), min, MaxZoom);
 
         // the point under the cursor stays under it
@@ -275,6 +318,8 @@ public sealed class ST14BattleMapView : Control
         _pressed = false;
         if (Drawing)
             ReleaseTool(args.RelativePixelPosition);
+        else if (!_dragging && NearestCell(ScreenToWorld(args.RelativePixelPosition)) is { } cell)
+            OnCellClicked?.Invoke(cell);
 
         _dragging = false;
         args.Handle();
@@ -284,10 +329,17 @@ public sealed class ST14BattleMapView : Control
     {
         base.MouseMove(args);
 
+        var pos = args.RelativePixelPosition;
+        var hovered = NearestCell(ScreenToWorld(pos));
+        if (hovered != _hovered)
+        {
+            _hovered = hovered;
+            OnCellHovered?.Invoke(hovered);
+        }
+
         if (!_pressed)
             return;
 
-        var pos = args.RelativePixelPosition;
         if ((pos - _pressPos).Length() > DragThreshold)
             _dragging = true;
 
@@ -398,6 +450,8 @@ public sealed class ST14BattleMapView : Control
         UpdateLayout(state);
         if (!_framed && _layout.Count > 0)
             FrameBattle();
+
+        ApplyFocus();
 
         // the ground first, each sector turned to its place
         _buffer.Clear();

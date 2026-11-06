@@ -111,7 +111,7 @@ public sealed partial class ST14BattleMapSystem : EntitySystem
         var commands = ST14GalaxyWarRules.Sides.Where(s => _war.CanCommand(session, s)).ToArray();
         if (_sectors.Planet is not { } planet || !_war.TryGetWar(planet, out var war, out var target))
         {
-            RaiseNetworkEvent(new ST14BattleMapStateEvent(false, _ticker.RoundId, side, commands, -1, -1, -1,
+            RaiseNetworkEvent(new ST14BattleMapStateEvent(false, _ticker.RoundId, string.Empty, side, commands, -1, -1, -1,
                 Array.Empty<ST14BattleSector>(), Array.Empty<ST14BattleMark>()), session);
             return;
         }
@@ -128,7 +128,7 @@ public sealed partial class ST14BattleMapSystem : EntitySystem
                 loaded.Contains(cell) ? war.Grid.Edges[cell] : Array.Empty<int>()))
             .ToArray();
 
-        RaiseNetworkEvent(new ST14BattleMapStateEvent(true, _ticker.RoundId, side, commands, here, target, _war.StagingOf(planet),
+        RaiseNetworkEvent(new ST14BattleMapStateEvent(true, _ticker.RoundId, planet, side, commands, here, target, _war.StagingOf(planet),
             sectors, _marks[side].ToArray()), session);
     }
 
