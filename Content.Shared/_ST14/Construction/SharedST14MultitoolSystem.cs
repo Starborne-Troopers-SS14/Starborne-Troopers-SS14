@@ -9,6 +9,7 @@ using Content.Shared.Popups;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
 using Robust.Shared.Timing;
+using Content.Shared._ST14.Sectors;    
 
 namespace Content.Shared._ST14.Construction.EntitySystems;
 
@@ -140,7 +141,7 @@ public abstract partial class SharedST14MultitoolSystem : EntitySystem
         var anchored = _map.GetAnchoredEntitiesEnumerator(gridUid, grid, tile);
         while (anchored.MoveNext(out var uid))
         {
-            if (HasComp<ST14BlueprintComponent>(uid) || HasComp<ST14EngineerStructureComponent>(uid))
+            if (HasComp<ST14BlueprintComponent>(uid) || HasComp<ST14EngineerStructureComponent>(uid) || HasComp<ST14ResourcePointHolderComponent>(uid))
                 return "st14-blueprint-spot-taken";
         }
 
