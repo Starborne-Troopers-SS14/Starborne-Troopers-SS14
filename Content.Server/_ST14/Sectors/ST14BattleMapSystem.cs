@@ -55,6 +55,7 @@ public sealed partial class ST14BattleMapSystem : EntitySystem
         SubscribeNetworkEvent<ST14BattleMarkAddEvent>(OnMarkAdd);
         SubscribeNetworkEvent<ST14BattleMarkRemoveEvent>(OnMarkRemove);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundCleanup);
+        InitializeLive();
     }
 
     private void OnRoundCleanup(RoundRestartCleanupEvent ev)
@@ -66,6 +67,7 @@ public sealed partial class ST14BattleMapSystem : EntitySystem
 
         _terrain.Clear();
         _viewers.Clear();
+        ClearLive();
     }
 
     private void OnRequest(ST14BattleMapRequestEvent ev, EntitySessionEventArgs args)
@@ -76,6 +78,8 @@ public sealed partial class ST14BattleMapSystem : EntitySystem
             : SideOf(session);
 
         _viewers[session] = side;
+        _open.Add(session);
+        _nextLive = TimeSpan.Zero;
         Send(session, side);
     }
 

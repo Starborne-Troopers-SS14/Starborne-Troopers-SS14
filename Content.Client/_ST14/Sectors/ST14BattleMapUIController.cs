@@ -56,7 +56,7 @@ public sealed partial class ST14BattleMapUIController : UIController, IOnStateEn
     {
         if (_window == null)
         {
-            _window = new ST14BattleMapWindow(_cache, EntityManager.System<ST14BattleMapClientSystem>());
+            _window = new ST14BattleMapWindow(_cache, EntityManager.System<ST14BattleMapClientSystem>(), EntityManager.System<Robust.Client.GameObjects.SpriteSystem>());
             _window.OnOpen += () => SetPressed(true);
             _window.OnClose += () => SetPressed(false);
         }

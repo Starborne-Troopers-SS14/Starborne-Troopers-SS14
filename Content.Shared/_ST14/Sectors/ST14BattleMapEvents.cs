@@ -152,3 +152,71 @@ public sealed class ST14BattleMarkRemoveEvent(ST14GalaxyFaction side, int index)
     public readonly ST14GalaxyFaction Side = side;
     public readonly int Index = index;
 }
+
+/// <summary>
+/// Puts a thing on the battle map as its own icon: a drill now, walls, turrets and factories later. Without a side
+/// everybody sees it, with one only that side does
+/// </summary>
+[RegisterComponent]
+public sealed partial class ST14MapIconComponent : Component
+{
+    [DataField]
+    public ST14GalaxyFaction? Side;
+}
+
+/// <summary>
+/// The window of the battle map closed: the server stops sending what moves
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class ST14BattleMapClosedEvent : EntityEventArgs;
+
+/// <summary>
+/// A thing with an icon, where it stands in the tiles of its sector
+/// </summary>
+[Serializable, NetSerializable]
+public readonly record struct ST14MapIconInfo(int Cell, Vector2 Position, string Prototype);
+
+/// <summary>
+/// A squad of one side. The number names it, the leader made it
+/// </summary>
+[Serializable, NetSerializable]
+public readonly record struct ST14SquadInfo(int Id, int Number, string Leader, string[] Members);
+
+/// <summary>
+/// A member of the squad of the player on the map, the player among them
+/// </summary>
+[Serializable, NetSerializable]
+public readonly record struct ST14SquadMate(string Name, int Cell, Vector2 Position, bool Leader, bool Me);
+
+/// <summary>
+/// What changes while the map is open, sent every second: the icons, the squads of the side and where the squad is
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class ST14BattleMapLiveEvent(int round, ST14MapIconInfo[] icons, ST14SquadInfo[] squads, int squad, ST14SquadMate[] mates)
+    : EntityEventArgs
+{
+    public const int MaxSquadSize = 8;
+
+    public readonly int Round = round;
+    public readonly ST14MapIconInfo[] Icons = icons;
+    public readonly ST14SquadInfo[] Squads = squads;
+
+    /// <summary>
+    /// Id of the squad of the player, -1 without one
+    /// </summary>
+    public readonly int Squad = squad;
+
+    public readonly ST14SquadMate[] Mates = mates;
+}
+
+[Serializable, NetSerializable]
+public sealed class ST14SquadCreateEvent : EntityEventArgs;
+
+[Serializable, NetSerializable]
+public sealed class ST14SquadJoinEvent(int id) : EntityEventArgs
+{
+    public readonly int Id = id;
+}
+
+[Serializable, NetSerializable]
+public sealed class ST14SquadLeaveEvent : EntityEventArgs;
