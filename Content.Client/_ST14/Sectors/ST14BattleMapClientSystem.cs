@@ -4,8 +4,6 @@ using Content.Shared._ST14.Sectors;
 using Robust.Client.Graphics;
 using Robust.Client.Player;
 using Robust.Shared.Graphics;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 
 namespace Content.Client._ST14.Sectors;
 
@@ -14,9 +12,6 @@ namespace Content.Client._ST14.Sectors;
 /// </summary>
 public sealed partial class ST14BattleMapClientSystem : EntitySystem
 {
-    private static readonly Rgba32 GroundColor = new(150, 118, 78, 255);
-    private static readonly Rgba32 ObstacleColor = new(44, 34, 28, 255);
-
     private static readonly TextureLoadParameters Smooth = new()
     {
         SampleParameters = new TextureSampleParameters { Filter = true },
@@ -180,21 +175,7 @@ public sealed partial class ST14BattleMapClientSystem : EntitySystem
         if (ev.Round != _round || ev.Data.Length != size * size)
             return;
 
-        using var image = new Image<Rgba32>(size, size);
-        for (var y = 0; y < size; y++)
-        {
-            for (var x = 0; x < size; x++)
-            {
-                var block = ev.Data[y * size + x];
-                var middle = (new Vector2(x, y) + new Vector2(0.5f)) * ST14BattleMapTerrainEvent.BlockTiles;
-                if (block == ST14BattleMapTerrainEvent.Empty || !ST14SectorGeometry.Contains(middle))
-                    continue;
-
-                // rows of an image go down, rows of a map go up
-                image[x, size - 1 - y] = block == ST14BattleMapTerrainEvent.Obstacle ? ObstacleColor : GroundColor;
-            }
-        }
-
+        using var image = PaintTerrain(ev.Cell, ev.Data);
         _terrain[ev.Cell] = Texture.LoadFromImage(image, $"st14-battle-map-{ev.Cell}", Smooth);
         Changed?.Invoke();
     }
