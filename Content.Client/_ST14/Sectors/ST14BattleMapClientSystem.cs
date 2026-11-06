@@ -38,6 +38,13 @@ public sealed partial class ST14BattleMapClientSystem : EntitySystem
     /// </summary>
     public ST14BattleMapLiveEvent? Live { get; private set; }
 
+    /// <summary>
+    /// The squads of the side, kept whether the map is open or not
+    /// </summary>
+    public ST14SquadStateEvent? Squads { get; private set; }
+
+    public event Action? SquadsChanged;
+
     public event Action? Changed;
 
     public override void Initialize()
@@ -47,6 +54,7 @@ public sealed partial class ST14BattleMapClientSystem : EntitySystem
         SubscribeNetworkEvent<ST14BattleMapStateEvent>(OnState);
         SubscribeNetworkEvent<ST14BattleMapTerrainEvent>(OnTerrain);
         SubscribeNetworkEvent<ST14BattleMapLiveEvent>(OnLive);
+        SubscribeNetworkEvent<ST14SquadStateEvent>(OnSquads);
     }
 
     public void Request(ST14GalaxyFaction? side = null)
@@ -58,6 +66,16 @@ public sealed partial class ST14BattleMapClientSystem : EntitySystem
     public void Closed()
     {
         RaiseNetworkEvent(new ST14BattleMapClosedEvent());
+    }
+
+    public void RequestSquads()
+    {
+        RaiseNetworkEvent(new ST14SquadRequestEvent());
+    }
+
+    public void AnswerInvite(bool accept)
+    {
+        RaiseNetworkEvent(new ST14SquadInviteAnswerEvent(accept));
     }
 
     public void CreateSquad()
@@ -139,6 +157,12 @@ public sealed partial class ST14BattleMapClientSystem : EntitySystem
 
         State = ev;
         Changed?.Invoke();
+    }
+
+    private void OnSquads(ST14SquadStateEvent ev)
+    {
+        Squads = ev;
+        SquadsChanged?.Invoke();
     }
 
     private void OnLive(ST14BattleMapLiveEvent ev)
