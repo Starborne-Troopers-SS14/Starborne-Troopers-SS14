@@ -1,0 +1,67 @@
+# Prostheses made by hand: field ones from planks and cloth, steel ones from steel and rods
+- type: constructionGraph
+  id: ST14Prostheses
+  start: start
+  graph:
+  - node: start
+    edges:
+    - to: fieldArm
+      steps:
+      - material: WoodPlank
+        amount: 3
+      - material: Cloth
+        amount: 2
+        doAfter: 5
+    - to: fieldLeg
+      steps:
+      - material: WoodPlank
+        amount: 4
+      - material: Cloth
+        amount: 2
+        doAfter: 5
+    - to: steelArm
+      steps:
+      - material: Steel
+        amount: 8
+      - material: MetalRod
+        amount: 4
+        doAfter: 10
+    - to: steelLeg
+      steps:
+      - material: Steel
+        amount: 10
+      - material: MetalRod
+        amount: 4
+        doAfter: 10
+  - node: fieldArm
+    entity: ST14FieldProsthesisArm
+  - node: fieldLeg
+    entity: ST14FieldProsthesisLeg
+  - node: steelArm
+    entity: ST14SteelProsthesisArm
+  - node: steelLeg
+    entity: ST14SteelProsthesisLeg
+
+- type: construction
+  parent: BaseTool
+  id: ST14FieldProsthesisArm
+  graph: ST14Prostheses
+  targetNode: fieldArm
+
+- type: construction
+  parent: BaseTool
+  id: ST14FieldProsthesisLeg
+  graph: ST14Prostheses
+  targetNode: fieldLeg
+
+- type: construction
+  parent: BaseTool
+  id: ST14SteelProsthesisArm
+  graph: ST14Prostheses
+  targetNode: steelArm
+
+- type: construction
+  parent: BaseTool
+  id: ST14SteelProsthesisLeg
+  graph: ST14Prostheses
+  targetNode: steelLeg

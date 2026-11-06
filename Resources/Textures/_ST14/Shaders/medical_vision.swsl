@@ -1,0 +1,78 @@
+// How a wounded body sees. Every effect is 0 when off and 1 at full strength:
+// pain - a red rim that throbs with every heartbeat and a picture that kicks on the beat;
+// blood_loss - the colours drain out and sight narrows to a dark tunnel;
+// morphine - a warm soft haze that sways slowly; stim - a cold, hard, contrasted picture that jumps with the pulse;
+// crash - grey, blurred, with heavy eyelids; ketamine - the world floats and doubles;
+// flash - the white of a shock; beat - the envelope of the current heartbeat, 1 on the beat
+uniform sampler2D SCREEN_TEXTURE;
+uniform highp float pain;
+uniform highp float beat;
+uniform highp float blood_loss;
+uniform highp float morphine;
+uniform highp float stim;
+uniform highp float crash;
+uniform highp float ketamine;
+uniform highp float flash;
+
+highp vec3 look(highp vec2 uv) {
+    return zTextureSpec(SCREEN_TEXTURE, uv).rgb;
+}
+
+void fragment() {
+    highp vec2 uv = FRAGCOORD.xy * SCREEN_PIXEL_SIZE.xy;
+    highp float t = TIME;
+    highp vec2 centre = uv - vec2(0.5);
+
+    // ketamine: the world floats away in slow waves
+    uv += vec2(sin(uv.y * 6.0 + t * 0.9), cos(uv.x * 5.0 + t * 0.7)) * 0.012 * ketamine;
+
+    // morphine: a slow sway
+    uv += vec2(sin(t * 0.5), cos(t * 0.37)) * 0.004 * morphine;
+
+    // the picture kicks inward on every beat of a racing or hurting heart
+    uv = vec2(0.5) + (uv - vec2(0.5)) * (1.0 - (0.006 * stim + 0.005 * pain) * beat);
+
+    // colours slip apart on the beat
+    highp float split = 0.002 * stim + 0.004 * pain * beat + 0.003 * ketamine;
+    highp vec3 colour = vec3(look(uv + centre * split).r, look(uv).g, look(uv - centre * split).b);
+
+    // soft focus: morphine, a crash, blood loss and ketamine
+    highp float blur = 0.0025 * morphine + 0.003 * crash + 0.0035 * blood_loss + 0.002 * ketamine;
+    if (blur > 0.0001) {
+        highp vec3 soft = (look(uv + vec2(blur, 0.0)) + look(uv - vec2(blur, 0.0)) + look(uv + vec2(0.0, blur)) + look(uv - vec2(0.0, blur))) * 0.25;
+        colour = mix(colour, soft, 0.6);
+    }
+
+    // ketamine doubles the picture
+    if (ketamine > 0.01) {
+        highp vec3 ghost = look(uv + vec2(sin(t * 0.6), cos(t * 0.45)) * 0.02 * ketamine);
+        colour = mix(colour, ghost, 0.35 * ketamine);
+    }
+
+    // the colours drain with the blood
+    highp float grey = dot(colour, vec3(0.299, 0.587, 0.114));
+    colour = mix(colour, vec3(grey), clamp(blood_loss * 0.85 + crash * 0.45 + morphine * 0.15, 0.0, 0.9));
+
+    // morphine is warm, a stimulant cold and hard
+    colour = mix(colour, colour * vec3(1.08, 1.0, 0.86), morphine * 0.6);
+    colour = mix(colour, (colour - vec3(0.5)) * 1.25 + vec3(0.5), stim * 0.5);
+    colour = mix(colour, colour * vec3(0.92, 1.0, 1.1), stim * 0.4);
+
+    highp float edge = length(centre) * 1.414;
+
+    // pain: a red rim throbbing with the heart
+    highp float rim = smoothstep(0.35, 1.0, edge) * pain * (0.55 + 0.45 * beat);
+    colour = mix(colour, vec3(0.55, 0.02, 0.02), clamp(rim, 0.0, 0.85));
+
+    // blood loss: sight narrows to a tunnel
+    highp float tunnel = smoothstep(0.75 - 0.45 * blood_loss, 1.05, edge) * blood_loss;
+    colour *= 1.0 - clamp(tunnel * 1.2, 0.0, 0.95);
+
+    // the crash: eyelids keep falling shut
+    highp float lids = crash * (0.5 + 0.5 * sin(t * 0.8));
+    highp float bands = smoothstep(0.5 - lids * 0.35, 0.5, abs(uv.y - 0.5));
+    colour *= 1.0 - bands * crash * 0.8;
+
+    colour = mix(colour, vec3(1.0), clamp(flash, 0.0, 1.0));
+    COLOR = vec4(colour, 1.0);
+}

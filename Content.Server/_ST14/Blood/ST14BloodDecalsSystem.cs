@@ -117,6 +117,24 @@ public sealed partial class ST14BloodDecalsSystem : EntitySystem
     }
 
     /// <summary>
+    /// A torn limb: a pool under the body and a fan of long streaks thrown away from the one who tore it
+    /// </summary>
+    public void Gush(EntityUid uid, EntityUid? origin, int streaks)
+    {
+        if (!TryComp<ST14BloodDecalsComponent>(uid, out var comp))
+            return;
+
+        var ent = (uid, comp);
+        Place(uid, comp.PoolTag, _random.NextVector2(0.3f), _random.NextAngle());
+
+        var direction = HitDirection(uid, origin);
+        for (var i = 0; i < streaks; i++)
+        {
+            Splatter(ent, direction + _random.NextAngle(-0.6f, 0.6f), _random.NextFloat(0.5f, 1.8f));
+        }
+    }
+
+    /// <summary>
     /// The way the blood flies: away from whoever dealt the hit, or any way when nobody did
     /// </summary>
     private Angle HitDirection(EntityUid target, EntityUid? origin)

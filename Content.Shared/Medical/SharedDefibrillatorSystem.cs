@@ -50,6 +50,10 @@ public abstract partial class SharedDefibrillatorSystem : EntitySystem
         if (args.Handled || args.Target is not { } target || !args.CanReach)
             return;
 
+        // ST14: this one is charged by hand, see ST14FieldDefibSystem
+        if (HasComp<Content.Shared._ST14.Medicine.ST14FieldDefibComponent>(ent))
+            return;
+
         args.Handled = TryStartZap(ent.AsNullable(), target, args.User);
     }
 

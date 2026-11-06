@@ -1,0 +1,366 @@
+# The field medicine of the Federation: the tools that go on a patient part by part, the shots, the scanner and the kits
+
+# Tools: one click treats the part that needs it most, the right-click menu "Medicine" picks the part
+
+- type: entity
+  parent: BaseItem
+  id: ST14Tourniquet
+  name: tourniquet
+  description: A strap with a windlass. Pulled tight above a wound, it stops the bleeding of a limb dead, even of a torn-off one. Leave it on for more than ten minutes and the limb dies.
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medical.rsi
+    state: tourniquet
+  - type: Item
+    sprite: Objects/Specific/Medical/medical.rsi
+    heldPrefix: tourniquet
+    size: Tiny
+  - type: ST14Treatment
+    kind: Tourniquet
+    delay: 2.5
+    selfDelay: 4
+    pain: 30
+    startSound:
+      path: /Audio/Items/zip.ogg
+      params:
+        pitch: 0.7
+        volume: 2
+    endSound:
+      path: /Audio/Items/ratchet.ogg
+      params:
+        volume: 2
+
+- type: entity
+  parent: BaseItem
+  id: ST14Bandage
+  name: field dressing
+  description: A pressure dressing. Stops a small wound, slows a big one. A cut artery soaks through it.
+  suffix: Full
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medical.rsi
+    state: gauze
+  - type: Item
+    sprite: Objects/Specific/Medical/medical.rsi
+    heldPrefix: gauze
+    size: Small
+  - type: Stack
+    stackType: ST14Bandage
+    count: 5
+  - type: ST14Treatment
+    kind: Bandage
+    delay: 3
+    selfDelay: 4.5
+    pain: 5
+    startSound:
+      path: /Audio/Items/Medical/brutepack_begin.ogg
+    endSound:
+      path: /Audio/Items/Medical/brutepack_end.ogg
+
+- type: entity
+  parent: BaseItem
+  id: ST14HemostaticGauze
+  name: hemostatic gauze
+  description: Gauze soaked in a clotting agent, stuffed deep into the wound. Holds what a tourniquet cannot reach, a chest, a neck, a cut artery. It hurts.
+  suffix: Full
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medical.rsi
+    state: gauze
+    color: "#E6D29A"
+  - type: Item
+    sprite: Objects/Specific/Medical/medical.rsi
+    heldPrefix: gauze
+    size: Small
+  - type: Stack
+    stackType: ST14HemostaticGauze
+    count: 3
+  - type: ST14Treatment
+    kind: Hemostatic
+    delay: 4
+    selfDelay: 6
+    pain: 35
+    startSound:
+      path: /Audio/Items/Medical/ointment_begin.ogg
+    endSound:
+      path: /Audio/Items/Medical/ointment_end.ogg
+
+- type: entity
+  parent: BaseItem
+  id: ST14Splint
+  name: field splint
+  description: Two slats and straps. A broken leg stops buckling, a broken arm stops shaking the aim.
+  suffix: Full
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medical.rsi
+    state: cast
+  - type: Item
+    sprite: Objects/Specific/Medical/medical.rsi
+    size: Small
+  - type: Stack
+    stackType: ST14Splint
+    count: 3
+  - type: ST14Treatment
+    kind: Splint
+    delay: 4
+    selfDelay: 6
+    pain: 20
+    startSound:
+      path: /Audio/Effects/snap.ogg
+    endSound:
+      path: /Audio/Items/zip.ogg
+
+- type: entity
+  parent: BaseItem
+  id: ST14SurgeryKit
+  name: suture kit
+  description: Needles, clamps and thread. Sews the wounds of a part shut for good and closes a stump for a prosthesis. The patient lies down, and without ketamine or morphine it is torture.
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medical.rsi
+    state: medicated-suture
+  - type: Item
+    sprite: Objects/Specific/Medical/medical.rsi
+    heldPrefix: medicated-suture
+    size: Small
+  - type: ST14Treatment
+    kind: Suture
+    delay: 7
+    selfDelay: 12
+    reusable: true
+    needsLying: true
+    pain: 55
+    startSound:
+      path: /Audio/Items/Medical/brutepack_begin.ogg
+      params:
+        pitch: 0.8
+    endSound:
+      path: /Audio/Items/snap.ogg
+
+- type: entity
+  parent: BaseItem
+  id: ST14MedScanner
+  name: field medical scanner
+  description: Shows a patient part by part, the heart, the blood and the drugs in it, and what will kill them first. Click a patient, or use it in hand on yourself.
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/healthanalyzer.rsi
+    layers:
+    - state: icon
+    - state: analyzer
+      shader: unshaded
+  - type: Item
+    sprite: Objects/Specific/Medical/healthanalyzer.rsi
+    size: Small
+  - type: ST14MedScanner
+  - type: UserInterface
+    interfaces:
+      enum.ST14MedScannerUiKey.Key:
+        type: ST14MedScannerBoundUserInterface
+
+# Shots: one click on the patient or in hand on yourself
+
+- type: entity
+  parent: ChemicalMedipen
+  id: ST14MorphinePen
+  name: morphine autoinjector
+  description: One dose of morphine. The pain goes and the screaming stops. A second dose slows the breathing, a third can stop it.
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medipen.rsi
+    layers:
+    - state: morphen
+      map: ["enum.SolutionContainerLayers.Fill"]
+  - type: SolutionContainerVisuals
+    maxFillLevels: 1
+    changeColor: false
+    emptySpriteName: morphen_empty
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: ST14Morphine
+        Quantity: 10
+
+- type: entity
+  parent: ChemicalMedipen
+  id: ST14AdrenalinePen
+  name: adrenaline autoinjector
+  description: Epinephrine. Keeps a dying heart going and helps a stopped one start under chest compressions. With a stimulant it can stop a healthy one.
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medipen.rsi
+    layers:
+    - state: medipen
+      map: ["enum.SolutionContainerLayers.Fill"]
+  - type: SolutionContainerVisuals
+    maxFillLevels: 1
+    changeColor: false
+    emptySpriteName: medipen_empty
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: Epinephrine
+        Quantity: 10
+
+- type: entity
+  parent: ChemicalMedipen
+  id: ST14CombatStimPen
+  name: combat stimulant autoinjector
+  description: Faster legs, a steady aim, no pain slowing you down and no falling down. The heart pays for it, and when it wears off the body crashes. Never with adrenaline.
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medipen.rsi
+    layers:
+    - state: stimpen
+      map: ["enum.SolutionContainerLayers.Fill"]
+  - type: SolutionContainerVisuals
+    maxFillLevels: 1
+    changeColor: false
+    emptySpriteName: stimpen_empty
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: ST14CombatStim
+        Quantity: 8
+
+- type: entity
+  parent: ChemicalMedipen
+  id: ST14TranexamicPen
+  name: hemostatic autoinjector
+  description: Tranexamic acid. The blood clots faster, small wounds close by themselves and big ones bleed less. It does not hold a torn limb, a tourniquet does.
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medipen.rsi
+    layers:
+    - state: hypovolemic
+      map: ["enum.SolutionContainerLayers.Fill"]
+  - type: SolutionContainerVisuals
+    maxFillLevels: 1
+    changeColor: false
+    emptySpriteName: hypovolemic_empty
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: TranexamicAcid
+        Quantity: 10
+
+- type: entity
+  parent: ChemicalMedipen
+  id: ST14NaloxonePen
+  name: naloxone autoinjector
+  description: The antidote to morphine. Brings back the breathing of an overdose, and all the pain with it.
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medipen.rsi
+    layers:
+    - state: atropen
+      map: ["enum.SolutionContainerLayers.Fill"]
+  - type: SolutionContainerVisuals
+    maxFillLevels: 1
+    changeColor: false
+    emptySpriteName: atropen_empty
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: ST14Naloxone
+        Quantity: 10
+
+- type: entity
+  parent: ChemicalMedipen
+  id: ST14KetaminePen
+  name: ketamine autoinjector
+  description: Anaesthesia for the field. The patient is out for about a minute and feels nothing, time enough to sew a stump or fit a prosthesis.
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medipen.rsi
+    layers:
+    - state: dexpen
+      map: ["enum.SolutionContainerLayers.Fill"]
+  - type: SolutionContainerVisuals
+    maxFillLevels: 1
+    changeColor: false
+    emptySpriteName: dexpen_empty
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: ST14Ketamine
+        Quantity: 12
+
+# Kits
+
+- type: entity
+  parent: Medkit
+  id: ST14FieldKit
+  name: trooper field kit
+  description: Two tourniquets, a field dressing, morphine and a hemostatic shot. Enough to live until a medic comes.
+  components:
+  - type: Sprite
+    state: blackkit
+  - type: Item
+    heldPrefix: blackkit
+    size: Normal
+  - type: Storage
+    maxItemSize: Small
+    grid:
+    - 0,0,4,1
+  - type: StorageFill
+    contents:
+    - id: ST14Tourniquet
+      amount: 2
+    - id: ST14Bandage
+    - id: ST14MorphinePen
+    - id: ST14TranexamicPen
+
+- type: entity
+  parent: ST14ClothingBackpack
+  id: ST14MedicBag
+  name: medic field pack
+  description: Everything a Mobile Infantry medic carries into a battle.
+  components:
+  - type: Storage
+    grid:
+    - 0,0,9,4
+  - type: StorageFill
+    contents:
+    - id: ST14MedScanner
+    - id: ST14SurgeryKit
+    - id: ST14Tourniquet
+      amount: 4
+    - id: ST14Bandage
+      amount: 2
+    - id: ST14HemostaticGauze
+      amount: 2
+    - id: ST14Splint
+    - id: ST14MorphinePen
+      amount: 3
+    - id: ST14AdrenalinePen
+      amount: 2
+    - id: ST14CombatStimPen
+      amount: 2
+    - id: ST14TranexamicPen
+      amount: 2
+    - id: ST14NaloxonePen
+      amount: 2
+    - id: ST14KetaminePen
+      amount: 2
+    - id: Bloodpack
+    - id: ST14FieldProsthesisArm
+    - id: ST14FieldProsthesisLeg
+
+# The shout for a medic every trooper has
+- type: entity
+  parent: BaseAction
+  id: ST14ActionCallMedic
+  name: Call a medic
+  description: Shout for a medic. For a minute every medic sees a red cross over you.
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 20
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medical.rsi
+    layers:
+    - state: brutepack
+  - type: InstantAction
+    event: !type:ST14CallMedicActionEvent

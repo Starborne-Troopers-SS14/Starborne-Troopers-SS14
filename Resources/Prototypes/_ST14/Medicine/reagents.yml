@@ -1,0 +1,98 @@
+# The field drugs of the Federation. How hard each works and what they do together is counted by ST14WoundSystem from
+# the amount in the blood: here they only wear off and show a few side effects
+
+# Takes the pain away and stops the screaming. Two doses in a row slow the breathing, the antidote is naloxone
+- type: reagent
+  id: ST14Morphine
+  name: reagent-name-st14-morphine
+  group: Medicine
+  desc: reagent-desc-st14-morphine
+  physicalDesc: reagent-physical-desc-opaque
+  flavor: bitter
+  color: "#E8E3C9"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.1
+      effects:
+      - !type:ModifyKnockdown
+        time: 1
+        type: Remove
+      - !type:PopupMessage
+        visualType: Medium
+        messages: ["st14-morphine-effect-warm", "st14-morphine-effect-far"]
+        type: Local
+        probability: 0.04
+      - !type:ModifyStatusEffect
+        conditions:
+        - !type:ReagentCondition
+          reagent: ST14Morphine
+          min: 16
+        effectProto: StatusEffectDrowsiness
+        time: 4
+
+# Tears morphine out of the blood: the overdose ends, and the pain comes back at once
+- type: reagent
+  id: ST14Naloxone
+  name: reagent-name-st14-naloxone
+  group: Medicine
+  desc: reagent-desc-st14-naloxone
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: bitter
+  color: "#BFE3F0"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.5
+      effects:
+      - !type:Jitter
+      - !type:PopupMessage
+        visualType: Medium
+        messages: ["st14-naloxone-effect"]
+        type: Local
+        probability: 0.08
+
+# Drives a wounded trooper on: faster legs, a steady aim, no falling down. With adrenaline it overloads the heart,
+# and when it wears off the body crashes
+- type: reagent
+  id: ST14CombatStim
+  name: reagent-name-st14-combat-stim
+  group: Medicine
+  desc: reagent-desc-st14-combat-stim
+  physicalDesc: reagent-physical-desc-fizzy
+  flavor: sour
+  color: "#F2A33A"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.1
+      effects:
+      - !type:ModifyStatusEffect
+        effectProto: StatusEffectStunned
+        time: 1
+        type: Remove
+      - !type:ModifyKnockdown
+        time: 1
+        type: Remove
+      - !type:Jitter
+      - !type:PopupMessage
+        visualType: Medium
+        messages: ["st14-stim-effect-heart", "st14-stim-effect-sharp"]
+        type: Local
+        probability: 0.05
+
+# Puts the patient under for surgery: asleep and feeling nothing while there is enough of it
+- type: reagent
+  id: ST14Ketamine
+  name: reagent-name-st14-ketamine
+  group: Medicine
+  desc: reagent-desc-st14-ketamine
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: bitter
+  color: "#D9D2F2"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.12
+      effects:
+      - !type:PopupMessage
+        visualType: Medium
+        messages: ["st14-ketamine-effect"]
+        type: Local
+        probability: 0.05
