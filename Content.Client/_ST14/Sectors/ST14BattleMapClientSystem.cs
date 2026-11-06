@@ -33,6 +33,11 @@ public sealed partial class ST14BattleMapClientSystem : EntitySystem
 
     public ST14BattleMapStateEvent? State { get; private set; }
 
+    /// <summary>
+    /// What moves on the map, null until the server sent it for this round
+    /// </summary>
+    public ST14BattleMapLiveEvent? Live { get; private set; }
+
     public event Action? Changed;
 
     public override void Initialize()
@@ -41,12 +46,33 @@ public sealed partial class ST14BattleMapClientSystem : EntitySystem
 
         SubscribeNetworkEvent<ST14BattleMapStateEvent>(OnState);
         SubscribeNetworkEvent<ST14BattleMapTerrainEvent>(OnTerrain);
+        SubscribeNetworkEvent<ST14BattleMapLiveEvent>(OnLive);
     }
 
     public void Request(ST14GalaxyFaction? side = null)
     {
         _wantedSide = side ?? _wantedSide;
         RaiseNetworkEvent(new ST14BattleMapRequestEvent(_wantedSide));
+    }
+
+    public void Closed()
+    {
+        RaiseNetworkEvent(new ST14BattleMapClosedEvent());
+    }
+
+    public void CreateSquad()
+    {
+        RaiseNetworkEvent(new ST14SquadCreateEvent());
+    }
+
+    public void JoinSquad(int id)
+    {
+        RaiseNetworkEvent(new ST14SquadJoinEvent(id));
+    }
+
+    public void LeaveSquad()
+    {
+        RaiseNetworkEvent(new ST14SquadLeaveEvent());
     }
 
     public void AddMark(ST14GalaxyFaction side, ST14BattleMark mark)
@@ -108,9 +134,19 @@ public sealed partial class ST14BattleMapClientSystem : EntitySystem
             }
 
             _terrain.Clear();
+            Live = null;
         }
 
         State = ev;
+        Changed?.Invoke();
+    }
+
+    private void OnLive(ST14BattleMapLiveEvent ev)
+    {
+        if (ev.Round != _round)
+            return;
+
+        Live = ev;
         Changed?.Invoke();
     }
 
