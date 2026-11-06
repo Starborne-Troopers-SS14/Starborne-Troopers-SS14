@@ -242,7 +242,7 @@ public sealed partial class ST14CommandMenu : ST14WarScreenBase
     {
         if (_war != null && ev.Planet == _planet?.ID)
         {
-            _war.ImportState(ev.Cells, ev.Turn);
+            _war.ImportState(ev.Cells, ev.Turn, ev.ActiveRegion);
             ReadBattleTime(ev);
         }
 

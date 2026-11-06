@@ -63,6 +63,7 @@ public sealed partial class ST14SectorSystem : EntitySystem
     [Dependency] private SharedJobSystem _jobs = default!;
     [Dependency] private SharedMindSystem _mind = default!;
     [Dependency] private ST14GalaxyWarSystem _war = default!;
+    [Dependency] private ST14SubsectorSystem _subsectors = default!;
     [Dependency] private ServerStationSystem _station = default!;
 
     /// <summary>
@@ -172,21 +173,22 @@ public sealed partial class ST14SectorSystem : EntitySystem
         if (_staging >= 0)
             cells.Add(_staging);
 
+        // the ground of the Federation stands every round, the hive's sleeps in its save until it is fought over
         for (var i = 0; i < war.Cells.Length; i++)
         {
-            if (war.Cells[i].Initialized)
+            if (war.Cells[i].Initialized && war.Cells[i].Faction == ST14GalaxyFaction.Federation)
                 cells.Add(i);
         }
 
         foreach (var cell in cells)
         {
-            LoadCell(planet, cell, war.Cells[cell].Terrain, station);
+            LoadCell(planet, cell, war.Cells[cell].Terrain, station, war.Cells[cell].Faction == ST14GalaxyFaction.Arachnid);
         }
 
         Log.Info($"Sector round on {planet}: battle for {target}, gathering in {_staging}, {_maps.Count} sectors loaded");
     }
 
-    private void LoadCell(string planet, int cell, int terrain, EntityUid station)
+    private void LoadCell(string planet, int cell, int terrain, EntityUid station, bool hiveHeld)
     {
         var save = SavePath(planet, cell);
         var saved = _resources.UserData.Exists(save);
@@ -230,6 +232,8 @@ public sealed partial class ST14SectorSystem : EntitySystem
             ClearTrash(map.Value);
         else
             PlaceQueens(grids!);
+
+        _subsectors.PreparePoints(map.Value, grids!, cell, hiveHeld, !saved);
     }
 
     /// <summary>
@@ -408,7 +412,7 @@ public sealed partial class ST14SectorSystem : EntitySystem
     private void EndBattle(string planet, ST14GalaxyFaction? winner, string message)
     {
         _decided = true;
-        _war.ApplyResult(planet, winner);
+        _war.ApplyResult(planet, winner, _subsectors.Holders(_maps));
         _ticker.EndRound(Loc.GetString(message));
     }
 

@@ -1,0 +1,57 @@
+# A nest of the hive over a resource point: while it stands, the hive holds that subsector of the sector
+- type: entity
+  id: ST14HiveNest
+  name: hive nest
+  description: A swollen growth over a resource point. While it stands, the hive holds this part of the sector.
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: true
+  - type: Clickable
+  - type: InteractionOutline
+  - type: Sprite
+    sprite: Structures/Specific/xeno_building.rsi
+    layers:
+    - state: recoverytower
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.35,-0.35,0.35,0.35"
+        density: 190
+        mask:
+        - MachineMask
+        layer:
+        - MachineLayer
+  - type: RangedDamageSound
+    soundGroups:
+      Brute:
+        collection:
+          MeatBulletImpact
+    soundTypes:
+      Heat:
+        collection:
+          MeatLaserImpact
+  - type: Damageable
+  - type: Injurable
+    damageContainer: Biological
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 250
+      behaviors:
+      - !type:PlaySoundBehavior
+        sound:
+          collection: gib
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+  - type: ST14ResourcePointHolder
+    side: Arachnid
+  # the hive sees its nests on the battle map
+  - type: ST14MapIcon
+    side: Arachnid
