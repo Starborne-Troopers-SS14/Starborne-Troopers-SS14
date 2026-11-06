@@ -22,10 +22,6 @@ public sealed partial class ST14BloodDecalsSystem : EntitySystem
     [Dependency] private DecalSystem _decals = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
 
-    // Blood sprites are 52 px (48 px with a clear border, so a turned decal shows no stray lines), a decal is placed by
-    // its corner and turns around its middle
-    private static readonly Vector2 DecalCenter = new(0.8125f, 0.8125f);
-
     // A single drip event never paints more than this, the rest of the blood is lost on the way
     private const int MaxDripsPerBleed = 4;
 
@@ -75,12 +71,9 @@ public sealed partial class ST14BloodDecalsSystem : EntitySystem
     {
         if (args.Burst)
         {
-            for (var i = 0; i < ent.Comp.DeathPools; i++)
-            {
-                Place(ent, ent.Comp.PoolTag, _random.NextVector2(0.5f), _random.NextAngle());
-            }
+            PlacePools(ent, ent.Comp.GibPools, 0.5f);
 
-            for (var i = 0; i < 4; i++)
+            for (var i = 0; i < ent.Comp.GibSplatters; i++)
             {
                 Splatter(ent, _random.NextAngle(), _random.NextFloat(0.4f, 1.2f));
             }
@@ -90,29 +83,42 @@ public sealed partial class ST14BloodDecalsSystem : EntitySystem
         }
 
         ent.Comp.Lost += args.Amount;
+        if (ent.Comp.DripVolume <= 0)
+            return;
 
-        var drips = 0;
-        while (ent.Comp.Lost >= ent.Comp.DripVolume)
+        var drips = (ent.Comp.Lost / ent.Comp.DripVolume).Int();
+        ent.Comp.Lost -= ent.Comp.DripVolume * drips;
+
+        for (var i = 0; i < Math.Min(drips, MaxDripsPerBleed); i++)
         {
-            ent.Comp.Lost -= ent.Comp.DripVolume;
-
-            if (drips++ < MaxDripsPerBleed)
-                Place(ent, ent.Comp.DripTag, _random.NextVector2(ent.Comp.DripSpread), _random.NextAngle());
+            Place(ent, ent.Comp.DripTag, _random.NextVector2(ent.Comp.DripSpread), _random.NextAngle());
         }
     }
 
     private void OnMobStateChanged(Entity<ST14BloodDecalsComponent> ent, ref MobStateChangedEvent args)
     {
-        var pools = args.NewMobState switch
+        switch (args.NewMobState)
         {
-            MobState.Dead => ent.Comp.DeathPools,
-            MobState.Critical => 1,
-            _ => 0,
-        };
+            case MobState.Alive:
+                ent.Comp.Pools = 0;
+                break;
+            case MobState.Critical:
+                PlacePools(ent, ent.Comp.CriticalPools, 0.25f);
+                break;
+            case MobState.Dead:
+                PlacePools(ent, ent.Comp.DeathPools, 0.25f);
+                break;
+        }
+    }
 
-        for (var i = 0; i < pools; i++)
+    /// <summary>
+    /// Adds pools until the body has left this many of them since it went down
+    /// </summary>
+    private void PlacePools(Entity<ST14BloodDecalsComponent> ent, int total, float spread)
+    {
+        for (; ent.Comp.Pools < total; ent.Comp.Pools++)
         {
-            Place(ent, ent.Comp.PoolTag, _random.NextVector2(0.25f), _random.NextAngle());
+            Place(ent, ent.Comp.PoolTag, _random.NextVector2(spread), _random.NextAngle());
         }
     }
 
@@ -125,7 +131,7 @@ public sealed partial class ST14BloodDecalsSystem : EntitySystem
             return;
 
         var ent = (uid, comp);
-        Place(uid, comp.PoolTag, _random.NextVector2(0.3f), _random.NextAngle());
+        Place(ent, comp.PoolTag, _random.NextVector2(0.3f), _random.NextAngle());
 
         var direction = HitDirection(uid, origin);
         for (var i = 0; i < streaks; i++)
@@ -163,9 +169,9 @@ public sealed partial class ST14BloodDecalsSystem : EntitySystem
         Place(ent, ent.Comp.SplatterTag, offset, rotation);
     }
 
-    private void Place(EntityUid uid, string tag, Vector2 offset, Angle rotation)
+    private void Place(Entity<ST14BloodDecalsComponent> ent, string tag, Vector2 offset, Angle rotation)
     {
-        var xform = Transform(uid);
+        var xform = Transform(ent);
         if (xform.GridUid is not { } grid)
             return;
 
@@ -176,7 +182,7 @@ public sealed partial class ST14BloodDecalsSystem : EntitySystem
         var gridRotation = _transform.GetWorldRotation(grid);
         var local = _transform.WithEntityId(xform.Coordinates, grid).Position
                     + (-gridRotation).RotateVec(offset)
-                    - DecalCenter;
+                    - ent.Comp.DecalCenter;
 
         _decals.TryAddDecal(_random.Pick(decals),
             new EntityCoordinates(grid, local),
