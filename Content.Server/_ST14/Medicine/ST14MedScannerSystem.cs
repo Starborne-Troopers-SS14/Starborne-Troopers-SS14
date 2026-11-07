@@ -5,12 +5,14 @@ using Content.Shared.Actions;
 using Content.Shared.Body.Components;
 using Content.Shared.Chat;
 using Content.Shared.Chemistry.EntitySystems;
+using Content.Shared.Chemistry.Reagent;
 using Content.Shared.Interaction;
 using Content.Shared.Interaction.Events;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Popups;
 using Robust.Server.Audio;
 using Robust.Server.GameObjects;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
 namespace Content.Server._ST14.Medicine;
@@ -21,24 +23,8 @@ namespace Content.Server._ST14.Medicine;
 /// </summary>
 public sealed partial class ST14MedScannerSystem : EntitySystem
 {
-    /// <summary>
-    /// The dose past which a drug starts to do harm, for the bars of the scanner
-    /// </summary>
-    private static readonly Dictionary<string, float> Overdoses = new()
-    {
-        { ST14WoundSystem.MorphineId, 20f },
-        { ST14WoundSystem.StimId, 12f },
-        { ST14WoundSystem.KetamineId, 18f },
-        { ST14WoundSystem.NaloxoneId, 20f },
-        { ST14WoundSystem.AdrenalineId, 30f },
-        { ST14WoundSystem.TranexamicId, 25f },
-        { "Bicaridine", 30f },
-        { "Kelotane", 30f },
-        { "Dermaline", 30f },
-        { "Saline", 0f },
-    };
-
     [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private AudioSystem _audio = default!;
     [Dependency] private ChatSystem _chat = default!;
     [Dependency] private MobStateSystem _mobState = default!;
@@ -129,9 +115,10 @@ public sealed partial class ST14MedScannerSystem : EntitySystem
                 if (id == "Blood" || reagent.Quantity <= 0)
                     continue;
 
-                var overdose = Overdoses.GetValueOrDefault(id, 0f);
+                var profile = _wounds.DrugOf(id);
+                var overdose = profile?.Overdose ?? 0f;
                 var amount = reagent.Quantity.Float();
-                drugs.Add(new ST14DrugReading(id, amount, overdose, overdose > 0f ? amount / overdose : 0f));
+                drugs.Add(new ST14DrugReading(id, amount, overdose, overdose > 0f ? amount / overdose : 0f, profile?.Summary?.Id));
             }
         }
 
@@ -187,16 +174,29 @@ public sealed partial class ST14MedScannerSystem : EntitySystem
         if (wounds.Heart == ST14HeartState.Arrhythmia)
             yield return Loc.GetString("st14-scan-warn-arrhythmia");
 
-        if (wounds.Stim > 0.25f && wounds.Adrenaline > 0.25f)
-            yield return Loc.GetString("st14-scan-warn-stim-adrenaline");
-
-        if (wounds.Stim > 0.3f && wounds.Morphine > 0.3f)
-            yield return Loc.GetString("st14-scan-warn-speedball");
+        // what the drugs do together
+        foreach (var id in wounds.Interactions)
+        {
+            if (_prototypes.Index(id).Warning is { } warning)
+                yield return Loc.GetString(warning);
+        }
 
         foreach (var drug in drugs.Where(d => d.Strength >= 0.8f))
         {
-            yield return Loc.GetString("st14-scan-warn-overdose", ("drug", drug.Reagent));
+            var name = _prototypes.TryIndex<ReagentPrototype>(drug.Reagent, out var reagent) ? reagent.LocalizedName : drug.Reagent;
+            yield return Loc.GetString("st14-scan-warn-overdose", ("drug", name));
         }
+
+        if (wounds.Toxin >= 0.15f)
+            yield return Loc.GetString("st14-scan-warn-venom");
+
+        if (wounds.Infection >= Sepsis)
+            yield return Loc.GetString("st14-scan-warn-sepsis");
+        else if (wounds.Infection >= 0.3f)
+            yield return Loc.GetString(wounds.Fever < 0.1f ? "st14-scan-warn-infection-hidden" : "st14-scan-warn-infection");
+
+        if (wounds.Wounds.Any(w => w.Sutured && w.Infection > 0.2f))
+            yield return Loc.GetString("st14-scan-warn-sewn-dirty");
 
         if (wounds.Wounds.Any(w => w.Kind == ST14WoundKind.Stump && !w.Sutured))
             yield return Loc.GetString("st14-scan-warn-stump");
@@ -204,12 +204,17 @@ public sealed partial class ST14MedScannerSystem : EntitySystem
         if (wounds.Wounds.Any(w => w.Kind == ST14WoundKind.Fracture && !w.Splinted))
             yield return Loc.GetString("st14-scan-warn-fracture");
 
-        if (wounds.Ketamine >= 0.6f)
+        if (wounds.Wounds.Any(w => w.Kind == ST14WoundKind.Malunion))
+            yield return Loc.GetString("st14-scan-warn-malunion");
+
+        if (wounds.Dissociation >= 0.6f)
             yield return Loc.GetString("st14-scan-warn-anaesthesia");
 
         if (wounds.Crash > 0.2f)
             yield return Loc.GetString("st14-scan-warn-crash");
     }
+
+    private const float Sepsis = 0.8f;
 
     private void OnCallerInit(Entity<ST14MedicCallerComponent> ent, ref MapInitEvent args)
     {

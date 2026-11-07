@@ -254,12 +254,12 @@
   - type: Sprite
     sprite: Objects/Specific/Medical/medipen.rsi
     layers:
-    - state: atropen
+    - state: oxapen
       map: ["enum.SolutionContainerLayers.Fill"]
   - type: SolutionContainerVisuals
     maxFillLevels: 1
     changeColor: false
-    emptySpriteName: atropen_empty
+    emptySpriteName: oxapen_empty
   - type: Solution
     solution:
       reagents:
@@ -320,7 +320,7 @@
   components:
   - type: Storage
     grid:
-    - 0,0,9,4
+    - 0,0,11,4
   - type: StorageFill
     contents:
     - id: ST14MedScanner
@@ -347,6 +347,8 @@
     - id: Bloodpack
     - id: ST14FieldProsthesisArm
     - id: ST14FieldProsthesisLeg
+    - id: ST14Antiseptic
+    - id: ST14MedicDrugCase
 
 # The shout for a medic every trooper has
 - type: entity
@@ -364,3 +366,282 @@
     - state: brutepack
   - type: InstantAction
     event: !type:ST14CallMedicActionEvent
+
+
+- type: entity
+  parent: ChemicalMedipen
+  id: ST14AtropinePen
+  name: atropine autoinjector
+  description: Atropine. Speeds a slow heart, clears the morphine fog and pulls some bug venom out. With adrenaline the heart races.
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medipen.rsi
+    layers:
+    - state: atropen
+      map: ["enum.SolutionContainerLayers.Fill"]
+  - type: SolutionContainerVisuals
+    maxFillLevels: 1
+    changeColor: false
+    emptySpriteName: atropen_empty
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: ST14Atropine
+        Quantity: 8
+
+- type: entity
+  parent: ChemicalMedipen
+  id: ST14AmiodaronePen
+  name: amiodarone autoinjector
+  description: Keeps the heart in rhythm under any load and helps a shock or compressions start a stopped one. Do not mix with atropine.
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medipen.rsi
+    layers:
+    - state: punctpen
+      map: ["enum.SolutionContainerLayers.Fill"]
+  - type: SolutionContainerVisuals
+    maxFillLevels: 1
+    changeColor: false
+    emptySpriteName: punctpen_empty
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: ST14Amiodarone
+        Quantity: 10
+
+- type: entity
+  parent: ChemicalMedipen
+  id: ST14KetorolacPen
+  name: ketorolac autoinjector
+  description: "A painkiller that keeps the head clear. It thins the blood: not with a hemostatic, not with alcohol."
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medipen.rsi
+    layers:
+    - state: dermpen
+      map: ["enum.SolutionContainerLayers.Fill"]
+  - type: SolutionContainerVisuals
+    maxFillLevels: 1
+    changeColor: false
+    emptySpriteName: dermpen_empty
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: ST14Ketorolac
+        Quantity: 10
+
+- type: entity
+  parent: ChemicalMedipen
+  id: ST14AntibioticPen
+  name: antibiotic autoinjector
+  description: Kills the infection of the wounds over a few minutes. Wash the wound first.
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medipen.rsi
+    layers:
+    - state: penacid
+      map: ["enum.SolutionContainerLayers.Fill"]
+  - type: SolutionContainerVisuals
+    maxFillLevels: 1
+    changeColor: false
+    emptySpriteName: penacid_empty
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: ST14Antibiotic
+        Quantity: 10
+
+- type: entity
+  parent: ChemicalMedipen
+  id: ST14AntipyreticPen
+  name: fever reducer autoinjector
+  description: Takes the fever away. The infection goes on underneath, only an antibiotic stops it.
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medipen.rsi
+    layers:
+    - state: pyrapen
+      map: ["enum.SolutionContainerLayers.Fill"]
+  - type: SolutionContainerVisuals
+    maxFillLevels: 1
+    changeColor: false
+    emptySpriteName: pyrapen_empty
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: ST14Antipyretic
+        Quantity: 10
+
+- type: entity
+  parent: ChemicalMedipen
+  id: ST14OsteogenPen
+  name: osteogen autoinjector
+  description: Grows a broken bone back in a minute and a half. Splint it first, or it grows crooked.
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medipen.rsi
+    layers:
+    - state: bicpen
+      map: ["enum.SolutionContainerLayers.Fill"]
+  - type: SolutionContainerVisuals
+    maxFillLevels: 1
+    changeColor: false
+    emptySpriteName: bicpen_empty
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: ST14Osteogen
+        Quantity: 12
+
+- type: entity
+  parent: ChemicalMedipen
+  id: ST14RegenerolPen
+  name: regenerol autoinjector
+  description: Closes wounds three times faster. A light load on the heart.
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medipen.rsi
+    layers:
+    - state: salpen
+      map: ["enum.SolutionContainerLayers.Fill"]
+  - type: SolutionContainerVisuals
+    maxFillLevels: 1
+    changeColor: false
+    emptySpriteName: salpen_empty
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: ST14Regenerol
+        Quantity: 10
+
+- type: entity
+  parent: ChemicalMedipen
+  id: ST14AntivenomPen
+  name: antivenom autoinjector
+  description: Pulls tiger bug venom out of the blood.
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medipen.rsi
+    layers:
+    - state: arithpen
+      map: ["enum.SolutionContainerLayers.Fill"]
+  - type: SolutionContainerVisuals
+    maxFillLevels: 1
+    changeColor: false
+    emptySpriteName: arithpen_empty
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: ST14Antivenom
+        Quantity: 8
+
+- type: entity
+  parent: ChemicalMedipen
+  id: ST14ModafinilPen
+  name: modafinil autoinjector
+  description: "Wakes the body up: the stimulant crash goes, the morphine fog lifts. Not on top of a stimulant."
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medipen.rsi
+    layers:
+    - state: microstimpen
+      map: ["enum.SolutionContainerLayers.Fill"]
+  - type: SolutionContainerVisuals
+    maxFillLevels: 1
+    changeColor: false
+    emptySpriteName: microstimpen_empty
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: ST14Modafinil
+        Quantity: 8
+
+- type: entity
+  parent: ChemicalMedipen
+  id: ST14PlasmaPen
+  name: plasma expander autoinjector
+  description: Fills the vessels when there is no blood to give. It thins the blood that is left.
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medipen.rsi
+    layers:
+    - state: salacid
+      map: ["enum.SolutionContainerLayers.Fill"]
+  - type: SolutionContainerVisuals
+    maxFillLevels: 1
+    changeColor: false
+    emptySpriteName: salacid_empty
+  - type: Solution
+    solution:
+      reagents:
+      - ReagentId: ST14PlasmaExpander
+        Quantity: 15
+
+# Washes the wounds of a part: they stop going bad and a fresh infection dies. It stings
+- type: entity
+  parent: BaseItem
+  id: ST14Antiseptic
+  name: antiseptic
+  description: A tube of antiseptic gel. Washes the wounds of a part so they stop going bad and kills a fresh infection. Do it before you sew a wound shut. It stings.
+  suffix: Full
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medical.rsi
+    state: ointment
+    color: "#B8E6F0"
+  - type: Item
+    sprite: Objects/Specific/Medical/medical.rsi
+    heldPrefix: ointment
+    size: Small
+  - type: Stack
+    stackType: ST14Antiseptic
+    count: 5
+  - type: ST14Treatment
+    kind: Disinfect
+    delay: 2
+    selfDelay: 3
+    pain: 15
+    startSound:
+      path: /Audio/Items/Medical/ointment_begin.ogg
+    endSound:
+      path: /Audio/Items/Medical/ointment_end.ogg
+
+# The medic's case of shots for everything past the first minutes: the heart, infection, bones, venom
+- type: entity
+  parent: Medkit
+  id: ST14MedicDrugCase
+  name: medic drug case
+  description: Shots for what comes after the first minutes of a wound - the heart, infection, bones, venom and blood.
+  components:
+  - type: Sprite
+    state: advkit
+  - type: Item
+    heldPrefix: advkit
+    size: Normal
+  - type: Storage
+    maxItemSize: Tiny
+    grid:
+    - 0,0,6,2
+  - type: StorageFill
+    contents:
+    - id: ST14AtropinePen
+      amount: 2
+    - id: ST14AmiodaronePen
+      amount: 2
+    - id: ST14KetorolacPen
+      amount: 2
+    - id: ST14AntibioticPen
+      amount: 3
+    - id: ST14AntipyreticPen
+      amount: 2
+    - id: ST14OsteogenPen
+      amount: 2
+    - id: ST14RegenerolPen
+      amount: 2
+    - id: ST14AntivenomPen
+      amount: 2
+    - id: ST14ModafinilPen
+      amount: 2
+    - id: ST14PlasmaPen
+      amount: 2

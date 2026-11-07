@@ -96,3 +96,178 @@
         messages: ["st14-ketamine-effect"]
         type: Local
         probability: 0.05
+
+# Speeds a slow heart and clears the head of sedatives, pulls some bug venom out. With adrenaline the heart races
+- type: reagent
+  id: ST14Atropine
+  name: reagent-name-st14-atropine
+  group: Medicine
+  desc: reagent-desc-st14-atropine
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: bitter
+  color: "#F4E2B8"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.2
+      effects:
+      - !type:PopupMessage
+        visualType: Medium
+        messages: ["st14-atropine-effect"]
+        type: Local
+        probability: 0.05
+
+# Keeps the heart in rhythm under any load and helps a shock or compressions start a stopped one
+- type: reagent
+  id: ST14Amiodarone
+  name: reagent-name-st14-amiodarone
+  group: Medicine
+  desc: reagent-desc-st14-amiodarone
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: bitter
+  color: "#E9D27A"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.08
+      effects: []
+
+# A painkiller that does not dull the head, but thins the blood
+- type: reagent
+  id: ST14Ketorolac
+  name: reagent-name-st14-ketorolac
+  group: Medicine
+  desc: reagent-desc-st14-ketorolac
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: bitter
+  color: "#D6E8F2"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.1
+      effects: []
+
+# Kills the infection of the wounds, slowly
+- type: reagent
+  id: ST14Antibiotic
+  name: reagent-name-st14-antibiotic
+  group: Medicine
+  desc: reagent-desc-st14-antibiotic
+  physicalDesc: reagent-physical-desc-opaque
+  flavor: bitter
+  color: "#F2F0E6"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.05
+      effects: []
+
+# Takes the fever away and a little of the pain. The infection goes on underneath
+- type: reagent
+  id: ST14Antipyretic
+  name: reagent-name-st14-antipyretic
+  group: Medicine
+  desc: reagent-desc-st14-antipyretic
+  physicalDesc: reagent-physical-desc-opaque
+  flavor: bitter
+  color: "#FFFFFF"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.08
+      effects: []
+
+# Grows a broken bone back in a minute and a half: straight under a splint, crooked without one
+- type: reagent
+  id: ST14Osteogen
+  name: reagent-name-st14-osteogen
+  group: Medicine
+  desc: reagent-desc-st14-osteogen
+  physicalDesc: reagent-physical-desc-opaque
+  flavor: chalky
+  color: "#EDE3CF"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.08
+      effects:
+      - !type:PopupMessage
+        visualType: Medium
+        messages: ["st14-osteogen-effect"]
+        type: Local
+        probability: 0.04
+
+# Closes wounds three times faster
+- type: reagent
+  id: ST14Regenerol
+  name: reagent-name-st14-regenerol
+  group: Medicine
+  desc: reagent-desc-st14-regenerol
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: sweet
+  color: "#9BE07A"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.1
+      effects: []
+
+# Binds bug venom and pulls it out of the blood
+- type: reagent
+  id: ST14Antivenom
+  name: reagent-name-st14-antivenom
+  group: Medicine
+  desc: reagent-desc-st14-antivenom
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: bitter
+  color: "#7AC2E0"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.2
+      effects: []
+
+# Wakes the body up: the stimulant crash goes, the morphine fog lifts. One more load on the heart
+- type: reagent
+  id: ST14Modafinil
+  name: reagent-name-st14-modafinil
+  group: Medicine
+  desc: reagent-desc-st14-modafinil
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: sour
+  color: "#E7F27A"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.08
+      effects:
+      - !type:PopupMessage
+        visualType: Medium
+        messages: ["st14-modafinil-effect"]
+        type: Local
+        probability: 0.05
+
+# Fills the vessels when there is no blood to give. It thins what blood is left
+- type: reagent
+  id: ST14PlasmaExpander
+  name: reagent-name-st14-plasma
+  group: Medicine
+  desc: reagent-desc-st14-plasma
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: salty
+  color: "#F2D9A0"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.25
+      effects: []
+
+# The venom of the tiger bugs: the limbs grow heavy and numb, the picture goes green, too much of it stops the breath
+- type: reagent
+  id: ST14BugVenom
+  name: reagent-name-st14-bug-venom
+  group: Toxins
+  desc: reagent-desc-st14-bug-venom
+  physicalDesc: reagent-physical-desc-opaque
+  flavor: bitter
+  color: "#7FB03A"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.08
+      effects:
+      - !type:Jitter
+      - !type:PopupMessage
+        visualType: Medium
+        messages: ["st14-venom-effect-burn", "st14-venom-effect-numb"]
+        type: Local
+        probability: 0.06

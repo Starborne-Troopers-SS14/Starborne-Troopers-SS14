@@ -30,6 +30,7 @@ public sealed class ST14MedScannerWindow : DefaultWindow
     private static readonly Color Muted = Color.FromHex("#7E8C84");
     private static readonly Color Danger = Color.FromHex("#FF5A4A");
     private static readonly Color Good = Color.FromHex("#6FE08A");
+    private static readonly Color Infected = Color.FromHex("#B5D94A");
 
     private readonly IResourceCache _cache;
     private readonly IPrototypeManager _prototypes;
@@ -55,7 +56,7 @@ public sealed class ST14MedScannerWindow : DefaultWindow
         var entities = IoCManager.Resolve<IEntityManager>();
 
         Title = Loc.GetString("st14-scan-title");
-        MinSize = new Vector2(860, 600);
+        MinSize = new Vector2(1080, 720);
 
         var root = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 10, Margin = new Thickness(8) };
         Contents.AddChild(root);
@@ -102,9 +103,13 @@ public sealed class ST14MedScannerWindow : DefaultWindow
         right.AddChild(vitals);
 
         // what is dangerous right now
-        right.AddChild(ST14HubStyle.Label(_cache, Loc.GetString("st14-scan-warnings"), ST14HubFont.Bold, 14, Danger));
+        var warningsTitle = ST14HubStyle.Label(_cache, Loc.GetString("st14-scan-warnings"), ST14HubFont.Bold, 14, Danger);
+        warningsTitle.Margin = new Thickness(0, 10, 0, 0);
+        right.AddChild(warningsTitle);
         _warnings = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 2 };
-        right.AddChild(_warnings);
+        var warningsScroll = new ScrollContainer { HScrollEnabled = false, SetHeight = 118 };
+        warningsScroll.AddChild(_warnings);
+        right.AddChild(warningsScroll);
 
         // wounds and drugs side by side
         var lists = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 12, VerticalExpand = true };
@@ -209,6 +214,14 @@ public sealed class ST14MedScannerWindow : DefaultWindow
                     notes.Add(Loc.GetString("st14-scan-wound-bandaged"));
                 if (wound.Splinted)
                     notes.Add(Loc.GetString("st14-scan-wound-splinted"));
+                if (wound.Infection >= 0.1f)
+                    notes.Add(Loc.GetString("st14-scan-wound-infected", ("percent", (int) (wound.Infection * 100f))));
+                else if (wound.Clean)
+                    notes.Add(Loc.GetString("st14-scan-wound-clean"));
+                else if (wound.Dirty && ST14Zones.IsOpen(wound.Kind) && !wound.Sutured)
+                    notes.Add(Loc.GetString("st14-scan-wound-dirty"));
+                if (wound.Kind == ST14WoundKind.Fracture && wound.Severity < 1f)
+                    notes.Add(Loc.GetString("st14-scan-wound-healing", ("percent", (int) ((1f - wound.Severity) * 100f))));
 
                 parts.Add(notes.Count > 0 ? $"{text} ({string.Join(", ", notes)})" : text);
             }
@@ -222,7 +235,8 @@ public sealed class ST14MedScannerWindow : DefaultWindow
             any = true;
             var bleeding = state.Wounds.Any(w => w.Zone == zone && w.Bleed > 0.05f && !w.Sutured && !state.Tourniquets.ContainsKey(zone));
             var dying = seconds >= state.IschemiaTime;
-            _wounds.AddChild(Line($"{name}: {string.Join(", ", parts)}", dying || bleeding ? Danger : Text));
+            var infected = state.Wounds.Any(w => w.Zone == zone && w.Infection >= 0.3f);
+            _wounds.AddChild(Line($"{name}: {string.Join(", ", parts)}", dying || bleeding ? Danger : infected ? Infected : Text));
         }
 
         if (!any)
@@ -247,6 +261,14 @@ public sealed class ST14MedScannerWindow : DefaultWindow
             }
 
             _drugs.AddChild(row);
+
+            // what it does, small under the name: the medic learns the drugs from the scanner
+            if (drug.Summary is { } summary)
+            {
+                var what = Line(Loc.GetString(summary), Muted, 11);
+                what.Margin = new Thickness(10, 0, 0, 2);
+                _drugs.AddChild(what);
+            }
         }
     }
 }
@@ -461,7 +483,9 @@ public sealed class ST14BodyDoll : Control
             return Color.InterpolateBetween(Color.FromHex("#5A4AA8"), Color.FromHex("#9080E0"), pulse);
         if (bleeding > 0.05f)
             return Color.FromHex("#E0562E");
-        if (wounds.Any(w => w.Kind == ST14WoundKind.Fracture && !w.Splinted))
+        if (wounds.Any(w => w.Infection >= 0.3f))
+            return Color.InterpolateBetween(Color.FromHex("#7FAF2E"), Color.FromHex("#C8F060"), wounds.Any(w => w.Infection >= 0.8f) ? pulse : 0f);
+        if (wounds.Any(w => w.Kind == ST14WoundKind.Fracture && !w.Splinted || w.Kind == ST14WoundKind.Malunion))
             return Color.FromHex("#E8C23A");
         if (wounds.Any(w => !w.Sutured && !w.Bandaged && !w.Packed && w.Kind != ST14WoundKind.Fracture && w.Severity > 0.25f))
             return Color.FromHex("#D9893A");

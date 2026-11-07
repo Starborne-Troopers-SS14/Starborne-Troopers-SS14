@@ -42,9 +42,15 @@ public sealed partial class ST14WoundEffectsSystem : EntitySystem
                                       (legs ? ST14Zones.IsLeg(w.Zone) : ST14Zones.IsArm(w.Zone)));
     }
 
+    public static int Malunions(ST14WoundsComponent comp, bool legs)
+    {
+        return comp.Wounds.Count(w => w.Kind == ST14WoundKind.Malunion && (legs ? ST14Zones.IsLeg(w.Zone) : ST14Zones.IsArm(w.Zone)));
+    }
+
     public static float SpeedOf(ST14WoundsComponent comp)
     {
-        var speed = MathF.Pow(0.68f, Fractures(comp, true, false)) * MathF.Pow(0.9f, Fractures(comp, true, true));
+        var speed = MathF.Pow(0.68f, Fractures(comp, true, false)) * MathF.Pow(0.9f, Fractures(comp, true, true))
+                    * MathF.Pow(0.88f, Malunions(comp, true));
 
         // pain drags the feet, unless a stimulant drowns it out
         if (comp.Pain > 55f && comp.Stim < 0.25f)
@@ -55,7 +61,9 @@ public sealed partial class ST14WoundEffectsSystem : EntitySystem
 
         speed *= 1f + 0.18f * comp.Stim;
         speed *= 1f - 0.35f * comp.Crash;
-        speed *= 1f - 0.5f * comp.Ketamine;
+        speed *= 1f - 0.5f * comp.Dissociation;
+        speed *= 1f - 0.35f * comp.Toxin;
+        speed *= 1f - 0.12f * comp.Fever;
         return Math.Clamp(speed, 0.15f, 1.3f);
     }
 
@@ -64,13 +72,13 @@ public sealed partial class ST14WoundEffectsSystem : EntitySystem
     /// </summary>
     public static float AimPenaltyOf(ST14WoundsComponent comp)
     {
-        var penalty = 7f * Fractures(comp, false, false) + 2f * Fractures(comp, false, true);
+        var penalty = 7f * Fractures(comp, false, false) + 2f * Fractures(comp, false, true) + 3f * Malunions(comp, false);
         if (comp.Pain > 35f)
             penalty += (comp.Pain - 35f) * 0.15f * (1f - 0.6f * comp.Adrenaline);
 
-        penalty += 6f * MathF.Max(0f, comp.Morphine - 0.5f);
-        penalty += 10f * comp.Ketamine + 5f * comp.Crash;
-        penalty -= 2f * comp.Stim;
+        penalty += 6f * MathF.Max(0f, comp.Sedation - 0.5f);
+        penalty += 10f * comp.Dissociation + 5f * comp.Crash + 6f * comp.Toxin + 3f * comp.Fever;
+        penalty -= 2f * comp.Stim + comp.Steady;
         return MathF.Max(0f, penalty);
     }
 

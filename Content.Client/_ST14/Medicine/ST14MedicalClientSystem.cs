@@ -100,7 +100,7 @@ public sealed partial class ST14MedicalClientSystem : EntitySystem
     {
         var blood = Math.Clamp((0.95f - comp.Blood) / 0.5f, 0f, 1f);
         var racing = Math.Clamp((comp.Pulse - 100f) / 80f, 0f, 1f);
-        return MathF.Max(MathF.Max(comp.Pain / 100f, blood), MathF.Max(MathF.Max(comp.Stim, comp.Adrenaline * 0.8f), racing));
+        return MathF.Max(MathF.Max(MathF.Max(comp.Pain / 100f, blood), MathF.Max(MathF.Max(comp.Stim, comp.Adrenaline * 0.8f), racing)), comp.Fever * 0.7f);
     }
 
     public override void FrameUpdate(float frameTime)

@@ -3,7 +3,8 @@
 // blood_loss - the colours drain out and sight narrows to a dark tunnel;
 // morphine - a warm soft haze that sways slowly; stim - a cold, hard, contrasted picture that jumps with the pulse;
 // crash - grey, blurred, with heavy eyelids; ketamine - the world floats and doubles;
-// flash - the white of a shock; beat - the envelope of the current heartbeat, 1 on the beat
+// flash - the white of a shock; beat - the envelope of the current heartbeat, 1 on the beat;
+// fever - shimmering heat, a warm wash and chills; toxin - a sick green with blotches and a doubled picture
 uniform sampler2D SCREEN_TEXTURE;
 uniform highp float pain;
 uniform highp float beat;
@@ -13,6 +14,8 @@ uniform highp float stim;
 uniform highp float crash;
 uniform highp float ketamine;
 uniform highp float flash;
+uniform highp float fever;
+uniform highp float toxin;
 
 highp vec3 look(highp vec2 uv) {
     return zTextureSpec(SCREEN_TEXTURE, uv).rgb;
@@ -25,6 +28,10 @@ void fragment() {
 
     // ketamine: the world floats away in slow waves
     uv += vec2(sin(uv.y * 6.0 + t * 0.9), cos(uv.x * 5.0 + t * 0.7)) * 0.012 * ketamine;
+
+    // fever: the air shimmers with heat, and now and then the body shakes with a chill
+    uv += vec2(sin(uv.y * 40.0 + t * 6.0), cos(uv.x * 35.0 + t * 5.0)) * 0.0015 * fever;
+    uv.x += sin(t * 31.0) * 0.002 * fever * step(0.75, sin(t * 0.9));
 
     // morphine: a slow sway
     uv += vec2(sin(t * 0.5), cos(t * 0.37)) * 0.004 * morphine;
@@ -44,9 +51,11 @@ void fragment() {
     }
 
     // ketamine doubles the picture
-    if (ketamine > 0.01) {
-        highp vec3 ghost = look(uv + vec2(sin(t * 0.6), cos(t * 0.45)) * 0.02 * ketamine);
-        colour = mix(colour, ghost, 0.35 * ketamine);
+    // and so does venom, slower
+    highp float doubled = ketamine + toxin * 0.7;
+    if (doubled > 0.01) {
+        highp vec3 ghost = look(uv + vec2(sin(t * 0.6), cos(t * 0.45)) * 0.02 * doubled);
+        colour = mix(colour, ghost, 0.35 * clamp(doubled, 0.0, 1.0));
     }
 
     // the colours drain with the blood
@@ -59,6 +68,15 @@ void fragment() {
     colour = mix(colour, colour * vec3(0.92, 1.0, 1.1), stim * 0.4);
 
     highp float edge = length(centre) * 1.414;
+
+    // fever: everything washed warm, a hot sweaty glow at the edges
+    colour = mix(colour, colour * vec3(1.12, 1.02, 0.82), fever * 0.6);
+    colour += vec3(0.08, 0.05, 0.0) * fever * smoothstep(0.5, 1.0, edge);
+
+    // venom: a sick green, dark blotches creeping in from the edges
+    colour = mix(colour, colour * vec3(0.68, 1.12, 0.58), toxin * 0.9);
+    highp float blot = smoothstep(0.55, 1.0, edge + 0.08 * sin(uv.x * 23.0 + t) * sin(uv.y * 19.0 - t * 0.7));
+    colour *= 1.0 - blot * toxin * 0.6;
 
     // pain: a red rim throbbing with the heart
     highp float rim = smoothstep(0.35, 1.0, edge) * pain * (0.55 + 0.45 * beat);

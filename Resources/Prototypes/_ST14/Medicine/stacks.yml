@@ -18,3 +18,10 @@
   icon: { sprite: "/Textures/Objects/Specific/Medical/medical.rsi", state: cast }
   spawn: ST14Splint
   maxCount: 3
+
+- type: stack
+  id: ST14Antiseptic
+  name: st14-stack-antiseptic
+  icon: { sprite: "/Textures/Objects/Specific/Medical/medical.rsi", state: ointment }
+  spawn: ST14Antiseptic
+  maxCount: 5

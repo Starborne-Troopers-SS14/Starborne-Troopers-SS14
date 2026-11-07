@@ -28,9 +28,15 @@ public enum ST14TreatmentKind : byte
     Splint,
 
     /// <summary>
-    /// Sews the wounds of a part shut for good. Done lying down, and without anaesthesia it is torture
+    /// Sews the wounds of a part shut for good, or breaks a crooked bone again and sets it. Done lying down, and
+    /// without anaesthesia it is torture
     /// </summary>
     Suture,
+
+    /// <summary>
+    /// Washes the wounds of a part: they stop going bad, a fresh infection is killed. It stings
+    /// </summary>
+    Disinfect,
 }
 
 /// <summary>
@@ -153,7 +159,7 @@ public enum ST14MedScannerUiKey : byte
 }
 
 [Serializable, NetSerializable]
-public readonly record struct ST14DrugReading(string Reagent, float Amount, float Overdose, float Strength);
+public readonly record struct ST14DrugReading(string Reagent, float Amount, float Overdose, float Strength, string? Summary);
 
 [Serializable, NetSerializable]
 public sealed class ST14MedScannerState(

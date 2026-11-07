@@ -80,6 +80,12 @@ public sealed partial class ST14MedicHudOverlay : Overlay
             if (fracture)
                 icons.Add(at => DrawBone(handle, at));
 
+            if (wounds.Infection >= 0.3f && !dead)
+                icons.Add(at => DrawInfection(handle, at, wounds.Infection >= 0.8f ? pulse : 0f));
+
+            if (wounds.Toxin >= 0.15f && !dead)
+                icons.Add(at => DrawVenom(handle, at));
+
             var top = position + new Vector2(0f, 0.75f);
             if (calling && !dead)
             {
@@ -145,6 +151,27 @@ public sealed partial class ST14MedicHudOverlay : Overlay
         var dir = Vector2.Normalize(to - from);
         var side = new Vector2(-dir.Y, dir.X) * Icon * 0.12f;
         handle.DrawPrimitives(DrawPrimitiveTopology.TriangleStrip, new[] { from + side, from - side, to + side, to - side }, Bone);
+    }
+
+    private static void DrawInfection(DrawingHandleWorld handle, Vector2 at, float pulse)
+    {
+        var colour = Color.InterpolateBetween(Color.FromHex("#7FBF2E"), Color.FromHex("#D8FF60"), pulse);
+        handle.DrawCircle(at, Icon * 0.62f, Outline);
+        handle.DrawCircle(at, Icon * 0.5f, colour);
+        foreach (var dot in new[] { new Vector2(-0.2f, 0.15f), new Vector2(0.2f, 0.12f), new Vector2(0f, -0.22f) })
+        {
+            handle.DrawCircle(at + dot * Icon, Icon * 0.12f, Color.FromHex("#3E5E12"));
+        }
+    }
+
+    private static void DrawVenom(DrawingHandleWorld handle, Vector2 at)
+    {
+        var size = Icon * 0.85f;
+        var colour = Color.FromHex("#8BD12E");
+        handle.DrawCircle(at - new Vector2(0f, size * 0.25f), size * 0.62f, Outline);
+        Triangle(handle, at + new Vector2(0f, size * 1.05f), at - new Vector2(size * 0.68f, size * 0.15f), at + new Vector2(size * 0.68f, -size * 0.15f), Outline);
+        handle.DrawCircle(at - new Vector2(0f, size * 0.25f), size * 0.5f, colour);
+        Triangle(handle, at + new Vector2(0f, size * 0.9f), at - new Vector2(size * 0.52f, size * 0.12f), at + new Vector2(size * 0.52f, -size * 0.12f), colour);
     }
 
     private static void DrawHeart(DrawingHandleWorld handle, Vector2 at, float pulse)

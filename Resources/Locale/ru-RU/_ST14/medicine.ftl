@@ -165,7 +165,7 @@ st14-prosthesis-start = { CAPITALIZE($user) } начинает ставить п
 st14-prosthesis-pain = ПРОТЕЗ ВГОНЯЮТ ПРЯМО В КУЛЬТЮ!
 st14-prosthesis-done = Протез встал на место.
 st14-limbs-command-description = Отладка медицины на своём теле: оторвать конечность, поставить протез, ранить, остановить сердце.
-st14-limbs-command-help = st14_limbs tear | fit <протез> | wound <часть> <cut|puncture|burn|fracture> | arrest | scan
+st14-limbs-command-help = st14_limbs tear | fit <протез> | wound <часть> <cut|puncture|burn|fracture> | treat <лечение> <часть> | drug <реагент> <ед> | infect <часть> <0..1> | arrest | scan
 st14-limbs-command-nothing = Ничего не вышло.
 
 ## Должность
@@ -236,3 +236,125 @@ ent-ST14OrganSteelLegLeft = стальная левая нога
 ent-ST14OrganSteelLegRight = стальная правая нога
 ent-ST14OrganSteelFootLeft = стальная левая стопа
 ent-ST14OrganSteelFootRight = стальная правая стопа
+
+## Новые препараты
+reagent-name-st14-atropine = атропин
+reagent-desc-st14-atropine = Разгоняет медленное сердце, рассеивает морфийный туман, частично выводит яд жуков. С адреналином сердце скачет.
+reagent-name-st14-amiodarone = амиодарон
+reagent-desc-st14-amiodarone = Держит ритм сердца под любой нагрузкой и помогает разряду и массажу завести остановившееся.
+reagent-name-st14-ketorolac = кеторолак
+reagent-desc-st14-ketorolac = Обезболивает и не туманит голову, но разжижает кровь.
+reagent-name-st14-antibiotic = антибиотик
+reagent-desc-st14-antibiotic = Медленно убивает заражение ран.
+reagent-name-st14-antipyretic = жаропонижающее
+reagent-desc-st14-antipyretic = Снимает жар и немного боль. Само заражение продолжается.
+reagent-name-st14-osteogen = остеоген
+reagent-desc-st14-osteogen = Сращивает сломанную кость за полторы минуты: ровно под шиной, криво без неё.
+reagent-name-st14-regenerol = регенерол
+reagent-desc-st14-regenerol = Раны затягиваются втрое быстрее.
+reagent-name-st14-antivenom = антитоксин
+reagent-desc-st14-antivenom = Связывает яд жуков и выводит его из крови.
+reagent-name-st14-modafinil = модафинил
+reagent-desc-st14-modafinil = Будит тело: снимает отходняк после стимулятора и морфийный туман. Ещё одна нагрузка на сердце.
+reagent-name-st14-plasma = плазмозаменитель
+reagent-desc-st14-plasma = Наполняет сосуды, когда крови для переливания нет. Разбавляет оставшуюся кровь.
+reagent-name-st14-bug-venom = яд жуков
+reagent-desc-st14-bug-venom = Яд с когтей жуков-тигров: руки и ноги наливаются тяжестью и немеют, в глазах зеленеет, много яда останавливает дыхание.
+st14-atropine-effect = Во рту пересыхает, сердце ускоряется.
+st14-osteogen-effect = Кость внутри ноет и зудит.
+st14-modafinil-effect = Голова проясняется, как от ледяной воды.
+st14-venom-effect-burn = Яд жжёт изнутри.
+st14-venom-effect-numb = Пальцы немеют и не слушаются.
+st14-venom-breathing = Грудь сдавливает, вдохнуть всё труднее!
+st14-venom-injected = Когти были ядовитыми: жжение расползается по венам!
+st14-drug-antidote-pain = Обезболивающее вырвано из крови, и боль возвращается вся сразу!
+st14-drug-ketorolac-overdose = Желудок скручивает тупой болью.
+st14-drug-atropine-overdose = Сердце бьётся как сумасшедшее, в глазах плывёт.
+st14-drug-amiodarone-overdose = Сердце бьётся всё реже и реже...
+st14-drug-antipyretic-overdose = Под рёбрами справа тупая тяжесть.
+
+## Что препарат делает (в сканере)
+st14-drug-summary-morphine = сильно обезболивает, туманит; с 20 ед душит
+st14-drug-summary-ketorolac = обезболивает без тумана, разжижает кровь
+st14-drug-summary-ketamine = наркоз, ничего не чувствует
+st14-drug-summary-naloxone = выводит морфий, боль возвращается
+st14-drug-summary-adrenaline = держит сердце, помогает массажу
+st14-drug-summary-atropine = разгоняет сердце, снимает туман, выводит яд
+st14-drug-summary-amiodarone = держит ритм, помогает завести сердце
+st14-drug-summary-stim = скорость и твёрдая рука, потом отходняк
+st14-drug-summary-modafinil = снимает отходняк и туман
+st14-drug-summary-tranexamic = кровь сворачивается быстрее
+st14-drug-summary-plasma = восполняет кровь, разбавляет её
+st14-drug-summary-antibiotic = убивает заражение
+st14-drug-summary-antipyretic = снимает жар, заражение идёт
+st14-drug-summary-osteogen = сращивает кости
+st14-drug-summary-regenerol = раны затягиваются втрое быстрее
+st14-drug-summary-antivenom = выводит яд жуков
+st14-drug-summary-venom = яд: тяжесть, онемение, удушье
+st14-drug-summary-alcohol = чуть обезболивает, разжижает кровь
+
+## Взаимодействия
+st14-interaction-heart-pounding = Сердце колотится так, что больно.
+st14-interaction-heavy-breath = Дышать тяжело, грудь не поднимается.
+st14-interaction-slow-heart = Сердце бьётся медленно и тяжело.
+st14-interaction-bad-trip = Стены дышат, и в каждой тени кто-то есть.
+st14-scan-warn-morphine-alcohol = Морфий с алкоголем: угнетение дыхания
+st14-scan-warn-morphine-venom = Морфий с ядом: дыхание останавливается
+st14-scan-warn-ketorolac-tranexamic = Кеторолак гасит гемостатик
+st14-scan-warn-ketorolac-alcohol = Кеторолак с алкоголем: кровь не сворачивается
+st14-scan-warn-atropine-adrenaline = Атропин с адреналином: сердце скачет
+st14-scan-warn-atropine-amiodarone = Атропин и амиодарон гасят друг друга
+st14-scan-warn-bradycardia = Амиодарон с морфием: сердце замедляется
+st14-scan-warn-modafinil-stim = Модафинил со стимулятором: перегрузка сердца
+st14-scan-warn-ketamine-stim = Кетамин со стимулятором: тяжёлый бред, нагрузка на сердце
+st14-scan-warn-plasma-tranexamic = Плазмозаменитель разбавляет гемостатик
+st14-scan-warn-venom = Яд жуков в крови: нужен антитоксин
+st14-scan-warn-sepsis = Сепсис: заражение в крови, нужен антибиотик
+st14-scan-warn-infection = Заражение раны: антисептик и антибиотик
+st14-scan-warn-infection-hidden = Жар сбит, но заражение идёт: нужен антибиотик
+st14-scan-warn-sewn-dirty = Зашита грязная рана: гниёт под швами
+st14-scan-warn-malunion = Кость срослась криво: сломать и вправить шовным набором
+
+## Заражение и кости
+st14-wound-infected = Рана воспалилась и пульсирует: { $zone }.
+st14-wound-sepsis = Озноб и слабость: заражение уже в крови!
+st14-bone-healed = Кость срослась: { $zone }.
+st14-bone-malunion = Кость срослась криво: { $zone }. Без шины её никто не держал.
+st14-fever-shiver = трясётся в ознобе
+st14-examine-infected = [color=#b5d94a]Рана воспалена и опухла: { $zone }.[/color]
+st14-examine-fever = [color=#e0a040]Лицо горит, по нему катится пот.[/color]
+st14-scan-wound-malunion = кривое сращение
+st14-scan-wound-infected = заражение { $percent }%
+st14-scan-wound-clean = обработано
+st14-scan-wound-dirty = грязная
+st14-scan-wound-healing = срастается { $percent }%
+st14-treat-disinfect = Обработать антисептиком
+st14-treat-done-disinfect = Раны обработаны: { $zone }.
+st14-stack-antiseptic = антисептик
+
+## Новые предметы
+ent-ST14AtropinePen = автоинъектор атропина
+    .desc = Разгоняет медленное сердце, рассеивает морфийный туман и частично выводит яд жуков. С адреналином сердце скачет.
+ent-ST14AmiodaronePen = автоинъектор амиодарона
+    .desc = Держит ритм сердца под любой нагрузкой и помогает разряду и массажу завести остановившееся. Не вместе с атропином.
+ent-ST14KetorolacPen = автоинъектор кеторолака
+    .desc = Обезболивает и не туманит голову. Разжижает кровь: не вместе с гемостатиком и не с алкоголем.
+ent-ST14AntibioticPen = автоинъектор антибиотика
+    .desc = За несколько минут убивает заражение ран. Сначала обработайте рану.
+ent-ST14AntipyreticPen = автоинъектор жаропонижающего
+    .desc = Снимает жар. Заражение при этом продолжается, остановит его только антибиотик.
+ent-ST14OsteogenPen = автоинъектор остеогена
+    .desc = Сращивает сломанную кость за полторы минуты. Сначала шина, иначе кость срастётся криво.
+ent-ST14RegenerolPen = автоинъектор регенерола
+    .desc = Раны затягиваются втрое быстрее. Слегка нагружает сердце.
+ent-ST14AntivenomPen = автоинъектор антитоксина
+    .desc = Выводит из крови яд жуков-тигров.
+ent-ST14ModafinilPen = автоинъектор модафинила
+    .desc = Будит тело: снимает отходняк после стимулятора и морфийный туман. Не поверх стимулятора.
+ent-ST14PlasmaPen = автоинъектор плазмозаменителя
+    .desc = Наполняет сосуды, когда крови для переливания нет. Разбавляет оставшуюся кровь.
+ent-ST14Antiseptic = антисептик
+    .desc = Тюбик антисептического геля. Обрабатывает раны части тела: они перестают гнить, свежее заражение погибает. Сделайте это до того, как зашивать. Щиплет.
+    .suffix = Полный
+ent-ST14MedicDrugCase = укладка медика
+    .desc = Препараты на то, что приходит после первых минут ранения: сердце, заражение, кости, яд и кровь.

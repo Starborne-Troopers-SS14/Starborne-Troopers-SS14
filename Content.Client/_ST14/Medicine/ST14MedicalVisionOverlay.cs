@@ -30,6 +30,8 @@ public sealed partial class ST14MedicalVisionOverlay : Overlay
     private float _stim;
     private float _crash;
     private float _ketamine;
+    private float _fever;
+    private float _toxin;
 
     public override OverlaySpace Space => OverlaySpace.WorldSpace;
     public override bool RequestScreenTexture => true;
@@ -50,16 +52,18 @@ public sealed partial class ST14MedicalVisionOverlay : Overlay
         base.FrameUpdate(args);
 
         var dt = args.DeltaSeconds;
-        float pain = 0, blood = 0, morphine = 0, stim = 0, crash = 0, ketamine = 0;
+        float pain = 0, blood = 0, morphine = 0, stim = 0, crash = 0, ketamine = 0, fever = 0, toxin = 0;
         if (_entities.TryGetComponent(_player.LocalEntity, out ST14WoundsComponent? wounds) &&
             !_entities.System<MobStateSystem>().IsDead(_player.LocalEntity.Value))
         {
             pain = Math.Clamp((wounds.Pain - 15f) / 85f, 0f, 1f);
             blood = Math.Clamp((0.92f - wounds.Blood) / 0.5f, 0f, 1f);
-            morphine = wounds.Morphine;
+            morphine = wounds.Sedation;
             stim = MathF.Max(wounds.Stim, wounds.Adrenaline * 0.5f);
             crash = wounds.Crash;
-            ketamine = wounds.Ketamine;
+            ketamine = wounds.Dissociation;
+            fever = wounds.Fever;
+            toxin = wounds.Toxin;
         }
 
         _pain = Ease(_pain, pain, dt);
@@ -68,12 +72,14 @@ public sealed partial class ST14MedicalVisionOverlay : Overlay
         _stim = Ease(_stim, stim, dt);
         _crash = Ease(_crash, crash, dt);
         _ketamine = Ease(_ketamine, ketamine, dt);
+        _fever = Ease(_fever, fever, dt);
+        _toxin = Ease(_toxin, toxin, dt);
     }
 
     protected override bool BeforeDraw(in OverlayDrawArgs args)
     {
         var flash = _entities.System<ST14MedicalClientSystem>().Flash;
-        return _pain + _bloodLoss + _morphine + _stim + _crash + _ketamine + flash > 0.01f;
+        return _pain + _bloodLoss + _morphine + _stim + _crash + _ketamine + _fever + _toxin + flash > 0.01f;
     }
 
     protected override void Draw(in OverlayDrawArgs args)
@@ -91,6 +97,8 @@ public sealed partial class ST14MedicalVisionOverlay : Overlay
         _shader.SetParameter("stim", _stim);
         _shader.SetParameter("crash", _crash);
         _shader.SetParameter("ketamine", _ketamine);
+        _shader.SetParameter("fever", _fever);
+        _shader.SetParameter("toxin", _toxin);
         _shader.SetParameter("flash", client.Flash);
 
         var handle = args.WorldHandle;

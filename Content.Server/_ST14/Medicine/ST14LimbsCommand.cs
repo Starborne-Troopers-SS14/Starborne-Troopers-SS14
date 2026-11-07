@@ -58,6 +58,7 @@ public sealed partial class ST14LimbsCommand : IConsoleCommand
             "wound" when args.Length > 2 => Wound(body, args[1], args[2]),
             "treat" when args.Length > 2 => Treat(body, args[1], args[2]),
             "drug" when args.Length > 2 => Inject(body, args[1], args[2]),
+            "infect" when args.Length > 2 => Infect(body, args[1], args[2]),
             "arrest" => _entMan.TryGetComponent<ST14WoundsComponent>(body, out var heart) && Stop(wounds, (body, heart)),
             "scan" => Scan(body),
             _ => false,
@@ -127,6 +128,24 @@ public sealed partial class ST14LimbsCommand : IConsoleCommand
 
         var solution = new Solution(reagent, FixedPoint2.New(units));
         return _entMan.System<BloodstreamSystem>().TryAddToBloodstream((body, blood), solution);
+    }
+
+    private bool Infect(EntityUid body, string zone, string amount)
+    {
+        if (!Enum.TryParse<ST14BodyZone>(zone, true, out var part) ||
+            !float.TryParse(amount, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var infection) ||
+            !_entMan.TryGetComponent<ST14WoundsComponent>(body, out var comp))
+        {
+            return false;
+        }
+
+        var wounds = comp.Wounds.Where(w => w.Zone == part && ST14Zones.IsOpen(w.Kind)).ToList();
+        foreach (var wound in wounds)
+        {
+            wound.Infection = Math.Clamp(infection, 0f, 1f);
+        }
+
+        return wounds.Count > 0;
     }
 
     private bool Scan(EntityUid body)

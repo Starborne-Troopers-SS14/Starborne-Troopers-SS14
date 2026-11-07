@@ -5,6 +5,7 @@ using Content.Shared.Body;
 using Content.Shared.Body.Components;
 using Content.Shared.Body.Systems;
 using Content.Shared.Chat;
+using Content.Shared.Chemistry.Components;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Prototypes;
@@ -15,12 +16,15 @@ using Content.Shared.Jittering;
 using Content.Shared.Medical;
 using Content.Shared.Mobs;
 using Content.Shared.Mobs.Systems;
+using Content.Shared.NPC.Prototypes;
+using Content.Shared.NPC.Systems;
 using Content.Shared.Popups;
 using Content.Shared.StatusEffectNew;
 using Content.Shared.Stunnable;
 using Content.Shared.Traits.Assorted;
 using Robust.Server.Audio;
 using Robust.Shared.Audio;
+using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 using Robust.Shared.Timing;
@@ -29,19 +33,14 @@ namespace Content.Server._ST14.Medicine;
 
 /// <summary>
 /// Turns hits into wounds on the parts of a body and lives them out second by second: the blood runs out of
-/// whatever nobody holds, a limb under a tourniquet slowly dies, pain grows into screams and collapses, the drugs in
-/// the blood fight the pain and load the heart, and an overloaded or emptied heart stops until a medic restarts it
+/// whatever nobody holds, a limb under a tourniquet slowly dies, open wounds go bad, bones grow back straight or
+/// crooked, pain grows into screams and collapses, the drugs in the blood fight the pain, help or harm each other and
+/// load the heart, and an overloaded or emptied heart stops until a medic restarts it
 /// </summary>
 public sealed partial class ST14WoundSystem : EntitySystem
 {
-    public const string MorphineId = "ST14Morphine";
-    public const string NaloxoneId = "ST14Naloxone";
-    public const string StimId = "ST14CombatStim";
-    public const string KetamineId = "ST14Ketamine";
-    public const string AdrenalineId = "Epinephrine";
-    public const string TranexamicId = "TranexamicAcid";
-
     private static readonly ProtoId<DamageTypePrototype> Asphyxiation = "Asphyxiation";
+    private static readonly ProtoId<NpcFactionPrototype> Hive = "Xeno";
     private static readonly EntProtoId ForcedSleep = "StatusEffectForcedSleeping";
     private static readonly SoundSpecifier BoneCrack = new SoundPathSpecifier("/Audio/Effects/bone_rattle.ogg", AudioParams.Default.WithPitchScale(0.55f).WithVolume(3f));
     private static readonly SoundSpecifier HeartStop = new SoundPathSpecifier("/Audio/_ST14/Medicine/flatline.wav", AudioParams.Default.WithVolume(-4f));
@@ -57,6 +56,7 @@ public sealed partial class ST14WoundSystem : EntitySystem
     [Dependency] private ChatSystem _chat = default!;
     [Dependency] private DamageableSystem _damageable = default!;
     [Dependency] private MobStateSystem _mobState = default!;
+    [Dependency] private NpcFactionSystem _faction = default!;
     [Dependency] private SharedJitteringSystem _jitter = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private SharedSolutionContainerSystem _solutions = default!;
@@ -79,6 +79,7 @@ public sealed partial class ST14WoundSystem : EntitySystem
         SubscribeLocalEvent<ST14WoundsComponent, MobStateChangedEvent>(OnMobState);
         SubscribeLocalEvent<ST14WoundsComponent, TargetDefibrillatedEvent>(OnDefibrillated);
         SubscribeLocalEvent<ST14WoundsComponent, ExaminedEvent>(OnExamined);
+        InitializePharmacology();
     }
 
     #region Wounds
@@ -145,33 +146,53 @@ public sealed partial class ST14WoundSystem : EntitySystem
         ent.Comp.PainSpike = MathF.Min(70f, ent.Comp.PainSpike + total * 1.1f);
         var zone = PickZone(ent);
 
+        // bug claws drag the dirt of the hive into the wound
+        var dirty = args.Origin is { } origin && _faction.IsMember(origin, Hive);
+
         if (slash >= 5f)
-            AddWound(ent, ST14WoundKind.Cut, zone, slash / 35f, 0.12f + slash * 0.035f, slash >= 18f && _random.Prob(0.25f));
+            AddWound(ent, ST14WoundKind.Cut, zone, slash / 35f, 0.12f + slash * 0.035f, slash >= 18f && _random.Prob(0.25f), dirty);
 
         if (pierce >= 7f)
-            AddWound(ent, ST14WoundKind.Puncture, zone, pierce / 40f, 0.15f + pierce * 0.03f, pierce >= 20f && _random.Prob(0.2f));
+            AddWound(ent, ST14WoundKind.Puncture, zone, pierce / 40f, 0.15f + pierce * 0.03f, pierce >= 20f && _random.Prob(0.2f), dirty);
 
         if (heat >= 8f)
-            AddWound(ent, ST14WoundKind.Burn, zone, heat / 40f, 0f, false);
+            AddWound(ent, ST14WoundKind.Burn, zone, heat / 40f, 0f, false, dirty);
 
         // a heavy blow breaks the bone of a limb
         if (blunt >= 14f && ST14Zones.IsLimb(zone) && _random.Prob(MathF.Min(0.6f, (blunt - 14f) * 0.05f)) &&
-            !ent.Comp.Wounds.Any(w => w.Zone == zone && w.Kind == ST14WoundKind.Fracture))
+            !ent.Comp.Wounds.Any(w => w.Zone == zone && w.Kind is ST14WoundKind.Fracture or ST14WoundKind.Malunion))
         {
             AddWound(ent, ST14WoundKind.Fracture, zone, 1f, 0f, false);
             _audio.PlayPvs(BoneCrack, ent);
             _popup.PopupEntity(Loc.GetString("st14-wound-fracture-self", ("zone", ST14Zones.Name(zone))), ent, ent, PopupType.LargeCaution);
-            _popup.PopupEntity(Loc.GetString("st14-wound-fracture-others", ("victim", ent.Owner)), ent, Robust.Shared.Player.Filter.PvsExcept(ent), true, PopupType.MediumCaution);
+            _popup.PopupEntity(Loc.GetString("st14-wound-fracture-others", ("victim", ent.Owner)), ent, Filter.PvsExcept(ent), true, PopupType.MediumCaution);
             ent.Comp.PainSpike = MathF.Min(90f, ent.Comp.PainSpike + 35f);
         }
 
+        // the claws of some bugs carry venom
+        if (slash > 0f && args.Origin is { } attacker && TryComp<ST14VenomousComponent>(attacker, out var venom))
+            Envenom(ent, venom);
+
         Dirty(ent);
+    }
+
+    private void Envenom(Entity<ST14WoundsComponent> ent, ST14VenomousComponent venom)
+    {
+        if (!_random.Prob(venom.Chance) || !TryComp<BloodstreamComponent>(ent, out var blood) ||
+            !_solutions.ResolveSolution(ent.Owner, blood.BloodSolutionName, ref blood.BloodSolution, out var solution) ||
+            solution.GetTotalPrototypeQuantity(venom.Reagent).Float() >= venom.Max)
+        {
+            return;
+        }
+
+        _bloodstream.TryAddToBloodstream((ent.Owner, blood), new Solution(venom.Reagent, FixedPoint2.New(venom.Amount)));
+        _popup.PopupEntity(Loc.GetString("st14-venom-injected"), ent, ent, PopupType.LargeCaution);
     }
 
     /// <summary>
     /// Opens a wound, or makes the same open wound of the part worse
     /// </summary>
-    public void AddWound(Entity<ST14WoundsComponent> ent, ST14WoundKind kind, ST14BodyZone zone, float severity, float bleed, bool arterial)
+    public void AddWound(Entity<ST14WoundsComponent> ent, ST14WoundKind kind, ST14BodyZone zone, float severity, float bleed, bool arterial, bool dirty = false)
     {
         severity = Math.Clamp(severity, 0.05f, 1f);
         if (arterial)
@@ -182,6 +203,8 @@ public sealed partial class ST14WoundSystem : EntitySystem
         {
             existing.Severity = MathF.Min(1f, existing.Severity + severity * 0.6f);
             existing.Arterial |= arterial;
+            existing.Dirty |= dirty;
+            existing.Clean = false;
             existing.Bleed = MathF.Min(existing.Arterial ? 4f : 2f, existing.Bleed + bleed * 0.7f);
 
             // fresh blood soaks through the dressing
@@ -203,6 +226,7 @@ public sealed partial class ST14WoundSystem : EntitySystem
                 Severity = severity,
                 Bleed = MathF.Min(arterial ? 4f : 2f, bleed),
                 Arterial = arterial,
+                Dirty = dirty,
             });
         }
 
@@ -260,6 +284,7 @@ public sealed partial class ST14WoundSystem : EntitySystem
             Severity = 1f,
             Bleed = torn ? 3.2f : 0.35f,
             Arterial = torn,
+            Dirty = torn,
         });
 
         comp.PainSpike = MathF.Min(100f, comp.PainSpike + (torn ? 70f : 30f));
@@ -301,14 +326,14 @@ public sealed partial class ST14WoundSystem : EntitySystem
     }
 
     /// <summary>
-    /// Pain does not get through: morphine, ketamine or something numbing the nerves
+    /// Pain does not get through: strong painkillers, anaesthesia or something numbing the nerves
     /// </summary>
     public bool IsNumb(EntityUid uid)
     {
         if (_status.TryEffectsWithComp<PainNumbnessStatusEffectComponent>(uid, out _))
             return true;
 
-        return TryComp<ST14WoundsComponent>(uid, out var comp) && (comp.Morphine >= 0.45f || comp.Ketamine >= 0.3f);
+        return TryComp<ST14WoundsComponent>(uid, out var comp) && (comp.Relief >= 45f || comp.Dissociation >= 0.3f);
     }
 
     #endregion
@@ -320,14 +345,15 @@ public sealed partial class ST14WoundSystem : EntitySystem
     /// </summary>
     public static bool Needs(ST14WoundsComponent comp, ST14TreatmentKind kind, ST14BodyZone zone)
     {
-        var open = comp.Wounds.Where(w => w.Zone == zone && w.Kind != ST14WoundKind.Fracture && !w.Sutured).ToList();
+        var open = comp.Wounds.Where(w => w.Zone == zone && ST14Zones.IsOpen(w.Kind) && !w.Sutured).ToList();
         return kind switch
         {
             ST14TreatmentKind.Tourniquet => ST14Zones.IsLimb(zone) && !comp.Tourniquets.ContainsKey(zone) && RawBleed(comp, zone) > 0.05f,
             ST14TreatmentKind.Bandage => open.Any(w => !w.Bandaged),
             ST14TreatmentKind.Hemostatic => open.Any(w => !w.Packed && w.Bleed > 0f && w.Kind != ST14WoundKind.Burn),
             ST14TreatmentKind.Splint => comp.Wounds.Any(w => w.Zone == zone && w.Kind == ST14WoundKind.Fracture && !w.Splinted),
-            ST14TreatmentKind.Suture => open.Count > 0,
+            ST14TreatmentKind.Suture => open.Count > 0 || comp.Wounds.Any(w => w.Zone == zone && w.Kind == ST14WoundKind.Malunion),
+            ST14TreatmentKind.Disinfect => comp.Wounds.Any(w => w.Zone == zone && ST14Zones.IsOpen(w.Kind) && (!w.Clean || w.Infection > 0.05f)),
             _ => false,
         };
     }
@@ -340,13 +366,14 @@ public sealed partial class ST14WoundSystem : EntitySystem
         return ST14Zones.All
             .Where(z => Needs(comp, kind, z))
             .OrderByDescending(z => RawBleed(comp, z))
-            .ThenByDescending(z => comp.Wounds.Where(w => w.Zone == z).Sum(w => w.Severity))
+            .ThenByDescending(z => comp.Wounds.Where(w => w.Zone == z).Sum(w => w.Severity + w.Infection))
             .ToList();
     }
 
     public void Treat(Entity<ST14WoundsComponent> ent, ST14TreatmentKind kind, ST14BodyZone zone)
     {
         var wounds = ent.Comp.Wounds.Where(w => w.Zone == zone).ToList();
+        var open = wounds.Where(w => ST14Zones.IsOpen(w.Kind)).ToList();
         switch (kind)
         {
             case ST14TreatmentKind.Tourniquet:
@@ -354,7 +381,7 @@ public sealed partial class ST14WoundSystem : EntitySystem
                 break;
 
             case ST14TreatmentKind.Bandage:
-                foreach (var wound in wounds.Where(w => w.Kind != ST14WoundKind.Fracture && !w.Sutured))
+                foreach (var wound in open.Where(w => !w.Sutured))
                 {
                     wound.Bandaged = true;
 
@@ -366,7 +393,7 @@ public sealed partial class ST14WoundSystem : EntitySystem
                 break;
 
             case ST14TreatmentKind.Hemostatic:
-                foreach (var wound in wounds.Where(w => w.Kind != ST14WoundKind.Fracture && w.Kind != ST14WoundKind.Burn && !w.Sutured))
+                foreach (var wound in open.Where(w => w.Kind != ST14WoundKind.Burn && !w.Sutured))
                 {
                     wound.Packed = true;
                     wound.Bleed *= wound.Arterial ? 0.5f : 0.3f;
@@ -383,13 +410,32 @@ public sealed partial class ST14WoundSystem : EntitySystem
                 break;
 
             case ST14TreatmentKind.Suture:
-                foreach (var wound in wounds.Where(w => w.Kind != ST14WoundKind.Fracture))
+                // a bone grown back crooked is broken again and set straight: then a splint, and it grows right
+                foreach (var wound in wounds.Where(w => w.Kind == ST14WoundKind.Malunion))
+                {
+                    wound.Kind = ST14WoundKind.Fracture;
+                    wound.Severity = 1f;
+                    wound.Splinted = false;
+                    _audio.PlayPvs(BoneCrack, ent);
+                }
+
+                // a dirty wound sewn shut keeps rotting inside it
+                foreach (var wound in open)
                 {
                     wound.Sutured = true;
                     wound.Bandaged = false;
                     wound.Packed = false;
                     wound.Bleed = 0f;
                     wound.Arterial = false;
+                }
+
+                break;
+
+            case ST14TreatmentKind.Disinfect:
+                foreach (var wound in open)
+                {
+                    wound.Clean = true;
+                    wound.Infection = wound.Infection < 0.35f ? 0f : wound.Infection * 0.6f;
                 }
 
                 break;
@@ -429,7 +475,7 @@ public sealed partial class ST14WoundSystem : EntitySystem
         _stun.TryKnockdown(ent.Owner, TimeSpan.FromSeconds(4), force: true);
         _audio.PlayPvs(HeartStop, ent);
         _popup.PopupEntity(Loc.GetString("st14-heart-stopped-self"), ent, ent, PopupType.LargeCaution);
-        _popup.PopupEntity(Loc.GetString("st14-heart-stopped-others", ("victim", ent.Owner)), ent, Robust.Shared.Player.Filter.PvsExcept(ent), true, PopupType.LargeCaution);
+        _popup.PopupEntity(Loc.GetString("st14-heart-stopped-others", ("victim", ent.Owner)), ent, Filter.PvsExcept(ent), true, PopupType.LargeCaution);
         Dirty(ent);
     }
 
@@ -454,7 +500,8 @@ public sealed partial class ST14WoundSystem : EntitySystem
     }
 
     /// <summary>
-    /// One round of chest compressions on a stopped heart. Adrenaline in the blood makes it far likelier to start
+    /// One round of chest compressions on a stopped heart. Adrenaline and antiarrhythmics in the blood make it far
+    /// likelier to start
     /// </summary>
     public bool Compress(Entity<ST14WoundsComponent> ent)
     {
@@ -462,7 +509,7 @@ public sealed partial class ST14WoundSystem : EntitySystem
             return false;
 
         _cpr[ent] = _timing.CurTime + TimeSpan.FromSeconds(5);
-        if (_random.Prob(0.04f + 0.3f * ent.Comp.Adrenaline))
+        if (_random.Prob(Math.Clamp(0.04f + ent.Comp.RestartBonus, 0f, 0.8f)))
             RestartHeart(ent);
 
         return true;
@@ -470,7 +517,7 @@ public sealed partial class ST14WoundSystem : EntitySystem
 
     private void OnDefibrillated(Entity<ST14WoundsComponent> ent, ref TargetDefibrillatedEvent args)
     {
-        if (ent.Comp.Heart == ST14HeartState.Arrest && _random.Prob(0.85f))
+        if (ent.Comp.Heart == ST14HeartState.Arrest && _random.Prob(MathF.Min(0.97f, 0.85f + 0.3f * ent.Comp.RestartBonus)))
             RestartHeart(ent);
     }
 
@@ -519,17 +566,23 @@ public sealed partial class ST14WoundSystem : EntitySystem
             else if (bleed > 0.1f)
                 args.PushMarkup(Loc.GetString("st14-examine-bleeding", ("zone", name)));
 
+            if (wounds.Any(w => w.Infection >= 0.3f))
+                args.PushMarkup(Loc.GetString("st14-examine-infected", ("zone", name)));
+
             if (wounds.Any(w => w.Bandaged || w.Packed))
                 args.PushMarkup(Loc.GetString("st14-examine-bandaged", ("zone", name)));
 
             if (wounds.Any(w => w.Kind == ST14WoundKind.Fracture && w.Splinted))
                 args.PushMarkup(Loc.GetString("st14-examine-splinted", ("zone", name)));
-            else if (wounds.Any(w => w.Kind == ST14WoundKind.Fracture))
+            else if (wounds.Any(w => w.Kind is ST14WoundKind.Fracture or ST14WoundKind.Malunion))
                 args.PushMarkup(Loc.GetString("st14-examine-broken", ("zone", name)));
         }
 
         if (ent.Comp.Heart == ST14HeartState.Arrest && !_mobState.IsDead(ent))
             args.PushMarkup(Loc.GetString("st14-examine-no-pulse"));
+
+        if (ent.Comp.Fever >= 0.4f)
+            args.PushMarkup(Loc.GetString("st14-examine-fever"));
     }
 
     public override void Update(float frameTime)
@@ -548,11 +601,13 @@ public sealed partial class ST14WoundSystem : EntitySystem
             if (_mobState.IsDead(uid))
                 continue;
 
-            var txa = Drugs(ent, blood);
-            Bleed(ent, blood, txa);
+            var drugs = Pharmacology(ent, blood);
+            Bleed(ent, blood, drugs);
+            Infection(ent, drugs);
+            Bones(ent, drugs);
             Tourniquets(ent);
             Pain(ent);
-            Heart(ent, now);
+            Heart(ent, now, drugs);
             Voice(ent, now);
 
             _effects.Refresh(ent);
@@ -561,85 +616,21 @@ public sealed partial class ST14WoundSystem : EntitySystem
     }
 
     /// <summary>
-    /// Reads the drugs in the blood: how hard each works, the antidote pulling morphine out, the crash coming after
-    /// a stimulant, and what too much of each does
+    /// The blood leaves through everything nobody holds. Small wounds clot by themselves, faster with clotting drugs,
+    /// slower with blood thinners
     /// </summary>
-    private float Drugs(Entity<ST14WoundsComponent> ent, BloodstreamComponent blood)
-    {
-        var comp = ent.Comp;
-        if (!_solutions.ResolveSolution(ent.Owner, blood.BloodSolutionName, ref blood.BloodSolution, out var solution))
-            return 0f;
-
-        float Amount(string id) => solution.GetTotalPrototypeQuantity(id).Float();
-
-        var morphine = Amount(MorphineId);
-        var naloxone = Amount(NaloxoneId);
-        var stim = Amount(StimId);
-        var ketamine = Amount(KetamineId);
-        var adrenaline = Amount(AdrenalineId);
-        var tranexamic = Amount(TranexamicId);
-
-        // the antidote tears the morphine out, and the pain comes back all at once
-        if (naloxone > 0f && morphine > 0f)
-        {
-            var pulled = MathF.Min(morphine, 4f);
-            _solutions.RemoveReagent(blood.BloodSolution.Value, MorphineId, FixedPoint2.New(pulled));
-            morphine -= pulled;
-            comp.PainSpike = MathF.Min(100f, comp.PainSpike + 12f);
-            if (morphine <= 0f)
-                _popup.PopupEntity(Loc.GetString("st14-drug-naloxone"), ent, ent, PopupType.MediumCaution);
-        }
-
-        comp.Morphine = Math.Clamp(morphine / 10f, 0f, 1f);
-        comp.Stim = Math.Clamp(stim / 8f, 0f, 1f);
-        comp.Ketamine = Math.Clamp(ketamine / 10f, 0f, 1f);
-        comp.Adrenaline = Math.Clamp(adrenaline / 10f, 0f, 1f);
-
-        // the higher the stimulant took the body, the harder it falls when it runs out
-        if (stim > 0.5f)
-        {
-            comp.StimDose = MathF.Max(comp.StimDose, stim);
-        }
-        else if (comp.StimDose > 0f)
-        {
-            comp.CrashLeft = 25f + comp.StimDose * 6f;
-            comp.StimDose = 0f;
-            _popup.PopupEntity(Loc.GetString("st14-drug-crash"), ent, ent, PopupType.MediumCaution);
-        }
-
-        comp.CrashLeft = MathF.Max(0f, comp.CrashLeft - 1f);
-        comp.Crash = Math.Clamp(comp.CrashLeft / 40f, 0f, 1f);
-
-        // too much morphine: the breathing slows down to nothing
-        if (morphine >= 20f)
-        {
-            var damage = new DamageSpecifier(_prototypes.Index(Asphyxiation), FixedPoint2.New(1.5f + (morphine - 20f) * 0.15f));
-            _damageable.TryChangeDamage(ent.Owner, damage, ignoreResistances: true, interruptsDoAfters: false);
-            if (_random.Prob(0.15f))
-                _popup.PopupEntity(Loc.GetString("st14-drug-morphine-overdose"), ent, ent, PopupType.MediumCaution);
-        }
-
-        // ketamine puts the patient under: the surgery can start
-        if (ketamine >= 6f)
-            _status.TryUpdateStatusEffectDuration(ent, ForcedSleep, TimeSpan.FromSeconds(3));
-
-        return Math.Clamp(tranexamic / 10f, 0f, 1f);
-    }
-
-    /// <summary>
-    /// The blood leaves through everything nobody holds. Small wounds clot by themselves, tranexamic acid helps them
-    /// </summary>
-    private void Bleed(Entity<ST14WoundsComponent> ent, BloodstreamComponent blood, float tranexamic)
+    private void Bleed(Entity<ST14WoundsComponent> ent, BloodstreamComponent blood, DrugEffects drugs)
     {
         var comp = ent.Comp;
         var total = 0f;
         var healed = _damageable.GetTotalDamage(ent.Owner).Float() < 5f;
+        var heal = 1f + drugs.Regeneration;
 
         foreach (var wound in comp.Wounds)
         {
             if (!wound.Sutured && !wound.Arterial && wound.Kind is ST14WoundKind.Cut or ST14WoundKind.Puncture)
             {
-                var clot = (0.003f + 0.02f * tranexamic) * (wound.Bandaged || wound.Packed ? 3f : 1f);
+                var clot = MathF.Max(0f, 0.003f + drugs.Clotting) * (wound.Bandaged || wound.Packed ? 3f : 1f);
                 wound.Bleed = MathF.Max(0f, wound.Bleed - clot);
             }
 
@@ -650,14 +641,14 @@ public sealed partial class ST14WoundSystem : EntitySystem
                 wound.Severity *= 0.9f;
             }
 
-            if (wound.Kind is ST14WoundKind.Cut or ST14WoundKind.Puncture or ST14WoundKind.Burn && wound.Bleed <= 0.001f)
-                wound.Severity -= wound.Sutured ? 0.004f : wound.Bandaged ? 0.0025f : 0.0015f;
+            if (wound.Kind is ST14WoundKind.Cut or ST14WoundKind.Puncture or ST14WoundKind.Burn && wound.Bleed <= 0.001f && wound.Infection < 0.3f)
+                wound.Severity -= (wound.Sutured ? 0.004f : wound.Bandaged ? 0.0025f : 0.0015f) * heal;
 
-            total += Effective(comp, wound) * (1f - 0.35f * tranexamic);
+            total += Effective(comp, wound);
         }
 
         comp.Wounds.RemoveAll(w => w.Kind is ST14WoundKind.Cut or ST14WoundKind.Puncture or ST14WoundKind.Burn && w.Severity <= 0.02f);
-        comp.Bleeding = MathF.Min(10f, total);
+        comp.Bleeding = MathF.Min(10f, total * MathF.Max(0.2f, 1f + drugs.Bleeding));
 
         if (comp.Bleeding > 0.01f)
             _bloodstream.TryBleedOut((ent.Owner, blood), FixedPoint2.New(comp.Bleeding));
@@ -665,6 +656,9 @@ public sealed partial class ST14WoundSystem : EntitySystem
         // the wounds bleed, not the stock bleeding on top of them
         if (blood.BleedAmount > 0f)
             _bloodstream.TryModifyBleedAmount((ent.Owner, blood), -blood.BleedAmount);
+
+        if (drugs.BloodRestore > 0f)
+            _bloodstream.TryModifyBloodLevel((ent.Owner, blood), FixedPoint2.New(drugs.BloodRestore));
 
         comp.Blood = _bloodstream.GetBloodLevel((ent.Owner, blood));
     }
@@ -686,7 +680,7 @@ public sealed partial class ST14WoundSystem : EntitySystem
                 if (_dismember.Necrotize(ent.Owner, zone))
                 {
                     _popup.PopupEntity(Loc.GetString("st14-tourniquet-necrosis-self", ("zone", ST14Zones.Name(zone))), ent, ent, PopupType.LargeCaution);
-                    _popup.PopupEntity(Loc.GetString("st14-tourniquet-necrosis-others", ("victim", ent.Owner)), ent, Robust.Shared.Player.Filter.PvsExcept(ent), true, PopupType.MediumCaution);
+                    _popup.PopupEntity(Loc.GetString("st14-tourniquet-necrosis-others", ("victim", ent.Owner)), ent, Filter.PvsExcept(ent), true, PopupType.MediumCaution);
                 }
 
                 continue;
@@ -710,6 +704,7 @@ public sealed partial class ST14WoundSystem : EntitySystem
                 ST14WoundKind.Burn => 2f + 16f * wound.Severity,
                 ST14WoundKind.Fracture => wound.Splinted ? 8f : 26f,
                 ST14WoundKind.Stump => wound.Sutured ? 10f : 36f,
+                ST14WoundKind.Malunion => 6f,
                 _ => 0f,
             };
 
@@ -718,6 +713,8 @@ public sealed partial class ST14WoundSystem : EntitySystem
             else if (wound.Bandaged || wound.Packed)
                 pain *= 0.8f;
 
+            // an infected wound throbs
+            pain += 12f * wound.Infection;
             raw += pain;
         }
 
@@ -726,10 +723,10 @@ public sealed partial class ST14WoundSystem : EntitySystem
             raw += 8f + (seconds >= comp.IschemiaTime ? 22f : 0f);
         }
 
-        raw += comp.PainSpike;
+        raw += comp.PainSpike + 14f * comp.Fever;
         comp.PainSpike = MathF.Max(0f, comp.PainSpike - 5f);
 
-        var relief = 62f * comp.Morphine + 95f * comp.Ketamine + 15f * comp.Adrenaline;
+        var relief = comp.Relief;
         if (_status.TryEffectsWithComp<PainNumbnessStatusEffectComponent>(ent, out _))
             relief += 45f;
 
@@ -737,10 +734,10 @@ public sealed partial class ST14WoundSystem : EntitySystem
     }
 
     /// <summary>
-    /// The heart answers the pain, the blood loss and the drugs. Driven too hard for too long it goes out of rhythm and
-    /// stops; a stopped heart suffocates the body unless someone presses on the chest
+    /// The heart answers the pain, the blood loss, the fever and the drugs. Driven too hard for too long it goes out of
+    /// rhythm and stops; a stopped heart suffocates the body unless someone presses on the chest
     /// </summary>
-    private void Heart(Entity<ST14WoundsComponent> ent, TimeSpan now)
+    private void Heart(Entity<ST14WoundsComponent> ent, TimeSpan now, DrugEffects drugs)
     {
         var comp = ent.Comp;
         if (comp.Heart == ST14HeartState.Arrest)
@@ -758,24 +755,31 @@ public sealed partial class ST14WoundSystem : EntitySystem
             return;
         }
 
-        var speedball = comp.Morphine > 0.3f && comp.Stim > 0.3f ? 0.2f : 0f;
-        var doubled = comp.Stim > 0.25f && comp.Adrenaline > 0.25f ? 0.3f : 0f;
-        var load = 0.55f * comp.Stim + 0.45f * comp.Adrenaline + comp.Pain / 100f * 0.2f + MathF.Max(0f, 0.85f - comp.Blood) * 1.2f
-                   + doubled + speedball - (comp.Stim < 0.1f ? 0.25f * comp.Morphine : 0f);
+        var load = drugs.HeartLoad + comp.Pain / 100f * 0.2f + MathF.Max(0f, 0.85f - comp.Blood) * 1.2f + 0.12f * comp.Fever;
         comp.HeartLoad = Math.Clamp(load, 0f, 1.5f);
 
-        var pulse = 72f + comp.Pain * 0.35f + MathF.Max(0f, 1f - comp.Blood) * 130f + comp.Stim * 45f + comp.Adrenaline * 55f
-                    - comp.Morphine * 16f - comp.Ketamine * 12f + _random.NextFloat(-3f, 3f);
+        var pulse = 72f + comp.Pain * 0.35f + MathF.Max(0f, 1f - comp.Blood) * 130f + drugs.Pulse + 25f * comp.Fever
+                    + _random.NextFloat(-3f, 3f);
         if (_mobState.IsCritical(ent))
-            pulse = _random.NextFloat(42f, 58f);
+            pulse = _random.NextFloat(42f, 58f) + drugs.Pulse * 0.3f;
 
         comp.Pulse = (int) Math.Clamp(pulse, 30f, 220f);
-        comp.ArrhythmiaTime = comp.HeartLoad >= 0.95f ? comp.ArrhythmiaTime + 1f : MathF.Max(0f, comp.ArrhythmiaTime - 2f);
+
+        // an antiarrhythmic keeps the rhythm under a load that would break it otherwise
+        var guard = Math.Clamp(drugs.RhythmGuard, 0f, 1f);
+        comp.ArrhythmiaTime = comp.HeartLoad * (1f - 0.5f * guard) >= 0.95f
+            ? comp.ArrhythmiaTime + 1f
+            : MathF.Max(0f, comp.ArrhythmiaTime - 2f - 3f * guard);
         comp.Heart = comp.ArrhythmiaTime >= 4f ? ST14HeartState.Arrhythmia : comp.Pulse >= 115 ? ST14HeartState.Racing : ST14HeartState.Normal;
 
-        if (comp.Heart == ST14HeartState.Arrhythmia && _random.Prob(0.015f + 0.06f * (comp.HeartLoad - 0.95f)))
-            StopHeart(ent);
-        else if (comp.Blood < 0.45f && _random.Prob(0.02f))
+        var chance = drugs.Arrest;
+        if (comp.Heart == ST14HeartState.Arrhythmia)
+            chance += (0.015f + 0.06f * (comp.HeartLoad - 0.95f)) * (1f - guard);
+
+        if (comp.Blood < 0.45f)
+            chance += 0.02f;
+
+        if (_random.Prob(Math.Clamp(chance, 0f, 1f)))
             StopHeart(ent);
     }
 
@@ -785,7 +789,7 @@ public sealed partial class ST14WoundSystem : EntitySystem
     private void Voice(Entity<ST14WoundsComponent> ent, TimeSpan now)
     {
         var comp = ent.Comp;
-        if (comp.Heart == ST14HeartState.Arrest || _mobState.IsIncapacitated(ent) || comp.Ketamine >= 0.6f)
+        if (comp.Heart == ST14HeartState.Arrest || _mobState.IsIncapacitated(ent) || comp.Dissociation >= 0.6f)
             return;
 
         if (now >= comp.NextVoice)
@@ -801,6 +805,12 @@ public sealed partial class ST14WoundSystem : EntitySystem
             {
                 _chat.TrySendInGameICMessage(ent, Loc.GetString("st14-pain-groan"), InGameICChatType.Emote, false, ignoreActionBlocker: true);
                 comp.NextVoice = now + TimeSpan.FromSeconds(_random.NextFloat(12f, 20f));
+            }
+            else if (comp.Fever >= 0.5f)
+            {
+                _chat.TrySendInGameICMessage(ent, Loc.GetString("st14-fever-shiver"), InGameICChatType.Emote, false, ignoreActionBlocker: true);
+                _jitter.DoJitter(ent, TimeSpan.FromSeconds(2), true, 4f, 8f);
+                comp.NextVoice = now + TimeSpan.FromSeconds(_random.NextFloat(15f, 25f));
             }
         }
 

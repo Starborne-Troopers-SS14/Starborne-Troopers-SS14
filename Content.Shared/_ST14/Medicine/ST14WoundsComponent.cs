@@ -1,4 +1,5 @@
 using Robust.Shared.GameStates;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Serialization;
 
 namespace Content.Shared._ST14.Medicine;
@@ -41,6 +42,12 @@ public enum ST14WoundKind : byte
     /// What is left of a torn-off limb: an artery pumping blood out until a tourniquet stops it
     /// </summary>
     Stump,
+
+    /// <summary>
+    /// A bone that grew back crooked without a splint: a limp or a shaking aim for good, until it is broken again
+    /// and set right with the suture kit
+    /// </summary>
+    Malunion,
 }
 
 [Serializable, NetSerializable]
@@ -74,7 +81,7 @@ public sealed partial class ST14Wound
     public ST14BodyZone Zone;
 
     /// <summary>
-    /// How bad it is, from 0 to 1: the pain and the look of it
+    /// How bad it is, from 0 to 1: the pain and the look of it. For a fracture, how far it is from grown back
     /// </summary>
     [DataField]
     public float Severity;
@@ -109,6 +116,24 @@ public sealed partial class ST14Wound
     [DataField]
     public bool Splinted;
 
+    /// <summary>
+    /// Washed with antiseptic: it does not get infected while it stays closed
+    /// </summary>
+    [DataField]
+    public bool Clean;
+
+    /// <summary>
+    /// Made by bug claws: it gets infected twice as fast
+    /// </summary>
+    [DataField]
+    public bool Dirty;
+
+    /// <summary>
+    /// How far the wound has gone bad, from 0 to 1. It burns with fever past a third, it poisons the blood past 0.8
+    /// </summary>
+    [DataField]
+    public float Infection;
+
     public ST14Wound Copy()
     {
         return (ST14Wound) MemberwiseClone();
@@ -116,9 +141,9 @@ public sealed partial class ST14Wound
 }
 
 /// <summary>
-/// The wounds of a body part by part, the tourniquets on it, and how the body takes them: pain, the heart and the
-/// drugs that work in the blood. The server keeps it, the client draws the screen, the sounds and the marks on the
-/// body from it
+/// The wounds of a body part by part, the tourniquets on it, and how the body takes them: pain, the heart, infection
+/// and the drugs that work in the blood. The server keeps it, the client draws the screen, the sounds and the marks
+/// on the body from it
 /// </summary>
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState(true)]
 public sealed partial class ST14WoundsComponent : Component
@@ -157,11 +182,13 @@ public sealed partial class ST14WoundsComponent : Component
     [DataField, AutoNetworkedField]
     public float Bleeding;
 
+    // what the drugs do to the body right now, each from 0 to 1, for the screen, the walk, the aim and the scanner
+
     /// <summary>
-    /// How hard each drug works right now, from 0 to 1, for the screen and the scanner
+    /// The warm haze of morphine and alcohol
     /// </summary>
     [DataField, AutoNetworkedField]
-    public float Morphine;
+    public float Sedation;
 
     [DataField, AutoNetworkedField]
     public float Stim;
@@ -169,14 +196,41 @@ public sealed partial class ST14WoundsComponent : Component
     [DataField, AutoNetworkedField]
     public float Adrenaline;
 
+    /// <summary>
+    /// Ketamine: the world floats away, past 0.6 the body is under anaesthesia
+    /// </summary>
     [DataField, AutoNetworkedField]
-    public float Ketamine;
+    public float Dissociation;
 
     /// <summary>
-    /// The crash after a stimulant, from 0 to 1
+    /// Bug venom: heavy limbs, a green sick picture, the breath giving out
+    /// </summary>
+    [DataField, AutoNetworkedField]
+    public float Toxin;
+
+    /// <summary>
+    /// The crash after a stimulant
     /// </summary>
     [DataField, AutoNetworkedField]
     public float Crash;
+
+    /// <summary>
+    /// The fever the body feels: the infection, less what a fever reducer hides
+    /// </summary>
+    [DataField, AutoNetworkedField]
+    public float Fever;
+
+    /// <summary>
+    /// The worst infection of all the wounds, from 0 to 1, whatever the fever reducer hides
+    /// </summary>
+    [DataField, AutoNetworkedField]
+    public float Infection;
+
+    /// <summary>
+    /// Degrees the drugs take off the shaking of the aim
+    /// </summary>
+    [DataField, AutoNetworkedField]
+    public float Steady;
 
     /// <summary>
     /// How overloaded the heart is, from 0 to 1. Kept high it goes out of rhythm and stops
@@ -189,8 +243,11 @@ public sealed partial class ST14WoundsComponent : Component
     [DataField]
     public float CrashLeft;
 
+    /// <summary>
+    /// The highest dose of each drug that crashes when it wears off, since it was taken
+    /// </summary>
     [DataField]
-    public float StimDose;
+    public Dictionary<string, float> CrashPeaks = new();
 
     [DataField]
     public float ArrhythmiaTime;
@@ -200,6 +257,24 @@ public sealed partial class ST14WoundsComponent : Component
     /// </summary>
     [DataField]
     public float PainSpike;
+
+    /// <summary>
+    /// Pain the drugs take away right now
+    /// </summary>
+    [ViewVariables]
+    public float Relief;
+
+    /// <summary>
+    /// Extra chance for chest compressions and a defibrillator to start the heart, from the drugs in the blood
+    /// </summary>
+    [ViewVariables]
+    public float RestartBonus;
+
+    /// <summary>
+    /// The drug interactions going on in the blood right now, for the scanner
+    /// </summary>
+    [ViewVariables]
+    public List<ProtoId<ST14DrugInteractionPrototype>> Interactions = new();
 
     [ViewVariables]
     public TimeSpan NextTick;
@@ -240,6 +315,28 @@ public sealed partial class ST14CallingMedicComponent : Component
 }
 
 /// <summary>
+/// A bug whose claws carry venom: now and then a hit puts some into the blood
+/// </summary>
+[RegisterComponent]
+public sealed partial class ST14VenomousComponent : Component
+{
+    [DataField]
+    public string Reagent = "ST14BugVenom";
+
+    [DataField]
+    public float Chance = 0.3f;
+
+    [DataField]
+    public float Amount = 3f;
+
+    /// <summary>
+    /// The claws do not put more venom in a body that already has this much
+    /// </summary>
+    [DataField]
+    public float Max = 15f;
+}
+
+/// <summary>
 /// The moment a body is torn or shocked: the victim's screen goes white and the ears ring
 /// </summary>
 [Serializable, NetSerializable]
@@ -268,6 +365,14 @@ public static class ST14Zones
     public static bool IsArm(ST14BodyZone zone)
     {
         return zone is ST14BodyZone.ArmLeft or ST14BodyZone.ArmRight;
+    }
+
+    /// <summary>
+    /// A wound that opens the skin: it bleeds, it can be dressed, washed and sewn, and it can go bad
+    /// </summary>
+    public static bool IsOpen(ST14WoundKind kind)
+    {
+        return kind is ST14WoundKind.Cut or ST14WoundKind.Puncture or ST14WoundKind.Burn or ST14WoundKind.Stump;
     }
 
     /// <summary>
