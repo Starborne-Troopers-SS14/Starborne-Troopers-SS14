@@ -25,6 +25,12 @@ def get_publish_token() -> str:
         raise RuntimeError("PUBLISH_TOKEN is not set")
 
 
+def check_response(resp: requests.Response) -> None:
+    if not resp.ok:
+        print(f"Robust.Cdn returned {resp.status_code}: {resp.text}")
+    resp.raise_for_status()
+
+
 def simulate_publish(fork_id: str, version: str) -> None:
     print(f"[DRY RUN] Would publish version {version} to Robust.CDN fork '{fork_id}'")
     print(f"[DRY RUN]   engine version: {get_engine_version()}")
@@ -62,7 +68,7 @@ def main():
         "Content-Type": "application/json"
     }
     resp = session.post(f"{ROBUST_CDN_URL}fork/{fork_id}/publish/start", json=data, headers=headers)
-    resp.raise_for_status()
+    check_response(resp)
     print("Publish successfully started, adding files...")
 
     for file in get_files_to_publish():
@@ -75,7 +81,7 @@ def main():
             }
             resp = session.post(f"{ROBUST_CDN_URL}fork/{fork_id}/publish/file", data=f, headers=headers)
 
-        resp.raise_for_status()
+        check_response(resp)
 
     print("Successfully pushed files, finishing publish...")
 
@@ -86,7 +92,7 @@ def main():
         "Content-Type": "application/json"
     }
     resp = session.post(f"{ROBUST_CDN_URL}fork/{fork_id}/publish/finish", json=data, headers=headers)
-    resp.raise_for_status()
+    check_response(resp)
 
     print("SUCCESS!")
 

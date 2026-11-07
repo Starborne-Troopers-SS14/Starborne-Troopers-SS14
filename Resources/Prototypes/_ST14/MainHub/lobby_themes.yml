@@ -1,6 +1,6 @@
 # Lobby themes. The trooper theme is the default. The bug theme turns on when the selected character has one of its jobs
 # on high priority: add the ids of the bug jobs to "jobs" once they exist.
-# For a preview set the client cvar st14.lobby_theme to a theme id (empty means automatic).
+# For a preview set the client cvar st14.lobby_theme_preview to a theme id (empty means automatic).
 
 - type: st14LobbyTheme
   id: ST14Troopers
@@ -12,7 +12,7 @@
 - type: st14LobbyTheme
   id: ST14Arachnids
   scene: ST14LobbyHorde
-  jobs: []
+  jobs: [ ST14Bug, ST14BrainBug ]
   locPrefix: st14-lobby-bugs
   accent: "#FF9A52"
   standLight: "#FF5A2A"

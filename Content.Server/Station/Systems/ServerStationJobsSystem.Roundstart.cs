@@ -289,6 +289,14 @@ public sealed partial class ServerStationJobsSystem
             {
                 // Pick a random overflow job from that station and remove banned roles
                 var overflows = GetOverflowJobs(station).Where(job => bannedRoles == null || !bannedRoles.Contains(job.Id)).ToList();
+
+                // ST14: the overflow job goes through the same checks as the chosen ones, a player bound to a side keeps to it
+                var allowed = overflows.Select(job => new ProtoId<JobPrototype>(job.Id)).ToList();
+                var candidates = new StationJobsGetCandidatesEvent(player, allowed);
+                RaiseLocalEvent(ref candidates);
+                overflows.RemoveAll(job => !allowed.Contains(job.Id));
+                // ST14 end
+
                 _random.Shuffle(overflows);
 
                 // Stations with no overflow slots should simply get skipped over.

@@ -6,6 +6,13 @@
   components:
   - type: Transform
     anchored: true
+  # the troopers see their drills on the battle map
+  - type: ST14MapIcon
+    side: Federation
+  # a drill on a resource point holds that subsector of the sector for the Federation
+  - type: ST14ResourcePointHolder
+    side: Federation
+  # a drill stays in its sector from round to round until the sector is taken
   - type: Clickable
   - type: InteractionOutline
   - type: ActivatableUI

@@ -287,6 +287,8 @@ public sealed partial class ST14LobbyScreen : Control
         var playtime = _lobby.PlaytimeComment;
         Move(playtime, briefing.Body);
 
+        column.AddChild(BuildSide());
+
         // votes pile up under the briefing and scroll when there are many
         var votesScroll = new ScrollContainer { VerticalExpand = true, HScrollEnabled = false };
         column.AddChild(votesScroll);
@@ -539,6 +541,15 @@ public sealed partial class ST14LobbyScreen : Control
             return forcedTheme;
 
         var themes = _protoMan.EnumeratePrototypes<ST14LobbyThemePrototype>().ToList();
+
+        // a player bound to a side sees its lobby whatever their job priorities say
+        if (_entMan.System<ST14SideClientSystem>().Side is { } side)
+        {
+            return side == ST14GalaxyFaction.Arachnid && _protoMan.TryIndex(ST14GalaxyWarRules.BugTheme, out var bugs)
+                ? bugs
+                : themes.FirstOrDefault(t => t.Jobs.Count == 0);
+        }
+
         var high = profile?.JobPriorities.FirstOrDefault(p => p.Value == JobPriority.High).Key;
         if (high is { } job && job != default && themes.FirstOrDefault(t => t.Jobs.Contains(job)) is { } jobTheme)
             return jobTheme;

@@ -7,3 +7,13 @@
   id: ST14HubGlitch
   kind: source
   path: "/Textures/_ST14/Shaders/hub_glitch.swsl"
+
+- type: shader
+  id: ST14HiveScream
+  kind: source
+  path: "/Textures/_ST14/Shaders/hive_scream.swsl"
+
+- type: shader
+  id: ST14MedicalVision
+  kind: source
+  path: "/Textures/_ST14/Shaders/medical_vision.swsl"

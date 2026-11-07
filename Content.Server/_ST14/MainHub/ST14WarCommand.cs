@@ -1,3 +1,4 @@
+using Content.Shared._ST14.MainHub;
 using System.Linq;
 using Content.Server.Administration;
 using Content.Shared.Administration;
@@ -50,9 +51,16 @@ public sealed partial class ST14WarCommand : IConsoleCommand
                 return;
 
             case "win":
-            case "objective":
             case "loss":
-                if (!war.ApplyResult(planet, args[0] != "loss", args[0] == "objective"))
+            case "timeout":
+                ST14GalaxyFaction? winner = args[0] switch
+                {
+                    "win" => ST14GalaxyFaction.Federation,
+                    "loss" => ST14GalaxyFaction.Arachnid,
+                    _ => null,
+                };
+
+                if (!war.ApplyResult(planet, winner))
                 {
                     shell.WriteError(Loc.GetString("st14-war-command-no-target"));
                     return;
@@ -91,7 +99,7 @@ public sealed partial class ST14WarCommand : IConsoleCommand
     {
         return args.Length switch
         {
-            1 => CompletionResult.FromOptions(new[] { "status", "win", "objective", "loss", "target", "reset" }),
+            1 => CompletionResult.FromOptions(new[] { "status", "win", "loss", "timeout", "target", "reset" }),
             _ => CompletionResult.Empty,
         };
     }

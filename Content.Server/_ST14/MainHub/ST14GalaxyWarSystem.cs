@@ -21,21 +21,24 @@ using Robust.Server.Player;
 using Robust.Shared.Configuration;
 using Robust.Shared.ContentPack;
 using Robust.Shared.Enums;
+using Robust.Shared.Network;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Timing;
 using Robust.Shared.Utility;
 
 namespace Content.Server._ST14.MainHub;
 
 /// <summary>
-/// Keeps the war on the war planets of the galaxy map: who holds every hex sector, how far its bar is, and which sector
-/// the High Command picked for the next attack. The state is saved in the server data folder and survives restarts.
-/// It also counts the dead of the rounds fought in the target sector and keeps the plans the commands of both sides draw on the map.
-/// There is no game mode deciding the winner yet, so results come in through <see cref="ApplyResult"/> and the st14_war command
+/// Keeps the war on the war planets of the galaxy map: who holds every hex sector, whose turn it is, and which sector
+/// the command of that side picked for the next battle. The state is saved in the server data folder and survives restarts.
+/// It also counts the dead of the rounds and keeps the plans the commands of both sides draw on the map.
+/// Results come in from the sector rounds through <see cref="ApplyResult"/> and from the st14_war command
 /// </summary>
 public sealed partial class ST14GalaxyWarSystem : EntitySystem
 {
     [Dependency] private IConfigurationManager _cfg = default!;
+    [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IAdminManager _admin = default!;
     [Dependency] private IPlayerManager _player = default!;
     [Dependency] private IPrototypeManager _protoMan = default!;
@@ -51,6 +54,23 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
 
     private readonly Dictionary<string, ST14PlanetWar> _wars = new();
     private readonly Dictionary<string, int> _targets = new();
+    private readonly Dictionary<string, int> _stagings = new();
+    private readonly Dictionary<string, List<ST14WarLogEntry>> _logs = new();
+
+    /// <summary>
+    /// Planets whose target was picked by the command that has the turn
+    /// </summary>
+    private readonly HashSet<string> _picked = new();
+
+    /// <summary>
+    /// Planets a round is being fought on right now and when its time runs out
+    /// </summary>
+    private readonly Dictionary<string, TimeSpan> _fights = new();
+
+    /// <summary>
+    /// The log keeps this many battles, a long war drops the oldest
+    /// </summary>
+    private const int MaxLog = 300;
     private readonly Dictionary<ST14GalaxyFaction, Plan> _plans = ST14GalaxyWarRules.Sides.ToDictionary(s => s, _ => new Plan());
 
     /// <summary>
@@ -80,12 +100,14 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
 
         SubscribeNetworkEvent<ST14GalaxyWarRequestEvent>(OnRequest);
         SubscribeNetworkEvent<ST14GalaxyWarOrderEvent>(OnOrder);
+        SubscribeNetworkEvent<ST14GalaxyWarStagingEvent>(OnStaging);
         SubscribeNetworkEvent<ST14GalaxyMarkAddEvent>(OnMarkAdd);
         SubscribeNetworkEvent<ST14GalaxyMarkRemoveEvent>(OnMarkRemove);
         SubscribeNetworkEvent<ST14GalaxyOrderTextEvent>(OnOrderText);
         SubscribeLocalEvent<MobStateChangedEvent>(OnMobState);
         SubscribeLocalEvent<RoundStartingEvent>(OnRoundStarting);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundCleanup);
+        InitializeSides();
 
         Load();
     }
@@ -96,14 +118,6 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
     {
         target = _targets.GetValueOrDefault(planet, -1);
         return _wars.TryGetValue(planet, out war!);
-    }
-
-    /// <summary>
-    /// The Federation High Command picks the sector of the landing
-    /// </summary>
-    public bool CanCommand(ICommonSession session)
-    {
-        return CanCommand(session, ST14GalaxyFaction.Federation);
     }
 
     /// <summary>
@@ -124,6 +138,9 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
         if (_whitelist.IsWhitelisted(session.UserId, ST14GalaxyWarRules.HiveCommand))
             return ST14GalaxyFaction.Arachnid;
 
+        if (ChosenSide(session.UserId) is { } chosen)
+            return chosen;
+
         // a player without characters has no selected one, the indexer would throw
         if (!_prefs.TryGetCachedPreferences(session.UserId, out var prefs) ||
             !prefs.Characters.TryGetValue(prefs.SelectedCharacterIndex, out var character) ||
@@ -137,31 +154,100 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
     }
 
     /// <summary>
-    /// Result of a round fought in the target sector of the planet. Called by the game mode once there is one
+    /// The sector the attacker gathers in for the battle over the target: what its command picked, or else the first
+    /// fit neighbour. -1 when there is none, then the attacker lands in the target itself
     /// </summary>
-    public bool ApplyResult(string planet, bool federationWon, bool objectives)
+    public int StagingOf(string planet)
+    {
+        var target = _targets.GetValueOrDefault(planet, -1);
+        if (!_wars.TryGetValue(planet, out var war) || target < 0)
+            return -1;
+
+        var options = war.StagingOptions(target).ToList();
+        if (options.Count == 0)
+            return -1;
+
+        var picked = _stagings.GetValueOrDefault(planet, -1);
+        return options.Contains(picked) ? picked : options.FirstOrDefault(c => war.Cells[c].Initialized, options[0]);
+    }
+
+    /// <summary>
+    /// Result of the round fought over the target sector of the planet. A null winner is a battle that ran out of time.
+    /// The initiative goes to the other side and its command picks the next battle
+    /// </summary>
+    public bool ApplyResult(string planet, ST14GalaxyFaction? winner, IReadOnlyDictionary<int, ST14GalaxyFaction?>? points = null)
     {
         var target = _targets.GetValueOrDefault(planet, -1);
         if (!_wars.TryGetValue(planet, out var war) || target < 0)
             return false;
 
-        war.ApplyResult(target, federationWon, objectives);
-        // a taken sector is no longer a target, the High Command picks the next one
-        if (!war.Cells[target].Front)
-            _targets[planet] = war.FirstLanding ?? -1;
+        var log = _logs.GetOrNew(planet);
+        log.Add(new ST14WarLogEntry(_ticker.RoundId, target, ST14PlanetWar.Enemy(war.Cells[target].Faction), winner));
+        if (log.Count > MaxLog)
+            log.RemoveAt(0);
+
+        // the region is taken whole: the war moves on and every player picks a side again
+        if (war.ApplyResult(target, StagingOf(planet), winner, points))
+            ClearSides();
+
+        _fights.Remove(planet);
+        _picked.Remove(planet);
+        _stagings.Remove(planet);
+        _targets[planet] = war.Cells[target].Front ? target : war.FirstLanding ?? -1;
 
         Changed();
         return true;
     }
 
+    /// <summary>
+    /// A round started on the target of the planet: until it ends the battle stays what it is, the result goes to it
+    /// </summary>
+    public void BeginBattle(string planet, TimeSpan endsAt)
+    {
+        if (_wars.TryGetValue(planet, out var war))
+        {
+            war.LockRegion(_targets.GetValueOrDefault(planet, -1));
+            war.RefreshFront();
+        }
+
+        _fights[planet] = endsAt;
+        Changed();
+    }
+
     public bool SetTarget(string planet, int cell)
     {
-        if (!_wars.TryGetValue(planet, out var war) || cell < 0 || cell >= war.Cells.Length || !war.Cells[cell].Front)
+        if (_fights.ContainsKey(planet) || !_wars.TryGetValue(planet, out var war) || cell < 0 || cell >= war.Cells.Length || !war.Cells[cell].Front)
             return false;
 
         _targets[planet] = cell;
+        _picked.Add(planet);
+        _stagings.Remove(planet);
         Changed();
         return true;
+    }
+
+    public bool SetStaging(string planet, int cell)
+    {
+        var target = _targets.GetValueOrDefault(planet, -1);
+        if (_fights.ContainsKey(planet) || !_wars.TryGetValue(planet, out var war) || target < 0 || !war.StagingOptions(target).Contains(cell))
+            return false;
+
+        _stagings[planet] = cell;
+        Changed();
+        return true;
+    }
+
+    /// <summary>
+    /// A sector was saved at the end of a round: from now on it loads every round
+    /// </summary>
+    public void MarkInitialized(string planet, int cell)
+    {
+        if (!_wars.TryGetValue(planet, out var war) || cell < 0 || cell >= war.Cells.Length || war.Cells[cell].Initialized)
+            return;
+
+        war.Cells[cell].Initialized = true;
+        war.RefreshFront();
+        Changed();
     }
 
     /// <summary>
@@ -175,6 +261,15 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
         var war = Create(proto);
         _wars[planet] = war;
         _targets[planet] = war.FirstLanding ?? -1;
+        _stagings.Remove(planet);
+        _logs.Remove(planet);
+        _picked.Remove(planet);
+        _fights.Remove(planet);
+
+        var ev = new ST14WarResetEvent(planet);
+        RaiseLocalEvent(ref ev);
+        ClearSides();
+
         Changed();
         return true;
     }
@@ -215,6 +310,13 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
     private void OnRoundCleanup(RoundRestartCleanupEvent ev)
     {
         _battle = null;
+
+        // a round ended without a result, by an admin for one: the choice opens again
+        if (_fights.Count > 0)
+        {
+            _fights.Clear();
+            Changed();
+        }
     }
 
     private (string Planet, int Cell)? PickBattle()
@@ -236,7 +338,10 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
         if (_battle is not { } battle || !_wars.TryGetValue(battle.Planet, out var war) || battle.Cell >= war.Cells.Length)
             return;
 
+        // the dead count in the sector they fell in, a round can spread over several
         var target = battle.Cell;
+        if (CompOrNull<ST14SectorMapComponent>(Transform(ev.Target).MapUid) is { } map && map.Planet == battle.Planet && map.Cell < war.Cells.Length)
+            target = map.Cell;
 
         if (_faction.IsMemberOfAny(ev.Target, BugFactions))
             war.Cells[target].BugsKilled++;
@@ -317,7 +422,9 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
             return;
 
         // marks stay on the table, a little past its rim at most
-        var mark = ev.Mark with { From = ClampToMap(ev.Mark.From), To = ClampToMap(ev.Mark.To) };
+        var mark = ev.Mark.Surface
+            ? ev.Mark with { From = ClampToSphere(ev.Mark.From), To = ClampToSphere(ev.Mark.To) }
+            : ev.Mark with { From = ClampToMap(ev.Mark.From), To = ClampToMap(ev.Mark.To) };
         if (mark.IsArrow && (mark.To - mark.From).Length() < 0.01f)
             return;
 
@@ -360,6 +467,14 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
         return point.Length() > 1.1f ? Vector2.Normalize(point) * 1.1f : point;
     }
 
+    private static Vector2 ClampToSphere(Vector2 point)
+    {
+        if (!float.IsFinite(point.X) || !float.IsFinite(point.Y))
+            return Vector2.Zero;
+
+        return new Vector2(Math.Clamp(point.X, -MathF.PI, MathF.PI), Math.Clamp(point.Y, -MathF.PI / 2, MathF.PI / 2));
+    }
+
     private static string Clean(string? order)
     {
         if (string.IsNullOrWhiteSpace(order))
@@ -378,6 +493,12 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
         }
     }
 
+    private string[] MembersOf(ST14GalaxyFaction side)
+    {
+        var role = ST14GalaxyWarRules.CommandOf(side);
+        return Listeners().Where(s => _whitelist.IsWhitelisted(s.UserId, role)).Select(s => s.Name).OrderBy(n => n).ToArray();
+    }
+
     /// <summary>
     /// A player sees the plan of their own side and of every command they belong to, never the plan of the enemy
     /// </summary>
@@ -390,25 +511,37 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
             // a hidden plan still goes out empty, so a player who just left a command loses its plan on the map too
             if (side != own && !command)
             {
-                RaiseNetworkEvent(new ST14GalaxyOrdersEvent(side, Array.Empty<ST14WarMark>(), string.Empty, false), session);
+                RaiseNetworkEvent(new ST14GalaxyOrdersEvent(side, Array.Empty<ST14WarMark>(), string.Empty, false, Array.Empty<string>()), session);
                 continue;
             }
 
-            RaiseNetworkEvent(new ST14GalaxyOrdersEvent(side, plan.Marks.ToArray(), plan.Order, command), session);
+            RaiseNetworkEvent(new ST14GalaxyOrdersEvent(side, plan.Marks.ToArray(), plan.Order, command, MembersOf(side)), session);
         }
     }
 
     #endregion
     private void OnOrder(ST14GalaxyWarOrderEvent ev, EntitySessionEventArgs args)
     {
-        if (!CanCommand(args.SenderSession))
+        if (!_wars.TryGetValue(ev.Planet, out var war) || !CanCommand(args.SenderSession, war.Turn))
         {
-            _sawmill.Warning($"{args.SenderSession.Name} tried to order an attack without being in the High Command");
+            _sawmill.Warning($"{args.SenderSession.Name} tried to order an attack without having the turn");
             return;
         }
 
         if (SetTarget(ev.Planet, ev.Cell))
-            _sawmill.Info($"{args.SenderSession.Name} ordered the attack on sector {ev.Cell} of {ev.Planet}");
+            _sawmill.Info($"{args.SenderSession.Name} ordered the battle for sector {ev.Cell} of {ev.Planet}");
+    }
+
+    private void OnStaging(ST14GalaxyWarStagingEvent ev, EntitySessionEventArgs args)
+    {
+        if (!_wars.TryGetValue(ev.Planet, out var war) || !CanCommand(args.SenderSession, war.Turn))
+        {
+            _sawmill.Warning($"{args.SenderSession.Name} tried to pick a staging sector without having the turn");
+            return;
+        }
+
+        if (SetStaging(ev.Planet, ev.Cell))
+            _sawmill.Info($"{args.SenderSession.Name} picked sector {ev.Cell} of {ev.Planet} to gather in");
     }
 
     private void Changed()
@@ -432,11 +565,13 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
 
     private void Send(ICommonSession session)
     {
-        var command = CanCommand(session);
+        SendSide(session);
         foreach (var (planet, war) in _wars)
         {
-            RaiseNetworkEvent(new ST14GalaxyWarStateEvent(planet, war.ExportState(), _targets.GetValueOrDefault(planet, -1), command),
-                session);
+            RaiseNetworkEvent(new ST14GalaxyWarStateEvent(planet, war.ExportState(), _targets.GetValueOrDefault(planet, -1), StagingOf(planet),
+                war.Turn, CanCommand(session, war.Turn), _logs.GetValueOrDefault(planet)?.ToArray() ?? Array.Empty<ST14WarLogEntry>(),
+                _picked.Contains(planet), _fights.ContainsKey(planet),
+                _fights.TryGetValue(planet, out var ends) ? (float) (ends - _timing.CurTime).TotalSeconds : 0f, war.ActiveRegion), session);
         }
     }
 
@@ -446,6 +581,11 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
     {
         public Dictionary<string, PlanetSave> Planets { get; set; } = new();
         public Dictionary<ST14GalaxyFaction, PlanSave> Plans { get; set; } = new();
+
+        /// <summary>
+        /// The side each player chose for the war over the current region
+        /// </summary>
+        public Dictionary<Guid, ST14GalaxyFaction> Sides { get; set; } = new();
     }
 
     private sealed class PlanSave
@@ -457,7 +597,20 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
     private sealed class PlanetSave
     {
         public int Target { get; set; } = -1;
+        public int Staging { get; set; } = -1;
+        public bool TargetPicked { get; set; }
+        public ST14GalaxyFaction Turn { get; set; } = ST14GalaxyFaction.Federation;
+        public int ActiveRegion { get; set; } = -1;
+        public List<LogSave> Log { get; set; } = new();
         public List<CellSave> Cells { get; set; } = new();
+    }
+
+    private sealed class LogSave
+    {
+        public int Round { get; set; }
+        public int Cell { get; set; }
+        public ST14GalaxyFaction Attacker { get; set; }
+        public ST14GalaxyFaction? Winner { get; set; }
     }
 
     private sealed class MarkSave
@@ -467,6 +620,7 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
         public float FromY { get; set; }
         public float ToX { get; set; }
         public float ToY { get; set; }
+        public bool Surface { get; set; }
     }
 
     private sealed class CellSave
@@ -477,6 +631,7 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
         public bool Base { get; set; }
         public int BugsKilled { get; set; }
         public int TroopersKilled { get; set; }
+        public bool Initialized { get; set; }
     }
 
     private void Load()
@@ -501,9 +656,16 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
             var target = war.FirstLanding ?? -1;
 
             if (save != null && save.Planets.TryGetValue(planet.ID, out var saved) &&
-                war.ImportState(saved.Cells.Select(c => new ST14HexCellState(c.Faction, c.Liberation, c.Hive, c.Base, c.BugsKilled, c.TroopersKilled)).ToList()))
+                war.ImportState(saved.Cells.Select(c => new ST14HexCellState(c.Faction, c.Liberation, c.Hive, c.Base, c.BugsKilled, c.TroopersKilled, c.Initialized)).ToList(), saved.Turn, saved.ActiveRegion))
             {
-                target = saved.Target >= 0 && saved.Target < war.Cells.Length && war.Cells[saved.Target].Front ? saved.Target : target;
+                target = saved.Target >= 0 && saved.Target < war.Cells.Length && war.Cells[saved.Target].Front ? saved.Target : war.FirstLanding ?? -1;
+                if (saved.Staging >= 0)
+                    _stagings[planet.ID] = saved.Staging;
+
+                if (saved.TargetPicked)
+                    _picked.Add(planet.ID);
+
+                _logs[planet.ID] = saved.Log.Select(l => new ST14WarLogEntry(l.Round, l.Cell, l.Attacker, l.Winner)).ToList();
             }
 
             _wars[planet.ID] = war;
@@ -513,6 +675,11 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
         if (save == null)
             return;
 
+        foreach (var (user, side) in save.Sides)
+        {
+            _sides[new NetUserId(user)] = side;
+        }
+
         foreach (var (side, saved) in save.Plans)
         {
             if (!_plans.TryGetValue(side, out var plan))
@@ -521,7 +688,7 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
             plan.Order = Clean(saved.Order);
             foreach (var mark in saved.Marks.Take(ST14GalaxyOrdersEvent.MaxMarks))
             {
-                plan.Marks.Add(new ST14WarMark(mark.Kind, new Vector2(mark.FromX, mark.FromY), new Vector2(mark.ToX, mark.ToY)));
+                plan.Marks.Add(new ST14WarMark(mark.Kind, new Vector2(mark.FromX, mark.FromY), new Vector2(mark.ToX, mark.ToY), mark.Surface));
             }
         }
     }
@@ -534,6 +701,11 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
             save.Planets[planet] = new PlanetSave
             {
                 Target = _targets.GetValueOrDefault(planet, -1),
+                Staging = _stagings.GetValueOrDefault(planet, -1),
+                TargetPicked = _picked.Contains(planet),
+                Turn = war.Turn,
+                ActiveRegion = war.ActiveRegion,
+                Log = _logs.GetValueOrDefault(planet)?.Select(l => new LogSave { Round = l.Round, Cell = l.Cell, Attacker = l.Attacker, Winner = l.Winner }).ToList() ?? new(),
                 Cells = war.ExportState().Select(c => new CellSave
                 {
                     Faction = c.Faction,
@@ -542,8 +714,14 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
                     Base = c.Base,
                     BugsKilled = c.BugsKilled,
                     TroopersKilled = c.TroopersKilled,
+                    Initialized = c.Initialized,
                 }).ToList(),
             };
+        }
+
+        foreach (var (user, side) in _sides)
+        {
+            save.Sides[user.UserId] = side;
         }
 
         foreach (var (side, plan) in _plans)
@@ -558,6 +736,7 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
                     FromY = m.From.Y,
                     ToX = m.To.X,
                     ToY = m.To.Y,
+                    Surface = m.Surface,
                 }).ToList(),
             };
         }
@@ -574,4 +753,23 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
     }
 
     #endregion
+}
+
+/// <summary>
+/// The war on a planet started over: its saved sector maps go
+/// </summary>
+[ByRefEvent]
+public readonly record struct ST14WarResetEvent(string Planet);
+
+/// <summary>
+/// Marks the map of a sector loaded for this round
+/// </summary>
+[RegisterComponent]
+public sealed partial class ST14SectorMapComponent : Component
+{
+    [DataField]
+    public string Planet = string.Empty;
+
+    [DataField]
+    public int Cell = -1;
 }

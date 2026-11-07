@@ -34,10 +34,11 @@ public static partial class ST14CVars
         CVarDef.Create("st14.hub_debug", false, CVar.CLIENTONLY);
 
     /// <summary>
-    /// Forces a lobby theme by id, for example ST14Arachnids, empty picks it from the selected character
+    /// Forces a lobby theme by id for a preview, for example ST14Arachnids, empty picks it from the selected character.
+    /// Lives until the client closes: a saved value would switch the automatic theme off for good
     /// </summary>
     public static readonly CVarDef<string> LobbyTheme =
-        CVarDef.Create("st14.lobby_theme", string.Empty, CVar.CLIENTONLY | CVar.ARCHIVE);
+        CVarDef.Create("st14.lobby_theme_preview", string.Empty, CVar.CLIENTONLY);
 
     /// <summary>
     /// Supporter perks picked on the support screen, sent to the server on connect. Empty means not picked
@@ -61,6 +62,12 @@ public static partial class ST14CVars
         CVarDef.Create("st14.hub_on_connect", true, CVar.CLIENTONLY);
 
     /// <summary>
+    /// Volume of bug footsteps, 0 to 1, set in the audio options
+    /// </summary>
+    public static readonly CVarDef<float> BugFootstepsVolume =
+        CVarDef.Create("st14.bug_footsteps_volume", 1f, CVar.CLIENTONLY | CVar.ARCHIVE);
+
+    /// <summary>
     /// War planet of the galaxy map the current rounds are fought on, the deaths of the round count in its target sector.
     /// Empty uses the only war planet when there is exactly one
     /// </summary>
@@ -73,4 +80,11 @@ public static partial class ST14CVars
     /// </summary>
     public static readonly CVarDef<bool> Atmospherics =
         CVarDef.Create("st14.atmospherics", false, CVar.SERVERONLY | CVar.ARCHIVE);
+
+    /// <summary>
+    /// Rounds are fought on the map of the war's target sector. Off, or with game.map set by hand, the stock map
+    /// rotation is used
+    /// </summary>
+    public static readonly CVarDef<bool> SectorRounds =
+        CVarDef.Create("st14.sector_rounds", true, CVar.SERVERONLY | CVar.ARCHIVE);
 }

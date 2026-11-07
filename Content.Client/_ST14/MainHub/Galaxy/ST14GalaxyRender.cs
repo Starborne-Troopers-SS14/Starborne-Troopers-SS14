@@ -176,6 +176,13 @@ public sealed class ST14GalaxyTextures
     private readonly Dictionary<string, Texture> _surfaces = new();
     private Texture? _glow;
     private Texture? _hatch;
+    private Texture? _carrier;
+
+    /// <summary>
+    /// The carrier that hangs over the centre of a region
+    /// </summary>
+    public Texture Carrier => _carrier ??= IoCManager.Resolve<IResourceCache>()
+        .GetResource<TextureResource>("/Textures/_ST14/Interface/Hub/Wallpapers/ship_small.png").Texture;
 
     /// <summary>
     /// Diagonal stripes that cover enemy space, like on the war table of the original game. Tiles without a seam

@@ -74,6 +74,7 @@ namespace Content.Client.Input
             human.AddFunction(ContentKeyFunctions.ReleasePulledObject);
             human.AddFunction(ContentKeyFunctions.OpenCraftingMenu);
             human.AddFunction(ST14KeyFunctions.OpenEngineerBuildMenu); // ST14
+            human.AddFunction(ST14KeyFunctions.Heartbeat); // ST14
             human.AddFunction(ContentKeyFunctions.OpenInventoryMenu);
             human.AddFunction(ContentKeyFunctions.SmartEquipBackpack);
             human.AddFunction(ContentKeyFunctions.SmartEquipBelt);
@@ -133,6 +134,7 @@ namespace Content.Client.Input
             common.AddFunction(ContentKeyFunctions.OpenDecalSpawnWindow);
             common.AddFunction(ContentKeyFunctions.OpenAdminMenu);
             common.AddFunction(ContentKeyFunctions.OpenGuidebook);
+            common.AddFunction(ContentKeyFunctions.OpenBattleMap); // ST14
         }
     }
 }

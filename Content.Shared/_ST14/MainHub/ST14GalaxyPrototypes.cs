@@ -105,6 +105,12 @@ public sealed partial class ST14GalaxyPlanetPrototype : IPrototype
     public int HexFrequency = 5;
 
     /// <summary>
+    /// The region of every hex cell, by cell. Empty: the regions are worked out from the grid
+    /// </summary>
+    [DataField]
+    public List<int> Regions = new();
+
+    /// <summary>
     /// Hex sectors where troopers can land when the Federation holds nothing on the planet yet
     /// </summary>
     [DataField]
