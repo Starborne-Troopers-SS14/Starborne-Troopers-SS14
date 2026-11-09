@@ -1,3 +1,5 @@
+using Content.Server._ST14.Tiles;
+using Content.Shared.Gravity;
 using System.Linq;
 using Content.Server._ST14.MainHub;
 using Content.Server.Decals;
@@ -58,6 +60,7 @@ public sealed partial class ST14SectorSystem : EntitySystem
     [Dependency] private DecalSystem _decals = default!;
     [Dependency] private GameTicker _ticker = default!;
     [Dependency] private MapLoaderSystem _mapLoader = default!;
+    [Dependency] private ST14MultiTileSystem _multiTile = default!;
     [Dependency] private MobStateSystem _mobState = default!;
     [Dependency] private NpcFactionSystem _faction = default!;
     [Dependency] private SharedJobSystem _jobs = default!;
@@ -223,9 +226,15 @@ public sealed partial class ST14SectorSystem : EntitySystem
         comp.Cell = cell;
         _maps[cell] = map.Value;
 
+        // a sector is a planet surface: gravity is always on, no generator needed
+        EnsureGravity(map.Value);
         foreach (var grid in grids!)
         {
             _station.AddGridToStation(station, grid);
+            EnsureGravity(grid);
+
+            // a sector is loaded on its own, not as the game map: the big floors are put together here
+            _multiTile.FixGrid(grid);
         }
 
         if (saved)
@@ -234,6 +243,19 @@ public sealed partial class ST14SectorSystem : EntitySystem
             PlaceQueens(grids!);
 
         _subsectors.PreparePoints(map.Value, grids!, cell, hiveHeld, !saved);
+    }
+
+    private void EnsureGravity(EntityUid uid)
+    {
+        var gravity = EnsureComp<GravityComponent>(uid);
+        if (gravity.Inherent && gravity.Enabled)
+            return;
+
+        gravity.Inherent = true;
+        gravity.Enabled = true;
+        var ev = new GravityChangedEvent(uid, true);
+        RaiseLocalEvent(uid, ref ev, true);
+        Dirty(uid, gravity);
     }
 
     /// <summary>
