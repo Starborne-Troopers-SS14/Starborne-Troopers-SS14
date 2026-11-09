@@ -248,6 +248,9 @@ binds:
 - function: OpenBattleMap
   type: State
   key: M
+- function: ST14MedicRespond # ST14
+  type: State
+  key: N
 - function: OpenGuidebook
   type: State
   key: NumpadNum0

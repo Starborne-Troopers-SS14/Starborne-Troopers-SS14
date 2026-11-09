@@ -53,7 +53,8 @@ public sealed partial class ST14LimbsCommand : IConsoleCommand
         var done = args[0] switch
         {
             "tear" => _entMan.TryGetComponent<ST14DismemberableComponent>(body, out var dismember) &&
-                      _entMan.System<ST14DismembermentSystem>().TearOff((body, dismember), null),
+                      _entMan.System<ST14DismembermentSystem>().TearOff((body, dismember), null,
+                          args.Length > 1 && Enum.TryParse<ST14BodyZone>(args[1], true, out var only) ? only : null),
             "fit" when args.Length > 1 => Fit(body, args[1]),
             "wound" when args.Length > 2 => Wound(body, args[1], args[2]),
             "treat" when args.Length > 2 => Treat(body, args[1], args[2]),

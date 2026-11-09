@@ -5,3 +5,16 @@
   prototype: MobHuman
   dollPrototype: AppearanceHuman
   skinColoration: HumanToned
+  # ST14: five male and five female trooper voices, see _ST14/Voice/voices.yml
+  defaultSoundsBySex: [ ST14VoiceMale1, ST14VoiceFemale1, ST14VoiceMale1 ]
+  voices:
+  - ST14VoiceMale1
+  - ST14VoiceMale2
+  - ST14VoiceMale3
+  - ST14VoiceMale4
+  - ST14VoiceMale5
+  - ST14VoiceFemale1
+  - ST14VoiceFemale2
+  - ST14VoiceFemale3
+  - ST14VoiceFemale4
+  - ST14VoiceFemale5

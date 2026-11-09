@@ -2,3 +2,7 @@
   license: "CC0-1.0"
   copyright: "Synthesized for Starborne Troopers"
   source: "https://github.com/Starborne-Troopers-SS14/Starborne-Troopers-SS14"
+- files: ["shell_shock.wav"]
+  license: "Custom"
+  copyright: "© BOOM Library. All rights reserved. Used under licence by Starborne Troopers; the muffled blast from Armageddon, the ringing synthesized"
+  source: "https://www.boomlibrary.com"

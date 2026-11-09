@@ -200,7 +200,7 @@
   - type: Solution
     solution:
       reagents:
-      - ReagentId: Epinephrine
+      - ReagentId: ST14Adrenaline
         Quantity: 10
 
 - type: entity
@@ -242,7 +242,7 @@
   - type: Solution
     solution:
       reagents:
-      - ReagentId: TranexamicAcid
+      - ReagentId: ST14Tranexamic
         Quantity: 10
 
 - type: entity
@@ -344,29 +344,12 @@
       amount: 2
     - id: ST14KetaminePen
       amount: 2
-    - id: Bloodpack
+    - id: ST14BloodBag
+      amount: 2
     - id: ST14FieldProsthesisArm
     - id: ST14FieldProsthesisLeg
     - id: ST14Antiseptic
     - id: ST14MedicDrugCase
-
-# The shout for a medic every trooper has
-- type: entity
-  parent: BaseAction
-  id: ST14ActionCallMedic
-  name: Call a medic
-  description: Shout for a medic. For a minute every medic sees a red cross over you.
-  components:
-  - type: Action
-    itemIconStyle: BigAction
-    useDelay: 20
-  - type: Sprite
-    sprite: Objects/Specific/Medical/medical.rsi
-    layers:
-    - state: brutepack
-  - type: InstantAction
-    event: !type:ST14CallMedicActionEvent
-
 
 - type: entity
   parent: ChemicalMedipen
@@ -645,3 +628,26 @@
       amount: 2
     - id: ST14PlasmaPen
       amount: 2
+
+# A bag of blood for the vein: a quarter of the blood back in one go. The medic hangs it, it takes a while
+- type: entity
+  parent: BaseItem
+  id: ST14BloodBag
+  name: blood bag
+  description: Half a litre of donor blood with a needle. Puts back a quarter of the blood of a man who lost it. Hang it and wait.
+  components:
+  - type: Sprite
+    sprite: Objects/Specific/Medical/medical.rsi
+    state: bloodpack
+  - type: Item
+    sprite: Objects/Specific/Medical/medical.rsi
+    heldPrefix: bloodpack
+    size: Small
+  - type: ST14Treatment
+    kind: Transfusion
+    delay: 6
+    selfDelay: 9
+    startSound:
+      path: /Audio/Items/Medical/brutepack_begin.ogg
+    endSound:
+      path: /Audio/Items/Medical/brutepack_end.ogg

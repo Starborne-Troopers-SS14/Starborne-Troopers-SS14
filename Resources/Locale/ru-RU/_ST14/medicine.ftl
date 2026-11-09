@@ -165,7 +165,7 @@ st14-prosthesis-start = { CAPITALIZE($user) } начинает ставить п
 st14-prosthesis-pain = ПРОТЕЗ ВГОНЯЮТ ПРЯМО В КУЛЬТЮ!
 st14-prosthesis-done = Протез встал на место.
 st14-limbs-command-description = Отладка медицины на своём теле: оторвать конечность, поставить протез, ранить, остановить сердце.
-st14-limbs-command-help = st14_limbs tear | fit <протез> | wound <часть> <cut|puncture|burn|fracture> | treat <лечение> <часть> | drug <реагент> <ед> | infect <часть> <0..1> | arrest | scan
+st14-limbs-command-help = st14_limbs tear [ArmLeft|ArmRight|LegLeft|LegRight] | fit <протез> | wound <часть> <cut|puncture|burn|fracture> | treat <лечение> <часть> | drug <реагент> <ед> | infect <часть> <0..1> | arrest | scan
 st14-limbs-command-nothing = Ничего не вышло.
 
 ## Должность
@@ -210,8 +210,6 @@ ent-ST14FieldKit = полевой набор десантника
     .desc = Два жгута, перевязочный пакет, морфий и гемостатик. Хватит, чтобы дожить до медика.
 ent-ST14MedicBag = рюкзак полевого медика
     .desc = Всё, что медик Мобильной пехоты берёт в бой.
-ent-ST14ActionCallMedic = Позвать медика
-    .desc = Крикнуть «Медик!». Минуту все медики видят над вами красный крест.
 ent-ST14FieldProsthesisArm = полевой протез руки
     .desc = Деревянная рука на кожаных ремнях с крюком вместо кисти. Грубо, но винтовку держит. Ставится на зашитую культю где угодно.
 ent-ST14FieldProsthesisLeg = полевой протез ноги
@@ -358,3 +356,34 @@ ent-ST14Antiseptic = антисептик
     .suffix = Полный
 ent-ST14MedicDrugCase = укладка медика
     .desc = Препараты на то, что приходит после первых минут ранения: сердце, заражение, кости, яд и кровь.
+
+## Свои адреналин и гемостатик вместо станционных, пакет крови
+
+reagent-name-st14-adrenaline = адреналин
+reagent-desc-st14-adrenaline = Держит сердце и помогает массажу завести остановившееся. Сам ран не лечит.
+reagent-name-st14-tranexamic = гемостатик
+reagent-desc-st14-tranexamic = Транексамовая кислота: кровь сворачивается быстрее, мелкие раны закрываются сами.
+ent-ST14BloodBag = пакет крови
+    .desc = Поллитра донорской крови с иглой. Возвращает четверть крови тому, кто её потерял. Повесить и ждать.
+st14-treat-transfusion = Перелить кровь
+st14-treat-done-transfusion = Кровь перелита.
+
+## Вызов медика
+
+st14-medic-call-done = { $name } больше не нужен медик.
+st14-medic-respond-cancel = Вы больше не идёте к { $name }.
+st14-medic-respond-gone = Медик не придёт. Зовите снова.
+st14-medic-respond-none = Никто не зовёт медика.
+st14-medic-respond-self = Вы идёте к { $name }.
+st14-medic-respond-patient = Медик { $name } идёт к вам!
+st14-medic-status-waiting = Вы зовёте медика. Пока никто не ответил
+st14-medic-status-coming = Медик { $name } идёт к вам: { $distance } м
+st14-medic-status-coming-far = Медик { $name } идёт к вам
+st14-medic-hint-open = Зовут медика: { $count }  ·  { $key }: иду к ближайшему
+st14-medic-hint-going = Вы идёте к { $name }: { $distance } м  ·  { $key }: отменить
+st14-medic-mark = { $name } · { $distance } м
+st14-medic-mark-taken = { $name } · { $distance } м · идёт { $medic }
+st14-medic-mark-mine = { $name } · { $distance } м · вы идёте
+ui-options-function-st14-medic-respond = Медик: иду на вызов
+st14-heartbeat-hit = В ТАКТ!
+st14-heartbeat-miss = МИМО

@@ -165,7 +165,7 @@ st14-prosthesis-start = { CAPITALIZE($user) } starts fitting a prosthesis to the
 st14-prosthesis-pain = THEY ARE DRIVING THE PROSTHESIS INTO YOUR STUMP!
 st14-prosthesis-done = The prosthesis is in place.
 st14-limbs-command-description = Debug medicine on your own body: tear a limb, fit a prosthesis, wound, stop the heart.
-st14-limbs-command-help = st14_limbs tear | fit <prosthesis> | wound <part> <cut|puncture|burn|fracture> | treat <treatment> <part> | drug <reagent> <u> | infect <part> <0..1> | arrest | scan
+st14-limbs-command-help = st14_limbs tear [ArmLeft|ArmRight|LegLeft|LegRight] | fit <prosthesis> | wound <part> <cut|puncture|burn|fracture> | treat <treatment> <part> | drug <reagent> <u> | infect <part> <0..1> | arrest | scan
 st14-limbs-command-nothing = Nothing happened.
 
 ## Job
@@ -272,3 +272,32 @@ st14-scan-wound-healing = healing { $percent }%
 st14-treat-disinfect = Apply antiseptic
 st14-treat-done-disinfect = Cleaned: { $zone }.
 st14-stack-antiseptic = antiseptic
+
+## Own adrenaline and hemostatic instead of the station drugs, the blood bag
+
+reagent-name-st14-adrenaline = adrenaline
+reagent-desc-st14-adrenaline = Keeps the heart going and helps compressions start a stopped one. Heals no wounds by itself.
+reagent-name-st14-tranexamic = hemostatic
+reagent-desc-st14-tranexamic = Tranexamic acid: the blood clots faster, small wounds close by themselves.
+st14-treat-transfusion = Give blood
+st14-treat-done-transfusion = Blood given.
+
+## Medic calls
+
+st14-medic-call-done = { $name } needs no medic any more.
+st14-medic-respond-cancel = You no longer go to { $name }.
+st14-medic-respond-gone = The medic is not coming. Call again.
+st14-medic-respond-none = Nobody calls for a medic.
+st14-medic-respond-self = You go to { $name }.
+st14-medic-respond-patient = Medic { $name } is coming to you!
+st14-medic-status-waiting = You are calling for a medic. Nobody answered yet
+st14-medic-status-coming = Medic { $name } is coming: { $distance } m
+st14-medic-status-coming-far = Medic { $name } is coming
+st14-medic-hint-open = Calls for a medic: { $count }  ·  { $key }: go to the nearest
+st14-medic-hint-going = You go to { $name }: { $distance } m  ·  { $key }: cancel
+st14-medic-mark = { $name } · { $distance } m
+st14-medic-mark-taken = { $name } · { $distance } m · { $medic } goes
+st14-medic-mark-mine = { $name } · { $distance } m · you go
+ui-options-function-st14-medic-respond = Medic: answer a call
+st14-heartbeat-hit = ON BEAT!
+st14-heartbeat-miss = MISS

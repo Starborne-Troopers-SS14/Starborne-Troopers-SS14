@@ -1,0 +1,580 @@
+# The voices of the troopers: five performers of each sex from the BOOM Library war crowds.
+# Every sound of a voice is its own, none of the station voices: screams of agony, death cries, grunts,
+# moans, war cries and shouted orders. Men pick from the male voices, women from the female ones
+
+- type: emoteSounds
+  id: ST14VoiceMale1
+  sex: Male
+  voiceSelectorName: st14-voice-male-1
+  params:
+    variation: 0.06
+  sounds:
+    ST14TearScream:
+      collection: ST14VoiceMale1Tear
+    Scream:
+      collection: ST14VoiceMale1Scream
+    DefaultDeathgasp:
+      collection: ST14VoiceMale1Death
+    ST14Pain:
+      collection: ST14VoiceMale1Hit
+    Gasp:
+      collection: ST14VoiceMale1Hit
+    ST14Groan:
+      collection: ST14VoiceMale1Groan
+    ST14WarCry:
+      collection: ST14VoiceMale1Warcry
+    ST14Hurrah:
+      collection: ST14VoiceMale1Hurrah
+    ST14Charge:
+      collection: ST14VoiceMale1Charge
+    ST14Fear:
+      collection: ST14VoiceMale1Fear
+    ST14Cheer:
+      collection: ST14VoiceMale1Cheer
+    ST14Grenade:
+      collection: ST14VoiceMale1Grenade
+    ST14Go:
+      collection: ST14VoiceMale1Go
+    ST14Hold:
+      collection: ST14VoiceMale1Hold
+    ST14StayBack:
+      collection: ST14VoiceMale1Back
+    ST14Steady:
+      collection: ST14VoiceMale1Steady
+
+- type: emoteSounds
+  id: ST14VoiceMale2
+  sex: Male
+  voiceSelectorName: st14-voice-male-2
+  params:
+    variation: 0.06
+  sounds:
+    ST14TearScream:
+      collection: ST14VoiceMale2Tear
+    Scream:
+      collection: ST14VoiceMale2Scream
+    DefaultDeathgasp:
+      collection: ST14VoiceMale2Death
+    ST14Pain:
+      collection: ST14VoiceMale2Hit
+    Gasp:
+      collection: ST14VoiceMale2Hit
+    ST14Groan:
+      collection: ST14VoiceMale2Groan
+    ST14WarCry:
+      collection: ST14VoiceMale2Warcry
+    ST14Hurrah:
+      collection: ST14VoiceMale2Hurrah
+    ST14Charge:
+      collection: ST14VoiceMale2Charge
+    ST14Fear:
+      collection: ST14VoiceMale2Fear
+    ST14Cheer:
+      collection: ST14VoiceMale2Cheer
+    ST14Grenade:
+      collection: ST14VoiceMale2Grenade
+    ST14Go:
+      collection: ST14VoiceMale2Go
+    ST14Hold:
+      collection: ST14VoiceMale2Hold
+    ST14StayBack:
+      collection: ST14VoiceMale2Back
+    ST14Steady:
+      collection: ST14VoiceMale2Steady
+
+- type: emoteSounds
+  id: ST14VoiceMale3
+  sex: Male
+  voiceSelectorName: st14-voice-male-3
+  params:
+    variation: 0.06
+  sounds:
+    ST14TearScream:
+      collection: ST14VoiceMale3Tear
+    Scream:
+      collection: ST14VoiceMale3Scream
+    DefaultDeathgasp:
+      collection: ST14VoiceMale3Death
+    ST14Pain:
+      collection: ST14VoiceMale3Hit
+    Gasp:
+      collection: ST14VoiceMale3Hit
+    ST14Groan:
+      collection: ST14VoiceMale3Groan
+    ST14WarCry:
+      collection: ST14VoiceMale3Warcry
+    ST14Hurrah:
+      collection: ST14VoiceMale3Hurrah
+    ST14Charge:
+      collection: ST14VoiceMale3Charge
+    ST14Fear:
+      collection: ST14VoiceMale3Fear
+    ST14Cheer:
+      collection: ST14VoiceMale3Cheer
+    ST14Grenade:
+      collection: ST14VoiceMale3Grenade
+    ST14Go:
+      collection: ST14VoiceMale3Go
+    ST14Hold:
+      collection: ST14VoiceMale3Hold
+    ST14StayBack:
+      collection: ST14VoiceMale3Back
+    ST14Steady:
+      collection: ST14VoiceMale3Steady
+
+- type: emoteSounds
+  id: ST14VoiceMale4
+  sex: Male
+  voiceSelectorName: st14-voice-male-4
+  params:
+    variation: 0.06
+  sounds:
+    ST14TearScream:
+      collection: ST14VoiceMale4Tear
+    Scream:
+      collection: ST14VoiceMale4Scream
+    DefaultDeathgasp:
+      collection: ST14VoiceMale4Death
+    ST14Pain:
+      collection: ST14VoiceMale4Hit
+    Gasp:
+      collection: ST14VoiceMale4Hit
+    ST14Groan:
+      collection: ST14VoiceMale4Groan
+    ST14WarCry:
+      collection: ST14VoiceMale4Warcry
+    ST14Hurrah:
+      collection: ST14VoiceMale4Hurrah
+    ST14Charge:
+      collection: ST14VoiceMale4Charge
+    ST14Fear:
+      collection: ST14VoiceMale4Fear
+    ST14Cheer:
+      collection: ST14VoiceMale4Cheer
+    ST14Grenade:
+      collection: ST14VoiceMale4Grenade
+    ST14Go:
+      collection: ST14VoiceMale4Go
+    ST14Hold:
+      collection: ST14VoiceMale4Hold
+    ST14StayBack:
+      collection: ST14VoiceMale4Back
+    ST14Steady:
+      collection: ST14VoiceMale4Steady
+
+- type: emoteSounds
+  id: ST14VoiceMale5
+  sex: Male
+  voiceSelectorName: st14-voice-male-5
+  params:
+    variation: 0.06
+  sounds:
+    ST14TearScream:
+      collection: ST14VoiceMale5Tear
+    Scream:
+      collection: ST14VoiceMale5Scream
+    DefaultDeathgasp:
+      collection: ST14VoiceMale5Death
+    ST14Pain:
+      collection: ST14VoiceMale5Hit
+    Gasp:
+      collection: ST14VoiceMale5Hit
+    ST14Groan:
+      collection: ST14VoiceMale5Groan
+    ST14WarCry:
+      collection: ST14VoiceMale5Warcry
+    ST14Hurrah:
+      collection: ST14VoiceMale5Hurrah
+    ST14Charge:
+      collection: ST14VoiceMale5Charge
+    ST14Fear:
+      collection: ST14VoiceMale5Fear
+    ST14Cheer:
+      collection: ST14VoiceMale5Cheer
+    ST14Grenade:
+      collection: ST14VoiceMale5Grenade
+    ST14Go:
+      collection: ST14VoiceMale5Go
+    ST14Hold:
+      collection: ST14VoiceMale5Hold
+    ST14StayBack:
+      collection: ST14VoiceMale5Back
+    ST14Steady:
+      collection: ST14VoiceMale5Steady
+
+- type: emoteSounds
+  id: ST14VoiceFemale1
+  sex: Female
+  voiceSelectorName: st14-voice-female-1
+  params:
+    variation: 0.06
+  sounds:
+    ST14TearScream:
+      collection: ST14VoiceFemale1Tear
+    Scream:
+      collection: ST14VoiceFemale1Scream
+    DefaultDeathgasp:
+      collection: ST14VoiceFemale1Death
+    ST14Pain:
+      collection: ST14VoiceFemale1Hit
+    Gasp:
+      collection: ST14VoiceFemale1Hit
+    ST14Groan:
+      collection: ST14VoiceFemale1Groan
+    ST14WarCry:
+      collection: ST14VoiceFemale1Warcry
+    ST14Hurrah:
+      collection: ST14VoiceFemale1Hurrah
+    ST14Charge:
+      collection: ST14VoiceFemale1Charge
+    ST14Fear:
+      collection: ST14VoiceFemale1Fear
+    ST14Cheer:
+      collection: ST14VoiceFemale1Cheer
+    ST14Grenade:
+      collection: ST14VoiceFemale1Grenade
+    ST14Go:
+      collection: ST14VoiceFemale1Go
+    ST14Hold:
+      collection: ST14VoiceFemale1Hold
+    ST14StayBack:
+      collection: ST14VoiceFemale1Back
+    ST14Steady:
+      collection: ST14VoiceFemale1Steady
+
+- type: emoteSounds
+  id: ST14VoiceFemale2
+  sex: Female
+  voiceSelectorName: st14-voice-female-2
+  params:
+    variation: 0.06
+  sounds:
+    ST14TearScream:
+      collection: ST14VoiceFemale2Tear
+    Scream:
+      collection: ST14VoiceFemale2Scream
+    DefaultDeathgasp:
+      collection: ST14VoiceFemale2Death
+    ST14Pain:
+      collection: ST14VoiceFemale2Hit
+    Gasp:
+      collection: ST14VoiceFemale2Hit
+    ST14Groan:
+      collection: ST14VoiceFemale2Groan
+    ST14WarCry:
+      collection: ST14VoiceFemale2Warcry
+    ST14Hurrah:
+      collection: ST14VoiceFemale2Hurrah
+    ST14Charge:
+      collection: ST14VoiceFemale2Charge
+    ST14Fear:
+      collection: ST14VoiceFemale2Fear
+    ST14Cheer:
+      collection: ST14VoiceFemale2Cheer
+    ST14Grenade:
+      collection: ST14VoiceFemale2Grenade
+    ST14Go:
+      collection: ST14VoiceFemale2Go
+    ST14Hold:
+      collection: ST14VoiceFemale2Hold
+    ST14StayBack:
+      collection: ST14VoiceFemale2Back
+    ST14Steady:
+      collection: ST14VoiceFemale2Steady
+
+- type: emoteSounds
+  id: ST14VoiceFemale3
+  sex: Female
+  voiceSelectorName: st14-voice-female-3
+  params:
+    variation: 0.06
+  sounds:
+    ST14TearScream:
+      collection: ST14VoiceFemale3Tear
+    Scream:
+      collection: ST14VoiceFemale3Scream
+    DefaultDeathgasp:
+      collection: ST14VoiceFemale3Death
+    ST14Pain:
+      collection: ST14VoiceFemale3Hit
+    Gasp:
+      collection: ST14VoiceFemale3Hit
+    ST14Groan:
+      collection: ST14VoiceFemale3Groan
+    ST14WarCry:
+      collection: ST14VoiceFemale3Warcry
+    ST14Hurrah:
+      collection: ST14VoiceFemale3Hurrah
+    ST14Charge:
+      collection: ST14VoiceFemale3Charge
+    ST14Fear:
+      collection: ST14VoiceFemale3Fear
+    ST14Cheer:
+      collection: ST14VoiceFemale3Cheer
+    ST14Grenade:
+      collection: ST14VoiceFemale3Grenade
+    ST14Go:
+      collection: ST14VoiceFemale3Go
+    ST14Hold:
+      collection: ST14VoiceFemale3Hold
+    ST14StayBack:
+      collection: ST14VoiceFemale3Back
+    ST14Steady:
+      collection: ST14VoiceFemale3Steady
+
+- type: emoteSounds
+  id: ST14VoiceFemale4
+  sex: Female
+  voiceSelectorName: st14-voice-female-4
+  params:
+    variation: 0.06
+  sounds:
+    ST14TearScream:
+      collection: ST14VoiceFemale4Tear
+    Scream:
+      collection: ST14VoiceFemale4Scream
+    DefaultDeathgasp:
+      collection: ST14VoiceFemale4Death
+    ST14Pain:
+      collection: ST14VoiceFemale4Hit
+    Gasp:
+      collection: ST14VoiceFemale4Hit
+    ST14Groan:
+      collection: ST14VoiceFemale4Groan
+    ST14WarCry:
+      collection: ST14VoiceFemale4Warcry
+    ST14Hurrah:
+      collection: ST14VoiceFemale4Hurrah
+    ST14Charge:
+      collection: ST14VoiceFemale4Charge
+    ST14Fear:
+      collection: ST14VoiceFemale4Fear
+    ST14Cheer:
+      collection: ST14VoiceFemale4Cheer
+    ST14Grenade:
+      collection: ST14VoiceFemale4Grenade
+    ST14Go:
+      collection: ST14VoiceFemale4Go
+    ST14Hold:
+      collection: ST14VoiceFemale4Hold
+    ST14StayBack:
+      collection: ST14VoiceFemale4Back
+    ST14Steady:
+      collection: ST14VoiceFemale4Steady
+
+- type: emoteSounds
+  id: ST14VoiceFemale5
+  sex: Female
+  voiceSelectorName: st14-voice-female-5
+  params:
+    variation: 0.06
+  sounds:
+    ST14TearScream:
+      collection: ST14VoiceFemale5Tear
+    Scream:
+      collection: ST14VoiceFemale5Scream
+    DefaultDeathgasp:
+      collection: ST14VoiceFemale5Death
+    ST14Pain:
+      collection: ST14VoiceFemale5Hit
+    Gasp:
+      collection: ST14VoiceFemale5Hit
+    ST14Groan:
+      collection: ST14VoiceFemale5Groan
+    ST14WarCry:
+      collection: ST14VoiceFemale5Warcry
+    ST14Hurrah:
+      collection: ST14VoiceFemale5Hurrah
+    ST14Charge:
+      collection: ST14VoiceFemale5Charge
+    ST14Fear:
+      collection: ST14VoiceFemale5Fear
+    ST14Cheer:
+      collection: ST14VoiceFemale5Cheer
+    ST14Grenade:
+      collection: ST14VoiceFemale5Grenade
+    ST14Go:
+      collection: ST14VoiceFemale5Go
+    ST14Hold:
+      collection: ST14VoiceFemale5Hold
+    ST14StayBack:
+      collection: ST14VoiceFemale5Back
+    ST14Steady:
+      collection: ST14VoiceFemale5Steady
+
+# What the troopers can shout. All of them in the emote menu, played in the trooper's own voice
+
+- type: emote
+  id: ST14Pain
+  name: chat-emote-name-st14-pain
+  category: Vocal
+  icon: Interface/Emotes/scream.png
+  whitelist:
+    components:
+    - Vocal
+  chatMessages: ["chat-emote-msg-st14-pain"]
+  chatTriggers:
+  - охнуть
+  - охает
+  - grunt
+
+- type: emote
+  id: ST14Groan
+  name: chat-emote-name-st14-groan
+  category: Vocal
+  icon: Interface/Emotes/scream.png
+  whitelist:
+    components:
+    - Vocal
+  chatMessages: ["chat-emote-msg-st14-groan"]
+  chatTriggers:
+  - стон
+  - стонет
+  - groan
+
+- type: emote
+  id: ST14WarCry
+  name: chat-emote-name-st14-warcry
+  category: Vocal
+  icon: Interface/Emotes/scream.png
+  whitelist:
+    components:
+    - Vocal
+  chatMessages: ["chat-emote-msg-st14-warcry"]
+  chatTriggers:
+  - клич
+  - боевой клич
+  - warcry
+
+- type: emote
+  id: ST14Hurrah
+  name: chat-emote-name-st14-hurrah
+  category: Vocal
+  icon: Interface/Emotes/scream.png
+  whitelist:
+    components:
+    - Vocal
+  chatMessages: ["chat-emote-msg-st14-hurrah"]
+  chatTriggers:
+  - ура
+  - hurrah
+
+- type: emote
+  id: ST14Charge
+  name: chat-emote-name-st14-charge
+  category: Vocal
+  icon: Interface/Emotes/scream.png
+  whitelist:
+    components:
+    - Vocal
+  chatMessages: ["chat-emote-msg-st14-charge"]
+  chatTriggers:
+  - в атаку
+  - атака
+  - charge
+
+- type: emote
+  id: ST14Fear
+  name: chat-emote-name-st14-fear
+  category: Vocal
+  icon: Interface/Emotes/scream.png
+  whitelist:
+    components:
+    - Vocal
+  chatMessages: ["chat-emote-msg-st14-fear"]
+  chatTriggers:
+  - страх
+  - паника
+  - panic
+
+- type: emote
+  id: ST14Cheer
+  name: chat-emote-name-st14-cheer
+  category: Vocal
+  icon: Interface/Emotes/scream.png
+  whitelist:
+    components:
+    - Vocal
+  chatMessages: ["chat-emote-msg-st14-cheer"]
+  chatTriggers:
+  - ликовать
+  - ликует
+  - cheer
+
+- type: emote
+  id: ST14Grenade
+  name: chat-emote-name-st14-grenade
+  category: Vocal
+  icon: Interface/Emotes/scream.png
+  whitelist:
+    components:
+    - Vocal
+  chatMessages: ["chat-emote-msg-st14-grenade"]
+  chatTriggers:
+  - граната
+  - fire in the hole
+
+- type: emote
+  id: ST14Go
+  name: chat-emote-name-st14-go
+  category: Vocal
+  icon: Interface/Emotes/scream.png
+  whitelist:
+    components:
+    - Vocal
+  chatMessages: ["chat-emote-msg-st14-go"]
+  chatTriggers:
+  - вперёд
+  - вперед
+  - go
+
+- type: emote
+  id: ST14Hold
+  name: chat-emote-name-st14-hold
+  category: Vocal
+  icon: Interface/Emotes/scream.png
+  whitelist:
+    components:
+    - Vocal
+  chatMessages: ["chat-emote-msg-st14-hold"]
+  chatTriggers:
+  - держать позицию
+  - стоять
+  - hold
+
+- type: emote
+  id: ST14StayBack
+  name: chat-emote-name-st14-back
+  category: Vocal
+  icon: Interface/Emotes/scream.png
+  whitelist:
+    components:
+    - Vocal
+  chatMessages: ["chat-emote-msg-st14-back"]
+  chatTriggers:
+  - назад
+  - stay back
+
+- type: emote
+  id: ST14Steady
+  name: chat-emote-name-st14-steady
+  category: Vocal
+  icon: Interface/Emotes/scream.png
+  whitelist:
+    components:
+    - Vocal
+  chatMessages: ["chat-emote-msg-st14-steady"]
+  chatTriggers:
+  - спокойно
+  - steady
+
+# The scream of a torn-off limb, in the trooper's own voice: not in the menu, only the body screams it
+- type: emote
+  id: ST14TearScream
+  name: chat-emote-name-st14-tear
+  category: Vocal
+  available: false
+  whitelist:
+    components:
+    - Vocal
+  chatMessages: ["chat-emote-msg-st14-tear"]

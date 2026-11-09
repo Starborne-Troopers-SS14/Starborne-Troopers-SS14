@@ -49,4 +49,18 @@ public sealed partial class EmoteSoundsPrototype : IPrototype, IInheritingProtot
     [DataField]
     [AlwaysPushInheritance]
     public Dictionary<ProtoId<EmotePrototype>, SoundSpecifier> Sounds = new();
+
+    /// <summary>
+    /// ST14: the sex this voice belongs to; a character of another sex cannot pick it. Null fits everyone
+    /// </summary>
+    [DataField("sex")]
+    public Content.Shared.Humanoid.Sex? ST14Sex;
+
+    /// <summary>
+    /// ST14: whether a character of this sex may speak with this voice
+    /// </summary>
+    public bool ST14Fits(Content.Shared.Humanoid.Sex sex)
+    {
+        return ST14Sex == null || sex == Content.Shared.Humanoid.Sex.Unsexed || ST14Sex == sex;
+    }
 }

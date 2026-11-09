@@ -232,6 +232,7 @@ namespace Content.Client.Options.UI.Tabs
             AddButton(ST14KeyFunctions.Heartbeat); // ST14
             AddButton(ContentKeyFunctions.OpenGuidebook);
             AddButton(ContentKeyFunctions.OpenBattleMap); // ST14
+            AddButton(ContentKeyFunctions.ST14MedicRespond); // ST14
             AddButton(ContentKeyFunctions.OpenInventoryMenu);
             AddButton(ContentKeyFunctions.OpenAHelp);
             AddButton(ContentKeyFunctions.OpenActionsMenu);

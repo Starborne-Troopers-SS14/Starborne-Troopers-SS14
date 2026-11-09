@@ -1,4 +1,4 @@
-using Content.Shared.Actions;
+using System.Numerics;
 using Content.Shared.DoAfter;
 using Robust.Shared.Audio;
 using Robust.Shared.GameStates;
@@ -37,6 +37,11 @@ public enum ST14TreatmentKind : byte
     /// Washes the wounds of a part: they stop going bad, a fresh infection is killed. It stings
     /// </summary>
     Disinfect,
+
+    /// <summary>
+    /// A bag of blood into the vein: the blood lost comes back
+    /// </summary>
+    Transfusion,
 }
 
 /// <summary>
@@ -206,19 +211,55 @@ public sealed class ST14MedScannerState(
 }
 
 /// <summary>
-/// Every trooper can shout for a medic: the medics see a red cross over them for a minute
+/// A trooper who shouts for a medic by himself once a wound is bad enough, and again now and then while nobody comes
 /// </summary>
 [RegisterComponent]
 public sealed partial class ST14MedicCallerComponent : Component
 {
+    /// <summary>
+    /// How long between two shouts while no medic answered
+    /// </summary>
     [DataField]
-    public EntProtoId Action = "ST14ActionCallMedic";
+    public TimeSpan ShoutEvery = TimeSpan.FromSeconds(25);
 
-    [DataField]
-    public EntityUid? ActionEntity;
+    [ViewVariables]
+    public TimeSpan NextCheck;
 
-    [DataField]
-    public TimeSpan Duration = TimeSpan.FromSeconds(60);
+    [ViewVariables]
+    public TimeSpan NextShout;
 }
 
-public sealed partial class ST14CallMedicActionEvent : InstantActionEvent;
+/// <summary>
+/// One call for a medic as a medic sees it on the screen, near or far
+/// </summary>
+[Serializable, NetSerializable]
+public readonly record struct ST14MedicCall(NetEntity Caller, string Name, int Map, Vector2 Position, NetEntity? Responder, string? ResponderName);
+
+/// <summary>
+/// Every second to every medic: who calls, where, and who already goes
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class ST14MedicCallsEvent(List<ST14MedicCall> calls) : EntityEventArgs
+{
+    public readonly List<ST14MedicCall> Calls = calls;
+}
+
+/// <summary>
+/// Every second to a trooper who called: whether a medic comes, who and how far
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class ST14MedicCallStatusEvent(bool calling, string? responder, float distance) : EntityEventArgs
+{
+    public readonly bool Calling = calling;
+    public readonly string? Responder = responder;
+    public readonly float Distance = distance;
+}
+
+/// <summary>
+/// A medic takes a call, the given one or the nearest open one; with a call already taken, gives it up
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class ST14MedicRespondEvent(NetEntity? target) : EntityEventArgs
+{
+    public readonly NetEntity? Target = target;
+}
