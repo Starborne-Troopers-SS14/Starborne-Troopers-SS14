@@ -17,6 +17,7 @@ public sealed partial class ST14LobbyScreen
     private Button? _pickFederation;
     private Button? _pickArachnids;
     private ST14GalaxyFaction? _confirming;
+    private ST14SideChoiceScreen? _sideChoice;
 
     private Control BuildSide()
     {
@@ -32,6 +33,9 @@ public sealed partial class ST14LobbyScreen
         _sideButtons.AddChild(_pickFederation);
         _sideButtons.AddChild(_pickArachnids);
         frame.Body.AddChild(_sideButtons);
+
+        // with no side yet the choice covers the whole lobby, see Build
+        _sideChoice = new ST14SideChoiceScreen(_cache, sides);
 
         sides.Changed += UpdateSide;
         sides.Request();
@@ -65,6 +69,7 @@ public sealed partial class ST14LobbyScreen
             return;
 
         var sides = _entMan.System<ST14SideClientSystem>();
+        _sideChoice?.Update();
         if (sides.Side is { } side)
         {
             var name = Loc.GetString(side == ST14GalaxyFaction.Arachnid ? "st14-side-arachnids" : "st14-side-federation");

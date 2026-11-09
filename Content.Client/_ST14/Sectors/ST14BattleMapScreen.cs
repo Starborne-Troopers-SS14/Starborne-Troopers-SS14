@@ -84,8 +84,9 @@ public sealed class ST14BattleMapScreen : ST14WarScreenBase
         _globe.OnMarkErased += (side, index) => _war.RemoveMark(side, index);
         Canvas.AddAt(_globe, Vector2.Zero, new Vector2(480, 96), new Vector2(960, 892), Vector2.Zero);
 
+        // in a round only the region of the battle is shown: the planet is for the High Command in the hub
+        _globe.Visible = false;
         _flat = new ST14BattleMapView(ResCache, system, sprite) { Visible = false };
-        _flat.OnZoomPastMin += cell => ShowPlanet(cell);
         _flat.OnCellHovered += cell => Hover(cell);
         _flat.OnCellClicked += cell => Select(cell);
         _flat.OnToolCancelled += () => SetTool(null, false);
@@ -252,6 +253,13 @@ public sealed class ST14BattleMapScreen : ST14WarScreenBase
         if (!Visible)
             return;
 
+        // straight to the region of the battle, around the player's sector, as soon as the state is known
+        if (!_battleMode && _system.State is { Active: true } active)
+        {
+            ShowBattle(active.Here >= 0 ? active.Here : active.Target);
+            return;
+        }
+
         var state = _system.State;
         var war = War();
         UpdateGlobe(state, war);
@@ -397,11 +405,7 @@ public sealed class ST14BattleMapScreen : ST14WarScreenBase
         if (state is not { Active: true })
             return;
 
-        var planet = AddPlate(_header, Loc.GetString("st14-battle-map-mode-planet"), _battleMode ? ST14HqArt.PlateOff : ST14HubStyle.Blue, 1440, 26, 216, 62, 18);
-        planet.OnPressed += _ => ShowPlanet(_selected);
-        var battleCell = _selected is { } chosen && IsLoaded(chosen) ? chosen : state.Here >= 0 ? state.Here : state.Target;
-        var battle = AddPlate(_header, Loc.GetString("st14-battle-map-mode-battle"), _battleMode ? ST14HubStyle.Blue : ST14HqArt.PlateOff, 1664, 26, 216, 62, 18);
-        battle.OnPressed += _ => ShowBattle(battleCell);
+        AddPlate(_header, Loc.GetString("st14-battle-map-mode-battle"), ST14HubStyle.Blue, 1664, 26, 216, 62, 18);
     }
 
     private void AddFact(string key, string value, Color color, ref float y)

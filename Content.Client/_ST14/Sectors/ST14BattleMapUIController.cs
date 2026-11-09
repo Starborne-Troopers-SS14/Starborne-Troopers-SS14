@@ -79,6 +79,18 @@ public sealed partial class ST14BattleMapUIController : UIController, IOnStateEn
         SetPressed(true);
     }
 
+    /// <summary>
+    /// Closes the map if it is on the screen, for Esc
+    /// </summary>
+    public bool CloseIfOpen()
+    {
+        if (_screen is not { Visible: true })
+            return false;
+
+        Close();
+        return true;
+    }
+
     private void Close()
     {
         _screen?.Close();
