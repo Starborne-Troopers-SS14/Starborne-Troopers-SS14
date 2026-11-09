@@ -1,6 +1,8 @@
 using System.Collections.Frozen;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Content.Shared._ST14.Hive; // ST14
+using Content.Shared._ST14.Hive.Components; // ST14
 using Content.Shared.ActionBlocker;
 using Content.Shared.CCVar;
 using Content.Shared.Chat.Prototypes;
@@ -185,6 +187,9 @@ public abstract partial class SharedChatSystem : EntitySystem
         {
             output = SanitizeMessageCapital(input[1..].TrimStart());
             channel = ProtoMan.Index(CommonChannel);
+            // ST14: bugs have no common channel, their radio is the hive
+            if (HasComp<ST14HiveMemberComponent>(source))
+                channel = ProtoMan.Index(SharedST14HiveSystem.HiveChannel);
             return true;
         }
 

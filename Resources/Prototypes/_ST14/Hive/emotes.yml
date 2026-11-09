@@ -1,0 +1,110 @@
+# Bug emotes for the emote wheel (Y). Only bugs of the hive see them; each caste plays them with its own voice.
+- type: emote
+  id: ST14BugScreech
+  name: st14-emote-name-bug-screech
+  category: Vocal
+  icon: Interface/Emotes/scream.png
+  whitelist:
+    components:
+    - ST14HiveMember
+  chatMessages: [ "st14-emote-msg-bug-screech" ]
+  chatTriggers:
+  - визг
+  - визжит
+
+- type: emote
+  id: ST14BugRoar
+  name: st14-emote-name-bug-roar
+  category: Vocal
+  icon: Interface/Emotes/vocal.png
+  whitelist:
+    components:
+    - ST14HiveMember
+  chatMessages: [ "st14-emote-msg-bug-roar" ]
+  chatTriggers:
+  - рёв
+  - ревёт
+
+- type: emote
+  id: ST14BugTaunt
+  name: st14-emote-name-bug-taunt
+  category: Vocal
+  icon: Interface/Emotes/hew.png
+  whitelist:
+    components:
+    - ST14HiveMember
+  chatMessages: [ "st14-emote-msg-bug-taunt" ]
+  chatTriggers:
+  - шипение
+  - шипит
+
+- type: emote
+  id: ST14BugAlarm
+  name: st14-emote-name-bug-alarm
+  category: Vocal
+  icon: Interface/Emotes/chitter.png
+  whitelist:
+    components:
+    - ST14HiveMember
+  chatMessages: [ "st14-emote-msg-bug-alarm" ]
+  chatTriggers:
+  - стрекот
+  - стрекочет
+
+- type: emoteSounds
+  id: ST14BugWarrior
+  params:
+    variation: 0.08
+  sounds:
+    ST14BugScreech:
+      collection: ST14BugWarriorScream
+    ST14BugRoar:
+      collection: ST14BugWarriorRoar
+    ST14BugTaunt:
+      collection: ST14BugWarriorTaunt
+    ST14BugAlarm:
+      collection: ST14BugWarriorAlarm
+
+- type: emoteSounds
+  id: ST14BugTiger
+  params:
+    variation: 0.08
+  sounds:
+    ST14BugScreech:
+      collection: ST14BugTigerScream
+    ST14BugRoar:
+      collection: ST14BugTigerRoar
+    ST14BugTaunt:
+      collection: ST14BugTigerTaunt
+    ST14BugAlarm:
+      collection: ST14BugWarriorAlarm
+
+- type: emoteSounds
+  id: ST14BugLarva
+  params:
+    variation: 0.08
+    volume: -6
+    pitch: 1.6
+  sounds:
+    ST14BugScreech:
+      collection: ST14BugWarriorScream
+    ST14BugRoar:
+      collection: ST14BugWarriorRoar
+    ST14BugTaunt:
+      collection: ST14BugWarriorTaunt
+    ST14BugAlarm:
+      collection: ST14BugWarriorAlarm
+
+- type: emoteSounds
+  id: ST14BugBrain
+  params:
+    variation: 0.08
+  sounds:
+    ST14BugScreech:
+      collection: ST14BugDroneTaunt
+    ST14BugRoar:
+      collection: ST14BugDroneRoar
+    ST14BugTaunt:
+      collection: ST14BugDroneTaunt
+    ST14BugAlarm:
+      collection: ST14BugDroneAlarm

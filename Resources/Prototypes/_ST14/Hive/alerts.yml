@@ -1,0 +1,28 @@
+# Health of a bug on the right of the screen: the bug itself, its colour and the ring go from green to red
+- type: alert
+  id: ST14BugHealth
+  category: Health
+  icons:
+  - sprite: /Textures/_ST14/Interface/Alerts/bug_health.rsi
+    state: health0
+  - sprite: /Textures/_ST14/Interface/Alerts/bug_health.rsi
+    state: health1
+  - sprite: /Textures/_ST14/Interface/Alerts/bug_health.rsi
+    state: health2
+  - sprite: /Textures/_ST14/Interface/Alerts/bug_health.rsi
+    state: health3
+  - sprite: /Textures/_ST14/Interface/Alerts/bug_health.rsi
+    state: health4
+  name: st14-alerts-bug-health-name
+  description: st14-alerts-bug-health-desc
+  minSeverity: 0
+  maxSeverity: 4
+
+- type: alert
+  id: ST14BugDead
+  category: Health
+  icons:
+  - sprite: /Textures/_ST14/Interface/Alerts/bug_health.rsi
+    state: dead
+  name: st14-alerts-bug-dead-name
+  description: st14-alerts-bug-dead-desc
