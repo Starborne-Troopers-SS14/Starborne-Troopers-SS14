@@ -7,7 +7,6 @@
   - type: Transform
     anchored: true
   # a drill stays in its sector from round to round until the sector is taken
-  - type: ST14SectorPersistent
   - type: Clickable
   - type: InteractionOutline
   - type: ActivatableUI
