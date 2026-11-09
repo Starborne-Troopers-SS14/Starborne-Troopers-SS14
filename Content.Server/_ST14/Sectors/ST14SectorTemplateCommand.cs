@@ -1,5 +1,6 @@
 using System.Numerics;
 using Content.Server.Administration;
+using Content.Shared._ST14.Sectors;
 using Content.Shared.Administration;
 using Robust.Shared.Console;
 using Robust.Shared.EntitySerialization.Systems;
@@ -18,13 +19,13 @@ namespace Content.Server._ST14.Sectors;
 [AdminCommand(AdminFlags.Mapping)]
 public sealed partial class ST14SectorTemplateCommand : IConsoleCommand
 {
-    public const int Size = 200;
+    public const int Size = ST14SectorGeometry.Size;
     public const int StormDepth = 4;
 
     /// <summary>
     /// From the centre to the middle of an edge: a hexagon with its points up, 192 tiles from point to point
     /// </summary>
-    public const float Apothem = 83f;
+    public const float Apothem = ST14SectorGeometry.Apothem;
 
     private const float GapRadius = 4.5f;
 
