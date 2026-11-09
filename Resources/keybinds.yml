@@ -248,6 +248,9 @@ binds:
 - function: OpenBattleMap
   type: State
   key: M
+- function: OpenSquads # ST14
+  type: State
+  key: J
 - function: ST14MedicRespond # ST14
   type: State
   key: N

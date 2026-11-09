@@ -1,6 +1,8 @@
 using System.Linq;
 using Content.Client._ST14.MainHub;
 using Content.Shared._ST14.Sectors;
+using Content.Shared.Input;
+using Robust.Client.Input;
 using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface.Controls;
 
@@ -21,14 +23,17 @@ public sealed class ST14SquadPanel : PanelContainer
     private readonly ST14BattleMapClientSystem _system;
     private readonly BoxContainer _column;
     private readonly bool _compact;
-    private bool _listOpen;
+
+    /// <summary>
+    /// The short card on the screen asks for the window with the whole of the squads
+    /// </summary>
+    public event Action? OnOpenWindow;
 
     public ST14SquadPanel(IResourceCache cache, ST14BattleMapClientSystem system, bool compact)
     {
         _cache = cache;
         _system = system;
         _compact = compact;
-        _listOpen = !compact;
 
         PanelOverride = ST14HubStyle.Flat(Color.FromHex("#0E0D0B").WithAlpha(compact ? 0.86f : 0.6f), ST14HubStyle.Gold.WithAlpha(0.5f), 1);
         _column = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 4, Margin = new Thickness(8, 6) };
@@ -89,6 +94,13 @@ public sealed class ST14SquadPanel : PanelContainer
             _column.AddChild(answers);
         }
 
+        // on the screen only an invitation to answer, nothing else: the squads live in their window
+        if (_compact)
+        {
+            Visible = state.Invite != null;
+            return;
+        }
+
         if (state.Squads.FirstOrDefault(s => s.Id == state.Squad) is { Members: not null } own)
         {
             _column.AddChild(Text(Loc.GetString("st14-squad-title", ("number", own.Number)).ToUpperInvariant(), ST14HubFont.Bold, 16, ST14HubStyle.GoldLight));
@@ -103,32 +115,26 @@ public sealed class ST14SquadPanel : PanelContainer
                 _column.AddChild(row);
             }
 
-            if (!_compact)
-                _column.AddChild(Text(Loc.GetString("st14-squad-how-to-invite"), ST14HubFont.Regular, 12, ST14HqArtMuted));
+            // the card on the screen only shows who is who; leaving and inviting are in the window
+            if (_compact)
+            {
+                _column.AddChild(Text(OpenHint(), ST14HubFont.Regular, 12, ST14HqArtMuted));
+                return;
+            }
 
+            _column.AddChild(Text(Loc.GetString("st14-squad-how-to-invite"), ST14HubFont.Regular, 12, ST14HqArtMuted));
             _column.AddChild(Plate(Loc.GetString("st14-squad-leave"), _system.LeaveSquad));
             return;
         }
 
-        // not in a squad: in the corner of the screen the list opens on demand, so it does not take room in a fight
-        var header = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 6 };
-        var title = Text(Loc.GetString("st14-squad-none").ToUpperInvariant(), ST14HubFont.Bold, 14, ST14HubStyle.GoldLight);
-        title.HorizontalExpand = true;
-        header.AddChild(title);
+        // not in a squad: the card is one button to the window, it takes no room in a fight
         if (_compact)
         {
-            var toggle = new Button { Text = _listOpen ? "▴" : "▾", MinWidth = 30 };
-            toggle.OnPressed += _ =>
-            {
-                _listOpen = !_listOpen;
-                Rebuild();
-            };
-            header.AddChild(toggle);
+            _column.AddChild(Plate($"{Loc.GetString("st14-squad-none")}  ·  {OpenHint()}".ToUpperInvariant(), () => OnOpenWindow?.Invoke()));
+            return;
         }
 
-        _column.AddChild(header);
-        if (!_listOpen)
-            return;
+        _column.AddChild(Text(Loc.GetString("st14-squad-none").ToUpperInvariant(), ST14HubFont.Bold, 14, ST14HubStyle.GoldLight));
 
         foreach (var squad in state.Squads)
         {
@@ -143,4 +149,11 @@ public sealed class ST14SquadPanel : PanelContainer
     }
 
     private static readonly Color ST14HqArtMuted = new(0.68f, 0.71f, 0.75f);
+
+    private static string OpenHint()
+    {
+        var input = IoCManager.Resolve<IInputManager>();
+        var key = input.TryGetKeyBinding(ContentKeyFunctions.OpenSquads, out var binding) ? binding.GetKeyString() : "J";
+        return Loc.GetString("st14-squad-open-hint", ("key", key));
+    }
 }

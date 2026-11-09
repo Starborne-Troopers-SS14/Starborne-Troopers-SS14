@@ -26,6 +26,7 @@ public sealed partial class GameTopMenuBarUIController : UIController
     [Dependency] private GuidebookUIController _guidebook = default!;
     [Dependency] private EmotesUIController _emotes = default!;
     [Dependency] private ST14BattleMapUIController _battleMap = default!; // ST14
+    [Dependency] private ST14SquadHudUIController _squads = default!; // ST14
 
     private GameTopMenuBar? GameTopMenuBar => UIManager.GetActiveUIWidgetOrNull<GameTopMenuBar>();
 
@@ -50,6 +51,7 @@ public sealed partial class GameTopMenuBarUIController : UIController
         _sandbox.UnloadButton();
         _emotes.UnloadButton();
         _battleMap.UnloadButton(); // ST14
+        _squads.UnloadButton(); // ST14
     }
 
     public void LoadButtons()
@@ -64,5 +66,6 @@ public sealed partial class GameTopMenuBarUIController : UIController
         _sandbox.LoadButton();
         _emotes.LoadButton();
         _battleMap.LoadButton(); // ST14
+        _squads.LoadButton(); // ST14
     }
 }
