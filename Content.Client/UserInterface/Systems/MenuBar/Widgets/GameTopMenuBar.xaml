@@ -33,6 +33,17 @@
         HorizontalExpand="True"
         AppendStyleClass="{x:Static style:StyleClass.ButtonSquare}"
         />
+    <!-- ST14 -->
+    <ui:MenuButton
+        Name="BattleMapButton"
+        Access="Internal"
+        Icon="{xe:Tex '/Textures/_ST14/Interface/Hq/icon_objective.png'}"
+        ToolTip="{Loc 'st14-battle-map-button-tooltip'}"
+        BoundKey = "{x:Static is:ContentKeyFunctions.OpenBattleMap}"
+        MinSize="42 64"
+        HorizontalExpand="True"
+        AppendStyleClass="{x:Static style:StyleClass.ButtonSquare}"
+        />
     <ui:MenuButton
         Name="CharacterButton"
         Access="Internal"
