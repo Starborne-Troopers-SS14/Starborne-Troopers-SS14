@@ -47,6 +47,12 @@ namespace Content.IntegrationTests.Tests
             "Dart"
         };
 
+        // ST14: the map of a sector round only makes the station, players spawn on the sector maps loaded for the round
+        private static readonly string[] NoJobSpawnMaps =
+        {
+            "ST14SectorWar"
+        };
+
         private static readonly string[] Grids =
         {
             "/Maps/centcomm.yml",
@@ -422,7 +428,8 @@ namespace Content.IntegrationTests.Tests
 
                     jobs.ExceptWith(spawnPoints);
 
-                    Assert.That(jobs, Is.Empty, $"There is no spawnpoints for {string.Join(", ", jobs)} on {mapProto}.");
+                    if (!NoJobSpawnMaps.Contains(mapProto)) // ST14
+                        Assert.That(jobs, Is.Empty, $"There is no spawnpoints for {string.Join(", ", jobs)} on {mapProto}.");
                 }
 
                 try

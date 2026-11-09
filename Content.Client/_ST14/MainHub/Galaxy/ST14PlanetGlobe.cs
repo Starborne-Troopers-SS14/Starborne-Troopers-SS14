@@ -93,6 +93,11 @@ public sealed class ST14PlanetGlobe : Control
     public event Action<int?>? OnCellSelected;
     public event Action<int?>? OnCellHovered;
 
+    /// <summary>
+    /// The wheel turned on to zoom in once the planet was as close as it gets
+    /// </summary>
+    public event Action? OnZoomPastMax;
+
     static ST14PlanetGlobe()
     {
         var points = new List<Vector3>();
@@ -461,6 +466,9 @@ public sealed class ST14PlanetGlobe : Control
         if (MaxZoom <= MinZoom)
             return;
 
+        if (args.Delta.Y > 0 && Zoom >= MaxZoom - 0.001f)
+            OnZoomPastMax?.Invoke();
+
         Zoom = Math.Clamp(Zoom * MathF.Pow(1.1f, args.Delta.Y), MinZoom, MaxZoom);
         args.Handle();
     }
@@ -636,9 +644,7 @@ public sealed class ST14PlanetGlobe : Control
             if (last is { } tip && before is { } back && (tip - back).LengthSquared() > 0.01f)
             {
                 var dir = Vector2.Normalize(tip - back);
-                var wing = new Vector2(-dir.Y, dir.X) * (width * 2.6f + grow * 1.8f);
-                var root = tip - dir * grow;
-                _marks.Triangle(tip + dir * (width * 3.5f + grow * 2.2f), root + wing, root - wing, color);
+                ST14MarkShapes.Head(_marks, tip, dir, width, grow, color);
             }
 
             return;
@@ -647,29 +653,7 @@ public sealed class ST14PlanetGlobe : Control
         if (MarkPoint(mark, 0) is not { } center || center.Z <= 0.02f)
             return;
 
-        var at = Project(center);
-        var size = width * 3.2f;
-        switch (mark.Kind)
-        {
-            case ST14WarMarkKind.Rally:
-                _marks.Line(at + new Vector2(-size * 0.4f, size + grow), at + new Vector2(-size * 0.4f, -size - grow), width * 0.7f + grow * 2, color);
-                _marks.Triangle(at + new Vector2(-size * 0.4f, -size - grow * 1.6f), at + new Vector2(size * 0.9f + grow * 2.2f, -size * 0.55f),
-                    at + new Vector2(-size * 0.4f, -size * 0.1f + grow * 1.6f), color);
-                break;
-            case ST14WarMarkKind.Danger:
-                _marks.Triangle(at + new Vector2(0, -size - grow * 2f), at + new Vector2(size + grow * 1.8f, size * 0.8f + grow), at + new Vector2(-size - grow * 1.8f, size * 0.8f + grow), color);
-                if (grow > 0)
-                    break;
-
-                var dark = Color.FromHex("#141A22").WithAlpha(color.A);
-                _marks.Line(at + new Vector2(0, -size * 0.45f), at + new Vector2(0, size * 0.2f), width * 0.6f, dark);
-                _marks.Circle(at + new Vector2(0, size * 0.48f), width * 0.35f, dark, 8);
-                break;
-            default:
-                _marks.Ring(at, size * 0.75f - grow, size + grow, color, color, 20);
-                _marks.Circle(at, size * 0.28f + grow, color, 10);
-                break;
-        }
+        ST14MarkShapes.Sign(_marks, mark.Kind, Project(center), width, grow, color);
     }
 
     private float Lighting(Vector3 normal)
