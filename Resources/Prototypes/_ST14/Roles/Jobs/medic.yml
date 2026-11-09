@@ -1,0 +1,44 @@
+- type: job
+  id: ST14Medic
+  name: st14-job-name-medic
+  description: st14-job-description-medic
+  playTimeTracker: JobST14Medic
+  startingGear: ST14MedicGear
+  icon: JobIconST14Medic
+  supervisors: st14-job-supervisors-medic
+  special:
+  - !type:AddComponentSpecial
+    components:
+    - type: ST14MedicHud
+
+- type: startingGear
+  id: ST14MedicGear
+  equipment:
+    jumpsuit: ST14JumpsuitInfantryUniform
+    head: ST14ClothingHeadHelmetMed
+    outerClothing: ST14ClothingOuterArmorMedicalVest
+    gloves: ST14ClothingHandsGlovesCombat
+    belt: ST14ClothingBeltStandard
+    shoes: ST14ClothingShoesCombatBoots
+    back: ST14MedicBag
+  inhand:
+  - ST14FieldDefibrillator
+
+- type: department
+  id: ST14Medical
+  name: st14-department-medical
+  description: st14-department-medical-description
+  color: "#5B97BC"
+  roles:
+  - ST14Medic
+
+- type: playTimeTracker
+  id: JobST14Medic
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconST14Medic
+  icon:
+    sprite: /Textures/Interface/Misc/job_icons.rsi
+    state: MedicalDoctor
+  jobName: st14-job-name-medic

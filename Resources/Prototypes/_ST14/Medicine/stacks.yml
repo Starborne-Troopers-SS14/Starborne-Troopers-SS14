@@ -1,0 +1,27 @@
+- type: stack
+  id: ST14Bandage
+  name: st14-stack-bandage
+  icon: { sprite: "/Textures/Objects/Specific/Medical/medical.rsi", state: gauze }
+  spawn: ST14Bandage
+  maxCount: 5
+
+- type: stack
+  id: ST14HemostaticGauze
+  name: st14-stack-hemostatic
+  icon: { sprite: "/Textures/Objects/Specific/Medical/medical.rsi", state: gauze }
+  spawn: ST14HemostaticGauze
+  maxCount: 3
+
+- type: stack
+  id: ST14Splint
+  name: st14-stack-splint
+  icon: { sprite: "/Textures/Objects/Specific/Medical/medical.rsi", state: cast }
+  spawn: ST14Splint
+  maxCount: 3
+
+- type: stack
+  id: ST14Antiseptic
+  name: st14-stack-antiseptic
+  icon: { sprite: "/Textures/Objects/Specific/Medical/medical.rsi", state: ointment }
+  spawn: ST14Antiseptic
+  maxCount: 5

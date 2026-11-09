@@ -95,6 +95,9 @@
   name: Urist McHands
   components:
   - type: ST14BloodDecals # ST14: blood decals instead of puddles
+  - type: ST14Dismemberable # ST14: heavy hits tear arms and legs off
+  - type: ST14Wounds # ST14: wounds part by part, pain, the heart and the drugs
+  - type: ST14MedicCaller # ST14: the shout for a medic
   - type: Butcherable
     spawned:
     - id: FoodMeatHuman

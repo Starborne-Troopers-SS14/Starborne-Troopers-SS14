@@ -44,3 +44,5 @@ st14-squad-verb-invite = Пригласить в отряд { $number }
 st14-squad-verb-join = Вступить в отряд { $number }
 st14-squad-invited = { $from } зовёт вас в отряд { $number }. Ответ на панели отряда справа
 st14-squad-invite-sent = Приглашение отправлено: { $name }
+st14-battle-map-fact-points = Точки
+st14-battle-map-points = десант { $federation } · жуки { $bugs } из { $total }

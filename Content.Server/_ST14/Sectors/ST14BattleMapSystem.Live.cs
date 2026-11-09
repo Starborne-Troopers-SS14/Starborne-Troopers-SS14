@@ -28,6 +28,7 @@ public sealed partial class ST14BattleMapSystem
     [Dependency] private MobStateSystem _mobState = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
+    [Dependency] private ST14SubsectorSystem _subsectors = default!;
 
     private sealed class Squad
     {
@@ -73,6 +74,7 @@ public sealed partial class ST14BattleMapSystem
 
         _nextLive = _timing.CurTime + LiveInterval;
         var icons = Icons();
+        var points = _subsectors.Points(_sectors.LoadedMaps).ToArray();
         foreach (var session in _open.ToArray())
         {
             if (session.Status == SessionStatus.Disconnected || !_viewers.TryGetValue(session, out var side))
@@ -82,7 +84,7 @@ public sealed partial class ST14BattleMapSystem
             }
 
             var visible = icons.Where(i => i.Side == null || i.Side == side).Select(i => i.Info).ToArray();
-            RaiseNetworkEvent(new ST14BattleMapLiveEvent(_ticker.RoundId, visible, Mates(session)), session);
+            RaiseNetworkEvent(new ST14BattleMapLiveEvent(_ticker.RoundId, visible, Mates(session), points), session);
         }
     }
 

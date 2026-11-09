@@ -22,6 +22,9 @@
     back: ST14ClothingBackpackEngineer
   inhand:
   - ST14EngineerMultitool
+  storage:
+    back:
+    - ST14FieldKit
 
 - type: department
   id: ST14Engineering

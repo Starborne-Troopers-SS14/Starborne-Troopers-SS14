@@ -178,3 +178,19 @@
     - state: sucking
   - type: InstantAction
     event: !type:ST14BrainScreamActionEvent
+
+- type: entity
+  parent: BaseAction
+  id: ST14ActionPlantNest
+  name: Grow a nest
+  description: Grow a nest over the resource point next to you. While it stands, the hive holds this part of the sector. An enemy drill on the point has to be broken first.
+  components:
+  - type: Action
+    itemIconStyle: BigAction
+    useDelay: 10
+  - type: Sprite
+    sprite: Structures/Specific/xeno_building.rsi
+    layers:
+    - state: recoverytower
+  - type: InstantAction
+    event: !type:ST14PlantNestActionEvent

@@ -9,6 +9,7 @@
   name: warrior bug
   description: "The common soldier of the hive: four legs, a pair of claws and no fear."
   components:
+  - type: ST14NestPlanter
   - type: MobThresholds
     thresholds:
       0: Alive
@@ -46,6 +47,8 @@
   name: tiger bug
   description: "A striped killer, fast and terribly sharp."
   components:
+  - type: ST14NestPlanter
+  - type: ST14Venomous # its claws carry venom, see ST14BugVenom
   - type: MobThresholds
     thresholds:
       0: Alive

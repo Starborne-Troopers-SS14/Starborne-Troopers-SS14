@@ -352,6 +352,7 @@
   name: brain bug
   description: A bloated, pulsing mass with a long proboscis. The hive thinks with it.
   components:
+  - type: ST14NestPlanter
   - type: Sprite
     sprite: _ST14/Mobs/Bugs/brain.rsi
     layers:

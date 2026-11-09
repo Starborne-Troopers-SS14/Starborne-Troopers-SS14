@@ -309,7 +309,7 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         _stagings[ev.Planet] = ev.Staging;
         _turn = ev.Turn;
         if (_wars.TryGetValue(ev.Planet, out var war))
-            war.ImportState(ev.Cells, ev.Turn);
+            war.ImportState(ev.Cells, ev.Turn, ev.ActiveRegion);
         _commandButton.OurTurn = _commandSides.Contains(_turn);
 
         if (_level != ST14GalaxyLevel.Surface || _planet?.ID != ev.Planet)
@@ -537,7 +537,7 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         war = new ST14PlanetWar(planet, name.Length > 0 ? name[..1].ToUpperInvariant() : "X");
         if (WarSystem?.TryGetState(planet.ID, out var state) == true)
         {
-            war.ImportState(state.Cells, state.Turn);
+            war.ImportState(state.Cells, state.Turn, state.ActiveRegion);
             _targets[planet.ID] = state.Target;
             _stagings[planet.ID] = state.Staging;
         }

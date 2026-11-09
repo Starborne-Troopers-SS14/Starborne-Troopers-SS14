@@ -21,6 +21,7 @@ using Robust.Server.Player;
 using Robust.Shared.Configuration;
 using Robust.Shared.ContentPack;
 using Robust.Shared.Enums;
+using Robust.Shared.Network;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
@@ -106,6 +107,7 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
         SubscribeLocalEvent<MobStateChangedEvent>(OnMobState);
         SubscribeLocalEvent<RoundStartingEvent>(OnRoundStarting);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnRoundCleanup);
+        InitializeSides();
 
         Load();
     }
@@ -135,6 +137,9 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
     {
         if (_whitelist.IsWhitelisted(session.UserId, ST14GalaxyWarRules.HiveCommand))
             return ST14GalaxyFaction.Arachnid;
+
+        if (ChosenSide(session.UserId) is { } chosen)
+            return chosen;
 
         // a player without characters has no selected one, the indexer would throw
         if (!_prefs.TryGetCachedPreferences(session.UserId, out var prefs) ||
@@ -170,7 +175,7 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
     /// Result of the round fought over the target sector of the planet. A null winner is a battle that ran out of time.
     /// The initiative goes to the other side and its command picks the next battle
     /// </summary>
-    public bool ApplyResult(string planet, ST14GalaxyFaction? winner)
+    public bool ApplyResult(string planet, ST14GalaxyFaction? winner, IReadOnlyDictionary<int, ST14GalaxyFaction?>? points = null)
     {
         var target = _targets.GetValueOrDefault(planet, -1);
         if (!_wars.TryGetValue(planet, out var war) || target < 0)
@@ -181,7 +186,9 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
         if (log.Count > MaxLog)
             log.RemoveAt(0);
 
-        war.ApplyResult(target, StagingOf(planet), winner);
+        // the region is taken whole: the war moves on and every player picks a side again
+        if (war.ApplyResult(target, StagingOf(planet), winner, points))
+            ClearSides();
 
         _fights.Remove(planet);
         _picked.Remove(planet);
@@ -197,6 +204,12 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
     /// </summary>
     public void BeginBattle(string planet, TimeSpan endsAt)
     {
+        if (_wars.TryGetValue(planet, out var war))
+        {
+            war.LockRegion(_targets.GetValueOrDefault(planet, -1));
+            war.RefreshFront();
+        }
+
         _fights[planet] = endsAt;
         Changed();
     }
@@ -255,6 +268,7 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
 
         var ev = new ST14WarResetEvent(planet);
         RaiseLocalEvent(ref ev);
+        ClearSides();
 
         Changed();
         return true;
@@ -551,12 +565,13 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
 
     private void Send(ICommonSession session)
     {
+        SendSide(session);
         foreach (var (planet, war) in _wars)
         {
             RaiseNetworkEvent(new ST14GalaxyWarStateEvent(planet, war.ExportState(), _targets.GetValueOrDefault(planet, -1), StagingOf(planet),
                 war.Turn, CanCommand(session, war.Turn), _logs.GetValueOrDefault(planet)?.ToArray() ?? Array.Empty<ST14WarLogEntry>(),
                 _picked.Contains(planet), _fights.ContainsKey(planet),
-                _fights.TryGetValue(planet, out var ends) ? (float) (ends - _timing.CurTime).TotalSeconds : 0f), session);
+                _fights.TryGetValue(planet, out var ends) ? (float) (ends - _timing.CurTime).TotalSeconds : 0f, war.ActiveRegion), session);
         }
     }
 
@@ -566,6 +581,11 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
     {
         public Dictionary<string, PlanetSave> Planets { get; set; } = new();
         public Dictionary<ST14GalaxyFaction, PlanSave> Plans { get; set; } = new();
+
+        /// <summary>
+        /// The side each player chose for the war over the current region
+        /// </summary>
+        public Dictionary<Guid, ST14GalaxyFaction> Sides { get; set; } = new();
     }
 
     private sealed class PlanSave
@@ -580,6 +600,7 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
         public int Staging { get; set; } = -1;
         public bool TargetPicked { get; set; }
         public ST14GalaxyFaction Turn { get; set; } = ST14GalaxyFaction.Federation;
+        public int ActiveRegion { get; set; } = -1;
         public List<LogSave> Log { get; set; } = new();
         public List<CellSave> Cells { get; set; } = new();
     }
@@ -635,7 +656,7 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
             var target = war.FirstLanding ?? -1;
 
             if (save != null && save.Planets.TryGetValue(planet.ID, out var saved) &&
-                war.ImportState(saved.Cells.Select(c => new ST14HexCellState(c.Faction, c.Liberation, c.Hive, c.Base, c.BugsKilled, c.TroopersKilled, c.Initialized)).ToList(), saved.Turn))
+                war.ImportState(saved.Cells.Select(c => new ST14HexCellState(c.Faction, c.Liberation, c.Hive, c.Base, c.BugsKilled, c.TroopersKilled, c.Initialized)).ToList(), saved.Turn, saved.ActiveRegion))
             {
                 target = saved.Target >= 0 && saved.Target < war.Cells.Length && war.Cells[saved.Target].Front ? saved.Target : war.FirstLanding ?? -1;
                 if (saved.Staging >= 0)
@@ -653,6 +674,11 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
 
         if (save == null)
             return;
+
+        foreach (var (user, side) in save.Sides)
+        {
+            _sides[new NetUserId(user)] = side;
+        }
 
         foreach (var (side, saved) in save.Plans)
         {
@@ -678,6 +704,7 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
                 Staging = _stagings.GetValueOrDefault(planet, -1),
                 TargetPicked = _picked.Contains(planet),
                 Turn = war.Turn,
+                ActiveRegion = war.ActiveRegion,
                 Log = _logs.GetValueOrDefault(planet)?.Select(l => new LogSave { Round = l.Round, Cell = l.Cell, Attacker = l.Attacker, Winner = l.Winner }).ToList() ?? new(),
                 Cells = war.ExportState().Select(c => new CellSave
                 {
@@ -690,6 +717,11 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
                     Initialized = c.Initialized,
                 }).ToList(),
             };
+        }
+
+        foreach (var (user, side) in _sides)
+        {
+            save.Sides[user.UserId] = side;
         }
 
         foreach (var (side, plan) in _plans)
