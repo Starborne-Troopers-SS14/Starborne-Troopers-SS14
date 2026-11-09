@@ -131,7 +131,7 @@ public sealed class ST14GalaxyWarRequestEvent : EntityEventArgs;
 /// and whether the receiving player may change that target
 /// </summary>
 [Serializable, NetSerializable]
-public sealed class ST14GalaxyWarStateEvent(string planet, ST14HexCellState[] cells, int target, int staging, ST14GalaxyFaction turn, bool canCommand, ST14WarLogEntry[] log, bool targetPicked, bool battle, float battleSecondsLeft) : EntityEventArgs
+public sealed class ST14GalaxyWarStateEvent(string planet, ST14HexCellState[] cells, int target, int staging, ST14GalaxyFaction turn, bool canCommand, ST14WarLogEntry[] log, bool targetPicked, bool battle, float battleSecondsLeft, int activeRegion = -1) : EntityEventArgs
 {
     public readonly string Planet = planet;
     public readonly ST14HexCellState[] Cells = cells;
@@ -172,6 +172,11 @@ public sealed class ST14GalaxyWarStateEvent(string planet, ST14HexCellState[] ce
     public readonly bool Battle = battle;
 
     public readonly float BattleSecondsLeft = battleSecondsLeft;
+
+    /// <summary>
+    /// The region the war is bound to until the Federation takes it whole, -1 between regions
+    /// </summary>
+    public readonly int ActiveRegion = activeRegion;
 }
 
 /// <summary>
@@ -192,4 +197,29 @@ public sealed class ST14GalaxyWarOrderEvent(string planet, int cell) : EntityEve
 {
     public readonly string Planet = planet;
     public readonly int Cell = cell;
+}
+
+/// <summary>
+/// Asks the server for the side the player is bound to in the war over the current region
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class ST14SideRequestEvent : EntityEventArgs;
+
+/// <summary>
+/// The player binds themself to a side until the region is taken. The server refuses a second choice
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class ST14SideChooseEvent(ST14GalaxyFaction side) : EntityEventArgs
+{
+    public readonly ST14GalaxyFaction Side = side;
+}
+
+/// <summary>
+/// The side the player is bound to, null while not chosen. Region is the code of the region fought for, empty between regions
+/// </summary>
+[Serializable, NetSerializable]
+public sealed class ST14SideStateEvent(ST14GalaxyFaction? side, string region) : EntityEventArgs
+{
+    public readonly ST14GalaxyFaction? Side = side;
+    public readonly string Region = region;
 }
