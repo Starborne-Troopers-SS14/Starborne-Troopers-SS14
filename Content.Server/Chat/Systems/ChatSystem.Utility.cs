@@ -64,7 +64,7 @@ public sealed partial class ChatSystem
     /// <summary>
     ///     Sends a chat message to the given players in range of the source entity.
     /// </summary>
-    private void SendInVoiceRange(ChatChannel channel, string message, string wrappedMessage, EntityUid source, ChatTransmitRange range, NetUserId? author = null)
+    private void SendInVoiceRange(ChatChannel channel, string message, string wrappedMessage, EntityUid source, ChatTransmitRange range, NetUserId? author = null, bool st14Speech = false)
     {
         foreach (var (session, data) in GetRecipients(source, VoiceRange))
         {
@@ -72,6 +72,16 @@ public sealed partial class ChatSystem
             if (entRange == MessageRangeCheckResult.Disallowed)
                 continue;
             var entHideChat = entRange == MessageRangeCheckResult.HideChat;
+            // ST14: deafened ears hear no speech, listeners of the other kind (bugs and people) only hear its sound
+            if (st14Speech && session.AttachedEntity != source && _st14Language.IsDeaf(session.AttachedEntity))
+                continue;
+
+            if (st14Speech && !_st14Language.Understands(session.AttachedEntity, source))
+            {
+                _st14Language.PlayNoise(source, message, session);
+                continue;
+            }
+
             _chatManager.ChatMessageToOne(channel, message, wrappedMessage, source, entHideChat, session.Channel, author: author);
         }
 
