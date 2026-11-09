@@ -59,6 +59,7 @@
       - type: StationJobs
         availableJobs:
           ST14Engineer: [ -1, -1 ]
+          ST14Medic: [ -1, -1 ]
           ST14Bug: [ -1, -1 ]
           ST14BrainBug: [ 1, 1 ]
 

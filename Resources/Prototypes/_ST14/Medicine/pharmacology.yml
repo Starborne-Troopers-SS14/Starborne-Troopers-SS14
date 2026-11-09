@@ -1,0 +1,316 @@
+# What each drug does in a wounded body, at full strength (fullDose units in the blood). Read by ST14WoundSystem
+# every second. Effects of less than a full dose scale down, past the overdose they start to harm.
+# The ids match the reagents, so an interaction lists drugs by their reagent names.
+
+# Painkillers and anaesthesia
+
+- type: st14Drug
+  id: ST14Morphine
+  reagent: ST14Morphine
+  fullDose: 10
+  overdose: 20
+  summary: st14-drug-summary-morphine
+  painRelief: 62
+  sedation: 1
+  heartLoad: -0.15
+  pulse: -16
+  overdoseBreathing: 1.5
+  overdosePopup: st14-drug-morphine-overdose
+
+- type: st14Drug
+  id: ST14Ketorolac
+  reagent: ST14Ketorolac
+  fullDose: 10
+  overdose: 25
+  summary: st14-drug-summary-ketorolac
+  painRelief: 28
+  bleeding: 0.35
+  overdoseDamage:
+    types:
+      Poison: 1
+  overdosePopup: st14-drug-ketorolac-overdose
+
+- type: st14Drug
+  id: ST14Ketamine
+  reagent: ST14Ketamine
+  fullDose: 10
+  overdose: 18
+  summary: st14-drug-summary-ketamine
+  painRelief: 95
+  dissociation: 1
+  pulse: -12
+  overdoseBreathing: 1
+
+- type: st14Drug
+  id: ST14Naloxone
+  reagent: ST14Naloxone
+  fullDose: 10
+  overdose: 20
+  summary: st14-drug-summary-naloxone
+  pulse: 10
+  removes:
+    ST14Morphine: 4
+
+# The heart
+
+- type: st14Drug
+  id: Epinephrine
+  reagent: Epinephrine
+  fullDose: 10
+  overdose: 30
+  summary: st14-drug-summary-adrenaline
+  painRelief: 15
+  adrenergic: 1
+  heartLoad: 0.45
+  pulse: 55
+  restartBonus: 0.3
+  overdoseArrest: 0.01
+
+- type: st14Drug
+  id: ST14Atropine
+  reagent: ST14Atropine
+  fullDose: 8
+  overdose: 15
+  summary: st14-drug-summary-atropine
+  sedation: -0.3
+  heartLoad: 0.1
+  pulse: 30
+  removes:
+    ST14BugVenom: 0.5
+  overdosePulse: 30
+  overdoseArrest: 0.01
+  overdosePopup: st14-drug-atropine-overdose
+
+- type: st14Drug
+  id: ST14Amiodarone
+  reagent: ST14Amiodarone
+  fullDose: 10
+  overdose: 20
+  summary: st14-drug-summary-amiodarone
+  heartLoad: -0.35
+  pulse: -12
+  rhythmGuard: 1
+  restartBonus: 0.15
+  overdosePulse: -30
+  overdoseArrest: 0.02
+  overdosePopup: st14-drug-amiodarone-overdose
+
+# Stimulants
+
+- type: st14Drug
+  id: ST14CombatStim
+  reagent: ST14CombatStim
+  fullDose: 8
+  overdose: 12
+  summary: st14-drug-summary-stim
+  stimulation: 1
+  heartLoad: 0.55
+  pulse: 45
+  steady: 2
+  crashAfter: 9
+  overdoseArrest: 0.02
+  wearOffPopup: st14-drug-crash
+
+- type: st14Drug
+  id: ST14Modafinil
+  reagent: ST14Modafinil
+  fullDose: 8
+  overdose: 16
+  summary: st14-drug-summary-modafinil
+  sedation: -0.5
+  heartLoad: 0.15
+  pulse: 15
+  steady: 1
+  crashRelief: 2
+  overdoseArrest: 0.01
+
+# The blood
+
+- type: st14Drug
+  id: TranexamicAcid
+  reagent: TranexamicAcid
+  fullDose: 10
+  overdose: 25
+  summary: st14-drug-summary-tranexamic
+  bleeding: -0.35
+  clotting: 0.02
+
+- type: st14Drug
+  id: ST14PlasmaExpander
+  reagent: ST14PlasmaExpander
+  fullDose: 10
+  summary: st14-drug-summary-plasma
+  bloodRestore: 3
+  bleeding: 0.2
+  clotting: -0.003
+
+# Healing
+
+- type: st14Drug
+  id: ST14Antibiotic
+  reagent: ST14Antibiotic
+  fullDose: 10
+  overdose: 30
+  summary: st14-drug-summary-antibiotic
+  antiInfection: 0.004
+
+- type: st14Drug
+  id: ST14Antipyretic
+  reagent: ST14Antipyretic
+  fullDose: 10
+  overdose: 25
+  summary: st14-drug-summary-antipyretic
+  painRelief: 12
+  feverRelief: 1
+  overdoseDamage:
+    types:
+      Poison: 1.5
+  overdosePopup: st14-drug-antipyretic-overdose
+
+- type: st14Drug
+  id: ST14Osteogen
+  reagent: ST14Osteogen
+  fullDose: 6
+  overdose: 20
+  summary: st14-drug-summary-osteogen
+  boneGrowth: 0.012
+  pulse: 5
+
+- type: st14Drug
+  id: ST14Regenerol
+  reagent: ST14Regenerol
+  fullDose: 10
+  overdose: 20
+  summary: st14-drug-summary-regenerol
+  regeneration: 3
+  heartLoad: 0.1
+  pulse: 10
+  overdoseDamage:
+    types:
+      Poison: 0.5
+
+- type: st14Drug
+  id: ST14Antivenom
+  reagent: ST14Antivenom
+  fullDose: 8
+  overdose: 30
+  summary: st14-drug-summary-antivenom
+  removes:
+    ST14BugVenom: 2
+
+# What is in the blood but is no medicine
+
+- type: st14Drug
+  id: ST14BugVenom
+  reagent: ST14BugVenom
+  fullDose: 10
+  overdose: 12
+  summary: st14-drug-summary-venom
+  painRelief: -15
+  toxin: 1
+  heartLoad: 0.1
+  pulse: 10
+  overdoseBreathing: 1.2
+  overdosePopup: st14-venom-breathing
+
+- type: st14Drug
+  id: Ethanol
+  reagent: Ethanol
+  fullDose: 15
+  summary: st14-drug-summary-alcohol
+  painRelief: 10
+  sedation: 0.3
+  bleeding: 0.25
+  pulse: 5
+
+# What they do together
+
+- type: st14DrugInteraction
+  id: ST14StimAdrenaline
+  drugs: [ ST14CombatStim, Epinephrine ]
+  heartLoad: 0.3
+  warning: st14-scan-warn-stim-adrenaline
+  popup: st14-interaction-heart-pounding
+
+- type: st14DrugInteraction
+  id: ST14Speedball
+  drugs: [ ST14Morphine, ST14CombatStim ]
+  minStrength: 0.3
+  heartLoad: 0.2
+  warning: st14-scan-warn-speedball
+  popup: st14-interaction-heart-pounding
+
+- type: st14DrugInteraction
+  id: ST14MorphineAlcohol
+  drugs: [ ST14Morphine, Ethanol ]
+  breathing: 1
+  sedation: 0.3
+  warning: st14-scan-warn-morphine-alcohol
+  popup: st14-interaction-heavy-breath
+
+- type: st14DrugInteraction
+  id: ST14MorphineVenom
+  drugs: [ ST14Morphine, ST14BugVenom ]
+  minStrength: 0.2
+  breathing: 1.5
+  warning: st14-scan-warn-morphine-venom
+  popup: st14-interaction-heavy-breath
+
+- type: st14DrugInteraction
+  id: ST14KetorolacTranexamic
+  drugs: [ ST14Ketorolac, TranexamicAcid ]
+  weakens:
+    TranexamicAcid: 0.3
+  warning: st14-scan-warn-ketorolac-tranexamic
+
+- type: st14DrugInteraction
+  id: ST14KetorolacAlcohol
+  drugs: [ ST14Ketorolac, Ethanol ]
+  bleeding: 0.2
+  warning: st14-scan-warn-ketorolac-alcohol
+
+- type: st14DrugInteraction
+  id: ST14AtropineAdrenaline
+  drugs: [ ST14Atropine, Epinephrine ]
+  heartLoad: 0.25
+  pulse: 20
+  warning: st14-scan-warn-atropine-adrenaline
+  popup: st14-interaction-heart-pounding
+
+- type: st14DrugInteraction
+  id: ST14AtropineAmiodarone
+  drugs: [ ST14Atropine, ST14Amiodarone ]
+  weakens:
+    ST14Atropine: 0.4
+    ST14Amiodarone: 0.4
+  warning: st14-scan-warn-atropine-amiodarone
+
+- type: st14DrugInteraction
+  id: ST14AmiodaroneMorphine
+  drugs: [ ST14Amiodarone, ST14Morphine ]
+  pulse: -18
+  arrest: 0.003
+  warning: st14-scan-warn-bradycardia
+  popup: st14-interaction-slow-heart
+
+- type: st14DrugInteraction
+  id: ST14ModafinilStim
+  drugs: [ ST14Modafinil, ST14CombatStim ]
+  heartLoad: 0.25
+  warning: st14-scan-warn-modafinil-stim
+  popup: st14-interaction-heart-pounding
+
+- type: st14DrugInteraction
+  id: ST14KetamineStim
+  drugs: [ ST14Ketamine, ST14CombatStim ]
+  heartLoad: 0.2
+  dissociation: 0.3
+  warning: st14-scan-warn-ketamine-stim
+  popup: st14-interaction-bad-trip
+
+- type: st14DrugInteraction
+  id: ST14PlasmaTranexamic
+  drugs: [ ST14PlasmaExpander, TranexamicAcid ]
+  weakens:
+    TranexamicAcid: 0.6
+  warning: st14-scan-warn-plasma-tranexamic

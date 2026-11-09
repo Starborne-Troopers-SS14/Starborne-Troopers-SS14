@@ -71,19 +71,27 @@ public sealed partial class ST14SectorSpawnSystem : EntitySystem
         var map = start >= 0 && _sectors.LoadedMaps.TryGetValue(start, out var uid) ? uid : (EntityUid?) null;
 
         // only maps that lay out spawn points for the job take part, every other map keeps the stock rule
-        if (!FindPoints(args, map) && (map == null || !FindPoints(args, null)))
+        // a job no map lays out points for, like the medic, starts with the others of its side
+        if (!FindPoints(args, map, false) && !FindPoints(args, map, true) &&
+            (map == null || !FindPoints(args, null, false) && !FindPoints(args, null, true)))
+        {
             return;
+        }
 
         args.SpawnResult = _stationSpawning.SpawnPlayerMob(_random.Pick(_points), args.Job, args.HumanoidCharacterProfile, args.Station);
     }
 
-    private bool FindPoints(PlayerSpawningEvent args, EntityUid? map)
+    private bool FindPoints(PlayerSpawningEvent args, EntityUid? map, bool anyOfSide)
     {
         _points.Clear();
+        var side = SideOfJob(args.Job!.Value);
         var query = EntityQueryEnumerator<SpawnPointComponent, TransformComponent>();
         while (query.MoveNext(out var uid, out var point, out var xform))
         {
-            if (point.SpawnType != SpawnPointType.Job || point.Job != args.Job)
+            if (point.SpawnType != SpawnPointType.Job || point.Job is not { } job)
+                continue;
+
+            if (anyOfSide ? SideOfJob(job) != side : job != args.Job)
                 continue;
 
             if (map != null && xform.MapUid != map)
