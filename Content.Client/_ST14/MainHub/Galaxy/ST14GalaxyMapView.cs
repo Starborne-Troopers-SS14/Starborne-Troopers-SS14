@@ -832,7 +832,7 @@ public sealed class ST14GalaxyMapView : Control
     /// <summary>
     /// The bugs plan in their own colours, so a commander who sees both plans tells them apart
     /// </summary>
-    private static Color MarkColor(ST14GalaxyFaction side, ST14WarMarkKind kind)
+    public static Color MarkColor(ST14GalaxyFaction side, ST14WarMarkKind kind)
     {
         if (side == ST14GalaxyFaction.Arachnid)
         {
