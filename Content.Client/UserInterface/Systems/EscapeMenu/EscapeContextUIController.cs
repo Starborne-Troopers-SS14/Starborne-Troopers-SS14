@@ -25,6 +25,10 @@ public sealed partial class EscapeContextUIController : UIController
 
     private void CloseWindowOrOpenGameMenu()
     {
+        // ST14: the map of the war over the whole screen closes first
+        if (UIManager.GetUIController<Content.Client._ST14.Sectors.ST14BattleMapUIController>().CloseIfOpen())
+            return;
+
         if (_closeRecentWindowUIController.HasClosableWindow())
         {
             _closeRecentWindowUIController.CloseMostRecentWindow();

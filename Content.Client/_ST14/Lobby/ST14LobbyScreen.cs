@@ -127,6 +127,12 @@ public sealed partial class ST14LobbyScreen : Control
         _support.OnBack += () => _support.Visible = false;
         AddChild(_support);
 
+        // no side in the war yet: the choice over everything, it cannot be skipped
+        if (_sideChoice != null)
+        {
+            AddChild(_sideChoice);
+        }
+
         _left.Play(new Vector2(-90, 0), 0.5f, 0.05f);
         _right.Play(new Vector2(90, 0), 0.5f, 0.12f);
 
@@ -480,6 +486,7 @@ public sealed partial class ST14LobbyScreen : Control
         _editorSlide.Arrange(UIBox2.FromDimensions(new Vector2(Gap, bodyTop), new Vector2(w - Gap * 2, bodyHeight)));
         _settings.Arrange(UIBox2.FromDimensions(Vector2.Zero, finalSize));
         _support.Arrange(UIBox2.FromDimensions(Vector2.Zero, finalSize));
+        _sideChoice?.Arrange(UIBox2.FromDimensions(Vector2.Zero, finalSize));
         return finalSize;
     }
 

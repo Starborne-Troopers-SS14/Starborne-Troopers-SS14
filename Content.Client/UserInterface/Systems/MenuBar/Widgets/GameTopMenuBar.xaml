@@ -45,6 +45,16 @@
         AppendStyleClass="{x:Static style:StyleClass.ButtonSquare}"
         />
     <ui:MenuButton
+        Name="SquadsButton"
+        Access="Internal"
+        Icon="{xe:Tex '/Textures/_ST14/Interface/Hq/icon_rally.png'}"
+        ToolTip="{Loc 'st14-squad-button-tooltip'}"
+        BoundKey = "{x:Static is:ContentKeyFunctions.OpenSquads}"
+        MinSize="42 64"
+        HorizontalExpand="True"
+        AppendStyleClass="{x:Static style:StyleClass.ButtonSquare}"
+        />
+    <ui:MenuButton
         Name="CharacterButton"
         Access="Internal"
         Icon="{xe:Tex '/Textures/Interface/character.svg.192dpi.png'}"

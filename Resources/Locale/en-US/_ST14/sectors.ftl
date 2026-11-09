@@ -32,3 +32,25 @@ st14-side-pick-federation = For the Federation
 st14-side-pick-arachnids = For the arachnids
 
 st14-side-confirm = Sure? { $side }
+
+## Side choice screen
+
+st14-side-choice-title = Choose your side
+st14-side-choice-play = How you fight
+st14-side-choice-note = The side holds until the region is taken whole. It cannot be changed before.
+st14-side-lore-what-title = What
+st14-side-lore-what = A war of extermination between the Terran Federation and the Arachnid Swarm, giant bugs ruled by the will of the brain bugs.
+st14-side-lore-where-title = Where
+st14-side-lore-where = Desert planets on the edge of known space. Each is split into regions, each region into sectors with resource points.
+st14-side-lore-when-title = When
+st14-side-lore-when = The far future, the height of the war. The fleet drops the Mobile Infantry wave after wave, the Swarm grows new hives faster than they burn.
+st14-side-lore-why-title = Why
+st14-side-lore-why = The Swarm wiped out the colonies of the Federation, the Federation came to wipe out the Swarm. There is no peace: a region goes to whoever holds all its sectors.
+st14-side-federation-name = Federation
+st14-side-federation-motto = Mobile Infantry. Ranks, fire, orders.
+st14-side-federation-lore = The citizen soldiers of the Terran Federation. Dropped from orbit onto the planets of the Swarm to take sector after sector and hold them until reinforcements come.
+st14-side-federation-play = Rifles, machine guns and grenades. Engineers raise walls and fortifications on resource points, medics drag the wounded out, the command sets the tasks on the map. Strength is in the ranks and the fire: stay together.
+st14-side-arachnids-name = Swarm
+st14-side-arachnids-motto = Arachnids. Claws, venom, numbers.
+st14-side-arachnids-lore = Countless bugs ruled by one mind. The Swarm digs tunnels, grows queens and throws wave after wave at anyone who sets foot on its ground.
+st14-side-arachnids-play = Claws, venom and acid. Queens lay larvae, the brain bug leads the hive, bugs evolve into new fighters. Strength is in the rush and the numbers: break the infantry lines and take the points.
