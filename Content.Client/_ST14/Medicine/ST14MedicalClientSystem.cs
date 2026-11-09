@@ -21,8 +21,30 @@ public sealed partial class ST14MedicalClientSystem : EntitySystem
     private const string LayerPrefix = "st14med_";
 
     private static readonly SoundSpecifier Heartbeat = new SoundPathSpecifier("/Audio/_ST14/Medicine/heartbeat.wav");
-    private static readonly SoundSpecifier Ringing = new SoundPathSpecifier("/Audio/_ST14/Mobs/Bugs/ear_ringing.wav");
+    private static readonly SoundSpecifier Ringing = new SoundPathSpecifier("/Audio/_ST14/Medicine/shell_shock.wav");
     private static readonly ResPath MarksRsi = new("/Textures/_ST14/Mobs/medical_overlays.rsi");
+    private static readonly ResPath BruteRsi = new("/Textures/Mobs/Effects/brute_damage.rsi");
+    private static readonly ResPath BurnRsi = new("/Textures/Mobs/Effects/burn_damage.rsi");
+    private static readonly Color BloodColor = Color.FromHex("#B0141A");
+    private static readonly string[] Kinds = { "blood", "burn", "tourniquet", "bandage", "splint" };
+
+    /// <summary>
+    /// The parts as the station damage sprites call them
+    /// </summary>
+    private static readonly Dictionary<ST14BodyZone, string> DamageParts = new()
+    {
+        { ST14BodyZone.Head, "Head" },
+        { ST14BodyZone.Torso, "Chest" },
+        { ST14BodyZone.ArmLeft, "LArm" },
+        { ST14BodyZone.ArmRight, "RArm" },
+        { ST14BodyZone.LegLeft, "LLeg" },
+        { ST14BodyZone.LegRight, "RLeg" },
+    };
+
+    /// <summary>
+    /// What is drawn on each body now, so the marks are rebuilt only when they change
+    /// </summary>
+    private readonly Dictionary<EntityUid, string> _drawn = new();
 
     private static readonly Dictionary<ST14BodyZone, string> Parts = new()
     {
@@ -61,6 +83,7 @@ public sealed partial class ST14MedicalClientSystem : EntitySystem
 
         SubscribeNetworkEvent<ST14MedicalShockEvent>(OnShock);
         SubscribeLocalEvent<ST14WoundsComponent, ST14WoundsChangedEvent>(OnWoundsState);
+        SubscribeLocalEvent<ST14WoundsComponent, ComponentShutdown>(OnWoundsShutdown);
 
         _vision = new ST14MedicalVisionOverlay();
         _hud = new ST14MedicHudOverlay();
@@ -148,8 +171,22 @@ public sealed partial class ST14MedicalClientSystem : EntitySystem
         if (!TryComp<SpriteComponent>(ent, out var sprite))
             return;
 
+        // blood and burns under the dressings, the dressings on top, all of it over the clothes
+        var wanted = new List<(string Key, ResPath Rsi, string State, Color Color)>();
         var stumps = ent.Comp.Wounds.Where(w => w.Kind == ST14WoundKind.Stump).Select(w => w.Zone).ToHashSet();
-        var wanted = new HashSet<string>();
+        foreach (var (zone, part) in Parts)
+        {
+            if (stumps.Contains(zone))
+                continue;
+
+            var wounds = ent.Comp.Wounds.Where(w => w.Zone == zone).ToList();
+            if (Level(wounds.Where(w => w.Kind is ST14WoundKind.Cut or ST14WoundKind.Puncture).Sum(w => w.Severity + (w.Arterial ? 0.4f : 0f))) is { } blood)
+                wanted.Add(($"blood_{part}", BruteRsi, $"{DamageParts[zone]}_Brute_{blood}", BloodColor));
+
+            if (Level(wounds.Where(w => w.Kind == ST14WoundKind.Burn).Sum(w => w.Severity)) is { } burn)
+                wanted.Add(($"burn_{part}", BurnRsi, $"{DamageParts[zone]}_Burn_{burn}", Color.White));
+        }
+
         foreach (var (zone, part) in Parts)
         {
             // a stump has nothing left to wear a mark on
@@ -158,35 +195,65 @@ public sealed partial class ST14MedicalClientSystem : EntitySystem
 
             var wounds = ent.Comp.Wounds.Where(w => w.Zone == zone).ToList();
             if (ent.Comp.Tourniquets.ContainsKey(zone))
-                wanted.Add($"tourniquet_{part}");
+                wanted.Add(($"tourniquet_{part}", MarksRsi, $"tourniquet_{part}", Color.White));
 
             if (wounds.Any(w => w.Bandaged || w.Packed))
-                wanted.Add($"bandage_{part}");
+                wanted.Add(($"bandage_{part}", MarksRsi, $"bandage_{part}", Color.White));
 
             if (wounds.Any(w => w.Kind == ST14WoundKind.Fracture && w.Splinted))
-                wanted.Add($"splint_{part}");
+                wanted.Add(($"splint_{part}", MarksRsi, $"splint_{part}", Color.White));
         }
 
+        // the state comes every second: redraw only when the picture is different
+        var signature = string.Join(";", wanted.Select(w => w.State));
+        if (_drawn.TryGetValue(ent, out var drawn) && drawn == signature)
+            return;
+
+        _drawn[ent] = signature;
+        foreach (var key in AllKeys())
+        {
+            _sprite.RemoveLayer((ent.Owner, sprite), LayerPrefix + key, false);
+        }
+
+        foreach (var (key, rsi, state, color) in wanted)
+        {
+            var index = _sprite.AddRsiLayer((ent.Owner, sprite), new RSI.StateId(state), rsi);
+            _sprite.LayerMapSet((ent.Owner, sprite), LayerPrefix + key, index);
+            _sprite.LayerSetColor((ent.Owner, sprite), index, color);
+        }
+    }
+
+    private static IEnumerable<string> AllKeys()
+    {
         foreach (var part in Parts.Values)
         {
-            foreach (var kind in new[] { "tourniquet", "bandage", "splint" })
+            foreach (var kind in Kinds)
             {
-                var state = $"{kind}_{part}";
-                var key = LayerPrefix + state;
-                var has = _sprite.LayerMapTryGet((ent.Owner, sprite), key, out _, false);
-                if (wanted.Contains(state) == has)
-                    continue;
-
-                if (has)
-                {
-                    _sprite.RemoveLayer((ent.Owner, sprite), key, false);
-                    continue;
-                }
-
-                var index = _sprite.AddRsiLayer((ent.Owner, sprite), new RSI.StateId(state), MarksRsi);
-                _sprite.LayerMapSet((ent.Owner, sprite), key, index);
+                yield return $"{kind}_{part}";
             }
         }
+    }
+
+    /// <summary>
+    /// How much of the wound shows, as the steps of the station damage sprites; nothing for a scratch
+    /// </summary>
+    private static int? Level(float amount)
+    {
+        return amount switch
+        {
+            >= 1.0f => 100,
+            >= 0.75f => 70,
+            >= 0.55f => 50,
+            >= 0.35f => 30,
+            >= 0.2f => 20,
+            >= 0.08f => 10,
+            _ => null,
+        };
+    }
+
+    private void OnWoundsShutdown(Entity<ST14WoundsComponent> ent, ref ComponentShutdown args)
+    {
+        _drawn.Remove(ent);
     }
 
     #endregion

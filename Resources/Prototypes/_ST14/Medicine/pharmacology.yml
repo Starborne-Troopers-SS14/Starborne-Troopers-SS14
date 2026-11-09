@@ -54,8 +54,8 @@
 # The heart
 
 - type: st14Drug
-  id: Epinephrine
-  reagent: Epinephrine
+  id: ST14Adrenaline
+  reagent: ST14Adrenaline
   fullDose: 10
   overdose: 30
   summary: st14-drug-summary-adrenaline
@@ -127,8 +127,8 @@
 # The blood
 
 - type: st14Drug
-  id: TranexamicAcid
-  reagent: TranexamicAcid
+  id: ST14Tranexamic
+  reagent: ST14Tranexamic
   fullDose: 10
   overdose: 25
   summary: st14-drug-summary-tranexamic
@@ -227,7 +227,7 @@
 
 - type: st14DrugInteraction
   id: ST14StimAdrenaline
-  drugs: [ ST14CombatStim, Epinephrine ]
+  drugs: [ ST14CombatStim, ST14Adrenaline ]
   heartLoad: 0.3
   warning: st14-scan-warn-stim-adrenaline
   popup: st14-interaction-heart-pounding
@@ -258,9 +258,9 @@
 
 - type: st14DrugInteraction
   id: ST14KetorolacTranexamic
-  drugs: [ ST14Ketorolac, TranexamicAcid ]
+  drugs: [ ST14Ketorolac, ST14Tranexamic ]
   weakens:
-    TranexamicAcid: 0.3
+    ST14Tranexamic: 0.3
   warning: st14-scan-warn-ketorolac-tranexamic
 
 - type: st14DrugInteraction
@@ -271,7 +271,7 @@
 
 - type: st14DrugInteraction
   id: ST14AtropineAdrenaline
-  drugs: [ ST14Atropine, Epinephrine ]
+  drugs: [ ST14Atropine, ST14Adrenaline ]
   heartLoad: 0.25
   pulse: 20
   warning: st14-scan-warn-atropine-adrenaline
@@ -310,7 +310,7 @@
 
 - type: st14DrugInteraction
   id: ST14PlasmaTranexamic
-  drugs: [ ST14PlasmaExpander, TranexamicAcid ]
+  drugs: [ ST14PlasmaExpander, ST14Tranexamic ]
   weakens:
-    TranexamicAcid: 0.6
+    ST14Tranexamic: 0.6
   warning: st14-scan-warn-plasma-tranexamic

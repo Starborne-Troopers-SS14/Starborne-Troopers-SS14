@@ -1,5 +1,9 @@
 using System.Linq;
+using Content.Server.Body.Components;
 using Content.Server.Chat.Systems;
+using Content.Server.Temperature.Systems;
+using Content.Shared.Alert;
+using Content.Shared.Temperature.Components;
 using Content.Shared._ST14.Medicine;
 using Content.Shared.Body;
 using Content.Shared.Body.Components;
@@ -19,6 +23,7 @@ using Content.Shared.Mobs.Systems;
 using Content.Shared.NPC.Prototypes;
 using Content.Shared.NPC.Systems;
 using Content.Shared.Popups;
+using Content.Shared.Speech.Components;
 using Content.Shared.StatusEffectNew;
 using Content.Shared.Stunnable;
 using Content.Shared.Traits.Assorted;
@@ -42,15 +47,22 @@ public sealed partial class ST14WoundSystem : EntitySystem
     private static readonly ProtoId<DamageTypePrototype> Asphyxiation = "Asphyxiation";
     private static readonly ProtoId<NpcFactionPrototype> Hive = "Xeno";
     private static readonly EntProtoId ForcedSleep = "StatusEffectForcedSleeping";
-    private static readonly SoundSpecifier BoneCrack = new SoundPathSpecifier("/Audio/Effects/bone_rattle.ogg", AudioParams.Default.WithPitchScale(0.55f).WithVolume(3f));
+    private static readonly SoundSpecifier BoneCrack = new SoundCollectionSpecifier("ST14BoneCrack", AudioParams.Default.WithVolume(3f).WithVariation(0.08f));
     private static readonly SoundSpecifier HeartStop = new SoundPathSpecifier("/Audio/_ST14/Medicine/flatline.wav", AudioParams.Default.WithVolume(-4f));
 
     private const int MaxWounds = 16;
+
+    /// <summary>
+    /// Blood one bag puts back, a quarter of all the blood of a human
+    /// </summary>
+    private const float TransfusionBlood = 150f;
 
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IRobustRandom _random = default!;
     [Dependency] private AudioSystem _audio = default!;
+    [Dependency] private AlertsSystem _alerts = default!;
+    [Dependency] private SharedAppearanceSystem _appearance = default!;
     [Dependency] private BloodstreamSystem _bloodstream = default!;
     [Dependency] private BodySystem _body = default!;
     [Dependency] private ChatSystem _chat = default!;
@@ -71,10 +83,16 @@ public sealed partial class ST14WoundSystem : EntitySystem
     /// </summary>
     private readonly Dictionary<EntityUid, TimeSpan> _cpr = new();
 
+    /// <summary>
+    /// When a body may grunt at a hit again
+    /// </summary>
+    private readonly Dictionary<EntityUid, TimeSpan> _nextGrunt = new();
+
     public override void Initialize()
     {
         base.Initialize();
 
+        SubscribeLocalEvent<ST14WoundsComponent, MapInitEvent>(OnMapInit);
         SubscribeLocalEvent<ST14WoundsComponent, DamageDealtEvent>(OnDamage);
         SubscribeLocalEvent<ST14WoundsComponent, MobStateChangedEvent>(OnMobState);
         SubscribeLocalEvent<ST14WoundsComponent, TargetDefibrillatedEvent>(OnDefibrillated);
@@ -130,6 +148,21 @@ public sealed partial class ST14WoundSystem : EntitySystem
         return damage.DamageDict.TryGetValue(type, out var value) && value > 0 ? value.Float() : 0f;
     }
 
+    /// <summary>
+    /// The station blood on every part by the total damage is off: the client draws the blood of each wound on its own part
+    /// </summary>
+    private void OnMapInit(Entity<ST14WoundsComponent> ent, ref MapInitEvent args)
+    {
+        _appearance.SetData(ent, DamageVisualizerKeys.Disabled, true);
+
+        // no body heat in the war: no freezing, no heatstroke, no thermometer on the screen
+        RemCompDeferred<TemperatureComponent>(ent);
+        RemCompDeferred<TemperatureDamageComponent>(ent);
+        RemCompDeferred<TemperatureSpeedComponent>(ent);
+        RemCompDeferred<ThermalRegulatorComponent>(ent);
+        _alerts.ClearAlertCategory(ent.Owner, TemperatureSystem.TemperatureAlertCategory);
+    }
+
     private void OnDamage(Entity<ST14WoundsComponent> ent, ref DamageDealtEvent args)
     {
         if (_mobState.IsDead(ent))
@@ -164,6 +197,8 @@ public sealed partial class ST14WoundSystem : EntitySystem
         {
             AddWound(ent, ST14WoundKind.Fracture, zone, 1f, 0f, false);
             _audio.PlayPvs(BoneCrack, ent);
+            _chat.TryEmoteWithChat(ent, "Scream", ignoreActionBlocker: true, forceEmote: true);
+            _nextGrunt[ent] = _timing.CurTime + TimeSpan.FromSeconds(2);
             _popup.PopupEntity(Loc.GetString("st14-wound-fracture-self", ("zone", ST14Zones.Name(zone))), ent, ent, PopupType.LargeCaution);
             _popup.PopupEntity(Loc.GetString("st14-wound-fracture-others", ("victim", ent.Owner)), ent, Filter.PvsExcept(ent), true, PopupType.MediumCaution);
             ent.Comp.PainSpike = MathF.Min(90f, ent.Comp.PainSpike + 35f);
@@ -173,7 +208,24 @@ public sealed partial class ST14WoundSystem : EntitySystem
         if (slash > 0f && args.Origin is { } attacker && TryComp<ST14VenomousComponent>(attacker, out var venom))
             Envenom(ent, venom);
 
+        // a grunt at a hit that hurts, not a stream of them under fire
+        var now = _timing.CurTime;
+        if (total >= 6f && !_mobState.IsIncapacitated(ent) && now >= _nextGrunt.GetValueOrDefault(ent))
+        {
+            _nextGrunt[ent] = now + TimeSpan.FromSeconds(_random.NextFloat(1.2f, 2.2f));
+            PlayVoice(ent, "ST14Pain");
+        }
+
         Dirty(ent);
+    }
+
+    /// <summary>
+    /// Plays one sound of the body's own voice, picked in the character editor, without a chat line
+    /// </summary>
+    public void PlayVoice(EntityUid uid, string emote)
+    {
+        if (TryComp<VocalComponent>(uid, out var vocal) && vocal.EmoteSounds is { } sounds)
+            _chat.TryPlayEmoteSound(uid, _prototypes.Index(sounds), emote);
     }
 
     private void Envenom(Entity<ST14WoundsComponent> ent, ST14VenomousComponent venom)
@@ -354,6 +406,8 @@ public sealed partial class ST14WoundSystem : EntitySystem
             ST14TreatmentKind.Splint => comp.Wounds.Any(w => w.Zone == zone && w.Kind == ST14WoundKind.Fracture && !w.Splinted),
             ST14TreatmentKind.Suture => open.Count > 0 || comp.Wounds.Any(w => w.Zone == zone && w.Kind == ST14WoundKind.Malunion),
             ST14TreatmentKind.Disinfect => comp.Wounds.Any(w => w.Zone == zone && ST14Zones.IsOpen(w.Kind) && (!w.Clean || w.Infection > 0.05f)),
+            // the blood goes into the vein of the arm or, with no arms left, of the chest
+            ST14TreatmentKind.Transfusion => zone == ST14BodyZone.Torso && comp.Blood < 0.97f,
             _ => false,
         };
     }
@@ -427,6 +481,15 @@ public sealed partial class ST14WoundSystem : EntitySystem
                     wound.Packed = false;
                     wound.Bleed = 0f;
                     wound.Arterial = false;
+                }
+
+                break;
+
+            case ST14TreatmentKind.Transfusion:
+                if (TryComp<BloodstreamComponent>(ent, out var blood))
+                {
+                    _bloodstream.TryModifyBloodLevel((ent.Owner, blood), FixedPoint2.New(TransfusionBlood));
+                    ent.Comp.Blood = _bloodstream.GetBloodLevel((ent.Owner, blood));
                 }
 
                 break;
@@ -525,6 +588,7 @@ public sealed partial class ST14WoundSystem : EntitySystem
     {
         if (args.NewMobState == MobState.Dead)
         {
+            _nextGrunt.Remove(ent);
             ent.Comp.Pulse = 0;
             ent.Comp.Bleeding = 0f;
         }
@@ -804,6 +868,7 @@ public sealed partial class ST14WoundSystem : EntitySystem
             else if (comp.Pain >= 45f)
             {
                 _chat.TrySendInGameICMessage(ent, Loc.GetString("st14-pain-groan"), InGameICChatType.Emote, false, ignoreActionBlocker: true);
+                PlayVoice(ent, "ST14Groan");
                 comp.NextVoice = now + TimeSpan.FromSeconds(_random.NextFloat(12f, 20f));
             }
             else if (comp.Fever >= 0.5f)

@@ -111,12 +111,14 @@ public sealed partial class HumanoidProfileEditor
         var speciesPrototype = _prototypeManager.Index(Profile.Species);
         var availableVoices = speciesPrototype.Voices;
 
-        _voices.AddRange(availableVoices.Select(protoId => _prototypeManager.Index(protoId)));
+        // ST14: only the voices of the character's sex
+        var sex = Profile.Sex;
+        _voices.AddRange(availableVoices.Select(protoId => _prototypeManager.Index(protoId)).Where(proto => proto.ST14Fits(sex)));
 
         if (_voices.All(proto => Profile?.Voice != proto.ID))
             SetVoice(speciesPrototype.DefaultSoundsBySex[(int)Profile.Sex]);
 
-        for (var i = 0; i < availableVoices.Count; i++)
+        for (var i = 0; i < _voices.Count; i++)
         {
             var name = Loc.GetString(_voices[i].VoiceSelectorName);
             VoiceButton.AddItem(name, i);

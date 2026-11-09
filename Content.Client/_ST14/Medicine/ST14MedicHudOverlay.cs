@@ -62,7 +62,8 @@ public sealed partial class ST14MedicHudOverlay : Overlay
                 continue;
 
             var dead = mobState.IsDead(uid);
-            var calling = _entities.HasComponent<ST14CallingMedicComponent>(uid);
+            _entities.TryGetComponent<ST14CallingMedicComponent>(uid, out var call);
+            var calling = call != null;
             var stopped = wounds.Heart == ST14HeartState.Arrest && !dead;
             var fracture = wounds.Wounds.Any(w => w.Kind == ST14WoundKind.Fracture && !w.Splinted);
             var dying = wounds.Tourniquets.Values.Any(s => s >= wounds.IschemiaTime);
@@ -89,7 +90,9 @@ public sealed partial class ST14MedicHudOverlay : Overlay
             var top = position + new Vector2(0f, 0.75f);
             if (calling && !dead)
             {
-                DrawCross(handle, top + new Vector2(0f, 0.32f), 0.2f + 0.04f * pulse);
+                var crossColor = call!.Responder == null ? Color.FromHex("#E01818")
+                    : call.Responder == _player.LocalEntity ? Color.FromHex("#2FBF5A") : Color.FromHex("#8A8A8A");
+                DrawCross(handle, top + new Vector2(0f, 0.32f), 0.2f + (call.Responder == null ? 0.04f * pulse : 0f), crossColor);
                 top += new Vector2(0f, 0.02f);
             }
 
@@ -185,10 +188,10 @@ public sealed partial class ST14MedicHudOverlay : Overlay
         Triangle(handle, at + new Vector2(-r * 1.7f, r * 0.2f), at + new Vector2(r * 1.7f, r * 0.2f), at - new Vector2(0f, r * 1.9f), color);
     }
 
-    private static void DrawCross(DrawingHandleWorld handle, Vector2 at, float size)
+    private static void DrawCross(DrawingHandleWorld handle, Vector2 at, float size, Color fill)
     {
         var arm = size * 0.33f;
-        foreach (var (box, color) in new[] { (0.035f, Color.White), (0f, Color.FromHex("#E01818")) })
+        foreach (var (box, color) in new[] { (0.035f, Color.White), (0f, fill) })
         {
             handle.DrawRect(new Box2(at.X - arm - box, at.Y - size - box, at.X + arm + box, at.Y + size + box), color);
             handle.DrawRect(new Box2(at.X - size - box, at.Y - arm - box, at.X + size + box, at.Y + arm + box), color);

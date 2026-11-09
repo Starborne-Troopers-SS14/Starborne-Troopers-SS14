@@ -1,0 +1,1062 @@
+# The clips of every trooper voice and the sounds of bones breaking and limbs tearing
+
+- type: soundCollection
+  id: ST14VoiceMale1Scream
+  files:
+  - /Audio/_ST14/Voice/male1/scream1.wav
+  - /Audio/_ST14/Voice/male1/scream2.wav
+  - /Audio/_ST14/Voice/male1/scream3.wav
+  - /Audio/_ST14/Voice/male1/scream4.wav
+
+- type: soundCollection
+  id: ST14VoiceMale1Death
+  files:
+  - /Audio/_ST14/Voice/male1/death1.wav
+  - /Audio/_ST14/Voice/male1/death2.wav
+  - /Audio/_ST14/Voice/male1/death3.wav
+  - /Audio/_ST14/Voice/male1/death4.wav
+
+- type: soundCollection
+  id: ST14VoiceMale1Hit
+  files:
+  - /Audio/_ST14/Voice/male1/hit1.wav
+  - /Audio/_ST14/Voice/male1/hit2.wav
+  - /Audio/_ST14/Voice/male1/hit3.wav
+  - /Audio/_ST14/Voice/male1/hit4.wav
+  - /Audio/_ST14/Voice/male1/hit5.wav
+
+- type: soundCollection
+  id: ST14VoiceMale1Groan
+  files:
+  - /Audio/_ST14/Voice/male1/groan1.wav
+  - /Audio/_ST14/Voice/male1/groan2.wav
+  - /Audio/_ST14/Voice/male1/groan3.wav
+  - /Audio/_ST14/Voice/male1/groan4.wav
+
+- type: soundCollection
+  id: ST14VoiceMale1Warcry
+  files:
+  - /Audio/_ST14/Voice/male1/warcry1.wav
+  - /Audio/_ST14/Voice/male1/warcry2.wav
+  - /Audio/_ST14/Voice/male1/warcry3.wav
+  - /Audio/_ST14/Voice/male1/warcry4.wav
+
+- type: soundCollection
+  id: ST14VoiceMale1Hurrah
+  files:
+  - /Audio/_ST14/Voice/male1/hurrah1.wav
+  - /Audio/_ST14/Voice/male1/hurrah2.wav
+  - /Audio/_ST14/Voice/male1/hurrah3.wav
+
+- type: soundCollection
+  id: ST14VoiceMale1Charge
+  files:
+  - /Audio/_ST14/Voice/male1/charge1.wav
+  - /Audio/_ST14/Voice/male1/charge2.wav
+  - /Audio/_ST14/Voice/male1/charge3.wav
+
+- type: soundCollection
+  id: ST14VoiceMale1Fear
+  files:
+  - /Audio/_ST14/Voice/male1/fear1.wav
+  - /Audio/_ST14/Voice/male1/fear2.wav
+  - /Audio/_ST14/Voice/male1/fear3.wav
+
+- type: soundCollection
+  id: ST14VoiceMale1Cheer
+  files:
+  - /Audio/_ST14/Voice/male1/cheer1.wav
+  - /Audio/_ST14/Voice/male1/cheer2.wav
+  - /Audio/_ST14/Voice/male1/cheer3.wav
+
+- type: soundCollection
+  id: ST14VoiceMale1Grenade
+  files:
+  - /Audio/_ST14/Voice/male1/grenade1.wav
+  - /Audio/_ST14/Voice/male1/grenade2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale1Go
+  files:
+  - /Audio/_ST14/Voice/male1/go1.wav
+  - /Audio/_ST14/Voice/male1/go2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale1Hold
+  files:
+  - /Audio/_ST14/Voice/male1/hold1.wav
+  - /Audio/_ST14/Voice/male1/hold2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale1Back
+  files:
+  - /Audio/_ST14/Voice/male1/back1.wav
+  - /Audio/_ST14/Voice/male1/back2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale1Steady
+  files:
+  - /Audio/_ST14/Voice/male1/steady1.wav
+  - /Audio/_ST14/Voice/male1/steady2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale2Scream
+  files:
+  - /Audio/_ST14/Voice/male2/scream1.wav
+  - /Audio/_ST14/Voice/male2/scream2.wav
+  - /Audio/_ST14/Voice/male2/scream3.wav
+  - /Audio/_ST14/Voice/male2/scream4.wav
+
+- type: soundCollection
+  id: ST14VoiceMale2Death
+  files:
+  - /Audio/_ST14/Voice/male2/death1.wav
+  - /Audio/_ST14/Voice/male2/death2.wav
+  - /Audio/_ST14/Voice/male2/death3.wav
+  - /Audio/_ST14/Voice/male2/death4.wav
+
+- type: soundCollection
+  id: ST14VoiceMale2Hit
+  files:
+  - /Audio/_ST14/Voice/male2/hit1.wav
+  - /Audio/_ST14/Voice/male2/hit2.wav
+  - /Audio/_ST14/Voice/male2/hit3.wav
+  - /Audio/_ST14/Voice/male2/hit4.wav
+  - /Audio/_ST14/Voice/male2/hit5.wav
+
+- type: soundCollection
+  id: ST14VoiceMale2Groan
+  files:
+  - /Audio/_ST14/Voice/male2/groan1.wav
+  - /Audio/_ST14/Voice/male2/groan2.wav
+  - /Audio/_ST14/Voice/male2/groan3.wav
+  - /Audio/_ST14/Voice/male2/groan4.wav
+
+- type: soundCollection
+  id: ST14VoiceMale2Warcry
+  files:
+  - /Audio/_ST14/Voice/male2/warcry1.wav
+  - /Audio/_ST14/Voice/male2/warcry2.wav
+  - /Audio/_ST14/Voice/male2/warcry3.wav
+  - /Audio/_ST14/Voice/male2/warcry4.wav
+
+- type: soundCollection
+  id: ST14VoiceMale2Hurrah
+  files:
+  - /Audio/_ST14/Voice/male2/hurrah1.wav
+  - /Audio/_ST14/Voice/male2/hurrah2.wav
+  - /Audio/_ST14/Voice/male2/hurrah3.wav
+
+- type: soundCollection
+  id: ST14VoiceMale2Charge
+  files:
+  - /Audio/_ST14/Voice/male2/charge1.wav
+  - /Audio/_ST14/Voice/male2/charge2.wav
+  - /Audio/_ST14/Voice/male2/charge3.wav
+
+- type: soundCollection
+  id: ST14VoiceMale2Fear
+  files:
+  - /Audio/_ST14/Voice/male2/fear1.wav
+  - /Audio/_ST14/Voice/male2/fear2.wav
+  - /Audio/_ST14/Voice/male2/fear3.wav
+
+- type: soundCollection
+  id: ST14VoiceMale2Cheer
+  files:
+  - /Audio/_ST14/Voice/male2/cheer1.wav
+  - /Audio/_ST14/Voice/male2/cheer2.wav
+  - /Audio/_ST14/Voice/male2/cheer3.wav
+
+- type: soundCollection
+  id: ST14VoiceMale2Grenade
+  files:
+  - /Audio/_ST14/Voice/male2/grenade1.wav
+  - /Audio/_ST14/Voice/male2/grenade2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale2Go
+  files:
+  - /Audio/_ST14/Voice/male2/go1.wav
+  - /Audio/_ST14/Voice/male2/go2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale2Hold
+  files:
+  - /Audio/_ST14/Voice/male2/hold1.wav
+  - /Audio/_ST14/Voice/male2/hold2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale2Back
+  files:
+  - /Audio/_ST14/Voice/male2/back1.wav
+  - /Audio/_ST14/Voice/male2/back2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale2Steady
+  files:
+  - /Audio/_ST14/Voice/male2/steady1.wav
+  - /Audio/_ST14/Voice/male2/steady2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale3Scream
+  files:
+  - /Audio/_ST14/Voice/male3/scream1.wav
+  - /Audio/_ST14/Voice/male3/scream2.wav
+  - /Audio/_ST14/Voice/male3/scream3.wav
+  - /Audio/_ST14/Voice/male3/scream4.wav
+
+- type: soundCollection
+  id: ST14VoiceMale3Death
+  files:
+  - /Audio/_ST14/Voice/male3/death1.wav
+  - /Audio/_ST14/Voice/male3/death2.wav
+  - /Audio/_ST14/Voice/male3/death3.wav
+  - /Audio/_ST14/Voice/male3/death4.wav
+
+- type: soundCollection
+  id: ST14VoiceMale3Hit
+  files:
+  - /Audio/_ST14/Voice/male3/hit1.wav
+  - /Audio/_ST14/Voice/male3/hit2.wav
+  - /Audio/_ST14/Voice/male3/hit3.wav
+  - /Audio/_ST14/Voice/male3/hit4.wav
+  - /Audio/_ST14/Voice/male3/hit5.wav
+
+- type: soundCollection
+  id: ST14VoiceMale3Groan
+  files:
+  - /Audio/_ST14/Voice/male3/groan1.wav
+  - /Audio/_ST14/Voice/male3/groan2.wav
+  - /Audio/_ST14/Voice/male3/groan3.wav
+  - /Audio/_ST14/Voice/male3/groan4.wav
+
+- type: soundCollection
+  id: ST14VoiceMale3Warcry
+  files:
+  - /Audio/_ST14/Voice/male3/warcry1.wav
+  - /Audio/_ST14/Voice/male3/warcry2.wav
+  - /Audio/_ST14/Voice/male3/warcry3.wav
+  - /Audio/_ST14/Voice/male3/warcry4.wav
+
+- type: soundCollection
+  id: ST14VoiceMale3Hurrah
+  files:
+  - /Audio/_ST14/Voice/male3/hurrah1.wav
+  - /Audio/_ST14/Voice/male3/hurrah2.wav
+  - /Audio/_ST14/Voice/male3/hurrah3.wav
+
+- type: soundCollection
+  id: ST14VoiceMale3Charge
+  files:
+  - /Audio/_ST14/Voice/male3/charge1.wav
+  - /Audio/_ST14/Voice/male3/charge2.wav
+  - /Audio/_ST14/Voice/male3/charge3.wav
+
+- type: soundCollection
+  id: ST14VoiceMale3Fear
+  files:
+  - /Audio/_ST14/Voice/male3/fear1.wav
+  - /Audio/_ST14/Voice/male3/fear2.wav
+  - /Audio/_ST14/Voice/male3/fear3.wav
+
+- type: soundCollection
+  id: ST14VoiceMale3Cheer
+  files:
+  - /Audio/_ST14/Voice/male3/cheer1.wav
+  - /Audio/_ST14/Voice/male3/cheer2.wav
+  - /Audio/_ST14/Voice/male3/cheer3.wav
+
+- type: soundCollection
+  id: ST14VoiceMale3Grenade
+  files:
+  - /Audio/_ST14/Voice/male3/grenade1.wav
+  - /Audio/_ST14/Voice/male3/grenade2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale3Go
+  files:
+  - /Audio/_ST14/Voice/male3/go1.wav
+  - /Audio/_ST14/Voice/male3/go2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale3Hold
+  files:
+  - /Audio/_ST14/Voice/male3/hold1.wav
+  - /Audio/_ST14/Voice/male3/hold2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale3Back
+  files:
+  - /Audio/_ST14/Voice/male3/back1.wav
+  - /Audio/_ST14/Voice/male3/back2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale3Steady
+  files:
+  - /Audio/_ST14/Voice/male3/steady1.wav
+  - /Audio/_ST14/Voice/male3/steady2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale4Scream
+  files:
+  - /Audio/_ST14/Voice/male4/scream1.wav
+  - /Audio/_ST14/Voice/male4/scream2.wav
+  - /Audio/_ST14/Voice/male4/scream3.wav
+  - /Audio/_ST14/Voice/male4/scream4.wav
+
+- type: soundCollection
+  id: ST14VoiceMale4Death
+  files:
+  - /Audio/_ST14/Voice/male4/death1.wav
+  - /Audio/_ST14/Voice/male4/death2.wav
+  - /Audio/_ST14/Voice/male4/death3.wav
+  - /Audio/_ST14/Voice/male4/death4.wav
+
+- type: soundCollection
+  id: ST14VoiceMale4Hit
+  files:
+  - /Audio/_ST14/Voice/male4/hit1.wav
+  - /Audio/_ST14/Voice/male4/hit2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale4Groan
+  files:
+  - /Audio/_ST14/Voice/male4/groan1.wav
+  - /Audio/_ST14/Voice/male4/groan2.wav
+  - /Audio/_ST14/Voice/male4/groan3.wav
+  - /Audio/_ST14/Voice/male4/groan4.wav
+
+- type: soundCollection
+  id: ST14VoiceMale4Warcry
+  files:
+  - /Audio/_ST14/Voice/male4/warcry1.wav
+  - /Audio/_ST14/Voice/male4/warcry2.wav
+  - /Audio/_ST14/Voice/male4/warcry3.wav
+  - /Audio/_ST14/Voice/male4/warcry4.wav
+
+- type: soundCollection
+  id: ST14VoiceMale4Hurrah
+  files:
+  - /Audio/_ST14/Voice/male4/hurrah1.wav
+  - /Audio/_ST14/Voice/male4/hurrah2.wav
+  - /Audio/_ST14/Voice/male4/hurrah3.wav
+
+- type: soundCollection
+  id: ST14VoiceMale4Charge
+  files:
+  - /Audio/_ST14/Voice/male4/charge1.wav
+  - /Audio/_ST14/Voice/male4/charge2.wav
+  - /Audio/_ST14/Voice/male4/charge3.wav
+
+- type: soundCollection
+  id: ST14VoiceMale4Fear
+  files:
+  - /Audio/_ST14/Voice/male4/fear1.wav
+  - /Audio/_ST14/Voice/male4/fear2.wav
+  - /Audio/_ST14/Voice/male4/fear3.wav
+
+- type: soundCollection
+  id: ST14VoiceMale4Cheer
+  files:
+  - /Audio/_ST14/Voice/male4/cheer1.wav
+  - /Audio/_ST14/Voice/male4/cheer2.wav
+  - /Audio/_ST14/Voice/male4/cheer3.wav
+
+- type: soundCollection
+  id: ST14VoiceMale4Grenade
+  files:
+  - /Audio/_ST14/Voice/male4/grenade1.wav
+  - /Audio/_ST14/Voice/male4/grenade2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale4Go
+  files:
+  - /Audio/_ST14/Voice/male4/go1.wav
+  - /Audio/_ST14/Voice/male4/go2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale4Hold
+  files:
+  - /Audio/_ST14/Voice/male4/hold1.wav
+  - /Audio/_ST14/Voice/male4/hold2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale4Back
+  files:
+  - /Audio/_ST14/Voice/male4/back1.wav
+  - /Audio/_ST14/Voice/male4/back2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale4Steady
+  files:
+  - /Audio/_ST14/Voice/male4/steady1.wav
+  - /Audio/_ST14/Voice/male4/steady2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale5Scream
+  files:
+  - /Audio/_ST14/Voice/male5/scream1.wav
+  - /Audio/_ST14/Voice/male5/scream2.wav
+  - /Audio/_ST14/Voice/male5/scream3.wav
+  - /Audio/_ST14/Voice/male5/scream4.wav
+
+- type: soundCollection
+  id: ST14VoiceMale5Death
+  files:
+  - /Audio/_ST14/Voice/male5/death1.wav
+  - /Audio/_ST14/Voice/male5/death2.wav
+  - /Audio/_ST14/Voice/male5/death3.wav
+  - /Audio/_ST14/Voice/male5/death4.wav
+
+- type: soundCollection
+  id: ST14VoiceMale5Hit
+  files:
+  - /Audio/_ST14/Voice/male5/hit1.wav
+  - /Audio/_ST14/Voice/male5/hit2.wav
+  - /Audio/_ST14/Voice/male5/hit3.wav
+  - /Audio/_ST14/Voice/male5/hit4.wav
+  - /Audio/_ST14/Voice/male5/hit5.wav
+
+- type: soundCollection
+  id: ST14VoiceMale5Groan
+  files:
+  - /Audio/_ST14/Voice/male5/groan1.wav
+  - /Audio/_ST14/Voice/male5/groan2.wav
+  - /Audio/_ST14/Voice/male5/groan3.wav
+  - /Audio/_ST14/Voice/male5/groan4.wav
+
+- type: soundCollection
+  id: ST14VoiceMale5Warcry
+  files:
+  - /Audio/_ST14/Voice/male5/warcry1.wav
+  - /Audio/_ST14/Voice/male5/warcry2.wav
+  - /Audio/_ST14/Voice/male5/warcry3.wav
+  - /Audio/_ST14/Voice/male5/warcry4.wav
+
+- type: soundCollection
+  id: ST14VoiceMale5Hurrah
+  files:
+  - /Audio/_ST14/Voice/male5/hurrah1.wav
+  - /Audio/_ST14/Voice/male5/hurrah2.wav
+  - /Audio/_ST14/Voice/male5/hurrah3.wav
+
+- type: soundCollection
+  id: ST14VoiceMale5Charge
+  files:
+  - /Audio/_ST14/Voice/male5/charge1.wav
+  - /Audio/_ST14/Voice/male5/charge2.wav
+  - /Audio/_ST14/Voice/male5/charge3.wav
+
+- type: soundCollection
+  id: ST14VoiceMale5Fear
+  files:
+  - /Audio/_ST14/Voice/male5/fear1.wav
+  - /Audio/_ST14/Voice/male5/fear2.wav
+  - /Audio/_ST14/Voice/male5/fear3.wav
+
+- type: soundCollection
+  id: ST14VoiceMale5Cheer
+  files:
+  - /Audio/_ST14/Voice/male5/cheer1.wav
+  - /Audio/_ST14/Voice/male5/cheer2.wav
+  - /Audio/_ST14/Voice/male5/cheer3.wav
+
+- type: soundCollection
+  id: ST14VoiceMale5Grenade
+  files:
+  - /Audio/_ST14/Voice/male5/grenade1.wav
+  - /Audio/_ST14/Voice/male5/grenade2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale5Go
+  files:
+  - /Audio/_ST14/Voice/male5/go1.wav
+  - /Audio/_ST14/Voice/male5/go2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale5Hold
+  files:
+  - /Audio/_ST14/Voice/male5/hold1.wav
+  - /Audio/_ST14/Voice/male5/hold2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale5Back
+  files:
+  - /Audio/_ST14/Voice/male5/back1.wav
+  - /Audio/_ST14/Voice/male5/back2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale5Steady
+  files:
+  - /Audio/_ST14/Voice/male5/steady1.wav
+  - /Audio/_ST14/Voice/male5/steady2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale1Scream
+  files:
+  - /Audio/_ST14/Voice/female1/scream1.wav
+  - /Audio/_ST14/Voice/female1/scream2.wav
+  - /Audio/_ST14/Voice/female1/scream3.wav
+  - /Audio/_ST14/Voice/female1/scream4.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale1Death
+  files:
+  - /Audio/_ST14/Voice/female1/death1.wav
+  - /Audio/_ST14/Voice/female1/death2.wav
+  - /Audio/_ST14/Voice/female1/death3.wav
+  - /Audio/_ST14/Voice/female1/death4.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale1Hit
+  files:
+  - /Audio/_ST14/Voice/female1/hit1.wav
+  - /Audio/_ST14/Voice/female1/hit2.wav
+  - /Audio/_ST14/Voice/female1/hit3.wav
+  - /Audio/_ST14/Voice/female1/hit4.wav
+  - /Audio/_ST14/Voice/female1/hit5.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale1Groan
+  files:
+  - /Audio/_ST14/Voice/female1/groan1.wav
+  - /Audio/_ST14/Voice/female1/groan2.wav
+  - /Audio/_ST14/Voice/female1/groan3.wav
+  - /Audio/_ST14/Voice/female1/groan4.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale1Warcry
+  files:
+  - /Audio/_ST14/Voice/female1/warcry1.wav
+  - /Audio/_ST14/Voice/female1/warcry2.wav
+  - /Audio/_ST14/Voice/female1/warcry3.wav
+  - /Audio/_ST14/Voice/female1/warcry4.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale1Hurrah
+  files:
+  - /Audio/_ST14/Voice/female1/hurrah1.wav
+  - /Audio/_ST14/Voice/female1/hurrah2.wav
+  - /Audio/_ST14/Voice/female1/hurrah3.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale1Charge
+  files:
+  - /Audio/_ST14/Voice/female1/charge1.wav
+  - /Audio/_ST14/Voice/female1/charge2.wav
+  - /Audio/_ST14/Voice/female1/charge3.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale1Fear
+  files:
+  - /Audio/_ST14/Voice/female1/fear1.wav
+  - /Audio/_ST14/Voice/female1/fear2.wav
+  - /Audio/_ST14/Voice/female1/fear3.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale1Cheer
+  files:
+  - /Audio/_ST14/Voice/female1/cheer1.wav
+  - /Audio/_ST14/Voice/female1/cheer2.wav
+  - /Audio/_ST14/Voice/female1/cheer3.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale1Grenade
+  files:
+  - /Audio/_ST14/Voice/female1/grenade1.wav
+  - /Audio/_ST14/Voice/female1/grenade2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale1Go
+  files:
+  - /Audio/_ST14/Voice/female1/go1.wav
+  - /Audio/_ST14/Voice/female1/go2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale1Hold
+  files:
+  - /Audio/_ST14/Voice/female1/hold1.wav
+  - /Audio/_ST14/Voice/female1/hold2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale1Back
+  files:
+  - /Audio/_ST14/Voice/female1/back1.wav
+  - /Audio/_ST14/Voice/female1/back2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale1Steady
+  files:
+  - /Audio/_ST14/Voice/female1/steady1.wav
+  - /Audio/_ST14/Voice/female1/steady2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale2Scream
+  files:
+  - /Audio/_ST14/Voice/female2/scream1.wav
+  - /Audio/_ST14/Voice/female2/scream2.wav
+  - /Audio/_ST14/Voice/female2/scream3.wav
+  - /Audio/_ST14/Voice/female2/scream4.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale2Death
+  files:
+  - /Audio/_ST14/Voice/female2/death1.wav
+  - /Audio/_ST14/Voice/female2/death2.wav
+  - /Audio/_ST14/Voice/female2/death3.wav
+  - /Audio/_ST14/Voice/female2/death4.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale2Hit
+  files:
+  - /Audio/_ST14/Voice/female2/hit1.wav
+  - /Audio/_ST14/Voice/female2/hit2.wav
+  - /Audio/_ST14/Voice/female2/hit3.wav
+  - /Audio/_ST14/Voice/female2/hit4.wav
+  - /Audio/_ST14/Voice/female2/hit5.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale2Groan
+  files:
+  - /Audio/_ST14/Voice/female2/groan1.wav
+  - /Audio/_ST14/Voice/female2/groan2.wav
+  - /Audio/_ST14/Voice/female2/groan3.wav
+  - /Audio/_ST14/Voice/female2/groan4.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale2Warcry
+  files:
+  - /Audio/_ST14/Voice/female2/warcry1.wav
+  - /Audio/_ST14/Voice/female2/warcry2.wav
+  - /Audio/_ST14/Voice/female2/warcry3.wav
+  - /Audio/_ST14/Voice/female2/warcry4.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale2Hurrah
+  files:
+  - /Audio/_ST14/Voice/female2/hurrah1.wav
+  - /Audio/_ST14/Voice/female2/hurrah2.wav
+  - /Audio/_ST14/Voice/female2/hurrah3.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale2Charge
+  files:
+  - /Audio/_ST14/Voice/female2/charge1.wav
+  - /Audio/_ST14/Voice/female2/charge2.wav
+  - /Audio/_ST14/Voice/female2/charge3.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale2Fear
+  files:
+  - /Audio/_ST14/Voice/female2/fear1.wav
+  - /Audio/_ST14/Voice/female2/fear2.wav
+  - /Audio/_ST14/Voice/female2/fear3.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale2Cheer
+  files:
+  - /Audio/_ST14/Voice/female2/cheer1.wav
+  - /Audio/_ST14/Voice/female2/cheer2.wav
+  - /Audio/_ST14/Voice/female2/cheer3.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale2Grenade
+  files:
+  - /Audio/_ST14/Voice/female2/grenade1.wav
+  - /Audio/_ST14/Voice/female2/grenade2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale2Go
+  files:
+  - /Audio/_ST14/Voice/female2/go1.wav
+  - /Audio/_ST14/Voice/female2/go2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale2Hold
+  files:
+  - /Audio/_ST14/Voice/female2/hold1.wav
+  - /Audio/_ST14/Voice/female2/hold2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale2Back
+  files:
+  - /Audio/_ST14/Voice/female2/back1.wav
+  - /Audio/_ST14/Voice/female2/back2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale2Steady
+  files:
+  - /Audio/_ST14/Voice/female2/steady1.wav
+  - /Audio/_ST14/Voice/female2/steady2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale3Scream
+  files:
+  - /Audio/_ST14/Voice/female3/scream1.wav
+  - /Audio/_ST14/Voice/female3/scream2.wav
+  - /Audio/_ST14/Voice/female3/scream3.wav
+  - /Audio/_ST14/Voice/female3/scream4.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale3Death
+  files:
+  - /Audio/_ST14/Voice/female3/death1.wav
+  - /Audio/_ST14/Voice/female3/death2.wav
+  - /Audio/_ST14/Voice/female3/death3.wav
+  - /Audio/_ST14/Voice/female3/death4.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale3Hit
+  files:
+  - /Audio/_ST14/Voice/female3/hit1.wav
+  - /Audio/_ST14/Voice/female3/hit2.wav
+  - /Audio/_ST14/Voice/female3/hit3.wav
+  - /Audio/_ST14/Voice/female3/hit4.wav
+  - /Audio/_ST14/Voice/female3/hit5.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale3Groan
+  files:
+  - /Audio/_ST14/Voice/female3/groan1.wav
+  - /Audio/_ST14/Voice/female3/groan2.wav
+  - /Audio/_ST14/Voice/female3/groan3.wav
+  - /Audio/_ST14/Voice/female3/groan4.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale3Warcry
+  files:
+  - /Audio/_ST14/Voice/female3/warcry1.wav
+  - /Audio/_ST14/Voice/female3/warcry2.wav
+  - /Audio/_ST14/Voice/female3/warcry3.wav
+  - /Audio/_ST14/Voice/female3/warcry4.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale3Hurrah
+  files:
+  - /Audio/_ST14/Voice/female3/hurrah1.wav
+  - /Audio/_ST14/Voice/female3/hurrah2.wav
+  - /Audio/_ST14/Voice/female3/hurrah3.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale3Charge
+  files:
+  - /Audio/_ST14/Voice/female3/charge1.wav
+  - /Audio/_ST14/Voice/female3/charge2.wav
+  - /Audio/_ST14/Voice/female3/charge3.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale3Fear
+  files:
+  - /Audio/_ST14/Voice/female3/fear1.wav
+  - /Audio/_ST14/Voice/female3/fear2.wav
+  - /Audio/_ST14/Voice/female3/fear3.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale3Cheer
+  files:
+  - /Audio/_ST14/Voice/female3/cheer1.wav
+  - /Audio/_ST14/Voice/female3/cheer2.wav
+  - /Audio/_ST14/Voice/female3/cheer3.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale3Grenade
+  files:
+  - /Audio/_ST14/Voice/female3/grenade1.wav
+  - /Audio/_ST14/Voice/female3/grenade2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale3Go
+  files:
+  - /Audio/_ST14/Voice/female3/go1.wav
+  - /Audio/_ST14/Voice/female3/go2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale3Hold
+  files:
+  - /Audio/_ST14/Voice/female3/hold1.wav
+  - /Audio/_ST14/Voice/female3/hold2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale3Back
+  files:
+  - /Audio/_ST14/Voice/female3/back1.wav
+  - /Audio/_ST14/Voice/female3/back2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale3Steady
+  files:
+  - /Audio/_ST14/Voice/female3/steady1.wav
+  - /Audio/_ST14/Voice/female3/steady2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale4Scream
+  files:
+  - /Audio/_ST14/Voice/female4/scream1.wav
+  - /Audio/_ST14/Voice/female4/scream2.wav
+  - /Audio/_ST14/Voice/female4/scream3.wav
+  - /Audio/_ST14/Voice/female4/scream4.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale4Death
+  files:
+  - /Audio/_ST14/Voice/female4/death1.wav
+  - /Audio/_ST14/Voice/female4/death2.wav
+  - /Audio/_ST14/Voice/female4/death3.wav
+  - /Audio/_ST14/Voice/female4/death4.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale4Hit
+  files:
+  - /Audio/_ST14/Voice/female4/hit1.wav
+  - /Audio/_ST14/Voice/female4/hit2.wav
+  - /Audio/_ST14/Voice/female4/hit3.wav
+  - /Audio/_ST14/Voice/female4/hit4.wav
+  - /Audio/_ST14/Voice/female4/hit5.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale4Groan
+  files:
+  - /Audio/_ST14/Voice/female4/groan1.wav
+  - /Audio/_ST14/Voice/female4/groan2.wav
+  - /Audio/_ST14/Voice/female4/groan3.wav
+  - /Audio/_ST14/Voice/female4/groan4.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale4Warcry
+  files:
+  - /Audio/_ST14/Voice/female4/warcry1.wav
+  - /Audio/_ST14/Voice/female4/warcry2.wav
+  - /Audio/_ST14/Voice/female4/warcry3.wav
+  - /Audio/_ST14/Voice/female4/warcry4.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale4Hurrah
+  files:
+  - /Audio/_ST14/Voice/female4/hurrah1.wav
+  - /Audio/_ST14/Voice/female4/hurrah2.wav
+  - /Audio/_ST14/Voice/female4/hurrah3.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale4Charge
+  files:
+  - /Audio/_ST14/Voice/female4/charge1.wav
+  - /Audio/_ST14/Voice/female4/charge2.wav
+  - /Audio/_ST14/Voice/female4/charge3.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale4Fear
+  files:
+  - /Audio/_ST14/Voice/female4/fear1.wav
+  - /Audio/_ST14/Voice/female4/fear2.wav
+  - /Audio/_ST14/Voice/female4/fear3.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale4Cheer
+  files:
+  - /Audio/_ST14/Voice/female4/cheer1.wav
+  - /Audio/_ST14/Voice/female4/cheer2.wav
+  - /Audio/_ST14/Voice/female4/cheer3.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale4Grenade
+  files:
+  - /Audio/_ST14/Voice/female4/grenade1.wav
+  - /Audio/_ST14/Voice/female4/grenade2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale4Go
+  files:
+  - /Audio/_ST14/Voice/female4/go1.wav
+  - /Audio/_ST14/Voice/female4/go2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale4Hold
+  files:
+  - /Audio/_ST14/Voice/female4/hold1.wav
+  - /Audio/_ST14/Voice/female4/hold2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale4Back
+  files:
+  - /Audio/_ST14/Voice/female4/back1.wav
+  - /Audio/_ST14/Voice/female4/back2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale4Steady
+  files:
+  - /Audio/_ST14/Voice/female4/steady1.wav
+  - /Audio/_ST14/Voice/female4/steady2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale5Scream
+  files:
+  - /Audio/_ST14/Voice/female5/scream1.wav
+  - /Audio/_ST14/Voice/female5/scream2.wav
+  - /Audio/_ST14/Voice/female5/scream3.wav
+  - /Audio/_ST14/Voice/female5/scream4.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale5Death
+  files:
+  - /Audio/_ST14/Voice/female5/death1.wav
+  - /Audio/_ST14/Voice/female5/death2.wav
+  - /Audio/_ST14/Voice/female5/death3.wav
+  - /Audio/_ST14/Voice/female5/death4.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale5Hit
+  files:
+  - /Audio/_ST14/Voice/female5/hit1.wav
+  - /Audio/_ST14/Voice/female5/hit2.wav
+  - /Audio/_ST14/Voice/female5/hit3.wav
+  - /Audio/_ST14/Voice/female5/hit4.wav
+  - /Audio/_ST14/Voice/female5/hit5.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale5Groan
+  files:
+  - /Audio/_ST14/Voice/female5/groan1.wav
+  - /Audio/_ST14/Voice/female5/groan2.wav
+  - /Audio/_ST14/Voice/female5/groan3.wav
+  - /Audio/_ST14/Voice/female5/groan4.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale5Warcry
+  files:
+  - /Audio/_ST14/Voice/female5/warcry1.wav
+  - /Audio/_ST14/Voice/female5/warcry2.wav
+  - /Audio/_ST14/Voice/female5/warcry3.wav
+  - /Audio/_ST14/Voice/female5/warcry4.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale5Hurrah
+  files:
+  - /Audio/_ST14/Voice/female5/hurrah1.wav
+  - /Audio/_ST14/Voice/female5/hurrah2.wav
+  - /Audio/_ST14/Voice/female5/hurrah3.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale5Charge
+  files:
+  - /Audio/_ST14/Voice/female5/charge1.wav
+  - /Audio/_ST14/Voice/female5/charge2.wav
+  - /Audio/_ST14/Voice/female5/charge3.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale5Fear
+  files:
+  - /Audio/_ST14/Voice/female5/fear1.wav
+  - /Audio/_ST14/Voice/female5/fear2.wav
+  - /Audio/_ST14/Voice/female5/fear3.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale5Cheer
+  files:
+  - /Audio/_ST14/Voice/female5/cheer1.wav
+  - /Audio/_ST14/Voice/female5/cheer2.wav
+  - /Audio/_ST14/Voice/female5/cheer3.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale5Grenade
+  files:
+  - /Audio/_ST14/Voice/female5/grenade1.wav
+  - /Audio/_ST14/Voice/female5/grenade2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale5Go
+  files:
+  - /Audio/_ST14/Voice/female5/go1.wav
+  - /Audio/_ST14/Voice/female5/go2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale5Hold
+  files:
+  - /Audio/_ST14/Voice/female5/hold1.wav
+  - /Audio/_ST14/Voice/female5/hold2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale5Back
+  files:
+  - /Audio/_ST14/Voice/female5/back1.wav
+  - /Audio/_ST14/Voice/female5/back2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale5Steady
+  files:
+  - /Audio/_ST14/Voice/female5/steady1.wav
+  - /Audio/_ST14/Voice/female5/steady2.wav
+
+- type: soundCollection
+  id: ST14BoneCrack
+  files:
+  - /Audio/_ST14/Voice/sfx/bone_crack1.wav
+  - /Audio/_ST14/Voice/sfx/bone_crack2.wav
+  - /Audio/_ST14/Voice/sfx/bone_crack3.wav
+
+- type: soundCollection
+  id: ST14LimbTear
+  files:
+  - /Audio/_ST14/Voice/sfx/limb_tear1.wav
+  - /Audio/_ST14/Voice/sfx/limb_tear2.wav
+  - /Audio/_ST14/Voice/sfx/limb_tear3.wav
+
+- type: soundCollection
+  id: ST14VoiceMale1Tear
+  files:
+  - /Audio/_ST14/Voice/male1/tear1.wav
+  - /Audio/_ST14/Voice/male1/tear2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale2Tear
+  files:
+  - /Audio/_ST14/Voice/male2/tear1.wav
+  - /Audio/_ST14/Voice/male2/tear2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale3Tear
+  files:
+  - /Audio/_ST14/Voice/male3/tear1.wav
+  - /Audio/_ST14/Voice/male3/tear2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale4Tear
+  files:
+  - /Audio/_ST14/Voice/male4/tear1.wav
+  - /Audio/_ST14/Voice/male4/tear2.wav
+
+- type: soundCollection
+  id: ST14VoiceMale5Tear
+  files:
+  - /Audio/_ST14/Voice/male5/tear1.wav
+  - /Audio/_ST14/Voice/male5/tear2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale1Tear
+  files:
+  - /Audio/_ST14/Voice/female1/tear1.wav
+  - /Audio/_ST14/Voice/female1/tear2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale2Tear
+  files:
+  - /Audio/_ST14/Voice/female2/tear1.wav
+  - /Audio/_ST14/Voice/female2/tear2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale3Tear
+  files:
+  - /Audio/_ST14/Voice/female3/tear1.wav
+  - /Audio/_ST14/Voice/female3/tear2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale4Tear
+  files:
+  - /Audio/_ST14/Voice/female4/tear1.wav
+  - /Audio/_ST14/Voice/female4/tear2.wav
+
+- type: soundCollection
+  id: ST14VoiceFemale5Tear
+  files:
+  - /Audio/_ST14/Voice/female5/tear1.wav
+  - /Audio/_ST14/Voice/female5/tear2.wav

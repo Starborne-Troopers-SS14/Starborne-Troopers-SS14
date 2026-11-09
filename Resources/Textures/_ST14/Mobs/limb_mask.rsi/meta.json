@@ -1,0 +1,74 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-3.0",
+  "copyright": "Made for Starborne Troopers from the human body parts of tgstation (human_parts_greyscale.dmi, modified by DrSmugleaf): masks that cut clothing off a missing limb",
+  "size": {
+    "x": 32,
+    "y": 32
+  },
+  "load": {
+    "srgb": false
+  },
+  "states": [
+    {
+      "name": "mask1",
+      "directions": 4
+    },
+    {
+      "name": "mask2",
+      "directions": 4
+    },
+    {
+      "name": "mask3",
+      "directions": 4
+    },
+    {
+      "name": "mask4",
+      "directions": 4
+    },
+    {
+      "name": "mask5",
+      "directions": 4
+    },
+    {
+      "name": "mask6",
+      "directions": 4
+    },
+    {
+      "name": "mask7",
+      "directions": 4
+    },
+    {
+      "name": "mask8",
+      "directions": 4
+    },
+    {
+      "name": "mask9",
+      "directions": 4
+    },
+    {
+      "name": "mask10",
+      "directions": 4
+    },
+    {
+      "name": "mask11",
+      "directions": 4
+    },
+    {
+      "name": "mask12",
+      "directions": 4
+    },
+    {
+      "name": "mask13",
+      "directions": 4
+    },
+    {
+      "name": "mask14",
+      "directions": 4
+    },
+    {
+      "name": "mask15",
+      "directions": 4
+    }
+  ]
+}

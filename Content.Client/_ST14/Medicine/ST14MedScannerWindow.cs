@@ -45,6 +45,8 @@ public sealed class ST14MedScannerWindow : DefaultWindow
     private readonly ST14MedBar _load;
     private readonly Label _bleeding;
     private readonly BoxContainer _warnings;
+    private readonly Label _warningsTitle;
+    private readonly ScrollContainer _warningsScroll;
     private readonly BoxContainer _wounds;
     private readonly BoxContainer _drugs;
     private readonly Label _range;
@@ -103,13 +105,13 @@ public sealed class ST14MedScannerWindow : DefaultWindow
         right.AddChild(vitals);
 
         // what is dangerous right now
-        var warningsTitle = ST14HubStyle.Label(_cache, Loc.GetString("st14-scan-warnings"), ST14HubFont.Bold, 14, Danger);
-        warningsTitle.Margin = new Thickness(0, 10, 0, 0);
-        right.AddChild(warningsTitle);
+        _warningsTitle = ST14HubStyle.Label(_cache, Loc.GetString("st14-scan-warnings"), ST14HubFont.Bold, 14, Danger);
+        _warningsTitle.Margin = new Thickness(0, 10, 0, 0);
+        right.AddChild(_warningsTitle);
         _warnings = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 2 };
-        var warningsScroll = new ScrollContainer { HScrollEnabled = false, SetHeight = 118 };
-        warningsScroll.AddChild(_warnings);
-        right.AddChild(warningsScroll);
+        _warningsScroll = new ScrollContainer { HScrollEnabled = false, SetHeight = 118 };
+        _warningsScroll.AddChild(_warnings);
+        right.AddChild(_warningsScroll);
 
         // wounds and drugs side by side
         var lists = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 12, VerticalExpand = true };
@@ -178,9 +180,10 @@ public sealed class ST14MedScannerWindow : DefaultWindow
         _bleeding.Text = Loc.GetString("st14-scan-per-second", ("value", state.Bleeding.ToString("0.00")));
         _bleeding.FontColorOverride = state.Bleeding >= 1f ? Danger : state.Bleeding > 0.05f ? ST14HubStyle.Orange : Good;
 
+        // nothing threatens the patient: no red block at all
         _warnings.RemoveAllChildren();
-        if (state.Warnings.Length == 0)
-            _warnings.AddChild(Line(Loc.GetString("st14-scan-all-clear"), Good));
+        _warningsTitle.Visible = state.Warnings.Length > 0;
+        _warningsScroll.Visible = state.Warnings.Length > 0;
 
         foreach (var warning in state.Warnings)
         {

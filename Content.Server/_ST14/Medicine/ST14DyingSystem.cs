@@ -116,7 +116,8 @@ public sealed partial class ST14DyingSystem : EntitySystem
             _audio.PlayGlobal(ent.Comp.HitSound, actor.PlayerSession);
     }
 
-    private void NextBeat(Entity<ST14DyingComponent> ent)
+    /// <param name="after">The beat just done: the next one keeps the rhythm from it, not from when the server got to it</param>
+    private void NextBeat(Entity<ST14DyingComponent> ent, TimeSpan? after = null)
     {
         var critical = _thresholds.GetThresholdForState(ent, MobState.Critical);
         var dead = _thresholds.GetThresholdForState(ent, MobState.Dead);
@@ -125,7 +126,8 @@ public sealed partial class ST14DyingSystem : EntitySystem
             : 0f;
 
         ent.Comp.BeatInterval = MathHelper.Lerp(ent.Comp.FastestInterval, ent.Comp.SlowestInterval, progress);
-        ent.Comp.NextBeat = _timing.CurTime + TimeSpan.FromSeconds(ent.Comp.BeatInterval);
+        var from = after is { } last && last + TimeSpan.FromSeconds(ent.Comp.BeatInterval) > _timing.CurTime ? last : _timing.CurTime;
+        ent.Comp.NextBeat = from + TimeSpan.FromSeconds(ent.Comp.BeatInterval);
         ent.Comp.Result = ST14BeatResult.None;
         ent.Comp.ReviveBeat = false;
         Dirty(ent);
@@ -154,7 +156,7 @@ public sealed partial class ST14DyingSystem : EntitySystem
 
         // the damage or the healing may have changed the state and taken the heart away
         if (TryComp<ST14DyingComponent>(ent, out var dying))
-            NextBeat((ent, dying));
+            NextBeat((ent, dying), dying.NextBeat);
     }
 
     public override void Update(float frameTime)
