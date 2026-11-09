@@ -53,6 +53,18 @@ public sealed class ST14CanvasLayout : Control
         return Add(control, Vector2.Zero, Vector2.One, Vector2.Zero, Vector2.Zero);
     }
 
+    /// <summary>
+    /// Moves a child that is already placed, its anchors and size stay
+    /// </summary>
+    public void MoveTo(Control control, Vector2 position)
+    {
+        if (!_slots.TryGetValue(control, out var slot) || slot.Position == position)
+            return;
+
+        _slots[control] = slot with { Position = position };
+        InvalidateArrange();
+    }
+
     protected override void ChildRemoved(Control child)
     {
         base.ChildRemoved(child);

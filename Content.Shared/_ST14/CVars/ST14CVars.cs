@@ -34,10 +34,11 @@ public static partial class ST14CVars
         CVarDef.Create("st14.hub_debug", false, CVar.CLIENTONLY);
 
     /// <summary>
-    /// Forces a lobby theme by id, for example ST14Arachnids, empty picks it from the selected character
+    /// Forces a lobby theme by id for a preview, for example ST14Arachnids, empty picks it from the selected character.
+    /// Lives until the client closes: a saved value would switch the automatic theme off for good
     /// </summary>
     public static readonly CVarDef<string> LobbyTheme =
-        CVarDef.Create("st14.lobby_theme", string.Empty, CVar.CLIENTONLY | CVar.ARCHIVE);
+        CVarDef.Create("st14.lobby_theme_preview", string.Empty, CVar.CLIENTONLY);
 
     /// <summary>
     /// Supporter perks picked on the support screen, sent to the server on connect. Empty means not picked
