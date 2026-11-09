@@ -236,6 +236,12 @@ public sealed class ST14PlanetWar
     /// </summary>
     public ST14GalaxyFaction Turn = ST14GalaxyFaction.Federation;
 
+    /// <summary>
+    /// The region the war is fought in, -1 between regions. The first battle locks it, and both commands fight only
+    /// there until the Federation holds all of it
+    /// </summary>
+    public int ActiveRegion = -1;
+
     public ST14PlanetWar(ST14GalaxyPlanetPrototype planet, string codePrefix)
     {
         Grid = new ST14HexGrid(planet.HexFrequency);
@@ -454,10 +460,14 @@ public sealed class ST14PlanetWar
     public HashSet<int> TargetOptions(ST14GalaxyFaction side)
     {
         var options = new HashSet<int>();
+        var locked = ActiveRegion >= 0 && ActiveRegion < RegionCenters.Length;
         if (side == ST14GalaxyFaction.Federation)
         {
             for (var r = 0; r < RegionCenters.Length; r++)
             {
+                if (locked && r != ActiveRegion)
+                    continue;
+
                 var held = false;
                 for (var i = 0; i < Cells.Length; i++)
                 {
@@ -479,9 +489,11 @@ public sealed class ST14PlanetWar
             return options;
         }
 
+        bool InWar(int i) => !locked || Cells[i].Region == ActiveRegion;
+
         for (var i = 0; i < Cells.Length; i++)
         {
-            if (Cells[i].Faction == ST14GalaxyFaction.Federation)
+            if (InWar(i) && Cells[i].Faction == ST14GalaxyFaction.Federation)
                 options.Add(i);
         }
 
@@ -490,12 +502,17 @@ public sealed class ST14PlanetWar
 
         for (var i = 0; i < Cells.Length; i++)
         {
-            if (Cells[i].Initialized)
+            if (InWar(i) && Cells[i].Initialized)
                 options.Add(i);
         }
 
         if (options.Count == 0)
-            options.UnionWith(RegionCenters);
+        {
+            if (locked)
+                options.Add(RegionCenters[ActiveRegion]);
+            else
+                options.UnionWith(RegionCenters);
+        }
 
         return options;
     }
@@ -523,19 +540,47 @@ public sealed class ST14PlanetWar
     /// is a battle that ran out of time, the attack has failed. A staging sector of the bugs falls to troopers who
     /// wipe the bugs out even though it was the bugs who were attacking
     /// </summary>
-    public void ApplyResult(int target, int staging, ST14GalaxyFaction? winner)
+    /// <remarks>
+    /// A sector with resource points goes by them instead: <paramref name="points"/> holds such sectors of the battle,
+    /// each with the side that holds all of its points, or null when no side does and the sector stays as it is.
+    /// Returns true when the Federation took the whole region of the war, which frees the commands to pick another one
+    /// </remarks>
+    public bool ApplyResult(int target, int staging, ST14GalaxyFaction? winner, IReadOnlyDictionary<int, ST14GalaxyFaction?>? points = null)
     {
+        LockRegion(target);
+
         var holder = Cells[target].Faction;
+        var byPoints = points ?? new Dictionary<int, ST14GalaxyFaction?>();
         if (winner is { } side)
         {
-            if (side != holder)
+            if (side != holder && !byPoints.ContainsKey(target))
                 SetHolder(target, side);
-            else if (side == ST14GalaxyFaction.Federation && staging >= 0)
+            else if (side == holder && side == ST14GalaxyFaction.Federation && staging >= 0 && !byPoints.ContainsKey(staging))
                 SetHolder(staging, side);
         }
 
+        foreach (var (cell, pointsHolder) in byPoints)
+        {
+            if (pointsHolder is { } taker && cell >= 0 && cell < Cells.Length && Cells[cell].Faction != taker)
+                SetHolder(cell, taker);
+        }
+
+        var taken = ActiveRegion >= 0 && Cells.All(c => c.Region != ActiveRegion || c.Faction == ST14GalaxyFaction.Federation);
+        if (taken)
+            ActiveRegion = -1;
+
         Turn = Enemy(Turn);
         RefreshFront();
+        return taken;
+    }
+
+    /// <summary>
+    /// A battle started in the region of the cell: when no region is fought for yet, the war is now bound to this one
+    /// </summary>
+    public void LockRegion(int cell)
+    {
+        if (ActiveRegion < 0 && cell >= 0 && cell < Cells.Length)
+            ActiveRegion = Cells[cell].Region;
     }
 
     private void SetHolder(int index, ST14GalaxyFaction side)
@@ -567,8 +612,9 @@ public sealed class ST14PlanetWar
     /// <summary>
     /// Takes the state of the cells from the server or from a save. A state made for another grid is ignored
     /// </summary>
-    public bool ImportState(IReadOnlyList<ST14HexCellState> states, ST14GalaxyFaction turn)
+    public bool ImportState(IReadOnlyList<ST14HexCellState> states, ST14GalaxyFaction turn, int activeRegion = -1)
     {
+        ActiveRegion = activeRegion >= 0 && activeRegion < RegionCenters.Length ? activeRegion : -1;
         if (states.Count != Cells.Length)
             return false;
 

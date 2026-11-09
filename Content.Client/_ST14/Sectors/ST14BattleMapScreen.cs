@@ -185,7 +185,7 @@ public sealed class ST14BattleMapScreen : ST14WarScreenBase
         }
 
         if (_war.TryGetState(planet.ID, out var warState))
-            _planetWar.ImportState(warState.Cells, warState.Turn);
+            _planetWar.ImportState(warState.Cells, warState.Turn, warState.ActiveRegion);
 
         return _planetWar;
     }
@@ -415,7 +415,8 @@ public sealed class ST14BattleMapScreen : ST14WarScreenBase
     private void BuildLeft(ST14BattleMapStateEvent? state, ST14PlanetWar? war)
     {
         var shown = _hovered ?? _selected ?? (state?.Here >= 0 ? state.Here : null);
-        var key = $"{state?.Active}|{shown}|{_battleMode}|{(shown is { } c && war != null ? war.Cells[c].Faction : default)}";
+        var points = _system.Live?.Points.Where(p => p.Cell == shown).ToList() ?? new List<ST14SubsectorPoint>();
+        var key = $"{state?.Active}|{shown}|{_battleMode}|{(shown is { } c && war != null ? war.Cells[c].Faction : default)}|{string.Join(",", points.Select(p => p.Holder))}";
         if (key == _leftKey)
             return;
 
@@ -436,6 +437,14 @@ public sealed class ST14BattleMapScreen : ST14WarScreenBase
             AddFact("st14-hq-fact-region", war.Cells[war.RegionCenters[hex.Region]].Code, Color.White, ref y);
             AddFact("st14-hq-fact-fights", Loc.GetString(hex.Initialized ? "st14-hq-fought" : "st14-hq-not-fought"), Color.White, ref y);
             AddFact("st14-battle-map-fact-losses", Loc.GetString("st14-hq-losses", ("bugs", hex.BugsKilled), ("troopers", hex.TroopersKilled)), Color.White, ref y);
+
+            // the subsectors: whoever holds every point when the round ends takes the sector
+            if (points.Count > 0)
+            {
+                AddFact("st14-battle-map-fact-points", Loc.GetString("st14-battle-map-points",
+                    ("federation", points.Count(p => p.Holder == ST14GalaxyFaction.Federation)),
+                    ("bugs", points.Count(p => p.Holder == ST14GalaxyFaction.Arachnid)), ("total", points.Count)), Color.White, ref y);
+            }
 
             y += 12;
             var loaded = IsLoaded(cell);

@@ -18,7 +18,7 @@ namespace Content.Client._ST14.Sectors;
 /// to. The planet is a sphere and cannot lie flat as a whole, the few sectors of a battle can. The wheel zooms, the left
 /// button drags the map or draws with a tool, the right button puts the tool away
 /// </summary>
-public sealed class ST14BattleMapView : Control
+public sealed partial class ST14BattleMapView : Control
 {
     private const float DragThreshold = 6f;
     private const float MaxZoom = 8f;
@@ -518,6 +518,7 @@ public sealed class ST14BattleMapView : Control
         handle.DrawTextureRect(_system.Vignette(), new UIBox2(Vector2.Zero, PixelSize));
 
         _buffer.Clear();
+        AddSubsectors();
         foreach (var (cell, place) in _layout)
         {
             if (Sector(cell) is { } sector)
@@ -525,6 +526,7 @@ public sealed class ST14BattleMapView : Control
         }
 
         AddPassages();
+        AddPointMarks();
         AddMarks(state);
         _buffer.Draw(handle, Texture.White);
 
@@ -534,6 +536,7 @@ public sealed class ST14BattleMapView : Control
         AddMates();
         AddPlayer(state);
         _buffer.Draw(handle, Texture.White);
+        DrawPointLetters(handle);
         DrawLabels(handle, state);
     }
 

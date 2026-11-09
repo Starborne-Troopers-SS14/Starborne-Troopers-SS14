@@ -244,11 +244,16 @@ public readonly record struct ST14SquadMate(string Name, int Cell, Vector2 Posit
 /// What moves on the map, sent every second while it is open: the icons and where the squad is
 /// </summary>
 [Serializable, NetSerializable]
-public sealed class ST14BattleMapLiveEvent(int round, ST14MapIconInfo[] icons, ST14SquadMate[] mates) : EntityEventArgs
+public sealed class ST14BattleMapLiveEvent(int round, ST14MapIconInfo[] icons, ST14SquadMate[] mates, ST14SubsectorPoint[] points) : EntityEventArgs
 {
     public readonly int Round = round;
     public readonly ST14MapIconInfo[] Icons = icons;
     public readonly ST14SquadMate[] Mates = mates;
+
+    /// <summary>
+    /// The resource points of the loaded sectors, each the middle of a subsector
+    /// </summary>
+    public readonly ST14SubsectorPoint[] Points = points;
 }
 
 [Serializable, NetSerializable]

@@ -44,3 +44,5 @@ st14-squad-verb-invite = Invite to squad { $number }
 st14-squad-verb-join = Join squad { $number }
 st14-squad-invited = { $from } asks you into squad { $number }. Answer on the squad panel on the right
 st14-squad-invite-sent = Invitation sent: { $name }
+st14-battle-map-fact-points = Points
+st14-battle-map-points = troopers { $federation } · bugs { $bugs } of { $total }
