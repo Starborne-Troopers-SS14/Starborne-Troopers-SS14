@@ -229,6 +229,7 @@ namespace Content.Client.Options.UI.Tabs
             AddButton(ContentKeyFunctions.OpenCharacterMenu);
             AddButton(ContentKeyFunctions.OpenCraftingMenu);
             AddButton(ST14KeyFunctions.OpenEngineerBuildMenu); // ST14
+            AddButton(ST14KeyFunctions.Heartbeat); // ST14
             AddButton(ContentKeyFunctions.OpenGuidebook);
             AddButton(ContentKeyFunctions.OpenBattleMap); // ST14
             AddButton(ContentKeyFunctions.OpenInventoryMenu);

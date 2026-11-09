@@ -242,6 +242,9 @@ binds:
 - function: OpenEngineerBuildMenu
   type: State
   key: G
+- function: Heartbeat
+  type: State
+  key: Space
 - function: OpenBattleMap
   type: State
   key: M
