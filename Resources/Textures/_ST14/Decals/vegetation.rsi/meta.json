@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "license": "All-Rights-Reserved",
+  "copyright": "(c) Starborne Troopers, Denlero. All rights reserved.",
+  "size": {
+    "x": 84,
+    "y": 54
+  },
+  "states": [
+    {
+      "name": "grassMound1"
+    },
+    {
+      "name": "grassMound2"
+    },
+    {
+      "name": "grassMound3"
+    },
+    {
+      "name": "grassMound4"
+    },
+    {
+      "name": "grassPatch1"
+    },
+    {
+      "name": "grassPatch2"
+    },
+    {
+      "name": "grassPatch3"
+    },
+    {
+      "name": "grassPatch4"
+    },
+    {
+      "name": "grassPiece1"
+    },
+    {
+      "name": "grassPiece2"
+    },
+    {
+      "name": "grassPiece3"
+    },
+    {
+      "name": "grassPiece4"
+    },
+    {
+      "name": "grassPiece5"
+    },
+    {
+      "name": "grassPiece6"
+    },
+    {
+      "name": "grassPiece7"
+    },
+    {
+      "name": "reeds1"
+    },
+    {
+      "name": "reeds2"
+    },
+    {
+      "name": "reeds3"
+    },
+    {
+      "name": "reeds4"
+    },
+    {
+      "name": "fern_green"
+    },
+    {
+      "name": "fern_red"
+    },
+    {
+      "name": "shrub1"
+    },
+    {
+      "name": "shrub2"
+    },
+    {
+      "name": "shrub3"
+    },
+    {
+      "name": "smallFern_green"
+    },
+    {
+      "name": "smallFern_red"
+    }
+  ]
+}
