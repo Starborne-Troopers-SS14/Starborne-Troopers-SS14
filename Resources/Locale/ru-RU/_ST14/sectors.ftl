@@ -10,3 +10,9 @@ st14-sector-template-command-done = Шаблон сектора сохранён
 ent-ST14SpawnPointEngineer = инженер
 ent-ST14SectorQueenSlot = место королевы
     .desc = Здесь в начале раунда может появиться королева улья.
+
+st14-sector-time-up = Время вышло: нападение провалилось.
+st14-sector-gate-closed = Буря закрывает этот путь.
+st14-sector-gate-not-initialized = За сектор { $code } ещё не было боёв, прохода нет.
+ent-ST14SectorGateBase = проход в сектор
+    .desc = За бурей лежит следующий сектор. Пройти туда можно, только если за него уже шли бои.

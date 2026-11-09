@@ -313,6 +313,19 @@ public abstract partial class SharedMindSystem : EntitySystem
     /// <summary>
     /// Detaches a mind from all entities and clears the user ID.
     /// </summary>
+    // ST14-start
+    /// <summary>
+    /// A body loaded from a saved sector map still names the mind it had last round, which is gone
+    /// </summary>
+    public void ClearSavedMind(Entity<MindContainerComponent> ent)
+    {
+        ent.Comp.Mind = null;
+        ent.Comp.HasMind = false;
+        ent.Comp.LastMind = null;
+        Dirty(ent);
+    }
+    // ST14-end
+
     public void WipeMind(EntityUid? mindId, MindComponent? mind = null)
     {
         if (mindId == null || !Resolve(mindId.Value, ref mind, false))

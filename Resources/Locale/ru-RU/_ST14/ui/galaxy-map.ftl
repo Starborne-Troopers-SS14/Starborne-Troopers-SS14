@@ -23,25 +23,23 @@ st14-galaxy-planet-locked = Операций здесь пока нет. Сей�
 
 st14-galaxy-surface-label = Секторов на планете: { $count }
 st14-galaxy-surface-bugs = Под контролем арахнидов: { $count }
-st14-galaxy-surface-available = Доступно для высадки: { $count }
+st14-galaxy-surface-available = Можно выбрать для боя: { $count }
 st14-galaxy-surface-hives = Обнаружено ульев: { $count }
-st14-galaxy-surface-help = Федерация ещё не закрепилась на планете. Высадка возможна только в отмеченный сектор, каждая победа откроет соседние.
+st14-galaxy-surface-help = Планета поделена на регионы по семь секторов. Над центром каждого висит авианосец «Роджер Янг», с него начинается высадка. Один раунд решает судьбу одного сектора, после него ход переходит к другой стороне.
 st14-galaxy-to-landing = К сектору высадки
 
 st14-galaxy-cell-name = Сектор { $code }
-st14-galaxy-cell-available = Доступен для высадки
+st14-galaxy-cell-available = Можно выбрать для боя
 st14-galaxy-cell-terrain = Местность: { $terrain }
 st14-galaxy-cell-hive = Улей арахнидов
 st14-galaxy-cell-base = База Федерации
 st14-galaxy-cell-held = Сектор удерживает Федерация. Отсюда начинаются наступления на соседние секторы.
-st14-galaxy-cell-front = Сектор на линии фронта. Мобильная пехота может высадиться и отбить его у жуков.
-st14-galaxy-cell-deep = Глубоко в тылу жуков. Сначала нужно освободить соседние секторы.
+st14-galaxy-cell-front = Командование, чей сейчас ход, может выбрать этот сектор для следующего боя.
+st14-galaxy-cell-deep = Пока недоступен: регион захватывают от центра, сектор за сектором.
 st14-galaxy-cell-back = К обзору планеты
 st14-galaxy-land = Высадиться
 st14-galaxy-land-held = Сектор под контролем
-st14-galaxy-land-no-path = Нет плацдарма рядом
-
-st14-galaxy-terrain-1 = скальные пустоши
+st14-galaxy-land-no-path = Сейчас не выбрать
 st14-galaxy-terrain-2 = каньоны
 st14-galaxy-terrain-3 = поле ульев
 st14-galaxy-terrain-4 = кратеры
@@ -143,12 +141,10 @@ st14-galaxy-sector-lethe = Лета
 st14-galaxy-sector-gloom = Мрачная туманность
 
 st14-galaxy-target = Цель атаки: сектор { $code }
-st14-galaxy-cell-target = Цель Высшего командования
-st14-galaxy-order = Назначить целью атаки
+st14-galaxy-cell-target = Цель текущего хода
+st14-galaxy-order = Выбрать для боя
 st14-galaxy-land-not-target = Цель выбирает командование
-
-st14-war-command-description = Галактическая война: состояние, итог раунда в целевом секторе, смена цели, сброс.
-st14-war-command-help = st14_war status|win|objective|loss|reset [планета] или st14_war target <номер сектора> [планета]
+st14-war-command-help = st14_war status|win|loss|timeout|reset [планета] или st14_war target <номер> [планета]
 st14-war-command-no-planet = Нет планеты с войной: { $planet }
 st14-war-command-no-target = У планеты нет целевого сектора.
 st14-war-command-bad-target = Этот сектор нельзя сделать целью: он не на линии фронта.
@@ -190,3 +186,7 @@ st14-command-role-taken = { $player }: роль «{ $side }» снята.
 
 st14-war-command-reset-failed = Не удалось сбросить войну на { $planet }: это не планета войны.
 st14-command-role-failed = Команда не выполнена: { $error }
+st14-galaxy-turn = Ход: { $faction }
+st14-galaxy-cell-region = Регион { $code }
+st14-galaxy-cell-staging = Плацдарм атакующих
+st14-galaxy-staging = Собираться здесь
