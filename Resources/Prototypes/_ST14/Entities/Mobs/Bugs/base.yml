@@ -92,6 +92,13 @@
     - CannotSuicide
     - DoorBumpOpener
   - type: NoSlip
+  # alt-click pries doors, shutters and the like open, the same as the station xenos
+  - type: Prying
+    pryPowered: true
+    force: true
+    speedModifier: 1.5
+    useSound:
+      path: /Audio/Items/crowbar.ogg
   - type: Speech
     speechVerb: LargeMob
   # emotes from the wheel need it; a ghost role adds it, but evolved and job bugs never become ghost roles
