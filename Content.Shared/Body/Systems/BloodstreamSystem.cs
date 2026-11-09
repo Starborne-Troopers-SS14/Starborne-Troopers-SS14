@@ -508,6 +508,18 @@ public sealed partial class BloodstreamSystem : EntitySystem
 
         tempSolution.AddSolution(leakedBlood, ProtoMan);
 
+        // ST14 begin: blood leaves decals instead of puddles
+        if (HasComp<ST14BloodDecalsComponent>(ent))
+        {
+            var bleedEv = new ST14BleedOutEvent(leakedBlood.Volume);
+            RaiseLocalEvent(ent, ref bleedEv);
+
+            tempSolution.RemoveAllSolution();
+            _solutionContainer.UpdateChemicals(ent.Comp.TemporarySolution.Value);
+            return true;
+        }
+        // ST14 end
+
         if (tempSolution.Volume > ent.Comp.BleedPuddleThreshold)
         {
             _puddle.TrySpillAt(ent.Owner, tempSolution, out _, sound: false);
