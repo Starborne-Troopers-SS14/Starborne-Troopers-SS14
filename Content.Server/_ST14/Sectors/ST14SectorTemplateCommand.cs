@@ -11,16 +11,28 @@ using Robust.Shared.Utility;
 namespace Content.Server._ST14.Sectors;
 
 /// <summary>
-/// Makes a blank sector map for mappers to start from: a square of ground with the sandstorm all around, the landing
-/// zone of the troopers on the left, the hive's spawn points and queen places on the right. Saved into the server's
-/// data folder
+/// Makes a blank sector map for mappers to start from: a hexagon of ground with its points up, the sandstorm along its
+/// edges, a passage in the middle of each of the six, the landing zone of the troopers on the left, the hive's spawn
+/// points and queen places on the right. Saved into the server's data folder
 /// </summary>
 [AdminCommand(AdminFlags.Mapping)]
 public sealed partial class ST14SectorTemplateCommand : IConsoleCommand
 {
     public const int Size = 200;
     public const int StormDepth = 4;
-    private const string GridPrototype = "ST14SectorGrid";
+
+    /// <summary>
+    /// From the centre to the middle of an edge: a hexagon with its points up, 192 tiles from point to point
+    /// </summary>
+    public const float Apothem = 83f;
+
+    private const float GapRadius = 4.5f;
+
+    private static readonly string[] Gates =
+    {
+        "ST14SectorGateEast", "ST14SectorGateNorthEast", "ST14SectorGateNorthWest",
+        "ST14SectorGateWest", "ST14SectorGateSouthWest", "ST14SectorGateSouthEast",
+    };
 
     private const string DefaultTile = "ST14FloorDunes";
     private const string Storm = "ST14SandstormWall";
@@ -66,51 +78,99 @@ public sealed partial class ST14SectorTemplateCommand : IConsoleCommand
         mapSystem.SetAmbientLight(mapId, Daylight);
 
         var grid = mapSystem.CreateGridEntity(mapId);
-        // the grid becomes the station of the round: the components come from a prototype, the id is set there
-        _entMan.AddComponents(grid, _prototype.Index<EntityPrototype>(GridPrototype), false);
         _entMan.System<MetaDataSystem>().SetEntityName(grid, "Sector");
 
         var tiles = new List<(Vector2i, Tile)>(Size * Size);
+        var storm = new List<Vector2i>();
         for (var x = 0; x < Size; x++)
         {
             for (var y = 0; y < Size; y++)
             {
+                var depth = EdgeDepth(x, y, out var edge);
+                if (depth < 0)
+                    continue;
+
                 tiles.Add((new Vector2i(x, y), ground));
+
+                // the storm runs along every edge, with a gap for the passage in the middle of it
+                if (depth < StormDepth && !InGap(x, y, edge))
+                    storm.Add(new Vector2i(x, y));
             }
         }
 
         mapSystem.SetTiles(grid, tiles);
 
-        // the storm closes the square off on every side
-        for (var x = 0; x < Size; x++)
+        foreach (var tile in storm)
         {
-            for (var y = 0; y < Size; y++)
-            {
-                if (x < StormDepth || y < StormDepth || x >= Size - StormDepth || y >= Size - StormDepth)
-                    Place(grid, Storm, x, y);
-            }
+            Place(grid, Storm, tile.X, tile.Y);
+        }
+
+        for (var edge = 0; edge < Gates.Length; edge++)
+        {
+            var mid = EdgeMiddle(edge, Apothem - StormDepth / 2f);
+            Place(grid, Gates[edge], (int) mid.X, (int) mid.Y);
         }
 
         // troopers land on the left, in a column a little way off the storm
         const int middle = Size / 2;
+        var left = (int) (middle - Apothem) + StormDepth;
         for (var i = -5; i <= 5; i++)
         {
-            Place(grid, "ST14SpawnPointEngineer", StormDepth + 6, middle + i * 6);
-            Place(grid, "SpawnPointLatejoin", StormDepth + 3, middle + i * 6);
+            Place(grid, "ST14SpawnPointEngineer", left + 14, middle + i * 6);
+            Place(grid, "SpawnPointLatejoin", left + 11, middle + i * 6);
         }
 
         // the hive comes from the right; the brain bug sits further back, the queens in the depth of the hive's half
+        var right = (int) (middle + Apothem) - StormDepth;
         for (var i = -5; i <= 5; i++)
         {
-            Place(grid, "ST14SpawnPointBug", Size - StormDepth - 7, middle + i * 6);
+            Place(grid, "ST14SpawnPointBug", right - 14, middle + i * 6);
         }
 
-        Place(grid, "ST14SpawnPointBrainBug", Size - StormDepth - 12, middle);
-        Place(grid, "ST14SectorQueenSlot", Size - StormDepth - 20, middle + 45);
-        Place(grid, "ST14SectorQueenSlot", Size - StormDepth - 20, middle - 45);
-        Place(grid, "ST14SectorQueenSlot", Size - StormDepth - 35, middle);
+        Place(grid, "ST14SpawnPointBrainBug", right - 18, middle);
+        Place(grid, "ST14SectorQueenSlot", right - 24, middle + 30);
+        Place(grid, "ST14SectorQueenSlot", right - 24, middle - 30);
+        Place(grid, "ST14SectorQueenSlot", right - 38, middle);
 
         return map;
+    }
+
+    private static Vector2 EdgeNormal(int edge)
+    {
+        var angle = MathF.PI / 3 * edge;
+        return new Vector2(MathF.Cos(angle), MathF.Sin(angle));
+    }
+
+    private static Vector2 EdgeMiddle(int edge, float distance)
+    {
+        return new Vector2(Size / 2f, Size / 2f) + EdgeNormal(edge) * distance;
+    }
+
+    /// <summary>
+    /// How deep a tile lies inside the hexagon, negative outside it, and the edge it is closest to
+    /// </summary>
+    private static float EdgeDepth(int x, int y, out int edge)
+    {
+        var offset = new Vector2(x + 0.5f - Size / 2f, y + 0.5f - Size / 2f);
+        var depth = float.MaxValue;
+        edge = 0;
+        for (var i = 0; i < Gates.Length; i++)
+        {
+            var d = Apothem - Vector2.Dot(offset, EdgeNormal(i));
+            if (d >= depth)
+                continue;
+
+            depth = d;
+            edge = i;
+        }
+
+        return depth;
+    }
+
+    private static bool InGap(int x, int y, int edge)
+    {
+        var offset = new Vector2(x + 0.5f, y + 0.5f) - EdgeMiddle(edge, Apothem);
+        return offset.Length() <= GapRadius;
     }
 
     /// <summary>

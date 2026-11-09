@@ -23,25 +23,23 @@ st14-galaxy-planet-locked = No operations here yet. Only Klendathu is open for n
 
 st14-galaxy-surface-label = Sectors on the planet: { $count }
 st14-galaxy-surface-bugs = Held by the arachnids: { $count }
-st14-galaxy-surface-available = Open for a landing: { $count }
+st14-galaxy-surface-available = Can be picked for battle: { $count }
 st14-galaxy-surface-hives = Hives found: { $count }
-st14-galaxy-surface-help = The Federation has no foothold on the planet yet. Troopers can only land in the marked sector, every victory opens its neighbours.
+st14-galaxy-surface-help = The planet is split into regions of seven sectors. The carrier Roger Young hangs over the centre of each, the landing starts from it. A round decides the fate of one sector, then the turn goes to the other side.
 st14-galaxy-to-landing = To the landing sector
 
 st14-galaxy-cell-name = Sector { $code }
-st14-galaxy-cell-available = Open for a landing
+st14-galaxy-cell-available = Can be picked for battle
 st14-galaxy-cell-terrain = Terrain: { $terrain }
 st14-galaxy-cell-hive = Arachnid hive
 st14-galaxy-cell-base = Federation base
-st14-galaxy-cell-held = The Federation holds this sector. Attacks on the neighbouring sectors start here.
-st14-galaxy-cell-front = Sector on the front line. Mobile infantry can land and take it back from the bugs.
-st14-galaxy-cell-deep = Deep behind bug lines. The neighbouring sectors have to be freed first.
+st14-galaxy-cell-held = Held by the Federation. Offensives on the neighbouring sectors start from here.
+st14-galaxy-cell-front = The command whose turn it is can pick this sector for the next battle.
+st14-galaxy-cell-deep = Out of reach for now: a region is taken from its centre, sector by sector.
 st14-galaxy-cell-back = Back to the planet
 st14-galaxy-land = Drop
 st14-galaxy-land-held = Sector held
-st14-galaxy-land-no-path = No foothold nearby
-
-st14-galaxy-terrain-1 = rocky wastes
+st14-galaxy-land-no-path = Cannot be picked now
 st14-galaxy-terrain-2 = canyons
 st14-galaxy-terrain-3 = hive fields
 st14-galaxy-terrain-4 = craters
@@ -143,12 +141,10 @@ st14-galaxy-sector-lethe = Lethe
 st14-galaxy-sector-gloom = Gloom nebula
 
 st14-galaxy-target = Attack target: sector { $code }
-st14-galaxy-cell-target = High Command target
-st14-galaxy-order = Make it the attack target
-st14-galaxy-land-not-target = Command picks the target
-
-st14-war-command-description = Galactic war: state, round result in the target sector, target change, reset.
-st14-war-command-help = st14_war status|win|objective|loss|reset [planet] or st14_war target <sector index> [planet]
+st14-galaxy-cell-target = Target of this turn
+st14-galaxy-order = Pick for battle
+st14-galaxy-land-not-target = The command picks the target
+st14-war-command-help = st14_war status|win|loss|timeout|reset [planet] or st14_war target <number> [planet]
 st14-war-command-no-planet = No war planet: { $planet }
 st14-war-command-no-target = The planet has no target sector.
 st14-war-command-bad-target = This sector cannot be the target: it is not on the front line.
@@ -190,3 +186,7 @@ st14-command-role-taken = { $player } left the { $side }.
 
 st14-war-command-reset-failed = Could not reset the war on { $planet }: it is not a war planet.
 st14-command-role-failed = The command failed: { $error }
+st14-galaxy-turn = Turn: { $faction }
+st14-galaxy-cell-region = Region { $code }
+st14-galaxy-cell-staging = Attackers gather here
+st14-galaxy-staging = Gather here

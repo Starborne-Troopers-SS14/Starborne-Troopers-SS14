@@ -1,5 +1,6 @@
-# Sector rounds of the galactic war: every sector of a war planet is fought on a 200x200 map with the sandstorm all
-# around, the troopers landing on the left and the hive on the right. st14_sector_template makes a blank one.
+# Sector rounds of the galactic war: every hex sector of a war planet is a 200x200 map cut as a hexagon, with the sandstorm
+# along its edges, a passage on each of the six edges, the troopers landing on the left and the hive on the right.
+# st14_sector_template makes a blank one. See docs/st14-sector-war.md.
 
 - type: st14SectorSettings
   id: Default
@@ -7,42 +8,47 @@
   queen: ST14MobBugQueen
   gracePeriod: 120
   checkInterval: 5
+  roundLimit: 14400
+  trashComponents: [ Puddle ]
+  unsaveableComponents: [ KillTracker ]
+  trashDecalTags: [ ST14BloodSplatter, ST14BloodDrip, ST14BloodPool, ST14BugBlood ]
 
-# One kind of ground per terrain of the galaxy map (index = terrain number from 0). Add the mappers' maps to each list.
+# One kind of ground per terrain of the galaxy map (index = terrain number from 0). Add the mappers' map files to each list.
 - type: st14SectorTerrain
   id: ST14SectorRockWastes
   index: 0
-  maps: [ ST14SectorTemplate ]
+  maps: [ /Maps/_ST14/Sectors/template.yml ]
 
 - type: st14SectorTerrain
   id: ST14SectorCanyons
   index: 1
-  maps: [ ST14SectorTemplate ]
+  maps: [ /Maps/_ST14/Sectors/template.yml ]
 
 - type: st14SectorTerrain
   id: ST14SectorHiveField
   index: 2
-  maps: [ ST14SectorTemplate ]
+  maps: [ /Maps/_ST14/Sectors/template.yml ]
 
 - type: st14SectorTerrain
   id: ST14SectorCraters
   index: 3
-  maps: [ ST14SectorTemplate ]
+  maps: [ /Maps/_ST14/Sectors/template.yml ]
 
 - type: st14SectorTerrain
   id: ST14SectorDunes
   index: 4
-  maps: [ ST14SectorTemplate ]
+  maps: [ /Maps/_ST14/Sectors/template.yml ]
 
 - type: st14SectorTerrain
   id: ST14SectorPlateau
   index: 5
-  maps: [ ST14SectorTemplate ]
+  maps: [ /Maps/_ST14/Sectors/template.yml ]
 
+# The game map of a sector round: a speck of ground that only makes the station, the sectors load on maps of their own
 - type: gameMap
-  id: ST14SectorTemplate
+  id: ST14SectorWar
   mapName: Sector
-  mapPath: /Maps/_ST14/Sectors/template.yml
+  mapPath: /Maps/_ST14/Sectors/anchor.yml
   minPlayers: 0
   stations:
     Sector:
@@ -68,14 +74,6 @@
   components:
   - type: Transform
 
-# Components the template command gives the sector grid
-- type: entity
-  id: ST14SectorGrid
-  categories: [ HideSpawnMenu ]
-  components:
-  - type: BecomesStation
-    id: Sector
-
 - type: entity
   parent: SpawnPointJobBase
   id: ST14SpawnPointEngineer
@@ -98,7 +96,81 @@
   - type: Sprite
     layers:
     - state: red
-    - sprite: _ST14/Mobs/Bugs/brain.rsi
-      state: alive
-      color: "#C88CFF"
-      scale: 0.33, 0.33
+
+# A passage on an edge of a sector map into the neighbouring sector: edge 0 is east, then counter-clockwise
+- type: entity
+  id: ST14SectorGateBase
+  abstract: true
+  name: sector passage
+  description: Beyond the storm lies the next sector. It can only be walked into once the sector has been fought over.
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: true
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      gate:
+        shape:
+          !type:PhysShapeCircle
+          radius: 2.5
+        mask:
+        - FullTileMask
+        - GhostImpassable
+        layer:
+        - WallLayer
+        hard: false
+  - type: Sprite
+    sprite: Markers/cross.rsi
+    state: blue
+    drawdepth: FloorObjects
+
+- type: entity
+  parent: ST14SectorGateBase
+  id: ST14SectorGateEast
+  suffix: East
+  components:
+  - type: ST14SectorGate
+    edge: 0
+
+- type: entity
+  parent: ST14SectorGateBase
+  id: ST14SectorGateNorthEast
+  suffix: North-east
+  components:
+  - type: ST14SectorGate
+    edge: 1
+
+- type: entity
+  parent: ST14SectorGateBase
+  id: ST14SectorGateNorthWest
+  suffix: North-west
+  components:
+  - type: ST14SectorGate
+    edge: 2
+
+- type: entity
+  parent: ST14SectorGateBase
+  id: ST14SectorGateWest
+  suffix: West
+  components:
+  - type: ST14SectorGate
+    edge: 3
+
+- type: entity
+  parent: ST14SectorGateBase
+  id: ST14SectorGateSouthWest
+  suffix: South-west
+  components:
+  - type: ST14SectorGate
+    edge: 4
+
+- type: entity
+  parent: ST14SectorGateBase
+  id: ST14SectorGateSouthEast
+  suffix: South-east
+  components:
+  - type: ST14SectorGate
+    edge: 5
