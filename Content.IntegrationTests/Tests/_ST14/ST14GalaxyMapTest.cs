@@ -1,7 +1,10 @@
+using System.Collections.Generic;
 using System.Linq;
 using Content.Client._ST14.MainHub.Galaxy;
 using Content.Server._ST14.MainHub;
 using Content.Shared._ST14.MainHub;
+using Robust.Client.UserInterface;
+using Robust.Shared.Input;
 using Robust.Shared.Prototypes;
 
 namespace Content.IntegrationTests.Tests._ST14;
@@ -145,6 +148,24 @@ public sealed class ST14GalaxyMapTest
                 TestContext.Out.WriteLine($"{planet.ID}: {war.Cells.Length} cells, regions {string.Join(",", sizes.OrderBy(x => x))}");
                 Assert.That(war.Cells.All(c => c.Region >= 0 && c.Region < war.RegionCenters.Length));
                 Assert.That(sizes.Count(x => x is 6 or 7), Is.GreaterThan(sizes.Count / 2), "Most regions should be a centre with its neighbours.");
+                if (planet.Regions.Count > 0)
+                    Assert.That(sizes, Is.All.EqualTo(7), "A region of a planned planet is seven cells.");
+
+                // a region is taken cell by cell from its centre, so all of it must be reachable from there
+                for (var r = 0; r < war.RegionCenters.Length; r++)
+                {
+                    var reached = new HashSet<int> { war.RegionCenters[r] };
+                    var queue = new Queue<int>(reached);
+                    while (queue.TryDequeue(out var cell))
+                    {
+                        foreach (var n in war.Grid.Neighbours[cell].Where(n => war.Cells[n].Region == r && reached.Add(n)))
+                        {
+                            queue.Enqueue(n);
+                        }
+                    }
+
+                    Assert.That(reached.Count, Is.EqualTo(war.Cells.Count(c => c.Region == r)), "A region falls apart.");
+                }
                 for (var r = 0; r < war.RegionCenters.Length; r++)
                 {
                     Assert.That(war.Cells[war.RegionCenters[r]].Region, Is.EqualTo(r));
@@ -180,7 +201,67 @@ public sealed class ST14GalaxyMapTest
             var screen = new ST14GalaxyMapScreen();
             Assert.That(screen.Visible, Is.False);
             screen.Visible = true;
+
+            // the command table builds every step, also with no war system to read from
+            var menu = new ST14CommandMenu(textures, () => null);
+            menu.Open(planets[0], new ST14PlanetWar(planets[0], "K"));
+            foreach (var step in Enum.GetValues<ST14CommandMenu.Step>())
+            {
+                menu.ShowStep(step);
+                menu.Rebuild();
+            }
+
+            menu.SetLogOpen(true);
+            menu.Rebuild();
+            menu.Close();
         });
+
+        await pair.CleanReturnAsync();
+    }
+
+    /// <summary>
+    /// The right button means "back" all over the command table, a step at a time: the log, the tool, then the table.
+    /// The planet stops the clicks that land on it, so it has to pass this one on
+    /// </summary>
+    [Test]
+    public async Task CommandTableRightClickTest()
+    {
+        await using var pair = await PoolManager.GetServerClient();
+        var client = pair.Client;
+        var protoMan = client.ResolveDependency<IPrototypeManager>();
+
+        ST14CommandMenu menu = default!;
+        ST14PlanetGlobe globe = default!;
+        var passedOn = 0;
+        await client.WaitPost(() =>
+        {
+            var textures = new ST14GalaxyTextures();
+            var planet = protoMan.EnumeratePrototypes<ST14GalaxyPlanetPrototype>().First(p => p.War);
+            menu = new ST14CommandMenu(textures, () => null);
+            menu.Open(planet, new ST14PlanetWar(planet, "K"));
+            menu.SetLogOpen(true);
+            menu.SetTool(ST14WarMarkKind.Attack, false);
+
+            globe = new ST14PlanetGlobe(textures);
+            globe.OnRightClicked += () => passedOn++;
+        });
+
+        static GUIBoundKeyEventArgs RightClick()
+        {
+            return new GUIBoundKeyEventArgs(EngineKeyFunctions.UIRightClick, BoundKeyState.Down, default, default, default, default);
+        }
+
+        await client.DoGuiEvent(globe, RightClick());
+        Assert.That(passedOn, Is.EqualTo(1));
+
+        await client.DoGuiEvent(menu, RightClick());
+        Assert.That(menu.Visible, Is.True, "The first right click only closes the log.");
+
+        await client.DoGuiEvent(menu, RightClick());
+        Assert.That(menu.Visible, Is.True, "The second right click only puts the tool away.");
+
+        await client.DoGuiEvent(menu, RightClick());
+        Assert.That(menu.Visible, Is.False, "With nothing left to put away the table closes.");
 
         await pair.CleanReturnAsync();
     }

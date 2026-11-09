@@ -125,6 +125,18 @@ public sealed class ST14SectorTest : GameTest
         var first = -1;
         var builtAt = new Vector2(100.5f, 100.5f);
         var standsAt = new Vector2(90.5f, 95.5f);
+        string? firstJob = null;
+
+        // the test player has no job preferences and may draw another job next round, then the body rightly stays behind
+        string? JobOf(EntityUid body)
+        {
+            var mind = server.System<Content.Shared.Mind.SharedMindSystem>();
+            if (!mind.TryGetMind(body, out var mindId, out _))
+                return null;
+
+            server.System<Content.Shared.Roles.Jobs.SharedJobSystem>().MindTryGetJobId(mindId, out var job);
+            return job?.Id;
+        }
 
         await server.WaitAssertion(() =>
         {
@@ -153,6 +165,7 @@ public sealed class ST14SectorTest : GameTest
             // the player started in the sector of the battle and leaves their body at a place of their own
             Assert.That(pair.Player!.AttachedEntity, Is.Not.Null, "The player did not spawn.");
             var body = pair.Player.AttachedEntity!.Value;
+            firstJob = JobOf(body);
             Assert.That(entMan.GetComponent<TransformComponent>(body).MapUid, Is.EqualTo(map), "The player did not spawn in the sector of the battle.");
             server.System<SharedTransformSystem>().SetCoordinates(body, new EntityCoordinates(grid, standsAt));
 
@@ -200,10 +213,13 @@ public sealed class ST14SectorTest : GameTest
             // the player is back in the same body, where it was left
             var player = pair.Player!.AttachedEntity;
             Assert.That(player, Is.Not.Null, "The player did not come back.");
-            Assert.That(entMan.TryGetComponent<ST14SectorOwnerComponent>(player, out var owner) && owner.UserId == pair.Player.UserId.UserId.ToString(), "The player got a new body.");
-            var at = entMan.GetComponent<TransformComponent>(player!.Value);
-            Assert.That(at.MapID, Is.EqualTo(mapId), "The body came back in another sector.");
-            Assert.That((at.LocalPosition - standsAt).Length(), Is.LessThan(0.1f), "The body came back in another place.");
+            if (JobOf(player!.Value) == firstJob)
+            {
+                Assert.That(entMan.TryGetComponent<ST14SectorOwnerComponent>(player, out var owner) && owner.UserId == pair.Player.UserId.UserId.ToString(), "The player got a new body.");
+                var at = entMan.GetComponent<TransformComponent>(player.Value);
+                Assert.That(at.MapID, Is.EqualTo(mapId), "The body came back in another sector.");
+                Assert.That((at.LocalPosition - standsAt).Length(), Is.LessThan(0.1f), "The body came back in another place.");
+            }
 
             var mobs = entMan.AllEntityQueryEnumerator<Content.Shared.Mobs.Components.MobStateComponent, TransformComponent>();
             while (mobs.MoveNext(out var uid, out _, out var xform))

@@ -50,6 +50,12 @@ public readonly record struct ST14HexCellState(
     bool Initialized);
 
 /// <summary>
+/// One battle of the war: which round, for which sector, who attacked and who won. No winner: the time ran out
+/// </summary>
+[Serializable, NetSerializable]
+public readonly record struct ST14WarLogEntry(int Round, int Cell, ST14GalaxyFaction Attacker, ST14GalaxyFaction? Winner);
+
+/// <summary>
 /// What the High Command can draw on the galaxy map. Arrows go from a point to a point, the rest are single marks
 /// </summary>
 public enum ST14WarMarkKind : byte
@@ -62,8 +68,10 @@ public enum ST14WarMarkKind : byte
 }
 
 [Serializable, NetSerializable]
-public readonly record struct ST14WarMark(ST14WarMarkKind Kind, Vector2 From, Vector2 To)
+public readonly record struct ST14WarMark(ST14WarMarkKind Kind, Vector2 From, Vector2 To, bool Surface = false)
 {
+    // a mark on the surface of the war planet has longitude and latitude for its points, the others galaxy coordinates
+
     public bool IsArrow => Kind is ST14WarMarkKind.Attack or ST14WarMarkKind.Defend;
 }
 
@@ -72,7 +80,7 @@ public readonly record struct ST14WarMark(ST14WarMarkKind Kind, Vector2 From, Ve
 /// shown at the top of the map. Each side only sees its own plan
 /// </summary>
 [Serializable, NetSerializable]
-public sealed class ST14GalaxyOrdersEvent(ST14GalaxyFaction side, ST14WarMark[] marks, string order, bool canCommand) : EntityEventArgs
+public sealed class ST14GalaxyOrdersEvent(ST14GalaxyFaction side, ST14WarMark[] marks, string order, bool canCommand, string[] members) : EntityEventArgs
 {
     public readonly ST14GalaxyFaction Side = side;
     public const int MaxMarks = 40;
@@ -81,6 +89,11 @@ public sealed class ST14GalaxyOrdersEvent(ST14GalaxyFaction side, ST14WarMark[] 
     public readonly ST14WarMark[] Marks = marks;
     public readonly string Order = order;
     public readonly bool CanCommand = canCommand;
+
+    /// <summary>
+    /// Players of this command who are on the server now
+    /// </summary>
+    public readonly string[] Members = members;
 }
 
 [Serializable, NetSerializable]
@@ -118,7 +131,7 @@ public sealed class ST14GalaxyWarRequestEvent : EntityEventArgs;
 /// and whether the receiving player may change that target
 /// </summary>
 [Serializable, NetSerializable]
-public sealed class ST14GalaxyWarStateEvent(string planet, ST14HexCellState[] cells, int target, int staging, ST14GalaxyFaction turn, bool canCommand) : EntityEventArgs
+public sealed class ST14GalaxyWarStateEvent(string planet, ST14HexCellState[] cells, int target, int staging, ST14GalaxyFaction turn, bool canCommand, ST14WarLogEntry[] log, bool targetPicked, bool battle, float battleSecondsLeft) : EntityEventArgs
 {
     public readonly string Planet = planet;
     public readonly ST14HexCellState[] Cells = cells;
@@ -142,6 +155,23 @@ public sealed class ST14GalaxyWarStateEvent(string planet, ST14HexCellState[] ce
     /// The player belongs to the command whose turn it is
     /// </summary>
     public readonly bool CanCommand = canCommand;
+
+    /// <summary>
+    /// The battles fought on the planet, the oldest first
+    /// </summary>
+    public readonly ST14WarLogEntry[] Log = log;
+
+    /// <summary>
+    /// The command whose turn it is picked the target itself, otherwise it is only the one the round would fall back on
+    /// </summary>
+    public readonly bool TargetPicked = targetPicked;
+
+    /// <summary>
+    /// A round is being fought over the target: the target and the staging sector are locked until it ends
+    /// </summary>
+    public readonly bool Battle = battle;
+
+    public readonly float BattleSecondsLeft = battleSecondsLeft;
 }
 
 /// <summary>

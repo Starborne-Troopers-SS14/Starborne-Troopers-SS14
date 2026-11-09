@@ -285,8 +285,35 @@ public sealed class ST14PlanetWar
             Cells[i] = cell;
         }
 
-        RegionCenters = BuildRegions();
+        RegionCenters = planet.Regions.Count == Cells.Length ? UseRegions(planet.Regions) : BuildRegions();
         RefreshFront();
+    }
+
+    /// <summary>
+    /// Takes the regions from the prototype. The centre of a region is its cell with the most of the region around it
+    /// </summary>
+    private int[] UseRegions(List<int> regions)
+    {
+        var centers = new int[regions.Max() + 1];
+        for (var r = 0; r < centers.Length; r++)
+        {
+            var best = -1;
+            for (var i = 0; i < regions.Count; i++)
+            {
+                if (regions[i] != r)
+                    continue;
+
+                Cells[i].Region = r;
+                var around = Grid.Neighbours[i].Count(n => regions[n] == r);
+                if (around <= best)
+                    continue;
+
+                best = around;
+                centers[r] = i;
+            }
+        }
+
+        return centers;
     }
 
     /// <summary>
