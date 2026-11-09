@@ -652,13 +652,17 @@ namespace Content.Shared.Preferences
                 _ => Sex.Male // Invalid enum values.
             };
 
-            var voice = Voice;
-            if (!speciesPrototype.Voices.Contains(voice))
-                voice = speciesPrototype.DefaultSoundsBySex[(int)sex];
-
             // ensure the species can be that sex and their age fits the founds
             if (!speciesPrototype.Sexes.Contains(sex))
                 sex = speciesPrototype.Sexes[0];
+
+            // ST14: the voice must be one of the species and of the character's sex
+            var voice = Voice;
+            if (!speciesPrototype.Voices.Contains(voice) ||
+                prototypeManager.TryIndex(voice, out var voiceProto) && !voiceProto.ST14Fits(sex))
+            {
+                voice = speciesPrototype.DefaultSoundsBySex[(int)sex];
+            }
 
             var age = Math.Clamp(Age, speciesPrototype.MinAge, speciesPrototype.MaxAge);
 

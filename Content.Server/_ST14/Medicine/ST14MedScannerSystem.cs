@@ -1,3 +1,5 @@
+using Robust.Shared.Player;
+using Content.Shared.IdentityManagement;
 using System.Linq;
 using Content.Server.Chat.Systems;
 using Content.Shared._ST14.Medicine;
@@ -6,6 +8,7 @@ using Content.Shared.Body.Components;
 using Content.Shared.Chat;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Chemistry.Reagent;
+using Content.Shared.Damage.Systems;
 using Content.Shared.Interaction;
 using Content.Shared.Interaction.Events;
 using Content.Shared.Mobs.Systems;
@@ -27,8 +30,8 @@ public sealed partial class ST14MedScannerSystem : EntitySystem
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private AudioSystem _audio = default!;
     [Dependency] private ChatSystem _chat = default!;
+    [Dependency] private DamageableSystem _damageable = default!;
     [Dependency] private MobStateSystem _mobState = default!;
-    [Dependency] private SharedActionsSystem _actions = default!;
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private SharedSolutionContainerSystem _solutions = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
@@ -43,7 +46,7 @@ public sealed partial class ST14MedScannerSystem : EntitySystem
         SubscribeLocalEvent<ST14MedScannerComponent, UseInHandEvent>(OnUseInHand);
 
         SubscribeLocalEvent<ST14MedicCallerComponent, MapInitEvent>(OnCallerInit);
-        SubscribeLocalEvent<ST14MedicCallerComponent, ST14CallMedicActionEvent>(OnCallMedic);
+        SubscribeNetworkEvent<ST14MedicRespondEvent>(OnRespond);
     }
 
     private void OnAfterInteract(Entity<ST14MedScannerComponent> ent, ref AfterInteractEvent args)
@@ -78,6 +81,7 @@ public sealed partial class ST14MedScannerSystem : EntitySystem
         base.Update(frameTime);
 
         ClearCalls();
+        UpdateCallers();
 
         var now = _timing.CurTime;
         var query = EntityQueryEnumerator<ST14MedScannerComponent>();
@@ -216,27 +220,219 @@ public sealed partial class ST14MedScannerSystem : EntitySystem
 
     private const float Sepsis = 0.8f;
 
+    private TimeSpan _nextBroadcast;
+
+    /// <summary>
+    /// The callers who were told their call stands, to tell them once when it is over
+    /// </summary>
+    private readonly HashSet<EntityUid> _told = new();
+
     private void OnCallerInit(Entity<ST14MedicCallerComponent> ent, ref MapInitEvent args)
     {
-        _actions.AddAction(ent, ref ent.Comp.ActionEntity, ent.Comp.Action);
-    }
-
-    private void OnCallMedic(Entity<ST14MedicCallerComponent> ent, ref ST14CallMedicActionEvent args)
-    {
-        if (args.Handled || _mobState.IsDead(ent))
-            return;
-
-        args.Handled = true;
-        var calling = EnsureComp<ST14CallingMedicComponent>(ent);
-        calling.Until = _timing.CurTime + ent.Comp.Duration;
-        Dirty(ent, calling);
-
-        _chat.TrySendInGameICMessage(ent, Loc.GetString("st14-medic-call-shout"), InGameICChatType.Speak, false, ignoreActionBlocker: true);
-        _popup.PopupEntity(Loc.GetString("st14-medic-call-self"), ent, ent);
+        ent.Comp.NextCheck = _timing.CurTime;
     }
 
     /// <summary>
-    /// Stops showing a call once a medic treated the trooper or the time ran out
+    /// The wounded shout for a medic by themselves once a wound is bad enough and keep calling while nobody comes.
+    /// The call ends once they are treated well enough or dead. Medics and the callers hear how it goes every second
+    /// </summary>
+    private void UpdateCallers()
+    {
+        var now = _timing.CurTime;
+        if (now < _nextBroadcast)
+            return;
+
+        _nextBroadcast = now + TimeSpan.FromSeconds(1);
+
+        var query = EntityQueryEnumerator<ST14MedicCallerComponent, ST14WoundsComponent>();
+        while (query.MoveNext(out var uid, out var caller, out var wounds))
+        {
+            var dead = _mobState.IsDead(uid);
+            TryComp<ST14CallingMedicComponent>(uid, out var calling);
+
+            if (!dead && Serious(uid, wounds))
+            {
+                if (calling == null)
+                {
+                    calling = EnsureComp<ST14CallingMedicComponent>(uid);
+                    caller.NextShout = now;
+                }
+
+                calling.Until = now + TimeSpan.FromSeconds(30);
+
+                // a responder that cannot come any more lets the call open again
+                if (calling.Responder is { } gone && (TerminatingOrDeleted(gone) || _mobState.IsIncapacitated(gone) || !HasComp<ST14MedicHudComponent>(gone)))
+                    calling.Responder = null;
+
+                Dirty(uid, calling);
+
+                // a shout while conscious and nobody answered yet
+                if (calling.Responder == null && now >= caller.NextShout && !_mobState.IsIncapacitated(uid) && wounds.Heart != ST14HeartState.Arrest)
+                {
+                    caller.NextShout = now + caller.ShoutEvery;
+                    _chat.TrySendInGameICMessage(uid, Loc.GetString("st14-medic-call-shout"), InGameICChatType.Speak, false, ignoreActionBlocker: true);
+                    _popup.PopupEntity(Loc.GetString("st14-medic-call-self"), uid, uid);
+                }
+            }
+            else if (calling != null && (dead || !NeedsMedic(uid, wounds)))
+            {
+                if (calling.Responder is { } medic && !dead)
+                    _popup.PopupEntity(Loc.GetString("st14-medic-call-done", ("name", Identity.Name(uid, EntityManager))), medic, medic);
+
+                RemCompDeferred<ST14CallingMedicComponent>(uid);
+                calling = null;
+            }
+
+            if (TryComp<ActorComponent>(uid, out var actor))
+                SendStatus(uid, calling, actor.PlayerSession);
+        }
+
+        BroadcastCalls();
+    }
+
+    private void SendStatus(EntityUid uid, ST14CallingMedicComponent? calling, ICommonSession session)
+    {
+        if (calling == null)
+        {
+            // once to say the call is over, then nothing
+            if (_told.Remove(uid))
+                RaiseNetworkEvent(new ST14MedicCallStatusEvent(false, null, 0f), session);
+
+            return;
+        }
+
+        _told.Add(uid);
+        string? name = null;
+        var distance = 0f;
+        if (calling.Responder is { } medic)
+        {
+            name = Identity.Name(medic, EntityManager);
+            var from = _transform.GetMapCoordinates(uid);
+            var to = _transform.GetMapCoordinates(medic);
+            distance = from.MapId == to.MapId ? (from.Position - to.Position).Length() : -1f;
+        }
+
+        RaiseNetworkEvent(new ST14MedicCallStatusEvent(true, name, distance), session);
+    }
+
+    /// <summary>
+    /// Every medic gets every call with where it is, so a far one can be found by its distance
+    /// </summary>
+    private void BroadcastCalls()
+    {
+        var calls = new List<ST14MedicCall>();
+        var callQuery = EntityQueryEnumerator<ST14CallingMedicComponent>();
+        while (callQuery.MoveNext(out var uid, out var calling))
+        {
+            var coords = _transform.GetMapCoordinates(uid);
+            calls.Add(new ST14MedicCall(GetNetEntity(uid), Identity.Name(uid, EntityManager), (int) coords.MapId, coords.Position,
+                GetNetEntity(calling.Responder), calling.Responder is { } medic ? Identity.Name(medic, EntityManager) : null));
+        }
+
+        var medics = EntityQueryEnumerator<ST14MedicHudComponent, ActorComponent>();
+        while (medics.MoveNext(out _, out _, out var actor))
+        {
+            RaiseNetworkEvent(new ST14MedicCallsEvent(calls), actor.PlayerSession);
+        }
+    }
+
+    /// <summary>
+    /// A wound bad enough to shout for a medic
+    /// </summary>
+    private bool Serious(EntityUid uid, ST14WoundsComponent wounds)
+    {
+        return wounds.Bleeding > 0.3f ||
+               wounds.Pain >= 50f ||
+               wounds.Blood < 0.85f ||
+               wounds.Heart == ST14HeartState.Arrest ||
+               wounds.Infection >= 0.5f ||
+               wounds.Toxin >= 0.3f ||
+               wounds.Wounds.Any(w => w.Kind == ST14WoundKind.Fracture && !w.Splinted || w.Kind == ST14WoundKind.Stump && !w.Sutured || w.Arterial) ||
+               _mobState.IsCritical(uid) ||
+               _damageable.GetTotalDamage(uid).Float() >= 45f;
+    }
+
+    /// <summary>
+    /// Still worth a medic: the call holds until the trooper is treated past this
+    /// </summary>
+    private bool NeedsMedic(EntityUid uid, ST14WoundsComponent wounds)
+    {
+        return wounds.Bleeding > 0.1f ||
+               wounds.Pain >= 35f ||
+               wounds.Blood < 0.8f ||
+               wounds.Heart == ST14HeartState.Arrest ||
+               wounds.Infection >= 0.3f ||
+               wounds.Toxin >= 0.15f ||
+               wounds.Wounds.Any(w => w.Kind == ST14WoundKind.Fracture && !w.Splinted || w.Kind == ST14WoundKind.Stump && !w.Sutured) ||
+               _mobState.IsCritical(uid);
+    }
+
+    /// <summary>
+    /// A medic answers a call: the one named, or the nearest nobody took. Pressed again, gives his call up
+    /// </summary>
+    private void OnRespond(ST14MedicRespondEvent ev, EntitySessionEventArgs args)
+    {
+        if (args.SenderSession.AttachedEntity is not { } medic || !HasComp<ST14MedicHudComponent>(medic) || _mobState.IsIncapacitated(medic))
+            return;
+
+        var named = ev.Target is { } net ? GetEntity(net) : (EntityUid?) null;
+
+        // his own call taken already: give it up
+        var callQuery = EntityQueryEnumerator<ST14CallingMedicComponent>();
+        while (callQuery.MoveNext(out var uid, out var calling))
+        {
+            if (calling.Responder != medic || named != null && named != uid)
+                continue;
+
+            calling.Responder = null;
+            Dirty(uid, calling);
+            _popup.PopupEntity(Loc.GetString("st14-medic-respond-cancel", ("name", Identity.Name(uid, EntityManager))), medic, medic);
+            _popup.PopupEntity(Loc.GetString("st14-medic-respond-gone"), uid, uid, PopupType.MediumCaution);
+            return;
+        }
+
+        EntityUid? target = null;
+        if (named is { } chosen && HasComp<ST14CallingMedicComponent>(chosen))
+        {
+            target = chosen;
+        }
+        else
+        {
+            var from = _transform.GetMapCoordinates(medic);
+            var best = float.MaxValue;
+            var open = EntityQueryEnumerator<ST14CallingMedicComponent>();
+            while (open.MoveNext(out var uid, out var calling))
+            {
+                if (calling.Responder != null || uid == medic)
+                    continue;
+
+                var at = _transform.GetMapCoordinates(uid);
+                if (at.MapId != from.MapId)
+                    continue;
+
+                var distance = (at.Position - from.Position).LengthSquared();
+                if (distance < best)
+                {
+                    best = distance;
+                    target = uid;
+                }
+            }
+        }
+
+        if (target is not { } patient || !TryComp<ST14CallingMedicComponent>(patient, out var call))
+        {
+            _popup.PopupEntity(Loc.GetString("st14-medic-respond-none"), medic, medic);
+            return;
+        }
+
+        call.Responder = medic;
+        Dirty(patient, call);
+        _popup.PopupEntity(Loc.GetString("st14-medic-respond-self", ("name", Identity.Name(patient, EntityManager))), medic, medic);
+        _popup.PopupEntity(Loc.GetString("st14-medic-respond-patient", ("name", Identity.Name(medic, EntityManager))), patient, patient, PopupType.Large);
+    }
+
+    /// <summary>
+    /// Ends calls nobody renewed
     /// </summary>
     public void ClearCalls()
     {

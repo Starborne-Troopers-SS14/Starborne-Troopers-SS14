@@ -271,3 +271,32 @@
         messages: ["st14-venom-effect-burn", "st14-venom-effect-numb"]
         type: Local
         probability: 0.06
+
+# The adrenaline of the field kits: it keeps a heart going and nothing more, the drug system does the rest.
+# Not the station epinephrine, which heals wounds by itself
+- type: reagent
+  id: ST14Adrenaline
+  name: reagent-name-st14-adrenaline
+  group: Medicine
+  desc: reagent-desc-st14-adrenaline
+  physicalDesc: reagent-physical-desc-translucent
+  flavor: medicine
+  color: "#D2FFFA"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.25
+      effects: []
+
+# Tranexamic acid: the blood clots, see pharmacology.yml
+- type: reagent
+  id: ST14Tranexamic
+  name: reagent-name-st14-tranexamic
+  group: Medicine
+  desc: reagent-desc-st14-tranexamic
+  physicalDesc: reagent-physical-desc-opaque
+  flavor: medicine
+  color: "#B42B2B"
+  metabolisms:
+    Bloodstream:
+      metabolismRate: 0.25
+      effects: []

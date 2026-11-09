@@ -65,10 +65,10 @@ public sealed partial class ST14DismemberableComponent : Component
     public SoundSpecifier TearSound = new SoundCollectionSpecifier("gib", AudioParams.Default.WithVolume(4f).WithVariation(0.1f));
 
     [DataField]
-    public SoundSpecifier CrackSound = new SoundPathSpecifier("/Audio/Effects/bone_rattle.ogg", AudioParams.Default.WithVolume(2f).WithPitchScale(0.6f));
+    public SoundSpecifier CrackSound = new SoundCollectionSpecifier("ST14LimbTear", AudioParams.Default.WithVolume(4f).WithVariation(0.08f));
 
     [DataField]
-    public string Scream = "Scream";
+    public string Scream = "ST14TearScream";
 
     [DataField]
     public TimeSpan Knockdown = TimeSpan.FromSeconds(2.5);
@@ -89,6 +89,13 @@ public sealed partial class ST14MissingLegsComponent : Component
     [DataField, AutoNetworkedField]
     public int FieldLegs;
 
+    /// <summary>
+    /// The arms and legs the body has lost, flesh not replaced by a prosthesis: 1 left arm, 2 right arm,
+    /// 4 left leg, 8 right leg. The clothing on them is not drawn
+    /// </summary>
+    [DataField, AutoNetworkedField]
+    public int MissingLimbs;
+
     [DataField]
     public float OneLegSpeed = 0.5f;
 
@@ -106,6 +113,11 @@ public sealed partial class ST14MissingLegsSystem : EntitySystem
 {
     private static readonly string[] Legs = { "LegLeft", "LegRight" };
 
+    /// <summary>
+    /// The limbs in the order of the bits of <see cref="ST14MissingLegsComponent.MissingLimbs"/>
+    /// </summary>
+    private static readonly string[] Limbs = { "ArmLeft", "ArmRight", "LegLeft", "LegRight" };
+
     [Dependency] private BodySystem _body = default!;
     [Dependency] private MovementSpeedModifierSystem _speed = default!;
 
@@ -113,7 +125,14 @@ public sealed partial class ST14MissingLegsSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<ST14MissingLegsComponent, RefreshMovementSpeedModifiersEvent>(OnRefreshSpeed);
-        SubscribeLocalEvent<ST14MissingLegsComponent, AfterAutoHandleStateEvent>((uid, _, _) => _speed.RefreshMovementSpeedModifiers(uid));
+        SubscribeLocalEvent<ST14MissingLegsComponent, AfterAutoHandleStateEvent>(OnState);
+    }
+
+    private void OnState(Entity<ST14MissingLegsComponent> ent, ref AfterAutoHandleStateEvent args)
+    {
+        _speed.RefreshMovementSpeedModifiers(ent.Owner);
+        var ev = new ST14LimbsChangedEvent();
+        RaiseLocalEvent(ent, ref ev);
     }
 
     private void OnRefreshSpeed(Entity<ST14MissingLegsComponent> ent, ref RefreshMovementSpeedModifiersEvent args)
@@ -129,15 +148,30 @@ public sealed partial class ST14MissingLegsSystem : EntitySystem
     }
 
     /// <summary>
-    /// Counts the legs the body has now, flesh or not, after one came off or a prosthesis went on
+    /// Counts the limbs the body has now, flesh or not, after one came off or a prosthesis went on
     /// </summary>
     public void Refresh(EntityUid body)
     {
-        var legs = _body.EnumerateOrgans<OrganComponent>(body).Where(o => o.Comp1.Category is { } c && Legs.Contains(c.Id)).ToList();
+        var organs = _body.EnumerateOrgans<OrganComponent>(body).ToList();
+        var categories = organs.Select(o => o.Comp1.Category?.Id).ToHashSet();
+        var legs = organs.Where(o => o.Comp1.Category is { } c && Legs.Contains(c.Id)).ToList();
         var comp = EnsureComp<ST14MissingLegsComponent>(body);
         comp.Missing = Legs.Length - legs.Count;
+        comp.MissingLimbs = 0;
+        for (var i = 0; i < Limbs.Length; i++)
+        {
+            if (!categories.Contains(Limbs[i]))
+                comp.MissingLimbs |= 1 << i;
+        }
+
         comp.FieldLegs = legs.Count(l => TryComp<ST14ProsthesisComponent>(l, out var prosthesis) && prosthesis.Field);
         Dirty(body, comp);
         _speed.RefreshMovementSpeedModifiers(body);
     }
 }
+
+/// <summary>
+/// The limbs of a body came in from the server: the clothing on them can be redrawn
+/// </summary>
+[ByRefEvent]
+public record struct ST14LimbsChangedEvent;

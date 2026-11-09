@@ -119,9 +119,15 @@ public sealed partial class ST14DismembermentSystem : EntitySystem
     /// <summary>
     /// Tears a random arm or leg off the body, with everything that goes with it
     /// </summary>
-    public bool TearOff(Entity<ST14DismemberableComponent> ent, EntityUid? origin)
+    public bool TearOff(Entity<ST14DismemberableComponent> ent, EntityUid? origin, ST14BodyZone? only = null)
     {
         var limbs = LimbsOf(ent);
+        if (limbs.Count == 0)
+            return false;
+
+        if (only is { } wanted)
+            limbs = limbs.Where(l => l.Zone == wanted).ToList();
+
         if (limbs.Count == 0)
             return false;
 
@@ -161,8 +167,7 @@ public sealed partial class ST14DismembermentSystem : EntitySystem
 
         Flinch(ent, away);
 
-        if (ST14Zones.IsLeg(zone))
-            _legs.Refresh(ent.Owner);
+        _legs.Refresh(ent.Owner);
 
         return true;
     }
@@ -178,8 +183,7 @@ public sealed partial class ST14DismembermentSystem : EntitySystem
 
         Del(dead);
         _wounds.LoseLimb(body, zone, false);
-        if (ST14Zones.IsLeg(zone))
-            _legs.Refresh(body);
+        _legs.Refresh(body);
 
         return true;
     }

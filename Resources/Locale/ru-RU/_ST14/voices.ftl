@@ -1,0 +1,39 @@
+## Голоса бойцов в редакторе персонажа
+
+st14-voice-male-1 = Мужской 1
+st14-voice-male-2 = Мужской 2
+st14-voice-male-3 = Мужской 3 (низкий)
+st14-voice-male-4 = Мужской 4
+st14-voice-male-5 = Мужской 5
+st14-voice-female-1 = Женский 1
+st14-voice-female-2 = Женский 2
+st14-voice-female-3 = Женский 3
+st14-voice-female-4 = Женский 4
+st14-voice-female-5 = Женский 5
+
+chat-emote-name-st14-pain = Охнуть от боли
+chat-emote-msg-st14-pain = охает от боли
+chat-emote-name-st14-groan = Стонать
+chat-emote-msg-st14-groan = стонет от боли
+chat-emote-name-st14-warcry = Боевой клич
+chat-emote-msg-st14-warcry = издаёт боевой клич!
+chat-emote-name-st14-hurrah = Ура!
+chat-emote-msg-st14-hurrah = кричит «Ура!»
+chat-emote-name-st14-charge = В атаку!
+chat-emote-msg-st14-charge = кричит «В атаку!»
+chat-emote-name-st14-fear = Закричать от страха
+chat-emote-msg-st14-fear = кричит от ужаса!
+chat-emote-name-st14-cheer = Ликовать
+chat-emote-msg-st14-cheer = ликует!
+chat-emote-name-st14-grenade = Граната!
+chat-emote-msg-st14-grenade = кричит «Граната!»
+chat-emote-name-st14-go = Вперёд!
+chat-emote-msg-st14-go = кричит «Вперёд!»
+chat-emote-name-st14-hold = Держать позицию!
+chat-emote-msg-st14-hold = кричит «Держать позицию!»
+chat-emote-name-st14-back = Назад!
+chat-emote-msg-st14-back = кричит «Назад!»
+chat-emote-name-st14-steady = Спокойно!
+chat-emote-msg-st14-steady = кричит «Спокойно!»
+chat-emote-name-st14-tear = Истошный крик
+chat-emote-msg-st14-tear = истошно кричит!

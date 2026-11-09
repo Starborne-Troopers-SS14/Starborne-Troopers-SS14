@@ -155,8 +155,7 @@ public sealed partial class ST14ProsthesisSystem : EntitySystem
         // the prosthesis takes the place of the stump
         _wounds.LimbRestored(target, ZoneOf(ent.Comp.Limb, left));
 
-        if (ent.Comp.Limb == ST14ProsthesisLimb.Leg)
-            _legs.Refresh(target);
+        _legs.Refresh(target);
 
         if (ent.Comp.FitSound != null)
             _audio.PlayPvs(ent.Comp.FitSound, target);

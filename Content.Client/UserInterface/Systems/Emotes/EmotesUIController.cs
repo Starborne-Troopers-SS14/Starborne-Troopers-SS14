@@ -155,6 +155,16 @@ public sealed partial class EmotesUIController : UIController, IOnStateChanged<G
                 && !speech.AllowedEmotes.Contains(emote.ID))
                 continue;
 
+            // ST14: a voice without a sound of its own for a vocal emote does not offer it, so the troopers
+            // have only the shouts their voices really have
+            if (emote.Category == EmoteCategory.Vocal
+                && EntityManager.TryGetComponent<Content.Shared.Speech.Components.VocalComponent>(player.Value, out var vocal)
+                && vocal.EmoteSounds is { } voiceId
+                && _prototypeManager.TryIndex(voiceId, out var voice)
+                && voice.ST14Sex != null
+                && !voice.Sounds.ContainsKey(emote.ID))
+                continue;
+
             if (!emotesByCategory.TryGetValue(emote.Category, out var list))
             {
                 list = new List<RadialMenuOptionBase>();

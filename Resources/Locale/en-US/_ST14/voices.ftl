@@ -1,0 +1,39 @@
+## Trooper voices in the character editor
+
+st14-voice-male-1 = Male 1
+st14-voice-male-2 = Male 2
+st14-voice-male-3 = Male 3 (deep)
+st14-voice-male-4 = Male 4
+st14-voice-male-5 = Male 5
+st14-voice-female-1 = Female 1
+st14-voice-female-2 = Female 2
+st14-voice-female-3 = Female 3
+st14-voice-female-4 = Female 4
+st14-voice-female-5 = Female 5
+
+chat-emote-name-st14-pain = Grunt in pain
+chat-emote-msg-st14-pain = grunts in pain
+chat-emote-name-st14-groan = Groan
+chat-emote-msg-st14-groan = groans in pain
+chat-emote-name-st14-warcry = War cry
+chat-emote-msg-st14-warcry = lets out a war cry!
+chat-emote-name-st14-hurrah = Hurrah!
+chat-emote-msg-st14-hurrah = shouts "Hurrah!"
+chat-emote-name-st14-charge = Charge!
+chat-emote-msg-st14-charge = shouts "Charge!"
+chat-emote-name-st14-fear = Scream in fear
+chat-emote-msg-st14-fear = screams in terror!
+chat-emote-name-st14-cheer = Cheer
+chat-emote-msg-st14-cheer = cheers!
+chat-emote-name-st14-grenade = Grenade!
+chat-emote-msg-st14-grenade = shouts "Fire in the hole!"
+chat-emote-name-st14-go = Go!
+chat-emote-msg-st14-go = shouts "Go!"
+chat-emote-name-st14-hold = Hold the line!
+chat-emote-msg-st14-hold = shouts "Hold your ground!"
+chat-emote-name-st14-back = Stay back!
+chat-emote-msg-st14-back = shouts "Stay back!"
+chat-emote-name-st14-steady = Steady!
+chat-emote-msg-st14-steady = shouts "Steady!"
+chat-emote-name-st14-tear = Shriek
+chat-emote-msg-st14-tear = shrieks in agony!
