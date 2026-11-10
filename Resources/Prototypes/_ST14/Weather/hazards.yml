@@ -1,0 +1,148 @@
+# Things the weather drops on a sector: a mark shows where it lands, then it hits
+
+- type: entity
+  id: ST14WeatherStrikeBase
+  abstract: true
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Transform
+    anchored: false
+  - type: Sprite
+    sprite: _ST14/Effects/Weather/strike.rsi
+    drawdepth: FloorObjects
+    noRot: true
+
+- type: entity
+  parent: ST14WeatherStrikeBase
+  id: ST14WeatherFallingRock
+  name: falling rock
+  components:
+  - type: Sprite
+    state: shadow
+  - type: ST14WeatherStrike
+    delay: 2.2
+    radius: 1.2
+    damage:
+      types:
+        Blunt: 25
+    knockdown: 2
+    impactSound:
+      collection: ST14WeatherRockHit
+      params:
+        volume: 4
+        maxDistance: 30
+    effect: ST14WeatherDust
+    leave: ST14RockFormationShortRocks
+    leaveChance: 0.25
+    decals: [ ST14SmallRock1, ST14SmallRock2, ST14SmallRock3, ST14Cracks1, ST14Cracks2, ST14Cracks3 ]
+    decalCount: 3
+    shakeRange: 9
+
+- type: entity
+  parent: ST14WeatherStrikeBase
+  id: ST14WeatherMeteor
+  name: meteor
+  components:
+  - type: Sprite
+    layers:
+    - state: glow
+      shader: unshaded
+  - type: PointLight
+    radius: 3
+    energy: 2
+    color: '#FF8C40'
+  - type: ST14WeatherStrike
+    delay: 3.5
+    radius: 1.5
+    damage:
+      types:
+        Blunt: 20
+        Heat: 15
+    knockdown: 3
+    fallSound:
+      collection: ST14WeatherMeteorFall
+      params:
+        volume: 2
+        maxDistance: 40
+    impactSound:
+      collection: ST14WeatherMeteorImpact
+      params:
+        volume: 6
+        maxDistance: 50
+    effect: ST14WeatherDust
+    explosion: Default
+    explosionIntensity: 25
+    explosionSlope: 6
+    explosionMaxTile: 5
+    leave: ST14RockFormationShortRocks
+    leaveChance: 0.15
+    decals: [ ST14FlatRock1, ST14FlatRock2, ST14SmallRock1, ST14SmallRock2 ]
+    decalCount: 4
+    shakeRange: 16
+
+- type: entity
+  parent: ST14WeatherStrikeBase
+  id: ST14WeatherLightning
+  name: lightning
+  components:
+  - type: Sprite
+    layers:
+    - state: glow
+      shader: unshaded
+      color: '#A0C0FF60'
+  - type: ST14WeatherStrike
+    delay: 0.9
+    radius: 1.6
+    damage:
+      types:
+        Shock: 22
+        Heat: 8
+    knockdown: 3
+    impactSound:
+      collection: ST14WeatherLightningStrike
+      params:
+        volume: 6
+        maxDistance: 60
+    effect: ST14WeatherBolt
+    flash: true
+    decals: [ ST14Cracks3 ]
+    decalCount: 1
+    shakeRange: 12
+
+# The look of the hits
+
+- type: entity
+  id: ST14WeatherDust
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Transform
+    anchored: false
+  - type: Sprite
+    sprite: _ST14/Effects/Weather/strike.rsi
+    state: dust
+    drawdepth: Effects
+    scale: 2, 2
+    noRot: true
+  - type: TimedDespawn
+    lifetime: 0.72
+
+- type: entity
+  id: ST14WeatherBolt
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Transform
+    anchored: false
+  - type: Sprite
+    sprite: _ST14/Effects/Weather/bolt.rsi
+    drawdepth: Effects
+    offset: 0, 6.4
+    layers:
+    - state: bolt
+      shader: unshaded
+    noRot: true
+  - type: PointLight
+    radius: 10
+    energy: 8
+    color: '#DDE6FF'
+  - type: TimedDespawn
+    lifetime: 0.3

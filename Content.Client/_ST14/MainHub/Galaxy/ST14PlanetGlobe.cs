@@ -1,9 +1,12 @@
 using System.Linq;
 using System.Numerics;
+using Content.Shared._ST14.CCVar;
 using Content.Shared._ST14.MainHub;
+using Content.Shared._ST14.Weather;
 using Robust.Client.Graphics;
 using Robust.Client.ResourceManagement;
 using Robust.Client.UserInterface;
+using Robust.Shared.Configuration;
 using Robust.Shared.Input;
 using Robust.Shared.Timing;
 
@@ -20,14 +23,21 @@ public sealed class ST14PlanetGlobe : Control
     private const float DragThreshold = 4f;
     private const int MarkSegments = 24;
 
-    // light comes from the upper left and a bit from the viewer, like on the map of the original game
+    // until the star is known the light comes from the upper left and a bit from the viewer
     private static readonly Vector3 Light = Vector3.Normalize(new Vector3(-0.55f, 0.45f, 0.7f));
 
     private static readonly Vector3[] MeshPoints;
     private static readonly Vector2[] MeshUv;
     private static readonly ushort[] MeshIndices;
 
+    private readonly IConfigurationManager _cfg = IoCManager.Resolve<IConfigurationManager>();
     private readonly ST14GalaxyTextures _textures;
+
+    /// <summary>
+    /// The direction to the star in view space: the planet turns under it, the half facing it has the day. The same
+    /// star the sector rounds take their daylight from
+    /// </summary>
+    private Vector3 _light = Light;
     private readonly ST14VertexBuffer _hatch = new();
     private readonly ST14VertexBuffer _overlay = new();
     private readonly ST14VertexBuffer _glow = new();
@@ -658,9 +668,9 @@ public sealed class ST14PlanetGlobe : Control
 
     private float Lighting(Vector3 normal)
     {
-        var diffuse = MathF.Max(0, Vector3.Dot(normal, Light));
-        // soft terminator: the night side keeps a little light
-        return 0.1f + 0.95f * MathF.Pow(diffuse, 0.85f);
+        var diffuse = MathF.Max(0, Vector3.Dot(normal, _light));
+        // soft terminator: the night side keeps enough light to read the sectors
+        return 0.16f + 0.9f * MathF.Pow(diffuse, 0.85f);
     }
 
     protected override void Draw(DrawingHandleScreen handle)
@@ -669,6 +679,9 @@ public sealed class ST14PlanetGlobe : Control
 
         if (_planet == null || _texture == null)
             return;
+
+        var phase = ST14PlanetDay.Phase(DateTime.UtcNow, _cfg.GetCVar(ST14CVars.DayLength), _cfg.GetCVar(ST14CVars.DayPhaseOffset));
+        _light = Vector3.Normalize(Vector3.Transform(ST14PlanetDay.StarDirection(phase), _rotation));
 
         var center = Center;
         var radius = Radius;

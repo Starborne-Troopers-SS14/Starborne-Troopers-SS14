@@ -1,0 +1,63 @@
+# Sounds of the weather of the sector rounds, cut from the BOOM Library packs (see the attributions next to the files)
+
+- type: soundCollection
+  id: ST14WeatherRockHit
+  files:
+  - /Audio/_ST14/Weather/Earthquake/rock_hit1.wav
+  - /Audio/_ST14/Weather/Earthquake/rock_hit2.wav
+  - /Audio/_ST14/Weather/Earthquake/rock_hit3.wav
+  - /Audio/_ST14/Weather/Earthquake/rock_hit4.wav
+  - /Audio/_ST14/Weather/Earthquake/rock_hit5.wav
+  - /Audio/_ST14/Weather/Earthquake/rock_hit6.wav
+  - /Audio/_ST14/Weather/Earthquake/rock_hit7.wav
+  - /Audio/_ST14/Weather/Earthquake/rock_hit8.wav
+
+- type: soundCollection
+  id: ST14WeatherCollapse
+  files:
+  - /Audio/_ST14/Weather/Earthquake/collapse1.wav
+  - /Audio/_ST14/Weather/Earthquake/collapse2.wav
+  - /Audio/_ST14/Weather/Earthquake/collapse3.wav
+  - /Audio/_ST14/Weather/Earthquake/collapse4.wav
+
+- type: soundCollection
+  id: ST14WeatherGust
+  files:
+  - /Audio/_ST14/Weather/Wind/gust1.wav
+  - /Audio/_ST14/Weather/Wind/gust2.wav
+  - /Audio/_ST14/Weather/Wind/gust3.wav
+  - /Audio/_ST14/Weather/Wind/gust4.wav
+  - /Audio/_ST14/Weather/Wind/gust5.wav
+  - /Audio/_ST14/Weather/Wind/gust6.wav
+
+- type: soundCollection
+  id: ST14WeatherLightningStrike
+  files:
+  - /Audio/_ST14/Weather/Thunder/strike1.wav
+  - /Audio/_ST14/Weather/Thunder/strike2.wav
+  - /Audio/_ST14/Weather/Thunder/strike3.wav
+  - /Audio/_ST14/Weather/Thunder/strike4.wav
+
+- type: soundCollection
+  id: ST14WeatherThunder
+  files:
+  - /Audio/_ST14/Weather/Thunder/distant1.wav
+  - /Audio/_ST14/Weather/Thunder/distant2.wav
+  - /Audio/_ST14/Weather/Thunder/distant3.wav
+  - /Audio/_ST14/Weather/Thunder/distant4.wav
+
+- type: soundCollection
+  id: ST14WeatherMeteorFall
+  files:
+  - /Audio/_ST14/Weather/Meteor/fall1.wav
+  - /Audio/_ST14/Weather/Meteor/fall2.wav
+  - /Audio/_ST14/Weather/Meteor/fall3.wav
+  - /Audio/_ST14/Weather/Meteor/fall4.wav
+
+- type: soundCollection
+  id: ST14WeatherMeteorImpact
+  files:
+  - /Audio/_ST14/Weather/Meteor/impact1.wav
+  - /Audio/_ST14/Weather/Meteor/impact2.wav
+  - /Audio/_ST14/Weather/Meteor/impact3.wav
+  - /Audio/_ST14/Weather/Meteor/impact4.wav
