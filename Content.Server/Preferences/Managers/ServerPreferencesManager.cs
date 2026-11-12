@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Content.Server.Afk;
 using Content.Server.Database;
 using Content.Shared.Body;
+using Content.Shared.Chat.Prototypes;
 using Content.Shared.CCVar;
 using Content.Shared.Construction.Prototypes;
 using Content.Shared.Humanoid;

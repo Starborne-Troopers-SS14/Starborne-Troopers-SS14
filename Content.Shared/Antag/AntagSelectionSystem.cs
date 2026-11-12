@@ -207,7 +207,10 @@ public abstract partial class AntagSelectionSystem : GameRuleSystem<AntagSelecti
                     AddGameRuleDefinitions(gameRule, playerCount, ref postSpawnRoles, active);
                 break;
             case Never:
-                SpawnGhostRoles(gameRule, playerCount, true);
+                // ST14-START
+                if (active)
+                    SpawnGhostRoles(gameRule, playerCount, true);
+                // ST14-STOP
                 break;
         }
     }

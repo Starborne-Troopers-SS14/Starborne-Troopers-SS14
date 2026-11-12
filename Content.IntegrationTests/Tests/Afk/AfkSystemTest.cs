@@ -100,9 +100,9 @@ public sealed class AfkSystemTest : GameTest
             var session = GetSession();
             var actor = session.AttachedEntity!.Value;
             var ev = new BoundUserInterfaceMessageReceivedEvent(actor, actor, TestUiKey.Key);
-            OnBoundUiMessageReceived.Invoke(_afkSystem, [ev]);
-
-            Assert.That(_afkManager.IsAfk(session), Is.False);
+            // ST14-START
+            AssertAfkReset(session, () => OnBoundUiMessageReceived.Invoke(_afkSystem, [ev]));
+            // ST14-STOP
         });
     }
 
@@ -126,9 +126,11 @@ public sealed class AfkSystemTest : GameTest
                 NetCoordinates.Invalid,
                 ScreenCoordinates.Invalid);
 
-            HandleInputCmd.Invoke(_afkSystem, [message, new EntitySessionEventArgs(session)]);
-
-            Assert.That(_afkManager.IsAfk(session), Is.False, inputType);
+            // ST14-START
+            AssertAfkReset(session,
+                () => HandleInputCmd.Invoke(_afkSystem, [message, new EntitySessionEventArgs(session)]),
+                inputType);
+            // ST14-STOP
         });
     }
 
@@ -174,6 +176,38 @@ public sealed class AfkSystemTest : GameTest
             Assert.That(_afkConfirm.HasConfirmation(session), Is.False);
         });
     }
+
+    // ST14-START
+    private void AssertAfkReset(ICommonSession session, Action action, string? message = null)
+    {
+        var reset = false;
+
+        void OnPlayerDidAction(ICommonSession player)
+        {
+            if (player == session)
+                reset = true;
+        }
+
+        _afkManager.PlayerDidActionEvent += OnPlayerDidAction;
+        try
+        {
+            action();
+        }
+        finally
+        {
+            _afkManager.PlayerDidActionEvent -= OnPlayerDidAction;
+        }
+
+        _cfg.SetCVar(CCVars.AfkTime, 60f);
+        _cfg.SetCVar(CCVars.AdminAfkTime, 60f);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(reset, Is.True, message);
+            Assert.That(_afkManager.IsAfk(session), Is.False, message);
+        });
+    }
+    // ST14-STOP
 
     private async Task MakeAfk()
     {
