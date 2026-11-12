@@ -1,0 +1,66 @@
+# Marks the weather leaves on the ground: meteor craters and lightning burns stay, earthquake cracks close when the
+# quake is over
+
+- type: decal
+  id: ST14WeatherCrater1
+  sprite:
+    sprite: /Textures/_ST14/Effects/Weather/crater.rsi
+    state: crater1
+
+- type: decal
+  id: ST14WeatherCrater2
+  sprite:
+    sprite: /Textures/_ST14/Effects/Weather/crater.rsi
+    state: crater2
+
+- type: decal
+  id: ST14WeatherCrater3
+  sprite:
+    sprite: /Textures/_ST14/Effects/Weather/crater.rsi
+    state: crater3
+
+- type: decal
+  id: ST14WeatherFissure1
+  showMenu: false
+  sprite:
+    sprite: /Textures/_ST14/Effects/Weather/fissure.rsi
+    state: fissure1
+
+- type: decal
+  id: ST14WeatherFissure2
+  showMenu: false
+  sprite:
+    sprite: /Textures/_ST14/Effects/Weather/fissure.rsi
+    state: fissure2
+
+- type: decal
+  id: ST14WeatherFissure3
+  showMenu: false
+  sprite:
+    sprite: /Textures/_ST14/Effects/Weather/fissure.rsi
+    state: fissure3
+
+- type: decal
+  id: ST14WeatherFissure4
+  showMenu: false
+  sprite:
+    sprite: /Textures/_ST14/Effects/Weather/fissure.rsi
+    state: fissure4
+
+- type: decal
+  id: ST14WeatherScorch1
+  sprite:
+    sprite: /Textures/_ST14/Effects/Weather/scorch.rsi
+    state: scorch1
+
+- type: decal
+  id: ST14WeatherScorch2
+  sprite:
+    sprite: /Textures/_ST14/Effects/Weather/scorch.rsi
+    state: scorch2
+
+- type: decal
+  id: ST14WeatherScorch3
+  sprite:
+    sprite: /Textures/_ST14/Effects/Weather/scorch.rsi
+    state: scorch3

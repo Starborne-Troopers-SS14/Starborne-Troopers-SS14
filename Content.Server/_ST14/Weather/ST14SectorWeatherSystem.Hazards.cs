@@ -105,11 +105,19 @@ public sealed partial class ST14SectorWeatherSystem
             }
         }
 
+        // the crater lies under the rubble; a decal is placed by its corner, so it is shifted to centre on the hit
+        if (strike.Crater.Count > 0 && xform.GridUid != null)
+        {
+            var half = strike.CraterSize / 2f;
+            _decals.TryAddDecal(_random.Pick(strike.Crater), coords.Offset(new Vector2(-half, -half)), out _,
+                zIndex: 1, cleanable: false);
+        }
+
         for (var i = 0; i < strike.DecalCount && strike.Decals.Count > 0; i++)
         {
             var offset = _random.NextVector2(strike.Radius);
             _decals.TryAddDecal(_random.Pick(strike.Decals), coords.Offset(offset - new Vector2(0.5f, 0.5f)), out _,
-                rotation: _random.NextAngle(), cleanable: true);
+                rotation: _random.NextAngle(), zIndex: 2, cleanable: true);
         }
 
         if (strike.Leave is { } leave && !someoneUnder && _random.Prob(strike.LeaveChance) && FreeTile(xform))

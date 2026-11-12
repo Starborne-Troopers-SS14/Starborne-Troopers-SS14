@@ -100,6 +100,11 @@ public sealed class ST14WeatherOverlay : Overlay
         public float Seed;
         public float Splash;
         public float Life;
+
+        /// <summary>
+        /// The gust the particle is caught in, eased so it never jumps
+        /// </summary>
+        public float Gust;
     }
 
     public ST14WeatherOverlay(IResourceCache resources)
@@ -189,9 +194,37 @@ public sealed class ST14WeatherOverlay : Overlay
         return new Vector2(_random.NextFloat(box.Left, box.Right), _random.NextFloat(box.Bottom, box.Top));
     }
 
+    /// <summary>
+    /// The wind comes in gusts: bands of strong wind run downwind over the ground with calmer air between them, their
+    /// fronts bent and slowly writhing. Returns how strong the wind is at a place, about 0.15 to 1.5, and how much it
+    /// swings to the side there
+    /// </summary>
+    private float GustAt(Vector2 pos, float speed, out float sway)
+    {
+        var across = Perp(_wind);
+        var along = Vector2.Dot(pos, _wind);
+        var side = Vector2.Dot(pos, across);
+        const float k1 = MathF.Tau / 17f;
+        const float k2 = MathF.Tau / 43f;
+        var bend = 1.4f * MathF.Sin(side * 0.11f + _time * 0.23f) + 0.6f * MathF.Sin(side * 0.31f - _time * 0.4f);
+        // the gusts run a little slower than the grains they carry, the long swells slower still
+        var w1 = MathF.Sin(k1 * along - _time * k1 * speed * 0.8f + bend);
+        var w2 = MathF.Sin(k2 * along - _time * k2 * speed * 0.55f + side * 0.05f);
+        sway = MathF.Sin(along * 0.21f - _time * 1.6f + side * 0.09f) * (0.5f + 0.5f * w1);
+        var g = 0.55f + 0.45f * (0.5f + 0.5f * w1) + 0.2f * w2;
+        return MathF.Max(0.3f, g);
+    }
+
+    private void CatchGust(ref Particle p, float speed, float dt, out float sway)
+    {
+        var g = GustAt(p.Pos, speed, out sway);
+        p.Gust += (g - p.Gust) * MathF.Min(1f, dt * 5f);
+    }
+
     private void Spawn(ref Particle p, ST14WeatherVisual v, bool anywhere)
     {
         p.Pos = RandomIn(SpawnBox);
+        p.Gust = 1f;
         p.Seed = _random.NextFloat();
         p.Splash = 0f;
         p.Z = anywhere ? _random.NextFloat(0f, FallHeight) : FallHeight * _random.NextFloat(0.7f, 1.3f);
@@ -236,14 +269,18 @@ public sealed class ST14WeatherOverlay : Overlay
                 break;
 
             case ST14WeatherParticles.Sand:
-                // grains race along the wind in waves, some lift and dip
-                var gust = 0.75f + 0.35f * MathF.Sin(_time * 0.9f + p.Pos.Y * 0.15f);
-                p.Pos += _wind * speed * gust * dt;
-                p.Z = 0.6f + MathF.Sin(_time * 2.5f + p.Seed * 30f) * 0.5f;
+                // grains race along the wind in gusts: a front of fast lifted sand, then a lull where it settles
+                CatchGust(ref p, v.Speed, dt, out var sandSway);
+                // the pace changes only a little, or the grains would pile up into walls at the fronts; a gust shows in
+                // how long and bright they are and how they swing
+                p.Vel = _wind * speed * (0.75f + 0.3f * p.Gust) + Perp(_wind) * sandSway * speed * 0.14f;
+                p.Pos += p.Vel * dt;
+                p.Z = 0.3f + 0.5f * p.Gust + MathF.Sin(_time * 2.5f + p.Seed * 30f) * 0.3f;
                 break;
 
             case ST14WeatherParticles.Dust:
-                p.Pos += (_wind * speed * 0.25f + new Vector2(0, -0.15f)) * dt;
+                CatchGust(ref p, v.Speed * 3f, dt, out var dustSway);
+                p.Pos += (_wind * speed * 0.25f * (0.7f + 0.5f * p.Gust) + Perp(_wind) * dustSway * 0.3f + new Vector2(0, -0.15f)) * dt;
                 p.Life += dt;
                 break;
 
@@ -518,9 +555,13 @@ public sealed class ST14WeatherOverlay : Overlay
                     baseColor = Dim(v.FogColor).WithAlpha(1f) * new Color(0.55f, 0.5f, 0.45f);
 
                 var at = p.Pos + new Vector2(0, p.Z * 0.3f);
-                var length = v.Length * (0.4f + 1.2f * p.Seed);
+                // in a gust the grains stretch into long bright streaks, in the lull they are faint short specks
+                var gust = Math.Clamp((p.Gust - 0.3f) / 0.9f, 0f, 1f);
+                var length = v.Length * (0.4f + 1.2f * p.Seed) * (0.45f + 0.75f * gust);
                 var shimmer = 0.6f + 0.4f * MathF.Sin(_time * 6f + p.Seed * 50f);
-                Line(at - _wind * length, at, v.Width * (0.6f + p.Seed), baseColor.WithAlpha(0f), baseColor.WithAlpha(alpha * shimmer));
+                var way = p.Vel.LengthSquared() > 0.0001f ? Vector2.Normalize(p.Vel) : _wind;
+                Line(at - way * length, at, v.Width * (0.6f + p.Seed), baseColor.WithAlpha(0f),
+                    baseColor.WithAlpha(alpha * shimmer * (0.45f + 0.55f * gust)));
                 break;
             }
             case ST14WeatherParticles.Dust:

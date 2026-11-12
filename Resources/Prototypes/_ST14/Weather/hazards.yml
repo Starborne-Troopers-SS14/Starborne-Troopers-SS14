@@ -78,6 +78,8 @@
     leaveChance: 0.15
     decals: [ ST14FlatRock1, ST14FlatRock2, ST14SmallRock1, ST14SmallRock2 ]
     decalCount: 4
+    crater: [ ST14WeatherCrater1, ST14WeatherCrater2, ST14WeatherCrater3 ]
+    craterSize: 3
     shakeRange: 16
 
 - type: entity
@@ -105,8 +107,8 @@
         maxDistance: 60
     effect: ST14WeatherBolt
     flash: true
-    decals: [ ST14Cracks3 ]
-    decalCount: 1
+    crater: [ ST14WeatherScorch1, ST14WeatherScorch2, ST14WeatherScorch3 ]
+    craterSize: 3
     shakeRange: 12
 
 # The look of the hits

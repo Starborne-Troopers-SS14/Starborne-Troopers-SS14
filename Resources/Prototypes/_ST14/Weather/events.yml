@@ -53,6 +53,18 @@
     strike: ST14WeatherFallingRock
     spread: 10
     anywhere: 0.3
+  - !type:ST14WeatherFissureEffect
+    interval: 1.2
+    decals: [ ST14WeatherFissure1, ST14WeatherFissure2, ST14WeatherFissure3, ST14WeatherFissure4 ]
+    size: 6, 3
+    spread: 9
+    anywhere: 0.35
+    max: 45
+    sound:
+      collection: ST14WeatherGroundCrack
+      params:
+        volume: -2
+        maxDistance: 25
 
 - type: st14WeatherEvent
   id: ST14WeatherSandstorm
@@ -290,91 +302,6 @@
     strike: ST14WeatherMeteor
     spread: 12
     anywhere: 0.4
-
-- type: st14WeatherEvent
-  id: ST14WeatherAshfall
-  name: st14-weather-ashfall
-  warning: st14-weather-ashfall-warning
-  over: st14-weather-ashfall-over
-  weight: 0.6
-  minDuration: 150
-  maxDuration: 260
-  rampUp: 60
-  rampDown: 30
-  ambient:
-    path: /Audio/_ST14/Weather/Ash/volcano.wav
-    params:
-      volume: -2
-  speed: 0.9
-  visual:
-    particles: Ash
-    count: 1200
-    color: '#4C4844D8'
-    speed: 3
-    width: 0.09
-    embers: 140
-    emberColor: '#FF7A30'
-    fog: 0.55
-    fogColor: '#3A3430'
-    fogColor2: '#7A6A5A'
-    clouds: [ billow, curls, patches ]
-    fogSpeed: 1.5
-    tint: '#3A201058'
-  effects:
-  - !type:ST14WeatherExposureEffect
-    interval: 6
-    popup: st14-weather-ashfall-hurt
-    damage:
-      types:
-        Heat: 1
-  - !type:ST14WeatherShakeEffect
-    interval: 3
-    chance: 0.5
-    strength: 0.35
-  - !type:ST14WeatherStrikeEffect
-    interval: 12
-    chance: 0.5
-    strike: ST14WeatherFallingRock
-    spread: 14
-    anywhere: 0.5
-
-- type: st14WeatherEvent
-  id: ST14WeatherHail
-  name: st14-weather-hail
-  warning: st14-weather-hail-warning
-  over: st14-weather-hail-over
-  weight: 0.7
-  minDuration: 90
-  maxDuration: 150
-  rampUp: 35
-  rampDown: 20
-  ambient:
-    path: /Audio/_ST14/Weather/Rain/hail.wav
-    params:
-      volume: -4
-  speed: 0.9
-  visual:
-    particles: Hail
-    count: 1000
-    color: '#E8F0FFD8'
-    speed: 18
-    length: 0.35
-    width: 0.07
-    fog: 0.3
-    fogColor: '#8890A0'
-    fogColor2: '#C8D0E0'
-    clouds: [ puffy, veil, wisps ]
-    fogSpeed: 2
-    tint: '#30384850'
-  effects:
-  - !type:ST14WeatherExposureEffect
-    interval: 4
-    popup: st14-weather-hail-hurt
-    damage:
-      types:
-        Blunt: 2
-  - !type:ST14WeatherExtinguishEffect
-    interval: 3
 
 - type: st14WeatherEvent
   id: ST14WeatherHeatwave

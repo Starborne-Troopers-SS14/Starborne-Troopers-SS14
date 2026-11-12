@@ -31,16 +31,6 @@ st14-weather-meteors = Метеоритный дождь
 st14-weather-meteors-warning = Метеоритный дождь! Смотрите, куда падают огни, и уходите оттуда!
 st14-weather-meteors-over = Метеориты больше не падают.
 
-st14-weather-ashfall = Пепельная буря
-st14-weather-ashfall-warning = Где-то проснулся вулкан: с неба сыплется горячий пепел!
-st14-weather-ashfall-over = Пепел больше не падает.
-st14-weather-ashfall-hurt = Горячий пепел обжигает.
-
-st14-weather-hail = Град
-st14-weather-hail-warning = Пошёл крупный град! Ищите укрытие!
-st14-weather-hail-over = Град прекратился.
-st14-weather-hail-hurt = Градины больно бьют.
-
 st14-weather-heatwave = Зной
 st14-weather-heatwave-warning = Звезда в зените, воздух раскалён: начинается зной.
 st14-weather-heatwave-over = Жара спала.

@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-3.0",
+  "copyright": "Made for Starborne Troopers",
+  "size": {
+    "x": 192,
+    "y": 96
+  },
+  "states": [
+    {
+      "name": "fissure1"
+    },
+    {
+      "name": "fissure2"
+    },
+    {
+      "name": "fissure3"
+    },
+    {
+      "name": "fissure4"
+    }
+  ]
+}

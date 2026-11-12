@@ -1,12 +1,8 @@
 - files: ["rain.wav"]
   license: "Custom"
-  copyright: "© BOOM Library. All rights reserved. Used under licence by Starborne Troopers; mixed from Armageddon (water constant) and Deserts Weather Wildlife (light rain)"
+  copyright: "© BOOM Library. All rights reserved. Used under licence by Starborne Troopers; cut from Thunderstorm Chaser (rain moderate breeze)"
   source: "https://www.boomlibrary.com"
 - files: ["downpour.wav"]
   license: "Custom"
-  copyright: "© BOOM Library. All rights reserved. Used under licence by Starborne Troopers; mixed from Armageddon (water constant) and Deserts Weather Wildlife (windy thunderstorm)"
-  source: "https://www.boomlibrary.com"
-- files: ["hail.wav"]
-  license: "Custom"
-  copyright: "© BOOM Library. All rights reserved. Used under licence by Starborne Troopers; mixed from Destruction (ice crack, freezing rain) and Armageddon (water constant)"
+  copyright: "© BOOM Library. All rights reserved. Used under licence by Starborne Troopers; cut from Thunderstorm Chaser (roaring gale rain)"
   source: "https://www.boomlibrary.com"

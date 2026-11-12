@@ -59,6 +59,18 @@ public sealed partial class ST14WeatherStrikeComponent : Component
     public int DecalCount;
 
     /// <summary>
+    /// One of these decals is left right where it lands and stays: the crater of a meteor
+    /// </summary>
+    [DataField]
+    public List<string> Crater = new();
+
+    /// <summary>
+    /// Width of the crater decal in tiles, it is centred on the hit
+    /// </summary>
+    [DataField]
+    public float CraterSize = 3f;
+
+    /// <summary>
     /// The sky of the whole sector flashes white
     /// </summary>
     [DataField]

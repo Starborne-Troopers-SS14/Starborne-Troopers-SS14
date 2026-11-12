@@ -31,16 +31,6 @@ st14-weather-meteors = Meteor shower
 st14-weather-meteors-warning = Meteor shower! Watch where the lights fall and get away from there!
 st14-weather-meteors-over = The meteors have stopped falling.
 
-st14-weather-ashfall = Ash storm
-st14-weather-ashfall-warning = A volcano has woken somewhere: hot ash is falling from the sky!
-st14-weather-ashfall-over = The ash has stopped falling.
-st14-weather-ashfall-hurt = The hot ash burns.
-
-st14-weather-hail = Hail
-st14-weather-hail-warning = Heavy hail! Find cover!
-st14-weather-hail-over = The hail has stopped.
-st14-weather-hail-hurt = The hailstones hurt.
-
 st14-weather-heatwave = Heatwave
 st14-weather-heatwave-warning = The star stands at its zenith and the air is scorching: a heatwave begins.
 st14-weather-heatwave-over = The heat has eased.
