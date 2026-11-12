@@ -118,7 +118,10 @@ namespace Content.Server.Preferences.Managers
                 speciesPrototype = _prototypeManager.Index<SpeciesPrototype>(species);
             }
 
-            var voice = profile.Voice ?? speciesPrototype.DefaultSoundsBySex[(int)sex];
+            // ST14: the voice is looked up as an emote sounds prototype, a bare string would be taken for an entity
+            // prototype and every saved voice would fall back to the default
+            ProtoId<Content.Shared.Chat.Prototypes.EmoteSoundsPrototype> voice =
+                profile.Voice ?? speciesPrototype.DefaultSoundsBySex[(int)sex];
             if (!_prototypeManager.HasIndex(voice))
                 voice = speciesPrototype.DefaultSoundsBySex[(int)sex];
 
