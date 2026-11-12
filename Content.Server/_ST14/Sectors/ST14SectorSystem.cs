@@ -128,8 +128,10 @@ public sealed partial class ST14SectorSystem : EntitySystem
         cell = -1;
         planet = string.Empty;
 
-        // an admin who picked the map by hand, or turned sector rounds off, gets the stock rotation
-        if (!_cfg.GetCVar(ST14CVars.SectorRounds) || !string.IsNullOrEmpty(_cfg.GetCVar(CCVars.GameMap)))
+        // an admin who picked another map by hand, or turned sector rounds off, gets the stock rotation; picking the
+        // sector war map itself is asking for a sector round, without its sectors it is a lone grid in space
+        var forced = _cfg.GetCVar(CCVars.GameMap);
+        if (!_cfg.GetCVar(ST14CVars.SectorRounds) || !string.IsNullOrEmpty(forced) && forced != AnchorMap.Id)
             return false;
 
         planet = _war.CurrentPlanet() ?? string.Empty;

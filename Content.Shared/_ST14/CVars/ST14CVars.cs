@@ -87,4 +87,23 @@ public static partial class ST14CVars
     /// </summary>
     public static readonly CVarDef<bool> SectorRounds =
         CVarDef.Create("st14.sector_rounds", true, CVar.SERVERONLY | CVar.ARCHIVE);
+    /// <summary>
+    /// Length of a day on the war planets, in minutes of real time: the planet turns once in this time and the day
+    /// and the night sweep over its sectors
+    /// </summary>
+    public static readonly CVarDef<float> DayLength =
+        CVarDef.Create("st14.day_length", 60f, CVar.SERVER | CVar.REPLICATED | CVar.ARCHIVE);
+
+    /// <summary>
+    /// Shift of the turn of the planets as a share of a day, 0 to 1. The turn itself runs from the real clock, so every
+    /// round, the server and every client see the star in the same place; this only moves it
+    /// </summary>
+    public static readonly CVarDef<float> DayPhaseOffset =
+        CVarDef.Create("st14.day_phase_offset", 0f, CVar.SERVER | CVar.REPLICATED | CVar.ARCHIVE);
+
+    /// <summary>
+    /// Weather and natural disasters in sector rounds
+    /// </summary>
+    public static readonly CVarDef<bool> SectorWeather =
+        CVarDef.Create("st14.sector_weather", true, CVar.SERVERONLY | CVar.ARCHIVE);
 }

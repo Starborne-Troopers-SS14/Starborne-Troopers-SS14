@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-3.0",
+  "copyright": "Made for Starborne Troopers",
+  "size": {
+    "x": 96,
+    "y": 96
+  },
+  "states": [
+    {
+      "name": "scorch1"
+    },
+    {
+      "name": "scorch2"
+    },
+    {
+      "name": "scorch3"
+    }
+  ]
+}

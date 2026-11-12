@@ -1,0 +1,8 @@
+- files: ["collapse1.wav", "collapse2.wav", "collapse3.wav", "collapse4.wav", "rock_hit1.wav", "rock_hit2.wav", "rock_hit3.wav", "rock_hit4.wav", "rock_hit5.wav", "rock_hit6.wav", "rock_hit7.wav", "rock_hit8.wav", "tremor.wav"]
+  license: "Custom"
+  copyright: "© BOOM Library. All rights reserved. Used under licence by Starborne Troopers; cut and mixed down from Armageddon (tremor, earth hits, collapses)"
+  source: "https://www.boomlibrary.com"
+- files: ["crack1.wav", "crack2.wav", "crack3.wav", "crack4.wav", "crack5.wav", "crack6.wav", "crack7.wav", "crack8.wav"]
+  license: "Custom"
+  copyright: "© BOOM Library. All rights reserved. Used under licence by Starborne Troopers; cut from Armageddon (earth rip open, ground rupture)"
+  source: "https://www.boomlibrary.com"
