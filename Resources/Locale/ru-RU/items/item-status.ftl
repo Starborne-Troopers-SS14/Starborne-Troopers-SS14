@@ -33,3 +33,4 @@ anomaly-status-charges = [color=orange]{$charges} зарядов[/color]
 
 # Timer Trigger Status
 timer-trigger-status-delay = Задержка: [color=white]{$delay} сек[/color]
+timer-trigger-status-delay-unknown = Заданная задержка: [color=gray]???[/color]

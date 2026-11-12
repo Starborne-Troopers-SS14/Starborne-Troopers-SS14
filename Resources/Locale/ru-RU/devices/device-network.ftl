@@ -57,3 +57,13 @@ device-net-id-reserved = Резерв
 
 # Unknown
 device-address-unknown = ????-????
+
+device-frequency-prototype-name-arrivals-shuttle-timer = Таймер прибытия
+device-frequency-prototype-name-shuttle-timer = Таймер эвакуационного шаттла
+device-frequency-prototype-name-surveillance-camera = Камеры
+device-address-prefix-camera-monitor = МКН-
+device-address-prefix-crew-monitor = МЭК-
+device-address-prefix-camera-router = МКМ-
+device-address-prefix-camera-router-wireless = БКМ-
+device-address-prefix-camera = КАМ-
+device-address-prefix-crew-monitoring-server = СМЭ-

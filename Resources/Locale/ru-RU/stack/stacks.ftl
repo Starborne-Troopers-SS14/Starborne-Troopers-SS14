@@ -383,3 +383,24 @@ stack-plasma-marble-floor = плазменный мраморный пол
 stack-uranium-marble-floor = урановый мраморный пол
 stack-astro-ironsand-floor = астро-железный песок
 stack-astro-ironsand-floor-borderless = безграничный астро-железный песок
+stack-xenoborg-crystal = { $amount ->
+    [one] кристалл
+    [few] кристалла
+    *[other] кристаллов
+    } ксеноборга
+stack-dragon-tail-compress = компресс из драконьего хвоста
+stack-plastic-tile = пластиковая плитка
+stack-plastic-dark-tile = тёмная пластиковая плитка
+stack-plastic-white-tile = белая пластиковая плитка
+stack-white-marble-mono-floor = белый мраморный моно пол
+stack-dark-marble-mono-floor = тёмный мраморный моно пол
+stack-exo-hull-floor = корпусной пол из экзодермиса
+stack-exo-viscera-floor = внутренний пол из экзодермиса
+stack-exo-techmaint-floor = технический пол из экзодермиса
+stack-exo-horizontal-floor = горизонтальный пол из экзодермиса
+stack-exo-vertical-floor = вертикальный пол из экзодермиса
+stack-exo-corner-ne-floor = северо-восточный угловой пол из экзодермиса
+stack-exo-corner-nw-floor = северо-западный угловой пол из экзодермиса
+stack-exo-corner-se-floor = юго-восточный угловой пол из экзодермиса
+stack-exo-corner-sw-floor = юго-западный угловой пол из экзодермиса
+stack-exo-borg-floor = пол из мехадермиса

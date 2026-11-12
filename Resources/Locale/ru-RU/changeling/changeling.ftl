@@ -54,3 +54,20 @@ changeling-sting-success = Мы незаметно жалим {THE($target)}!
 
 # other
 changeling-paused-map-name = Карта хранения личностей генокрада
+
+changeling-devour-doafter-windup = [color=red]{ CAPITALIZE(POSS-ADJ($user)) } лицо раскрывается, готовясь к пиршеству![/color]
+changeling-devour-doafter = [color=red]{ CAPITALIZE(SUBJECT($user)) } разрывает плоть { $target }![/color]
+changeling-transform-doafter = [color=red]Поверхность { POSS-ADJ($user) } кожи плавится, принимая другую форму.[/color]
+changeling-takeover-doafter = [color=red]{ CAPITALIZE(SUBJECT($user)) } забирается внутрь { $target }![/color]
+changeling-sting-hemotoxin = Вы чувствуете резкую боль в груди!
+changeling-fake-mindshield-enabled = Мы излучаем поддельные волны импланта защиты разума.
+changeling-fake-mindshield-disabled = Мы прекращаем излучать поддельные волны импланта защиты разума.
+changeling-not-enough-chemicals = Нам не хватает химикатов.
+changeling-action-fail-generic = Мы не можем сделать это сейчас.
+changeling-cocoon-success = Мы заключаем { THE($target) } в гробницу из плоти.
+changeling-cocoon-doafter = [color=red]{ CAPITALIZE(SUBJECT($user)) } покрывает { THE($target) } массой плоти![/color]
+changeling-horror-alert-time-name = Оставшееся время
+changeling-horror-alert-time-desc = Когда этот счётчик достигнет нуля, наши силы иссякнут.
+changeling-horror-force-transform-self = Наша энергия иссякла, мы больше не можем поддерживать этот облик.
+changeling-horror-force-transform-others = { CAPITALIZE(POSS-ADJ($user)) } плоть стремительно усыхает и отмирает.
+changeling-horror-transform-fail = Мы накопили недостаточно ДНК, чтобы раскрыть свою истинную сущность.

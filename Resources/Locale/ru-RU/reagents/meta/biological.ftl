@@ -33,3 +33,5 @@ reagent-desc-vomit = Вы можете увидеть в ней нескольк
 
 reagent-name-grey-matter = серое вещество
 reagent-desc-grey-matter = Сок мыслей, вытекающий из ушей.
+reagent-name-living-tissue = живая ткань
+reagent-desc-living-tissue = Смесь внутренностей инопланетного существа. Вы чувствуете, как она смотрит на вас.

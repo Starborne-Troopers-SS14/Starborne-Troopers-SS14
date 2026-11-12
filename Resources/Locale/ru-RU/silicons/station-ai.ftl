@@ -11,8 +11,8 @@ station-ai-core-critical-power = Ваше ядро ИИ имеет критич�
 station-ai-core-taking-damage = Ваше ядро ИИ получает физические повреждения.
 
 # Ghost role
-station-ai-ghost-role-name = Station AI
-station-ai-ghost-role-description = Serve the station crew as its ever watchful AI.
+station-ai-ghost-role-name = ИИ станции
+station-ai-ghost-role-description = Служите экипажу станции в роли её неусыпно бдительного ИИ.
 
 # Radial actions
 ai-open = Открыть действия

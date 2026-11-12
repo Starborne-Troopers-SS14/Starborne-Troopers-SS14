@@ -32,3 +32,6 @@ ent-ClosetBluespace = подозрительный шкаф
 ent-ClosetBluespaceUnstable = подозрительный шкаф
     .desc = Это хранилище... правда же?
     .suffix = Блюспейс нестабильный
+ent-ClosetMaintenanceWelded = { ent-ClosetMaintenance }
+    .desc = { ent-ClosetMaintenance.desc }
+    .suffix = Заваренный

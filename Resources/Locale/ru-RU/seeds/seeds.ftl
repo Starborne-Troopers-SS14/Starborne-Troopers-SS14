@@ -144,3 +144,5 @@ seeds-anomaly-berry-name = аномальные ягоды
 seeds-anomaly-berry-display-name = куст аномальных ягод
 seeds-bloonion-name = лук-летун
 seeds-bloonion-display-name = луковицы лука-летуна
+seeds-aloe-ignis-name = алоэ игнис
+seeds-dragontail-name = драконий хвост

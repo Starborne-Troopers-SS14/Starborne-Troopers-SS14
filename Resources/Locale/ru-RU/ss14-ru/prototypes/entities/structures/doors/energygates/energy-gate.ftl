@@ -1,0 +1,11 @@
+ent-EnergyGate = энергетический турникет
+    .desc = Продвинутый турникет, пропускающий только в одну сторону и не позволяющий пройти следом за другим человеком.
+ent-EnergyGateGenpopEnter = { ent-EnergyGate }
+    .desc = { ent-EnergyGate.desc }
+    .suffix = Общий блок, Вход
+ent-EnergyGateGenpopLeave = { ent-EnergyGate }
+    .desc = { ent-EnergyGate.desc }
+    .suffix = Общий блок, Выход
+ent-EnergyGateAirtight = герметичный энергетический турникет
+    .desc = { ent-EnergyGate.desc }
+    .suffix = Герметичный

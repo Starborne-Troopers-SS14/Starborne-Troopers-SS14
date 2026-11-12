@@ -20,3 +20,5 @@ ent-TreasureCoinAdamantine = { ent-TreasureCoinIron }
     .desc = { ent-TreasureCoinIron.desc }
 ent-TreasureCoinDiamond = { ent-TreasureCoinIron }
     .desc = { ent-TreasureCoinIron.desc }
+ent-BaseCoin = монета
+    .desc = Плоский кусочек металла. Будь он ещё в обращении, инфляция сделала бы его бесполезным. Но раз он вышел из обращения, его стоит хранить в альбоме.

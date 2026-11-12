@@ -6,3 +6,6 @@ ent-StationMap = карта станции
     .suffix = Настенный
 ent-StationMapAssembly = каркас карты станции
     .desc = Каркас карты станции.
+ent-BaseStationMap = { ent-StationMap }
+    .desc = { ent-StationMap.desc }
+    .suffix = Настенный

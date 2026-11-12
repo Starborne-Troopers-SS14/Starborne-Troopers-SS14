@@ -143,3 +143,7 @@ ent-AnomalyBerrySeeds = пакет семян (аномальные ягоды)
     .desc = { ent-SeedBase.desc }
 ent-BloonionSeeds = пакет семян (лук-летун)
     .desc = { ent-SeedBase.desc }
+ent-AloeIgnisSeeds = пакет семян (алоэ игнис)
+    .desc = { ent-SeedBase.desc }
+ent-DragonTailSeeds = пакет семян (драконий хвост)
+    .desc = { ent-SeedBase.desc }

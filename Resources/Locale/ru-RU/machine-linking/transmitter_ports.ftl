@@ -75,3 +75,5 @@ signal-port-description-power-discharging = Этот порт задейству
 
 signal-port-name-item-detected = Обнаружение
 signal-port-description-item-detected = Этот порт задействуется когда передатчик обнаруживает предмет.
+signal-port-name-doorboltstatus = Состояние болтов двери
+signal-port-description-doorboltstatus = Этот порт выдаёт высокий уровень сигнала (HIGH), когда болты двери опущены, и низкий (LOW), когда они подняты.

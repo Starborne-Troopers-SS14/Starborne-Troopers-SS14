@@ -16,3 +16,5 @@ ent-StatueIronsandTall = высокая статуя из железного п�
     .desc = { ent-BaseIronsandStatue.desc }
 ent-StatueIronsandTall2 = высокая статуя из железного песка
     .desc = { ent-BaseIronsandStatue.desc }
+ent-StatueOrnateClown = богато украшенная статуя спасителя
+    .desc = Позолоченная статуя, изображающая возвращение спасителя, который восстанет и поведёт клоунов к великому хонку.

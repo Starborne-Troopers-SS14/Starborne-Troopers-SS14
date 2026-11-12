@@ -41,6 +41,23 @@ def simulate_publish(fork_id: str, version: str) -> None:
     print("[DRY RUN] Skipping all network calls to Robust.CDN.")
 
 
+def get_publish_token() -> str:
+    try:
+        return os.environ["PUBLISH_TOKEN"]
+    except KeyError:
+        raise RuntimeError("PUBLISH_TOKEN is not set")
+
+
+def simulate_publish(fork_id: str, version: str) -> None:
+    print(f"[DRY RUN] Would publish version {version} to Robust.CDN fork '{fork_id}'")
+    print(f"[DRY RUN]   engine version: {get_engine_version()}")
+    files = list(get_files_to_publish())
+    print(f"[DRY RUN]   files to upload ({len(files)}):")
+    for file in files:
+        print(f"[DRY RUN]     - {file}")
+    print("[DRY RUN] Skipping all network calls to Robust.CDN.")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--fork-id", default=FORK_ID)

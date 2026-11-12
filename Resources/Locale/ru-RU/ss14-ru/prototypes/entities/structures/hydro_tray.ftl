@@ -3,3 +3,5 @@ ent-hydroponicsTray = гидропонный лоток
 ent-HydroponicsTrayEmpty = { ent-hydroponicsTray }
     .desc = { ent-hydroponicsTray.desc }
     .suffix = Пустой
+ent-HydroponicsTray = { ent-hydroponicsTray }
+    .desc = { ent-hydroponicsTray.desc }

@@ -20,3 +20,4 @@ credits-window-attributions-copyright = [color=white]Копирайт:[/color] {
 credits-window-attributions-license = [color=white]Лицензия:[/color] { $license }
 credits-window-attributions-source = [color=white]Источник:[/color] { $source }
 credits-window-attributions-failed = [color=red]Не удалось прочитать файл:[/color] { $file }
+credits-window-page-label = Страница:

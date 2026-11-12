@@ -157,3 +157,4 @@ construction-graph-tag-backpack = рюкзак
 
 # chemistry
 construction-graph-tag-centrifuge-compatible = пробирка
+construction-graph-tag-glass-lens = стеклянная линза

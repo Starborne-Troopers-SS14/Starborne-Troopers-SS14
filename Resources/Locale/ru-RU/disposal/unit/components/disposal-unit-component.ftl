@@ -27,3 +27,5 @@ disposal-unit-state-Pressurizing = Нагнетание
 
 # putting people in
 disposal-unit-being-inserted = { CAPITALIZE($user) } пытается затолкать вас в мусоропровод!
+ui-disposal-unit-button-routing = Маршрутизация
+disposal-unit-state-Unpowered = Нет питания

@@ -1,0 +1,10 @@
+cmd-setjobpriority-desc = Устанавливает предпочтение должности выбранного персонажа подключённого игрока.
+cmd-setjobpriority-help = Использование: setjobpriority <игрок> <должность> <high|medium|low|never>
+cmd-setjobpriority-player-not-found = Игрок { $player } не подключён.
+cmd-setjobpriority-job-not-found = Должность { $job } не существует.
+cmd-setjobpriority-invalid-priority = { $priority } — недопустимый приоритет должности. Используйте high, medium, low или never.
+cmd-setjobpriority-preferences-not-loaded = Предпочтения игрока { $player } ещё не загружены.
+cmd-setjobpriority-success = Приоритет должности { $job } для игрока { $player } установлен на { $priority }.
+cmd-setjobpriority-hint-player = [игрок]
+cmd-setjobpriority-hint-job = [должность]
+cmd-setjobpriority-hint-priority = [high|medium|low|never]

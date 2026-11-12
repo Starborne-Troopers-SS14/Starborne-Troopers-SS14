@@ -26,3 +26,7 @@ uplink-sniper-ammo-desc = Коробка с 10 патронами для сна�
 
 uplink-ammo-bundle-name = Набор боеприпасов
 uplink-ammo-bundle-desc = Перезаряжаюсь! Содержит 4 магазина для C-20r, 4 барабана для Бульдога, 3 магазина для винтовки Эсток и 2 короба патронов для L6 SAW.
+uplink-ammo-frag-name = Осколочная граната
+uplink-ammo-frag-desc = Запасная осколочная граната для гранатомёта China Lake.
+uplink-ammo-blast-name = Фугасная граната
+uplink-ammo-blast-desc = Запасная фугасная граната для гранатомёта China Lake.

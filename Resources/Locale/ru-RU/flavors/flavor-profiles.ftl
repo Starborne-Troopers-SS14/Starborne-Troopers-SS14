@@ -347,3 +347,4 @@ flavor-complex-punishment = как наказание
 flavor-complex-artifact-glue = как дроблённые артефакты
 flavor-weh = как вех
 flavor-hew = как хев
+flavor-base-earthy = как земля

@@ -24,3 +24,5 @@ reagent-desc-diethylamine = Очень мощное удобрение, насы
 
 reagent-name-sedin = семин
 reagent-desc-sedin = Модифицированная версия диэтиламина, способная восстанавливать семена на растениях за счёт снижения потенции.
+reagent-name-mutagenic-fertilizer = мутагенное удобрение
+reagent-desc-mutagenic-fertilizer = Резко пахнущее удобрение, вызывающее мутации растений, но сохраняющее их съедобными.

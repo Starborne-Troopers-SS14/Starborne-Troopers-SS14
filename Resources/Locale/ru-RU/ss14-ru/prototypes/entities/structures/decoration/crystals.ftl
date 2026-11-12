@@ -22,3 +22,5 @@ ent-CrystalYellow = { ent-CrystalGreen }
 ent-CrystalCyan = { ent-CrystalGreen }
     .desc = { ent-CrystalGreen.desc }
     .suffix = Голубой
+ent-BaseCrystalStalagmite = кристалл
+    .desc = Вырост острых кристаллов.

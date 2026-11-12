@@ -93,3 +93,12 @@ ent-StationAiFixerComputer = консоль восстановления ИИ
 ent-ComputerNukieDelivery = консоль снабжения Оперативников Синдиката
     .desc = Компьютер, оснащенный блюспейс оборудованием для снабжения Ядерных Оперативников.
         Печатная плата встроена в корпус и не подлежит восстановлению в случае демонтажа.
+ent-ComputerBodyScanner = компьютер сканера тела
+    .desc = Сканер тела.
+ent-ComputerStationTeleportersControl = консоль управления станционными телепортами
+    .desc = Используется для контроля работы системы телепортации станции.
+ent-ComputerStationTeleportersControlFilled = { ent-ComputerStationTeleportersControl }
+    .desc = { ent-ComputerStationTeleportersControl.desc }
+    .suffix = Автозаполнение, Сеть Nanotrasen
+ent-ComputerSyndicateTeleportersControl = консоль управления телепортами Синдиката
+    .desc = { ent-ComputerStationTeleportersControl.desc }

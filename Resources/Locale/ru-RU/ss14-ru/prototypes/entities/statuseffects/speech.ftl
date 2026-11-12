@@ -12,3 +12,5 @@ ent-StatusEffectRatvarianLanguage = ратварский акцент
     .desc = { ent-SpeechStatusEffectBase.desc }
 ent-StatusEffectBark = баркцент
     .desc = { ent-SpeechStatusEffectBase.desc }
+ent-StatusEffectAllCaps = акцент заглавных букв
+    .desc = { ent-SpeechStatusEffectBase.desc }

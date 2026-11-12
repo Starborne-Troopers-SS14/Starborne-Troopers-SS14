@@ -74,12 +74,12 @@ public static class CENavMapGeometry
 
     private static bool IsFloored(NavMapComponent nav, Vector2i gridTile)
     {
-        var chunkOrigin = SharedMapSystem.GetChunkIndices(gridTile, SharedNavMapSystem.ChunkSize);
+        var chunkOrigin = SharedMapSystem.GetChunkIndices(gridTile, NavMapSystem.ChunkSize);
         if (!nav.Chunks.TryGetValue(chunkOrigin, out var chunk))
             return false;
 
-        var rel = SharedMapSystem.GetChunkRelative(gridTile, SharedNavMapSystem.ChunkSize);
-        return (chunk.TileData[SharedNavMapSystem.GetTileIndex(rel)] & SharedNavMapSystem.FloorMask) != 0;
+        var rel = SharedMapSystem.GetChunkRelative(gridTile, NavMapSystem.ChunkSize);
+        return (chunk.TileData[NavMapSystem.GetTileIndex(rel)] & NavMapSystem.FloorMask) != 0;
     }
 
     /// <summary>
@@ -91,14 +91,14 @@ public static class CENavMapGeometry
 
         foreach (var chunk in nav.Chunks.Values)
         {
-            var baseTile = chunk.Origin * SharedNavMapSystem.ChunkSize;
+            var baseTile = chunk.Origin * NavMapSystem.ChunkSize;
 
-            for (var i = 0; i < SharedNavMapSystem.ArraySize; i++)
+            for (var i = 0; i < NavMapSystem.ArraySize; i++)
             {
-                if ((chunk.TileData[i] & SharedNavMapSystem.FloorMask) == 0)
+                if ((chunk.TileData[i] & NavMapSystem.FloorMask) == 0)
                     continue;
 
-                var t = baseTile + SharedNavMapSystem.GetTileFromIndex(i);
+                var t = baseTile + NavMapSystem.GetTileFromIndex(i);
 
                 var x0 = t.X * size;
                 var x1 = x0 + size;
@@ -131,17 +131,17 @@ public static class CENavMapGeometry
 
         foreach (var chunk in nav.Chunks.Values)
         {
-            var baseTile = chunk.Origin * SharedNavMapSystem.ChunkSize;
+            var baseTile = chunk.Origin * NavMapSystem.ChunkSize;
 
-            for (var y = 0; y < SharedNavMapSystem.ChunkSize; y++)
+            for (var y = 0; y < NavMapSystem.ChunkSize; y++)
             {
                 var runStart = -1;
 
-                for (var x = 0; x <= SharedNavMapSystem.ChunkSize; x++)
+                for (var x = 0; x <= NavMapSystem.ChunkSize; x++)
                 {
-                    var floored = x < SharedNavMapSystem.ChunkSize &&
-                                  (chunk.TileData[SharedNavMapSystem.GetTileIndex(new Vector2i(x, y))] &
-                                   SharedNavMapSystem.FloorMask) != 0;
+                    var floored = x < NavMapSystem.ChunkSize &&
+                                  (chunk.TileData[NavMapSystem.GetTileIndex(new Vector2i(x, y))] &
+                                   NavMapSystem.FloorMask) != 0;
 
                     if (floored)
                     {
@@ -176,18 +176,18 @@ public static class CENavMapGeometry
 
         foreach (var (chunkOrigin, chunk) in nav.Chunks)
         {
-            for (var i = 0; i < SharedNavMapSystem.ArraySize; i++)
+            for (var i = 0; i < NavMapSystem.ArraySize; i++)
             {
-                var tileData = chunk.TileData[i] & SharedNavMapSystem.WallMask;
+                var tileData = chunk.TileData[i] & NavMapSystem.WallMask;
                 if (tileData == 0)
                     continue;
 
                 tileData >>= (int)NavMapChunkType.Wall;
 
-                var relativeTile = SharedNavMapSystem.GetTileFromIndex(i);
-                var tile = (chunk.Origin * SharedNavMapSystem.ChunkSize + relativeTile) * grid.TileSize;
+                var relativeTile = NavMapSystem.GetTileFromIndex(i);
+                var tile = (chunk.Origin * NavMapSystem.ChunkSize + relativeTile) * grid.TileSize;
 
-                if (tileData != SharedNavMapSystem.AllDirMask)
+                if (tileData != NavMapSystem.AllDirMask)
                 {
                     AddRectForThinWall(data, tileData, tile);
                     continue;
@@ -198,10 +198,10 @@ public static class CENavMapGeometry
 
                 // North edge
                 var neighborData = 0;
-                if (relativeTile.Y != SharedNavMapSystem.ChunkSize - 1)
+                if (relativeTile.Y != NavMapSystem.ChunkSize - 1)
                     neighborData = chunk.TileData[i + 1];
                 else if (nav.Chunks.TryGetValue(chunkOrigin + Vector2i.Up, out neighborChunk))
-                    neighborData = neighborChunk.TileData[i + 1 - SharedNavMapSystem.ChunkSize];
+                    neighborData = neighborChunk.TileData[i + 1 - NavMapSystem.ChunkSize];
 
                 if ((neighborData & SouthMask) == 0)
                 {
@@ -213,12 +213,12 @@ public static class CENavMapGeometry
 
                 // East edge
                 neighborData = 0;
-                if (relativeTile.X != SharedNavMapSystem.ChunkSize - 1)
-                    neighborData = chunk.TileData[i + SharedNavMapSystem.ChunkSize];
+                if (relativeTile.X != NavMapSystem.ChunkSize - 1)
+                    neighborData = chunk.TileData[i + NavMapSystem.ChunkSize];
                 else if (nav.Chunks.TryGetValue(chunkOrigin + Vector2i.Right, out neighborChunk))
                 {
                     neighborData =
-                        neighborChunk.TileData[i + SharedNavMapSystem.ChunkSize - SharedNavMapSystem.ArraySize];
+                        neighborChunk.TileData[i + NavMapSystem.ChunkSize - NavMapSystem.ArraySize];
                 }
 
                 if ((neighborData & WestMask) == 0)
@@ -234,7 +234,7 @@ public static class CENavMapGeometry
                 if (relativeTile.Y != 0)
                     neighborData = chunk.TileData[i - 1];
                 else if (nav.Chunks.TryGetValue(chunkOrigin + Vector2i.Down, out neighborChunk))
-                    neighborData = neighborChunk.TileData[i - 1 + SharedNavMapSystem.ChunkSize];
+                    neighborData = neighborChunk.TileData[i - 1 + NavMapSystem.ChunkSize];
 
                 if ((neighborData & NorthMask) == 0)
                 {
@@ -244,11 +244,11 @@ public static class CENavMapGeometry
                 // West edge
                 neighborData = 0;
                 if (relativeTile.X != 0)
-                    neighborData = chunk.TileData[i - SharedNavMapSystem.ChunkSize];
+                    neighborData = chunk.TileData[i - NavMapSystem.ChunkSize];
                 else if (nav.Chunks.TryGetValue(chunkOrigin + Vector2i.Left, out neighborChunk))
                 {
                     neighborData =
-                        neighborChunk.TileData[i - SharedNavMapSystem.ChunkSize + SharedNavMapSystem.ArraySize];
+                        neighborChunk.TileData[i - NavMapSystem.ChunkSize + NavMapSystem.ArraySize];
                 }
 
                 if ((neighborData & EastMask) == 0)
@@ -276,18 +276,18 @@ public static class CENavMapGeometry
     {
         foreach (var chunk in nav.Chunks.Values)
         {
-            for (var i = 0; i < SharedNavMapSystem.ArraySize; i++)
+            for (var i = 0; i < NavMapSystem.ArraySize; i++)
             {
-                var tileData = chunk.TileData[i] & SharedNavMapSystem.AirlockMask;
+                var tileData = chunk.TileData[i] & NavMapSystem.AirlockMask;
                 if (tileData == 0)
                     continue;
 
                 tileData >>= (int)NavMapChunkType.Airlock;
 
-                var relative = SharedNavMapSystem.GetTileFromIndex(i);
-                var tile = (chunk.Origin * SharedNavMapSystem.ChunkSize + relative) * grid.TileSize;
+                var relative = NavMapSystem.GetTileFromIndex(i);
+                var tile = (chunk.Origin * NavMapSystem.ChunkSize + relative) * grid.TileSize;
 
-                if (tileData != SharedNavMapSystem.AllDirMask)
+                if (tileData != NavMapSystem.AllDirMask)
                 {
                     AddRectForThinAirlock(data, tileData, tile);
                     continue;
@@ -307,7 +307,7 @@ public static class CENavMapGeometry
         var leftTop = new Vector2(-0.5f, 0.5f - ThinWallThickness);
         var rightBottom = new Vector2(0.5f, 0.5f);
 
-        for (var i = 0; i < SharedNavMapSystem.Directions; i++)
+        for (var i = 0; i < NavMapSystem.Directions; i++)
         {
             var dirMask = 1 << i;
             if ((tileData & dirMask) == 0)
@@ -326,7 +326,7 @@ public static class CENavMapGeometry
         var centreTop = new Vector2(0f, 0.5f - FullWallInstep - ThinDoorThickness);
         var centreBottom = new Vector2(0f, 0.5f - FullWallInstep);
 
-        for (var i = 0; i < SharedNavMapSystem.Directions; i++)
+        for (var i = 0; i < NavMapSystem.Directions; i++)
         {
             var dirMask = 1 << i;
             if ((tileData & dirMask) == 0)
