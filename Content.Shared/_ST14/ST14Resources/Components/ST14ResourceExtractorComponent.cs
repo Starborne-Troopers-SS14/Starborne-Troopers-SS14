@@ -50,6 +50,13 @@ public sealed partial class ST14ResourceExtractorComponent : Component
     [DataField]
     public SoundSpecifier? HitSound;
 
+    /// <summary>
+    /// Играть HitSound и в момент запуска. Нужно, когда звук — это один цикл анимации:
+    /// анимация начинается с запуском, и без этого первый цикл шёл бы без звука.
+    /// </summary>
+    [DataField]
+    public bool HitSoundOnStart;
+
     [DataField]
     public float SoundRadius = 6f;
 
