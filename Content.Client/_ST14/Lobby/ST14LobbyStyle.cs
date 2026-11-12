@@ -197,6 +197,8 @@ public static class ST14LobbyStyle
         fill.SetContentMarginOverride(StyleBox.Margin.All, 0);
         var handle = ST14HubStyle.Flat(Color.FromHex("#F5F5F5C8"));
         handle.SetContentMarginOverride(StyleBox.Margin.Horizontal, 1.5f);
+        // the boxes above have no size of their own, the handle gives the slider its height or it collapses to nothing
+        handle.SetContentMarginOverride(StyleBox.Margin.Vertical, 11);
         yield return E<Slider>()
             .Prop(Slider.StylePropertyBackground, groove)
             .Prop(Slider.StylePropertyForeground, new StyleBoxEmpty())
