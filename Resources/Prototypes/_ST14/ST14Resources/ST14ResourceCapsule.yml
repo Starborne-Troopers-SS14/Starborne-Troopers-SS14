@@ -32,6 +32,7 @@
     sprites:
       Armium: _ST14/Structures/ST14Resources/bluegoo/32x32.rsi
       Auron: _ST14/Structures/ST14Resources/yellowgoo/32x32.rsi
+      Neft: _ST14/Structures/ST14Resources/oil/32x32.rsi
   - type: Clothing
     slots: NONE
     quickEquip: false

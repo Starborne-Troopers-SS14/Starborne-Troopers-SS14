@@ -4,6 +4,8 @@ using Content.Client.Animations;
 using Content.Client.Clickable;
 using Content.Client.Items;
 using Content.Client.Weapons.Ranged.Components;
+using Content.Shared._ST14.Weapons; // ST14
+using Content.Shared.Wieldable.Components; // ST14
 using Content.Shared.Camera;
 using Content.Shared.CCVar;
 using Content.Shared.CombatMode;
@@ -334,6 +336,14 @@ public sealed partial class GunSystem : SharedGunSystem
             var track = EnsureComp<TrackUserComponent>(ent);
             track.User = tracked;
             track.Offset = Vector2.UnitX / 2f;
+
+            // ST14: the flash sits on the barrel tip of this gun
+            if (TryComp<ST14MuzzleOffsetComponent>(gunUid, out var muzzle))
+            {
+                var wielded = TryComp<WieldableComponent>(gunUid, out var wield) && wield.Wielded;
+                var tip = wielded ? muzzle.WieldedDistance : muzzle.Distance;
+                track.Offset = Vector2.UnitX * (tip + muzzle.FlashCoreOffset);
+            }
         }
 
         var lifetime = 0.4f;
@@ -363,6 +373,11 @@ public sealed partial class GunSystem : SharedGunSystem
         };
 
         _animPlayer.Play(ent, anim, "muzzle-flash");
+
+        // ST14: a flash with its own light (coloured, on the barrel tip) replaces the orange gun light
+        if (HasComp<PointLightComponent>(ent))
+            return;
+
         if (!TryComp(gunUid, out PointLightComponent? light))
         {
             light = Factory.GetComponent<PointLightComponent>();

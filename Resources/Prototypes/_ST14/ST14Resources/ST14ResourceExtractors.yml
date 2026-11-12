@@ -179,7 +179,44 @@
   components:
   - type: Sprite
     sprite: _ST14/Structures/ST14Resources/neft_pumpjack.rsi
+    # спрайт 96x96: низ станины на нижнем краю клетки
+    offset: 0.15,1
+    layers:
+    - state: idle
+      map: [ "base" ]
+    - sprite: _ST14/Structures/ST14Resources/oil/pumpjack_left.rsi
+      state: empty
+      map: [ "capsule_slot_1" ]
+      visible: false
+    - sprite: _ST14/Structures/ST14Resources/oil/pumpjack_right.rsi
+      state: empty
+      map: [ "capsule_slot_2" ]
+      visible: false
+  - type: ST14ResourceExtractorSlotVisuals
+    fillStates:
+    - empty
+    - half
+    - filled
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-1.2,-0.45,1.2,0.35"
+        density: 200
+        mask:
+        - MachineMask
+        layer:
+        - MachineLayer
   - type: ST14ResourceExtractor
     resourceType: Neft
+    # один «удар» = один цикл анимации working (10 кадров по 0.18 с)
+    hitInterval: 1.8
+    hitSoundOnStart: true
+    shakeStrength: 0
+    soundRadius: 10
+    # один ход качки, вырезан из звука буров
     hitSound:
-      path: /Audio/Machines/machine_switch.ogg
+      path: /Audio/_ST14/ST14Resources/pumpjack_stroke.wav
+      params:
+        volume: -6

@@ -43,8 +43,14 @@ ent-ST14ClothingHeadHelmetEngineer = M-3 tactical engineering helmet
 ent-ST14JumpsuitInfantryUniform = Mobile Infantry uniform
     .desc = Field uniform of the Federation trooper - a padded grey jacket with black inserts and rank epaulettes, worn with reinforced-knee trousers. The winged Mobile Infantry emblem sits on the chest, with unit patches on the shoulders.
 
+ent-ST14JumpsuitInfantryUniformJacketless = Mobile Infantry fatigues
+    .desc = The Mobile Infantry field uniform without the jacket - a black undershirt and reinforced-knee trousers.
+
 ent-ST14JumpsuitEngineeringUniform = Mobile Engineering Infantry uniform
     .desc = Field uniform of the engineering corps - a padded grey jacket with black inserts and rank epaulettes, worn with reinforced-knee trousers. The corps insignia sits on the chest.
+
+ent-ST14JumpsuitEngineeringUniformJacketless = Mobile Engineering Infantry fatigues
+    .desc = The engineering corps field uniform without the jacket - an orange undershirt and reinforced-knee trousers.
 
 ent-ST14ClothingBackpack = Mobile Infantry backpack
     .desc = The trooper's field pack. Grey composite shell with external straps for the rest of the kit.

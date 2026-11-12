@@ -7,6 +7,8 @@
   name: shell (caseless)
   components:
   - type: CartridgeAmmo
+    proto: ST14PelletShotgunSpread
+    muzzleFlash: ST14MuzzleFlashBullet
     deleteOnSpawn: true
 
 - type: entity

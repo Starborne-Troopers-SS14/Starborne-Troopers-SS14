@@ -106,4 +106,47 @@ public static partial class ST14CVars
     /// </summary>
     public static readonly CVarDef<bool> SectorWeather =
         CVarDef.Create("st14.sector_weather", true, CVar.SERVERONLY | CVar.ARCHIVE);
+
+
+    /// <summary>
+    /// Volume of gunshots, reloads and bullet hits, 0 to 1, set in the audio options
+    /// </summary>
+    public static readonly CVarDef<float> WeaponsVolume =
+        CVarDef.Create("st14.volume_weapons", 1f, CVar.CLIENTONLY | CVar.ARCHIVE);
+
+    /// <summary>
+    /// Volume of explosions and grenades, 0 to 1, set in the audio options
+    /// </summary>
+    public static readonly CVarDef<float> ExplosionsVolume =
+        CVarDef.Create("st14.volume_explosions", 1f, CVar.CLIENTONLY | CVar.ARCHIVE);
+
+    /// <summary>
+    /// Volume of weather and natural disasters, 0 to 1, set in the audio options
+    /// </summary>
+    public static readonly CVarDef<float> WeatherVolume =
+        CVarDef.Create("st14.volume_weather", 1f, CVar.CLIENTONLY | CVar.ARCHIVE);
+
+    /// <summary>
+    /// Volume of trooper voices and shouts, 0 to 1, set in the audio options
+    /// </summary>
+    public static readonly CVarDef<float> VoicesVolume =
+        CVarDef.Create("st14.volume_voices", 1f, CVar.CLIENTONLY | CVar.ARCHIVE);
+
+    /// <summary>
+    /// Volume of bug screams and attacks (their footsteps have their own slider), 0 to 1, set in the audio options
+    /// </summary>
+    public static readonly CVarDef<float> BugsVolume =
+        CVarDef.Create("st14.volume_bugs", 1f, CVar.CLIENTONLY | CVar.ARCHIVE);
+
+    /// <summary>
+    /// Volume of trooper and other footsteps, 0 to 1, set in the audio options
+    /// </summary>
+    public static readonly CVarDef<float> FootstepsVolume =
+        CVarDef.Create("st14.volume_footsteps", 1f, CVar.CLIENTONLY | CVar.ARCHIVE);
+
+    /// <summary>
+    /// Volume of drills, pump jacks and other machines, 0 to 1, set in the audio options
+    /// </summary>
+    public static readonly CVarDef<float> MachinesVolume =
+        CVarDef.Create("st14.volume_machines", 1f, CVar.CLIENTONLY | CVar.ARCHIVE);
 }

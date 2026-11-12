@@ -2,6 +2,7 @@
          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
          xmlns:ui="clr-namespace:Content.Client.Options.UI">
     <BoxContainer Orientation="Vertical">
+        <ScrollContainer VerticalExpand="True" HScrollEnabled="False">
         <BoxContainer Orientation="Vertical" Margin="8 8 8 8" VerticalExpand="True">
             <Label Text="{Loc 'ui-options-volume-label'}"
                    StyleClasses="LabelKeyText"/>
@@ -16,6 +17,13 @@
                 <ui:OptionSlider Name="SliderVolumeLobby" Title="{Loc 'ui-options-lobby-volume'}" />
                 <ui:OptionSlider Name="SliderVolumeInterface" Title="{Loc 'ui-options-interface-volume'}" />
                 <!-- ST14 -->
+                <ui:OptionSlider Name="SliderVolumeWeapons" Title="{Loc 'st14-ui-options-weapons-volume'}" />
+                <ui:OptionSlider Name="SliderVolumeExplosions" Title="{Loc 'st14-ui-options-explosions-volume'}" />
+                <ui:OptionSlider Name="SliderVolumeWeather" Title="{Loc 'st14-ui-options-weather-volume'}" />
+                <ui:OptionSlider Name="SliderVolumeVoices" Title="{Loc 'st14-ui-options-voices-volume'}" />
+                <ui:OptionSlider Name="SliderVolumeBugs" Title="{Loc 'st14-ui-options-bugs-volume'}" />
+                <ui:OptionSlider Name="SliderVolumeFootsteps" Title="{Loc 'st14-ui-options-footsteps-volume'}" />
+                <ui:OptionSlider Name="SliderVolumeMachines" Title="{Loc 'st14-ui-options-machines-volume'}" />
                 <ui:OptionSlider Name="SliderVolumeBugFootsteps" Title="{Loc 'st14-ui-options-bug-footsteps-volume'}" />
                 <ui:OptionSlider Name="SliderMaxAmbienceSounds" Title="{Loc 'ui-options-ambience-max-sounds'}"
                                  Margin="0 0 0 8" />
@@ -28,6 +36,7 @@
                 <CheckBox Name="MuteUnfocusedCheckBox" Text="{Loc 'ui-options-mute-unfocused'}" />
             </BoxContainer>
         </BoxContainer>
+        </ScrollContainer>
         <ui:OptionsTabControlRow Name="Control" Access="Public" />
     </BoxContainer>
 </Control>

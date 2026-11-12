@@ -201,9 +201,13 @@ public sealed partial class ST14ResourceExtractorSystem : SharedST14ResourceExtr
 
     private void SetExtracting(Entity<ST14ResourceExtractorComponent> ent, bool extracting)
     {
+        var started = extracting && !ent.Comp.Extracting;
         ent.Comp.Extracting = extracting;
         if (extracting)
             ent.Comp.NextHitTime = _timing.CurTime + ent.Comp.HitInterval;
+
+        if (started && ent.Comp.HitSoundOnStart)
+            PlayHitSound(ent);
 
         Dirty(ent);
         _appearance.SetData(ent, ST14ResourceExtractorVisuals.Extracting, extracting);
@@ -278,10 +282,15 @@ public sealed partial class ST14ResourceExtractorSystem : SharedST14ResourceExtr
         _ui.SetUiState(ent.Owner, ST14ResourceExtractorUIKey.Key, state);
     }
 
-    private void PlayHitEffects(Entity<ST14ResourceExtractorComponent> ent)
+    private void PlayHitSound(Entity<ST14ResourceExtractorComponent> ent)
     {
         if (ent.Comp.HitSound != null)
             _audio.PlayPvs(ent.Comp.HitSound, ent, ent.Comp.HitSound.Params.WithMaxDistance(ent.Comp.SoundRadius));
+    }
+
+    private void PlayHitEffects(Entity<ST14ResourceExtractorComponent> ent)
+    {
+        PlayHitSound(ent);
 
         if (ent.Comp.ShakeStrength <= 0f)
             return;
