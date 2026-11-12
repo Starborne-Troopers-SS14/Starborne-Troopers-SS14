@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-3.0",
+  "copyright": "Generated procedurally for Starborne Troopers",
+  "size": {
+    "x": 64,
+    "y": 416
+  },
+  "states": [
+    {
+      "name": "bolt",
+      "delays": [
+        [
+          0.06,
+          0.06,
+          0.06,
+          0.06
+        ]
+      ]
+    }
+  ]
+}

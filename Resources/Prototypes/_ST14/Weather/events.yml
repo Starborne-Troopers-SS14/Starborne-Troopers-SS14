@@ -1,0 +1,371 @@
+# Weather and natural disasters of the sector rounds. Every sector map gets its own: after a quiet while one of these,
+# picked by weight among those fitting the time of day of the sector, starts there. An event builds up from nothing
+# over rampUp, slowly at first and then faster, and dies down over rampDown; its blows, its look and its one looping
+# sound all follow that strength.
+# st14_weather <id> starts one by hand on the sector the admin stands in, st14_weather hour <0-24> moves the star.
+
+- type: st14WeatherSettings
+  id: Default
+  firstDelay: 240
+  minGap: 300
+  maxGap: 720
+  lightInterval: 1
+
+- type: st14WeatherEvent
+  id: ST14WeatherEarthquake
+  name: st14-weather-earthquake
+  warning: st14-weather-earthquake-warning
+  over: st14-weather-earthquake-over
+  weight: 1
+  minDuration: 60
+  maxDuration: 110
+  rampUp: 20
+  rampDown: 15
+  startSound:
+    collection: ST14WeatherCollapse
+    params:
+      volume: -2
+  ambient:
+    path: /Audio/_ST14/Weather/Earthquake/tremor.wav
+    params:
+      volume: 2
+  speed: 0.85
+  visual:
+    particles: Dust
+    count: 320
+    color: '#A08868B0'
+    speed: 1.5
+    width: 0.14
+    fog: 0.55
+    fogColor: '#9C8466'
+    fogColor2: '#D0B890'
+    clouds: [ patches, veil, puffy ]
+    fogSpeed: 0.6
+    tint: '#4A3A2830'
+  effects:
+  - !type:ST14WeatherShakeEffect
+    interval: 0.4
+    strength: 0.9
+    knockdownChance: 0.006
+    knockdownTime: 2
+  - !type:ST14WeatherStrikeEffect
+    interval: 2.5
+    strike: ST14WeatherFallingRock
+    spread: 10
+    anywhere: 0.3
+  - !type:ST14WeatherFissureEffect
+    interval: 1.2
+    decals: [ ST14WeatherFissure1, ST14WeatherFissure2, ST14WeatherFissure3, ST14WeatherFissure4 ]
+    size: 6, 3
+    spread: 9
+    anywhere: 0.35
+    max: 45
+    sound:
+      collection: ST14WeatherGroundCrack
+      params:
+        volume: -2
+        maxDistance: 25
+
+- type: st14WeatherEvent
+  id: ST14WeatherSandstorm
+  name: st14-weather-sandstorm
+  warning: st14-weather-sandstorm-warning
+  over: st14-weather-sandstorm-over
+  weight: 1.2
+  minDuration: 180
+  maxDuration: 320
+  rampUp: 75
+  rampDown: 35
+  ambient:
+    path: /Audio/_ST14/Weather/Sandstorm/sandstorm.wav
+    params:
+      volume: 3
+  speed: 0.75
+  visual:
+    particles: Sand
+    count: 1800
+    color: '#FFF0D2B0'
+    speed: 14
+    length: 1.6
+    width: 0.07
+    fog: 1
+    fogColor: '#6E4220'
+    fogColor2: '#E8C890'
+    clouds: [ billow, ribbons, curls, wisps ]
+    fogSpeed: 5
+    tint: '#9A643088'
+  effects:
+  - !type:ST14WeatherExposureEffect
+    interval: 6
+    popup: st14-weather-sandstorm-hurt
+    damage:
+      types:
+        Blunt: 1
+  - !type:ST14WeatherGustEffect
+    interval: 10
+    chance: 0.6
+    distance: 4
+    itemChance: 0.5
+    pushChance: 0.15
+    knockdownChance: 0.05
+
+- type: st14WeatherEvent
+  id: ST14WeatherThunderstorm
+  name: st14-weather-thunderstorm
+  warning: st14-weather-thunderstorm-warning
+  over: st14-weather-thunderstorm-over
+  weight: 1
+  minDuration: 180
+  maxDuration: 320
+  rampUp: 60
+  rampDown: 30
+  ambient:
+    path: /Audio/_ST14/Weather/Rain/downpour.wav
+    params:
+      volume: 0
+  speed: 0.9
+  visual:
+    particles: Rain
+    count: 2200
+    color: '#DCE6F8C8'
+    speed: 17
+    length: 1.3
+    width: 0.06
+    fog: 0.6
+    fogColor: '#2E3442'
+    fogColor2: '#8890A0'
+    clouds: [ billow, wisps, curls ]
+    fogSpeed: 3
+    tint: '#141A2898'
+  effects:
+  - !type:ST14WeatherStrikeEffect
+    interval: 8
+    chance: 0.8
+    strike: ST14WeatherLightning
+    spread: 14
+    anywhere: 0.5
+  - !type:ST14WeatherSoundEffect
+    interval: 12
+    chance: 0.5
+    spread: 25
+    sound:
+      collection: ST14WeatherThunder
+      params:
+        volume: -2
+        maxDistance: 60
+  - !type:ST14WeatherExtinguishEffect
+    interval: 3
+
+- type: st14WeatherEvent
+  id: ST14WeatherDryStorm
+  name: st14-weather-dry-storm
+  warning: st14-weather-dry-storm-warning
+  over: st14-weather-dry-storm-over
+  weight: 0.7
+  minDuration: 150
+  maxDuration: 260
+  rampUp: 50
+  rampDown: 30
+  ambient:
+    path: /Audio/_ST14/Weather/Thunder/storm.wav
+    params:
+      volume: 2
+  speed: 0.9
+  visual:
+    particles: Sand
+    count: 900
+    color: '#E8DCCCA8'
+    speed: 11
+    length: 0.9
+    width: 0.06
+    fog: 0.7
+    fogColor: '#4A4250'
+    fogColor2: '#B8A890'
+    clouds: [ curls, ribbons, billow ]
+    fogSpeed: 4
+    tint: '#2A243058'
+  effects:
+  - !type:ST14WeatherStrikeEffect
+    interval: 11
+    chance: 0.7
+    strike: ST14WeatherLightning
+    spread: 16
+    anywhere: 0.6
+  - !type:ST14WeatherGustEffect
+    interval: 10
+    chance: 0.6
+    distance: 3
+    itemChance: 0.4
+    pushChance: 0.1
+    knockdownChance: 0.03
+
+- type: st14WeatherEvent
+  id: ST14WeatherRain
+  name: st14-weather-rain
+  warning: st14-weather-rain-warning
+  over: st14-weather-rain-over
+  weight: 1.4
+  minDuration: 200
+  maxDuration: 380
+  rampUp: 60
+  rampDown: 40
+  ambient:
+    path: /Audio/_ST14/Weather/Rain/rain.wav
+    params:
+      volume: 0
+  speed: 0.95
+  visual:
+    particles: Rain
+    count: 1400
+    color: '#D4E0F4B4'
+    speed: 14
+    length: 1
+    width: 0.05
+    fog: 0.35
+    fogColor: '#6E7686'
+    fogColor2: '#A8B0C0'
+    clouds: [ veil, puffy, wisps ]
+    fogSpeed: 2
+    tint: '#1C243460'
+  effects:
+  - !type:ST14WeatherExtinguishEffect
+    interval: 3
+
+- type: st14WeatherEvent
+  id: ST14WeatherGale
+  name: st14-weather-gale
+  warning: st14-weather-gale-warning
+  over: st14-weather-gale-over
+  weight: 1
+  minDuration: 120
+  maxDuration: 200
+  rampUp: 45
+  rampDown: 25
+  ambient:
+    path: /Audio/_ST14/Weather/Wind/gale.wav
+    params:
+      volume: 2
+  speed: 0.85
+  visual:
+    particles: Sand
+    count: 1100
+    color: '#FFF4DCA8'
+    speed: 19
+    length: 2
+    width: 0.05
+    fog: 0.55
+    fogColor: '#B89470'
+    fogColor2: '#F0DCB8'
+    clouds: [ wisps, ribbons, patches, veil ]
+    fogSpeed: 9
+    tint: '#6A584018'
+  effects:
+  - !type:ST14WeatherGustEffect
+    interval: 5
+    chance: 0.85
+    distance: 5
+    itemChance: 0.6
+    pushChance: 0.4
+    knockdownChance: 0.12
+    sound:
+      collection: ST14WeatherGust
+      params:
+        volume: -8
+
+- type: st14WeatherEvent
+  id: ST14WeatherMeteorShower
+  name: st14-weather-meteors
+  warning: st14-weather-meteors-warning
+  over: st14-weather-meteors-over
+  weight: 0.6
+  minDuration: 90
+  maxDuration: 150
+  rampUp: 30
+  rampDown: 20
+  visual:
+    count: 0
+    embers: 7
+    meteors: true
+    emberColor: '#FFB060'
+    speed: 9
+    width: 0.09
+    fog: 0.15
+    fogColor: '#603820'
+    fogColor2: '#A04A20'
+    clouds: [ curls, veil, puffy ]
+    fogSpeed: 1
+    tint: '#4A180838'
+  effects:
+  - !type:ST14WeatherStrikeEffect
+    interval: 4
+    chance: 0.8
+    strike: ST14WeatherMeteor
+    spread: 12
+    anywhere: 0.4
+
+- type: st14WeatherEvent
+  id: ST14WeatherHeatwave
+  name: st14-weather-heatwave
+  warning: st14-weather-heatwave-warning
+  over: st14-weather-heatwave-over
+  weight: 0.8
+  time: Day
+  minDuration: 200
+  maxDuration: 320
+  rampUp: 90
+  rampDown: 45
+  speed: 0.9
+  visual:
+    particles: Motes
+    count: 140
+    color: '#FFE4A880'
+    width: 0.06
+    fog: 0.22
+    fogColor: '#FFC890'
+    fogColor2: '#FFE8C0'
+    clouds: [ veil, curls, veil ]
+    fogSpeed: 0.8
+    tint: '#FF904030'
+  effects:
+  - !type:ST14WeatherExposureEffect
+    interval: 8
+    popup: st14-weather-heatwave-hurt
+    damage:
+      types:
+        Heat: 1
+
+- type: st14WeatherEvent
+  id: ST14WeatherColdNight
+  name: st14-weather-cold
+  warning: st14-weather-cold-warning
+  over: st14-weather-cold-over
+  weight: 0.8
+  time: Night
+  minDuration: 200
+  maxDuration: 320
+  rampUp: 80
+  rampDown: 40
+  ambient:
+    path: /Audio/_ST14/Weather/Snow/blizzard.wav
+    params:
+      volume: 0
+  speed: 0.92
+  visual:
+    particles: Snow
+    count: 1400
+    color: '#F0F4FFE0'
+    speed: 3
+    width: 0.08
+    fog: 0.5
+    fogColor: '#C8D4E8'
+    fogColor2: '#FFFFFF'
+    clouds: [ veil, puffy, wisps ]
+    fogSpeed: 1.5
+    tint: '#5070A030'
+  effects:
+  - !type:ST14WeatherExposureEffect
+    interval: 8
+    popup: st14-weather-cold-hurt
+    damage:
+      types:
+        Cold: 1
