@@ -4,6 +4,10 @@
   id: ST14WeaponRifleMoritaCarbine
   description: The standard-issue Federation carbine. Lighter and handier than the full rifle, it trades reach for a faster swing in close quarters.
   components:
+  # вспышка выстрела у кончика ствола
+  - type: ST14MuzzleOffset
+    distance: 0.22
+    wieldedDistance: 0.34
   - type: Sprite
     sprite: _ST14/Objects/Weapons/Guns/Rifles/moritacarbine/icon.rsi
     layers:
@@ -59,6 +63,10 @@
   id: ST14WeaponRifleMoritaMarksman
   description: A scoped Morita built for picking Arachnids off at range. Slower to shoulder, but it hits where you point it.
   components:
+  # вспышка выстрела у кончика ствола
+  - type: ST14MuzzleOffset
+    distance: 0.28
+    wieldedDistance: 0.5
   - type: Sprite
     sprite: _ST14/Objects/Weapons/Guns/Rifles/moritamarksman/icon.rsi
     layers:
@@ -114,6 +122,10 @@
   id: ST14WeaponRifleMoritaRifle
   description: The workhorse rifle of the Mobile Infantry. Reliable, serviceable, and chambered for the ammunition every trooper carries.
   components:
+  # вспышка выстрела у кончика ствола
+  - type: ST14MuzzleOffset
+    distance: 0.28
+    wieldedDistance: 0.5
   - type: Sprite
     sprite: _ST14/Objects/Weapons/Guns/Rifles/moritarifle/icon.rsi
     layers:
@@ -172,6 +184,10 @@
   id: ST14WeaponRifleEPulse44
   description: A compact energy-assisted rifle. Lighter than the E-Pulse 88 and fed from its own standard magazines.
   components:
+  # вспышка выстрела у кончика ствола
+  - type: ST14MuzzleOffset
+    distance: 0.25
+    wieldedDistance: 0.5
   - type: Sprite
     sprite: _ST14/Objects/Weapons/Guns/Rifles/epulse44/icon.rsi
     layers:

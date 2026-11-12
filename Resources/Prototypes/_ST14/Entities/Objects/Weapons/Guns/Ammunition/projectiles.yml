@@ -1,0 +1,175 @@
+# Пули, заряды и эффекты выстрела десанта.
+# Вспышку у ствола задаёт патрон (CartridgeAmmo.muzzleFlash), эффект попадания — пуля (Projectile.impactEffect).
+
+# --- вспышки у ствола
+
+- type: entity
+  parent: MuzzleFlashEffect
+  id: ST14MuzzleFlashBullet
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    drawdepth: BelowMobs
+    layers:
+    - shader: unshaded
+      map: [ "enum.EffectLayers.Unshaded" ]
+      sprite: _ST14/Objects/Weapons/Guns/Projectiles/projectiles.rsi
+      state: muzzle_bullet
+  - type: TimedDespawn
+    lifetime: 0.12
+  - type: PointLight
+    radius: 2
+    energy: 4
+    color: "#ffb347"
+    netsync: false
+    castShadows: false
+
+- type: entity
+  parent: MuzzleFlashEffect
+  id: ST14MuzzleFlashPulse
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    drawdepth: BelowMobs
+    layers:
+    - shader: unshaded
+      map: [ "enum.EffectLayers.Unshaded" ]
+      sprite: _ST14/Objects/Weapons/Guns/Projectiles/projectiles.rsi
+      state: muzzle_pulse
+  - type: TimedDespawn
+    lifetime: 0.12
+  - type: PointLight
+    radius: 2.2
+    energy: 5
+    color: "#5ad8ff"
+    netsync: false
+    castShadows: false
+
+# --- попадания
+
+- type: entity
+  parent: BulletImpactEffect
+  id: ST14BulletImpactEffect
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    drawdepth: Effects
+    layers:
+    - shader: unshaded
+      map: [ "enum.EffectLayers.Unshaded" ]
+      sprite: _ST14/Objects/Weapons/Guns/Projectiles/projectiles.rsi
+      state: impact_bullet
+  - type: TimedDespawn
+    lifetime: 0.25
+  - type: PointLight
+    radius: 1.2
+    energy: 1.5
+    color: "#ffb347"
+    netsync: false
+    castShadows: false
+
+- type: entity
+  parent: BulletImpactEffect
+  id: ST14BulletImpactEffectPulse
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    drawdepth: Effects
+    layers:
+    - shader: unshaded
+      map: [ "enum.EffectLayers.Unshaded" ]
+      sprite: _ST14/Objects/Weapons/Guns/Projectiles/projectiles.rsi
+      state: impact_pulse
+  - type: TimedDespawn
+    lifetime: 0.25
+  - type: PointLight
+    radius: 2
+    energy: 3
+    color: "#5ad8ff"
+    netsync: false
+    castShadows: false
+
+# --- пули
+
+- type: entity
+  parent: BulletLightRifle
+  id: ST14BulletMorita
+  name: bullet (Morita caseless)
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    noRot: false
+    sprite: _ST14/Objects/Weapons/Guns/Projectiles/projectiles.rsi
+    layers:
+    - state: bullet_long
+      shader: unshaded
+  - type: PointLight
+    radius: 1.5
+    energy: 1.6
+    color: "#ffb347"
+    netsync: false
+    castShadows: false
+  - type: Projectile
+    impactEffect: ST14BulletImpactEffect
+
+- type: entity
+  parent: PelletShotgun
+  id: ST14PelletShotgun
+  name: pellet (caseless)
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    noRot: false
+    sprite: _ST14/Objects/Weapons/Guns/Projectiles/projectiles.rsi
+    layers:
+    - state: bullet_short
+      shader: unshaded
+  - type: PointLight
+    radius: 1.5
+    energy: 1.6
+    color: "#ffb347"
+    netsync: false
+    castShadows: false
+  - type: Projectile
+    impactEffect: ST14BulletImpactEffect
+
+- type: entity
+  parent: ST14PelletShotgun
+  id: ST14PelletShotgunSpread
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: ProjectileSpread
+    proto: ST14PelletShotgun
+    count: 6
+    spread: 15
+
+# энергетический заряд E-Pulse: урон как у патрона Morita, другой вид
+- type: entity
+  parent: BulletLightRifle
+  id: ST14BulletEPulse
+  name: pulse charge (E-Pulse)
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    noRot: false
+    sprite: _ST14/Objects/Weapons/Guns/Projectiles/projectiles.rsi
+    layers:
+    - state: pulse
+      shader: unshaded
+  - type: PointLight
+    radius: 1.5
+    energy: 3
+    color: "#5ad8ff"
+    netsync: false
+    castShadows: false
+  - type: Projectile
+    impactEffect: ST14BulletImpactEffectPulse
+
+- type: entity
+  parent: ST14CartridgeMoritaCaseless
+  id: ST14CartridgeEPulse
+  name: cartridge (E-Pulse caseless)
+  components:
+  - type: CartridgeAmmo
+    proto: ST14BulletEPulse
+    muzzleFlash: ST14MuzzleFlashPulse

@@ -1,0 +1,82 @@
+{
+    "version": 1,
+    "license": "All-Rights-Reserved",
+    "copyright": "Bullets by Discord: @denlero; muzzle flashes, energy bolt and impacts made for Starborne Troopers",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "bullet_short",
+            "delays": [
+                [
+                    0.1,
+                    0.1
+                ]
+            ]
+        },
+        {
+            "name": "bullet_long",
+            "delays": [
+                [
+                    0.1,
+                    0.1
+                ]
+            ]
+        },
+        {
+            "name": "pulse",
+            "delays": [
+                [
+                    0.06,
+                    0.06
+                ]
+            ]
+        },
+        {
+            "name": "muzzle_bullet",
+            "delays": [
+                [
+                    0.04,
+                    0.04,
+                    0.04
+                ]
+            ]
+        },
+        {
+            "name": "muzzle_pulse",
+            "delays": [
+                [
+                    0.04,
+                    0.04,
+                    0.04
+                ]
+            ]
+        },
+        {
+            "name": "impact_bullet",
+            "delays": [
+                [
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05
+                ]
+            ]
+        },
+        {
+            "name": "impact_pulse",
+            "delays": [
+                [
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05,
+                    0.05
+                ]
+            ]
+        }
+    ]
+}

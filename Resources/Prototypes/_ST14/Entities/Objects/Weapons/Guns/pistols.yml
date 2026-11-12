@@ -26,6 +26,10 @@
   id: ST14WeaponPistolPeacemaker
   description: The standard-issue Mobile Infantry sidearm. Fast-firing and reliable, the last line of defence when the rifle runs dry.
   components:
+  # вспышка выстрела у кончика ствола
+  - type: ST14MuzzleOffset
+    distance: 0.22
+    wieldedDistance: 0.22
   - type: Sprite
     sprite: _ST14/Objects/Weapons/Guns/Pistols/peacemaker.rsi
     layers:
@@ -82,6 +86,10 @@
   id: ST14WeaponPistolEmancipator
   description: A heavy-calibre sidearm. Slow and hard-kicking, but every round hits like a hammer.
   components:
+  # вспышка выстрела у кончика ствола
+  - type: ST14MuzzleOffset
+    distance: 0.25
+    wieldedDistance: 0.25
   - type: Sprite
     sprite: _ST14/Objects/Weapons/Guns/Pistols/emancipator.rsi
     layers:

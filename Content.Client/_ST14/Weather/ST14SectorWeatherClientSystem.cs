@@ -1,3 +1,5 @@
+using Content.Shared._ST14.CCVar;
+using Robust.Shared.Configuration;
 using Content.Shared._ST14.Weather;
 using Robust.Shared.Map.Components;
 using Robust.Client.Graphics;
@@ -24,6 +26,7 @@ public sealed partial class ST14SectorWeatherClientSystem : EntitySystem
     [Dependency] private IPrototypeManager _prototype = default!;
     [Dependency] private IResourceCache _resources = default!;
     [Dependency] private SharedAudioSystem _audio = default!;
+    [Dependency] private IConfigurationManager _cfg = default!;
 
     private ST14WeatherOverlay _overlay = default!;
 
@@ -32,6 +35,11 @@ public sealed partial class ST14SectorWeatherClientSystem : EntitySystem
     private float _gain;
     private readonly List<(EntityUid Stream, float Gain)> _fading = new();
 
+    /// <summary>
+    /// Weather slider of the audio options
+    /// </summary>
+    private float _volume = 1f;
+
     public override void Initialize()
     {
         base.Initialize();
@@ -39,6 +47,7 @@ public sealed partial class ST14SectorWeatherClientSystem : EntitySystem
         _overlay = new ST14WeatherOverlay(_resources);
         _overlays.AddOverlay(_overlay);
         SubscribeNetworkEvent<ST14WeatherFlashEvent>(OnFlash);
+        Subs.CVar(_cfg, ST14CVars.WeatherVolume, value => _volume = value, true);
     }
 
     public override void Shutdown()
@@ -117,7 +126,7 @@ public sealed partial class ST14SectorWeatherClientSystem : EntitySystem
             {
                 // the volume eases after the strength, it never jumps
                 _gain += (strength - _gain) * MathF.Min(1f, frameTime * 1.5f);
-                _audio.SetGain(stream, _gain);
+                _audio.SetGain(stream, _gain * _volume);
             }
         }
 
@@ -132,9 +141,26 @@ public sealed partial class ST14SectorWeatherClientSystem : EntitySystem
                 continue;
             }
 
-            _audio.SetGain(old, gain);
+            _audio.SetGain(old, gain * _volume);
             _fading[i] = (old, gain);
         }
+    }
+
+    /// <summary>
+    /// The weather loops this system fades itself, the audio categories system leaves them alone
+    /// </summary>
+    public bool OwnsStream(EntityUid uid)
+    {
+        if (_stream == uid)
+            return true;
+
+        foreach (var (old, _) in _fading)
+        {
+            if (old == uid)
+                return true;
+        }
+
+        return false;
     }
 
     private void StopAll()

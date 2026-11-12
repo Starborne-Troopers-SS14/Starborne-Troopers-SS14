@@ -1,5 +1,5 @@
 - type: entity
-  parent: [ClothingUniformBase, ClothingUniformFoldableBase]
+  parent: ClothingUniformBase
   id: ST14JumpsuitInfantryUniform
   name: Mobile Infantry uniform
   description: Field uniform of the Federation trooper - a padded grey jacket with black inserts and rank epaulettes, worn with reinforced-knee trousers. The winged Mobile Infantry emblem sits on the chest, with unit patches on the shoulders.
@@ -8,11 +8,11 @@
     sprite: _ST14/Clothing/Uniforms/Jumpsuit/infantryuniform.rsi
   - type: Clothing
     sprite: _ST14/Clothing/Uniforms/Jumpsuit/infantryuniform.rsi
-  - type: FoldableClothing
-    foldedEquippedPrefix: jacketless
+  # закатанные рукава: состояние sleeves-equipped-INNERCLOTHING
+  - type: ST14RollableSleeves
 
 - type: entity
-  parent: [ClothingUniformBase, ClothingUniformFoldableBase]
+  parent: ClothingUniformBase
   id: ST14JumpsuitEngineeringUniform
   name: Mobile Engineering Infantry uniform
   description: Field uniform of the engineering corps - a padded grey jacket with black inserts and rank epaulettes, worn with reinforced-knee trousers. The corps insignia sits on the chest.
@@ -21,7 +21,37 @@
     sprite: _ST14/Clothing/Uniforms/Jumpsuit/engiuniform.rsi
   - type: Clothing
     sprite: _ST14/Clothing/Uniforms/Jumpsuit/engiuniform.rsi
-  - type: FoldableClothing
-    foldedEquippedPrefix: jacketless
+  # закатанные рукава: состояние sleeves-equipped-INNERCLOTHING
+  - type: ST14RollableSleeves
+  - type: ST14EngineerSuit
+    requiredJob: ST14Engineer
+
+# без куртки: отдельная униформа, рукава закатывать нечего
+
+- type: entity
+  parent: ClothingUniformBase
+  id: ST14JumpsuitInfantryUniformJacketless
+  name: Mobile Infantry fatigues
+  description: The Mobile Infantry field uniform without the jacket - a black undershirt and reinforced-knee trousers.
+  components:
+  - type: Sprite
+    sprite: _ST14/Clothing/Uniforms/Jumpsuit/infantryuniform.rsi
+    state: jacketless-icon
+  - type: Clothing
+    sprite: _ST14/Clothing/Uniforms/Jumpsuit/infantryuniform.rsi
+    equippedPrefix: jacketless
+
+- type: entity
+  parent: ClothingUniformBase
+  id: ST14JumpsuitEngineeringUniformJacketless
+  name: Mobile Engineering Infantry fatigues
+  description: The engineering corps field uniform without the jacket - an orange undershirt and reinforced-knee trousers.
+  components:
+  - type: Sprite
+    sprite: _ST14/Clothing/Uniforms/Jumpsuit/engiuniform.rsi
+    state: jacketless-icon
+  - type: Clothing
+    sprite: _ST14/Clothing/Uniforms/Jumpsuit/engiuniform.rsi
+    equippedPrefix: jacketless
   - type: ST14EngineerSuit
     requiredJob: ST14Engineer

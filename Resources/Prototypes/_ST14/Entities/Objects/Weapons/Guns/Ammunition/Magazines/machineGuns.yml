@@ -14,7 +14,7 @@
     whitelist:
       tags:
       - CartridgeLightRifle
-    proto: ST14CartridgeMoritaCaseless
+    proto: ST14CartridgeEPulse
     capacity: 50
   - type: ContainerContainer
     containers:

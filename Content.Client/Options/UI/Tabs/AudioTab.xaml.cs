@@ -57,6 +57,13 @@ public sealed partial class AudioTab : Control
             scale: ContentAudioSystem.InterfaceMultiplier);
 
         // ST14
+        Control.AddOptionPercentSlider(ST14CVars.WeaponsVolume, SliderVolumeWeapons);
+        Control.AddOptionPercentSlider(ST14CVars.ExplosionsVolume, SliderVolumeExplosions);
+        Control.AddOptionPercentSlider(ST14CVars.WeatherVolume, SliderVolumeWeather);
+        Control.AddOptionPercentSlider(ST14CVars.VoicesVolume, SliderVolumeVoices);
+        Control.AddOptionPercentSlider(ST14CVars.BugsVolume, SliderVolumeBugs);
+        Control.AddOptionPercentSlider(ST14CVars.FootstepsVolume, SliderVolumeFootsteps);
+        Control.AddOptionPercentSlider(ST14CVars.MachinesVolume, SliderVolumeMachines);
         Control.AddOptionPercentSlider(ST14CVars.BugFootstepsVolume, SliderVolumeBugFootsteps);
 
         Control.AddOptionSlider(

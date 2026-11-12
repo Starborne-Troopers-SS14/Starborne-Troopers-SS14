@@ -41,6 +41,8 @@
   name: "cartridge"
   components:
   - type: CartridgeAmmo
+    proto: ST14BulletMorita
+    muzzleFlash: ST14MuzzleFlashBullet
     deleteOnSpawn: true
 
 - type: entity
@@ -59,7 +61,7 @@
     whitelist:
       tags:
       - CartridgeLightRifle
-    proto: ST14CartridgeMoritaCaseless
+    proto: ST14CartridgeEPulse
     capacity: 30
   - type: ContainerContainer
     containers:

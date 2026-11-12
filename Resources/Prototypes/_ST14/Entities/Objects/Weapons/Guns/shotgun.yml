@@ -4,6 +4,10 @@
   id: ST14WeaponShotgun
   description: A magazine-fed combat shotgun. Devastating at close range, where most bug fights end up anyway.
   components:
+  # вспышка выстрела у кончика ствола
+  - type: ST14MuzzleOffset
+    distance: 0.19
+    wieldedDistance: 0.5
   - type: Sprite
     sprite: _ST14/Objects/Weapons/Guns/Shotguns/shotguns/icon.rsi
     layers:

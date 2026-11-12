@@ -27,6 +27,10 @@
   id: ST14WeaponMachineGunEPulse88
   description: A belt-fed squad support weapon. Heavy, loud, and built to keep a bug wave's head down while the rest of the squad repositions.
   components:
+  # вспышка выстрела у кончика ствола
+  - type: ST14MuzzleOffset
+    distance: 0.1
+    wieldedDistance: 0.5
   - type: Sprite
     sprite: _ST14/Objects/Weapons/Guns/MachineGuns/epulse88/icon.rsi
     layers:

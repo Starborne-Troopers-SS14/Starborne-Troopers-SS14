@@ -10,7 +10,20 @@
   name: bullet (Peacemaker)
   categories: [ HideSpawnMenu ]
   components:
+  - type: Sprite
+    noRot: false
+    sprite: _ST14/Objects/Weapons/Guns/Projectiles/projectiles.rsi
+    layers:
+    - state: bullet_short
+      shader: unshaded
+  - type: PointLight
+    radius: 1.5
+    energy: 1.6
+    color: "#ffb347"
+    netsync: false
+    castShadows: false
   - type: Projectile
+    impactEffect: ST14BulletImpactEffect
     damage:
       types:
         Piercing: 14
@@ -21,7 +34,20 @@
   name: bullet (Emancipator)
   categories: [ HideSpawnMenu ]
   components:
+  - type: Sprite
+    noRot: false
+    sprite: _ST14/Objects/Weapons/Guns/Projectiles/projectiles.rsi
+    layers:
+    - state: bullet_short
+      shader: unshaded
+  - type: PointLight
+    radius: 1.5
+    energy: 1.6
+    color: "#ffb347"
+    netsync: false
+    castShadows: false
   - type: Projectile
+    impactEffect: ST14BulletImpactEffect
     damage:
       types:
         Piercing: 26
@@ -33,6 +59,7 @@
   components:
   - type: CartridgeAmmo
     proto: ST14BulletPeacemaker
+    muzzleFlash: ST14MuzzleFlashBullet
     deleteOnSpawn: true
 
 - type: entity
@@ -42,6 +69,7 @@
   components:
   - type: CartridgeAmmo
     proto: ST14BulletEmancipator
+    muzzleFlash: ST14MuzzleFlashBullet
     deleteOnSpawn: true
 
 - type: entity
