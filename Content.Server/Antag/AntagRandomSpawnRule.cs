@@ -31,6 +31,11 @@ public sealed partial class AntagRandomSpawnSystem : GameRuleSystem<AntagRandomS
 
     private void OnSelectLocation(Entity<AntagRandomSpawnComponent> ent, ref AntagSelectLocationEvent args)
     {
+        // ST14-START
+        if (ent.Comp.Coords == null && _station.TryFindRandomTile(out _, out _, out _, out var coords))
+            ent.Comp.Coords = coords;
+        // ST14-STOP
+
         if (ent.Comp.Coords != null)
             args.Coordinates.Add(_transform.ToMapCoordinates(ent.Comp.Coords.Value));
     }

@@ -198,6 +198,16 @@ public abstract partial class SharedDoAfterSystem : EntitySystem
     {
         var args = doAfter.Args;
 
+        // ST14-START
+        if (TerminatingOrDeleted(args.User)
+            || args.Target is { } terminatingTarget && TerminatingOrDeleted(terminatingTarget)
+            || args.Used is { } terminatingUsed && TerminatingOrDeleted(terminatingUsed)
+            || args.EventTarget is { Valid: true } terminatingEventTarget && TerminatingOrDeleted(terminatingEventTarget))
+        {
+            return true;
+        }
+        // ST14-STOP
+
         if (args.Used is { } used && !Exists(used))
             return true;
 
@@ -208,6 +218,10 @@ public abstract partial class SharedDoAfterSystem : EntitySystem
         if (args.BreakOnMove && !(!args.BreakOnWeightlessMove && _gravity.IsWeightless(args.User)))
         {
             var movementEntity = doAfter.MovementEntity;
+            // ST14-START
+            if (TerminatingOrDeleted(movementEntity))
+                return true;
+            // ST14-STOP
             var movementXform = Transform(movementEntity);
 
             // Whether the effective movement entity has moved too much from its original position.
