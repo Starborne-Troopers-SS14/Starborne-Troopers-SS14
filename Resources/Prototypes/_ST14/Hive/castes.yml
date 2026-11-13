@@ -5,16 +5,19 @@
 - type: st14HiveCaste
   id: ST14CasteLarva
   name: st14-caste-larva
+  callsign: st14-caste-larva-callsign
   tier: 0
 
 - type: st14HiveCaste
   id: ST14CasteBrainBug
   name: st14-caste-brain-bug
+  callsign: st14-caste-brain-bug-callsign
   tier: 6
 
 - type: st14HiveCaste
   id: ST14CasteWarrior
   name: st14-caste-warrior
+  callsign: st14-caste-warrior-callsign
   description: st14-caste-warrior-desc
   entity: ST14MobBugWarrior
   tier: 1
@@ -24,6 +27,7 @@
 - type: st14HiveCaste
   id: ST14CasteTiger
   name: st14-caste-tiger
+  callsign: st14-caste-tiger-callsign
   description: st14-caste-tiger-desc
   entity: ST14MobBugTiger
   tier: 2

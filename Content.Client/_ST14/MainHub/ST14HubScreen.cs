@@ -1,12 +1,11 @@
+using System.Linq;
 using System.Numerics;
 using Content.Client.Changelog;
 using Content.Client.GameTicking;
 using Content.Client.Info;
-using Content.Client.LateJoin;
 using Content.Client.Lobby;
 using Content.Client.Lobby.UI;
 using Content.Client.UserInterface.Systems.EscapeMenu;
-using Content.Client.UserInterface.Systems.Guidebook;
 using Content.Client._ST14.MainHub.Galaxy;
 using Content.Shared._ST14.MainHub;
 using Content.Shared.CCVar;
@@ -45,8 +44,10 @@ public sealed partial class ST14HubScreen : Control
         "ST14HubInferno",
     };
 
+    // the server Discord, the icon above the bottom bar on the right leads there
+    public const string DiscordUrl = "https://discord.gg/abmMbHupqj";
+
     private const int NewsCount = 3;
-    private static readonly TimeSpan NewsInterval = TimeSpan.FromSeconds(8);
 
     // Bottom row of the original: the big card on the left, then plates every 212.68 px
     private const float RowLeft = 30.76f;
@@ -54,21 +55,17 @@ public sealed partial class ST14HubScreen : Control
     private static readonly Vector2 PlateSize = new(187.68f, 70f);
 
     private readonly ST14AnimatedScene _scene;
-    private readonly Label _newsLabel;
+    private readonly ST14NewsTicker _newsTicker;
     private readonly Label _hourLabel;
     private readonly Label _minuteLabel;
     private readonly Label _dateLabel;
     private readonly Label _tempLabel;
     private readonly Label _statusLabel;
-    private readonly ST14HubButton _observeButton;
     private readonly ST14SettingsScreen _settings;
     private readonly ST14HubLoadingScreen _loading;
     private readonly ST14ModeSelectScreen _modes;
     private readonly ST14GalaxyMapScreen _galaxy;
     private readonly ST14SupportScreen _support;
-
-    private int _newsIndex;
-    private TimeSpan _newsElapsed;
 
     public ST14HubScreen()
     {
@@ -125,11 +122,10 @@ public sealed partial class ST14HubScreen : Control
         var newsTitle = ST14HubStyle.Label(_resCache, Loc.GetString("st14-hub-news-title"), ST14HubFont.Regular, 27, ST14HubStyle.News);
         newsTitle.VAlign = Label.VAlignMode.Center;
         newsRow.AddChild(newsTitle);
-        _newsLabel = ST14HubStyle.Label(_resCache, string.Empty, ST14HubFont.Regular, 27, ST14HubStyle.News);
-        _newsLabel.VAlign = Label.VAlignMode.Center;
-        _newsLabel.ClipText = true;
-        _newsLabel.HorizontalExpand = true;
-        newsRow.AddChild(_newsLabel);
+        // all news glide along the banner one after another
+        _newsTicker = new ST14NewsTicker(_resCache, 27) { Color = ST14HubStyle.News, HorizontalExpand = true };
+        _newsTicker.Text = string.Join("     ///     ", Enumerable.Range(1, NewsCount).Select(i => Loc.GetString($"st14-hub-news-{i}")));
+        newsRow.AddChild(_newsTicker);
         canvas.Add(newsRow, Vector2.Zero, new Vector2(1, 0), new Vector2(-176.5f, 60), new Vector2(-537, 50), new Vector2(0.5f, 0.5f));
 
         var moreButton = new ST14HubButton(_resCache, Loc.GetString("st14-hub-news-more"), 25, ST14HubStyle.Orange, ST14HubStyle.News);
@@ -174,8 +170,8 @@ public sealed partial class ST14HubScreen : Control
         canvas.AddAt(clock, new Vector2(1, 0), new Vector2(-20.4f, 136.5f), new Vector2(170.6f, 103.3f), new Vector2(1, 0));
 
         // Social icons above the bottom bar
-        AddLinkIcon(canvas, "discord.png", CCVars.InfoLinksDiscord, new Vector2(-84.2f, -298.2f), 125, 0.53f);
-        AddLinkIcon(canvas, "twitter.png", CCVars.InfoLinksWebsite, new Vector2(-84.2f, -165.8f), 103, 0.67f);
+        AddLinkIcon(canvas, "discord.png", DiscordUrl, new Vector2(-84.2f, -175f), 125, 0.53f);
+        AddLinkIcon(canvas, "twitter.png", _cfg.GetCVar(CCVars.InfoLinksWebsite), new Vector2(-84.2f, -300f), 103, 0.67f);
 
         // "To battle!" opens the mode selection, then the galaxy map, a landing on Klendathu there leads to the lobby
         var warButton = AddPlate(canvas, 0, "st14-hub-button-war", ST14HubStyle.Blue, ST14HubStyle.BlueText);
@@ -183,16 +179,10 @@ public sealed partial class ST14HubScreen : Control
 
         AddPlate(canvas, 1, "st14-hub-button-character").OnPressed += _ => StartLoading(OpenCharacterSetup);
 
-        _observeButton = AddPlate(canvas, 2, "st14-hub-button-observe");
-        _observeButton.OnPressed += _ => new ObserveWarningWindow().OpenCentered();
-
-        AddPlate(canvas, 3, "st14-hub-button-guidebook").OnPressed +=
-            _ => _uiManager.GetUIController<GuidebookUIController>().ToggleGuidebook();
-
-        AddPlate(canvas, 4, "st14-hub-rules").OnPressed += _ => new RulesAndInfoWindow().Open();
+        AddPlate(canvas, 2, "st14-hub-rules").OnPressed += _ => new RulesAndInfoWindow().Open();
 
         // supporter perks and the way to Boosty
-        AddPlate(canvas, 5, "st14-hub-button-support", ST14HubStyle.Orange, Color.White).OnPressed += _ => ShowOverlay(_support!);
+        AddPlate(canvas, 3, "st14-hub-button-support", ST14HubStyle.Orange, Color.White).OnPressed += _ => ShowOverlay(_support!);
 
         var settingsButton = new ST14HubIconButton(ST14HubStyle.Tex(_resCache, "gear.png"), ST14HubStyle.Gold);
         settingsButton.OnPressed += _ => _settings!.Show();
@@ -228,7 +218,6 @@ public sealed partial class ST14HubScreen : Control
         _loading = new ST14HubLoadingScreen();
         AddChild(_loading);
 
-        ShowNews(0);
         UpdateClock();
     }
 
@@ -241,13 +230,12 @@ public sealed partial class ST14HubScreen : Control
         return button;
     }
 
-    private void AddLinkIcon(ST14CanvasLayout canvas, string texture, CVarDef<string> cvar, Vector2 position, float size, float alpha)
+    private void AddLinkIcon(ST14CanvasLayout canvas, string texture, string url, Vector2 position, float size, float alpha)
     {
-        var url = _cfg.GetCVar(cvar);
         if (string.IsNullOrEmpty(url))
             return;
 
-        var icon = new ST14HubIconButton(ST14HubStyle.Tex(_resCache, texture), Color.White.WithAlpha(alpha));
+        var icon = new ST14HubIconButton(ST14HubStyle.Tex(_resCache, texture), Color.White.WithAlpha(alpha)) { ToolTip = url };
         icon.OnPressed += _ => _uriOpener.OpenUri(url);
         canvas.AddAt(icon, new Vector2(1, 1), position, new Vector2(size, size));
     }
@@ -268,16 +256,12 @@ public sealed partial class ST14HubScreen : Control
     }
 
     /// <summary>
-    /// Landing on the galaxy map: into the lobby through the loading screen, straight to the join window if the round is on
+    /// Landing on the galaxy map: into the lobby through the loading screen. The join window opens only from the
+    /// lobby's join button, never by itself
     /// </summary>
     private void GoToWar()
     {
-        StartLoading(() =>
-        {
-            HubController.EnterLobby();
-            if (GameTicker.IsGameStarted)
-                new LateJoinGui().OpenCentered();
-        });
+        StartLoading(() => HubController.EnterLobby());
     }
 
     /// <summary>
@@ -292,12 +276,6 @@ public sealed partial class ST14HubScreen : Control
     private void OpenCharacterSetup()
     {
         HubController.EnterLobby().SwitchState(LobbyGui.LobbyGuiState.CharacterSetup);
-    }
-
-    private void ShowNews(int index)
-    {
-        _newsIndex = index % NewsCount;
-        _newsLabel.Text = Loc.GetString($"st14-hub-news-{_newsIndex + 1}");
     }
 
     // Labels are only touched when their value changes: a new text means a new layout pass and new strings,
@@ -333,8 +311,6 @@ public sealed partial class ST14HubScreen : Control
         _shownServer = serverName;
         _statusLabel.Text = Loc.GetString(started ? "st14-hub-status-round" : "st14-hub-status-lobby",
             ("server", serverName));
-
-        _observeButton.Disabled = !started;
     }
 
     protected override void FrameUpdate(FrameEventArgs args)
@@ -343,13 +319,6 @@ public sealed partial class ST14HubScreen : Control
 
         if (!Visible)
             return;
-
-        _newsElapsed += TimeSpan.FromSeconds(args.DeltaSeconds);
-        if (_newsElapsed >= NewsInterval)
-        {
-            _newsElapsed = TimeSpan.Zero;
-            ShowNews(_newsIndex + 1);
-        }
 
         UpdateClock();
         UpdateStatus();

@@ -1,0 +1,27 @@
+# The bug side in the character editor: a character of this species can only take the hive jobs and comes into the
+# round as the job entity of its caste, see ST14CharacterSide. Sex, voice and age are only kept so the profile stays
+# valid, the editor hides them for bugs.
+- type: species
+  id: ST14Bug
+  name: st14-species-name-bug
+  roundStart: true
+  prototype: MobHuman
+  dollPrototype: ST14BugDoll
+  skinColoration: Hues
+  defaultSkinTone: "#8A6A4A"
+  defaultSoundsBySex: [ ST14VoiceMale1, ST14VoiceFemale1, ST14VoiceMale1 ]
+  voices:
+  - ST14VoiceMale1
+  - ST14VoiceFemale1
+
+# Lobby and editor preview of a bug that has no hive job picked yet
+- type: entity
+  id: ST14BugDoll
+  categories: [ HideSpawnMenu ]
+  name: bug
+  components:
+  - type: Sprite
+    sprite: _ST14/Mobs/Bugs/warrior.rsi
+    state: alive
+  - type: VisualBody
+

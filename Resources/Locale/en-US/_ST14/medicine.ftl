@@ -169,7 +169,7 @@ st14-limbs-command-help = st14_limbs tear [ArmLeft|ArmRight|LegLeft|LegRight] | 
 st14-limbs-command-nothing = Nothing happened.
 
 ## Job
-st14-job-name-medic = Starborne Medic
+st14-job-name-medic = Medic
 st14-job-description-medic = The field medic of the Mobile Infantry: tourniquets, packing, anaesthesia and a heart to restart.
 st14-job-supervisors-medic = the commander
 st14-department-medical = Medical Corps

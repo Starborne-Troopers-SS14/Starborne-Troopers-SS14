@@ -51,7 +51,7 @@ st14-caste-warrior-desc = Обычный солдат улья.
 st14-caste-tiger = Жук-тигр
 st14-caste-tiger-desc = Быстрый полосатый убийца.
 
-st14-job-name-brain-bug = мозговой жук
+st14-job-name-brain-bug = Мозговой жук
 st14-job-description-brain-bug = Разум улья. Высасывай мозги живых десантников, которых притаскивают жуки, и решай, какие тиры и виды открывает улей.
 st14-job-supervisors-brain-bug = никому, ты и есть улей
 st14-department-hive = Улей
@@ -88,7 +88,7 @@ st14-emote-msg-bug-alarm = стрекочет
 
 st14-ui-options-bug-footsteps-volume = Шаги жуков:
 
-st14-job-name-bug = жук
+st14-job-name-bug = Жук
 st14-job-description-bug = Воин улья. Охоться на десантников, тащи живых к мозговому жуку и эволюционируй.
 st14-job-supervisors-bug = мозговому жуку
 ent-ST14SpawnPointBug = жук
@@ -151,3 +151,9 @@ st14-brain-stupor-free = Видения отпускают, тело снова 
 st14-larva-thrown = Тебя швырнули вперёд!
 ent-ST14ActionThrowLarva = Швырнуть личинку
     .desc = Сбросить личинку со спины и швырнуть туда, куда кликнешь, до 5 клеток.
+
+## Callsigns of player bugs, the number of the character follows
+st14-caste-larva-callsign = Личинка
+st14-caste-brain-bug-callsign = Мозг
+st14-caste-warrior-callsign = Воин
+st14-caste-tiger-callsign = Тигр

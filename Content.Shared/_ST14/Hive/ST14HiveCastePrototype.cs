@@ -44,6 +44,12 @@ public sealed partial class ST14HiveCastePrototype : IPrototype
     public LocId? Description;
 
     /// <summary>
+    /// First part of the name of a player bug of this caste, the number of its character follows: "Воин-394"
+    /// </summary>
+    [DataField]
+    public LocId? Callsign;
+
+    /// <summary>
     /// The mob a bug of this caste is. Null for castes nobody can evolve into, like the larva
     /// </summary>
     [DataField]

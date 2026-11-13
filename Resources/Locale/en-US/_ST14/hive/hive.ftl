@@ -51,7 +51,7 @@ st14-caste-warrior-desc = The common soldier of the hive.
 st14-caste-tiger = Tiger bug
 st14-caste-tiger-desc = A fast striped killer.
 
-st14-job-name-brain-bug = brain bug
+st14-job-name-brain-bug = Brain bug
 st14-job-description-brain-bug = The mind of the hive. Suck the brains of live troopers the bugs drag to you and decide which tiers and species the hive opens.
 st14-job-supervisors-brain-bug = nobody, you are the hive
 st14-department-hive = The Hive
@@ -69,7 +69,7 @@ st14-emote-msg-bug-alarm = chitters
 
 st14-ui-options-bug-footsteps-volume = Bug footsteps:
 
-st14-job-name-bug = bug
+st14-job-name-bug = Bug
 st14-job-description-bug = A warrior of the hive. Hunt troopers, drag the live ones to the brain bug and evolve.
 st14-job-supervisors-bug = the brain bug
 
@@ -113,3 +113,9 @@ st14-brain-stupor-done = You are inside the head of {$target}.
 st14-brain-stupor-victim = Something crawls into your head! You cannot move!
 st14-brain-stupor-free = The visions let go, your body obeys again.
 st14-larva-thrown = You are hurled ahead!
+
+## Callsigns of player bugs, the number of the character follows
+st14-caste-larva-callsign = Larva
+st14-caste-brain-bug-callsign = Brain
+st14-caste-warrior-callsign = Warrior
+st14-caste-tiger-callsign = Tiger

@@ -393,6 +393,7 @@ namespace Content.Client.Lobby.UI
             RefreshSpecies();
             RefreshTraits();
             RefreshFlavorText();
+            ST14UpdateSideControls(); // ST14
             ReloadPreview();
 
             if (Profile != null)
