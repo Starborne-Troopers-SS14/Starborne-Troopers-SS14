@@ -7,6 +7,14 @@
   icon: JobIconST14Engineer
   supervisors: st14-job-supervisors-engineer
   special:
+  - !type:AddComponentSpecial
+    components:
+    - type: ST14SquadRadio
+    - type: IntrinsicRadioReceiver
+    - type: ActiveRadio
+      channels:
+      - ST14Squad
+      - ST14Rodger
   - !type:ST14EquipItemSpecial
     slot: capsule
     prototype: ST14ResourceCapsuleArmiumFilled
@@ -25,14 +33,6 @@
   storage:
     back:
     - ST14FieldKit
-
-- type: department
-  id: ST14Engineering
-  name: st14-department-engineering
-  description: st14-department-engineering-description
-  color: "#EFB341"
-  roles:
-  - ST14Engineer
 
 - type: playTimeTracker
   id: JobST14Engineer

@@ -1,0 +1,11 @@
+st14-job-name-trooper = Десантник
+st14-job-description-trooper = Пехотинец Мобильной пехоты: винтовка «Морита», броня и приказ командира отряда.
+st14-job-supervisors-trooper = командиру отряда
+st14-job-name-squad-leader = Командир отряда
+st14-job-description-squad-leader = Вооружён энерговинтовкой E-Pulse 44. Собирает отряд и ведёт его в бой. Только командир может создать отряд, а вступив в отряд, принимает командование.
+st14-job-supervisors-squad-leader = Высшему командованию
+st14-job-name-signaller = Связист
+st14-job-description-signaller = Носит ранец-рацию: рядом с ним отряд слышит друг друга и видит на боевой карте. Вооружён карабином «Морита». Только связист умеет найти частоту «Роджера Янга» на вышке связи и выставить её на ранце.
+st14-job-supervisors-signaller = командиру отряда
+st14-department-infantry = Мобильная пехота
+st14-department-infantry-description = Линейные отряды десанта Федерации.

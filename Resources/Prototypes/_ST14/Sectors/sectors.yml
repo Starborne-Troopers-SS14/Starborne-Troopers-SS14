@@ -58,6 +58,9 @@
         mapNameTemplate: "Sector"
       - type: StationJobs
         availableJobs:
+          ST14Trooper: [ -1, -1 ]
+          ST14SquadLeader: [ -1, -1 ]
+          ST14Signaller: [ -1, -1 ]
           ST14Engineer: [ -1, -1 ]
           ST14Medic: [ -1, -1 ]
           ST14Bug: [ -1, -1 ]
