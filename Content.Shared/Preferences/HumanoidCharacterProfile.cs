@@ -271,6 +271,7 @@ namespace Content.Shared.Preferences
 
             var pool = prototypeManager.EnumeratePrototypes<SpeciesPrototype>()
                 .Where(x => ignoredSpecies == null ? x.RoundStart : x.RoundStart && !ignoredSpecies.Contains(x.ID))
+                .Where(x => !ST14CharacterSide.IsBug(x.ID)) // ST14: a bug comes only from the war side, never by chance
                 .ToArray();
             var species = random.Pick(pool);
             return species;

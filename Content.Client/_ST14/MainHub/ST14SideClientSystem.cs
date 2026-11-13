@@ -19,6 +19,11 @@ public sealed class ST14SideClientSystem : EntitySystem
     /// </summary>
     public bool Known { get; private set; }
 
+    /// <summary>
+    /// The player picked the side on the choice screen of this client, not the server binding them by their first job
+    /// </summary>
+    public bool ChosenHere { get; private set; }
+
     public event Action? Changed;
 
     public override void Initialize()
@@ -42,6 +47,7 @@ public sealed class ST14SideClientSystem : EntitySystem
 
     public void Choose(ST14GalaxyFaction side)
     {
+        ChosenHere = true;
         RaiseNetworkEvent(new ST14SideChooseEvent(side));
     }
 }

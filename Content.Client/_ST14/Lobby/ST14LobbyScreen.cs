@@ -637,12 +637,14 @@ public sealed partial class ST14LobbyScreen : Control
     private bool _sideCharacterRequested;
 
     /// <summary>
-    /// The war side is picked first and everything after it belongs to that side: when the selected character is of the
-    /// other side, a character of this side is selected instead, and a new one is made if there is none yet
+    /// The war side is picked first and everything after it belongs to that side: once the player picks it, a selected
+    /// character of the other side gives way to one of this side, and a new one is made if there is none yet.
+    /// A side the server bound by a first job changes nothing here
     /// </summary>
     private void FollowSide()
     {
-        if (!_prefs.ServerDataLoaded || _prefs.Preferences is not { } prefs || _entMan.System<ST14SideClientSystem>().Side is not { } side)
+        var sides = _entMan.System<ST14SideClientSystem>();
+        if (!sides.ChosenHere || !_prefs.ServerDataLoaded || _prefs.Preferences is not { } prefs || sides.Side is not { } side)
             return;
 
         var species = side == ST14GalaxyFaction.Arachnid ? ST14CharacterSide.BugSpecies.Id : (string) HumanoidCharacterProfile.DefaultSpecies;
