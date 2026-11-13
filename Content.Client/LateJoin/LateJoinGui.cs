@@ -1,10 +1,12 @@
 using System.Linq;
 using System.Numerics;
+using Content.Client._ST14.MainHub; // ST14
 using Content.Client.CrewManifest;
 using Content.Client.GameTicking;
 using Content.Client.Lobby;
 using Content.Client.UserInterface.Controls;
 using Content.Client.Players.PlayTimeTracking;
+using Content.Shared._ST14.MainHub; // ST14
 using Content.Shared.CCVar;
 using Content.Shared.Preferences;
 using Content.Shared.Roles;
@@ -180,6 +182,11 @@ namespace Content.Client.LateJoin
                     foreach (var jobId in department.Roles)
                     {
                         if (!stationAvailable.ContainsKey(jobId))
+                            continue;
+
+                        // ST14: only the jobs of the side the player fights for
+                        if (_entitySystem.GetEntitySystem<ST14SideClientSystem>().Side is { } side &&
+                            ST14CharacterSide.IsBugJob(_prototypeManager, jobId) != (side == ST14GalaxyFaction.Arachnid))
                             continue;
 
                         jobsAvailable.Add(_prototypeManager.Index<JobPrototype>(jobId));

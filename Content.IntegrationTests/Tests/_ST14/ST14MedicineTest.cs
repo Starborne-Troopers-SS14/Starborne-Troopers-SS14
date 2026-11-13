@@ -21,6 +21,7 @@ public sealed class ST14MedicineTest : InteractionTest
     protected override string PlayerPrototype => "MobHuman";
 
     private static readonly ProtoId<DamageTypePrototype> Blunt = "Blunt";
+    private static readonly ProtoId<DamageTypePrototype> Piercing = "Piercing";
 
     private async Task SetBlunt(FixedPoint2 amount)
     {
@@ -46,6 +47,32 @@ public sealed class ST14MedicineTest : InteractionTest
 
         await SetBlunt(0);
         Assert.That(SEntMan.HasComponent<ST14DyingComponent>(STarget), Is.False, "A healed person still has a dying heart.");
+    }
+
+    /// <summary>
+    /// The station medicine is off: a bruise without a wound fades by itself, the damage of an open wound stays until
+    /// the wound heals
+    /// </summary>
+    [Test]
+    public async Task StockDamageFollowsWoundsTest()
+    {
+        await AddAtmosphere();
+        await SpawnTarget("MobHuman");
+        var damageable = SEntMan.System<DamageableSystem>();
+
+        await SetBlunt(10);
+        await RunSeconds(10);
+        Assert.That(damageable.GetTotalDamage(STarget!.Value), Is.LessThan(FixedPoint2.New(1)), "A bruise without a wound did not fade.");
+
+        await Server.WaitPost(() =>
+        {
+            var uid = STarget!.Value;
+            var wounds = SEntMan.GetComponent<ST14WoundsComponent>(uid);
+            SEntMan.System<ST14WoundSystem>().AddWound((uid, wounds), ST14WoundKind.Puncture, ST14BodyZone.Torso, 0.5f, 0f, false);
+            damageable.TryChangeDamage(uid, new DamageSpecifier(ProtoMan.Index(Piercing), FixedPoint2.New(20)), ignoreResistances: true);
+        });
+        await RunSeconds(5);
+        Assert.That(damageable.GetTotalDamage(STarget!.Value), Is.GreaterThan(FixedPoint2.New(15)), "The damage of an open wound faded.");
     }
 
     /// <summary>

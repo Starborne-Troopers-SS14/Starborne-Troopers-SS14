@@ -50,13 +50,7 @@ public sealed partial class GuidebookUIController : UIController, IOnStateEntere
         _guideWindow.OnClose += OnWindowClosed;
         _guideWindow.OnOpen += OnWindowOpen;
 
-        if (state is LobbyState &&
-            _jobRequirements.FetchOverallPlaytime() < TimeSpan.FromMinutes(PlaytimeOpenGuidebook))
-        {
-            OpenGuidebook();
-            _guideWindow.RecenterWindow(new(0.5f, 0.5f));
-            _guideWindow.SetPositionFirst();
-        }
+        // ST14: the stock guidebook never opens by itself for new players, Starborne Troopers has no guidebook
 
         // setup keybinding
         CommandBinds.Builder

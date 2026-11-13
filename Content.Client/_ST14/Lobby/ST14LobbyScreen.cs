@@ -61,7 +61,7 @@ public sealed partial class ST14LobbyScreen : Control
     private ST14LobbyThemePrototype? _theme;
     private ST14LobbyFrame? _briefing;
     private ST14LobbyFrame? _dossier;
-    private ST14LobbyFrame? _links;
+    private Label? _linksTitle;
     private ST14LobbyFrame? _comms;
     private Button? _chatTab;
     private Button? _infoTab;
@@ -305,15 +305,31 @@ public sealed partial class ST14LobbyScreen : Control
 
         if (_lobby.FindControl<LinkBanner>("LinkBanner") is { } links)
         {
-            var linksFrame = _links = new ST14LobbyFrame(_cache, Loc.GetString("st14-lobby-links"));
-            column.AddChild(linksFrame);
-            Move(links, linksFrame.Body);
-            links.HorizontalAlignment = HAlignment.Center;
+            // one slim strip as wide as its buttons: the caption and the links in a row
+            var strip = new PanelContainer { PanelOverride = ST14LobbyStyle.Glass(0.8f), HorizontalAlignment = HAlignment.Left };
+            var row = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 10 };
+            strip.AddChild(row);
+            _linksTitle = ST14HubStyle.Label(_cache, Loc.GetString("st14-lobby-links").ToUpperInvariant(), ST14HubFont.SemiBold, 15,
+                ST14HubStyle.GoldLight);
+            _linksTitle.VAlign = Label.VAlignMode.Center;
+            row.AddChild(_linksTitle);
+            column.AddChild(strip);
+            Move(links, row);
+            links.VerticalAlignment = VAlignment.Center;
             links.Margin = new Thickness(0);
+
+            // no guidebook in Starborne Troopers: rules and updates stay
+            var guidebook = Loc.GetString("server-info-guidebook-button");
+            foreach (var buttons in links.Children)
+            {
+                foreach (var button in buttons.Children.OfType<Button>().Where(b => b.Text == guidebook))
+                {
+                    button.Visible = false;
+                }
+            }
         }
 
-        if (_lobby.FindControl<DevInfoBanner>("DevInfoBanner") is { } dev)
-            Move(dev, column);
+        // the credits banner stays hidden in the stock lobby, the links frame is the last thing in the column
 
         return column;
     }
@@ -557,6 +573,10 @@ public sealed partial class ST14LobbyScreen : Control
                 : themes.FirstOrDefault(t => t.Jobs.Count == 0);
         }
 
+        // a bug character waits in the hive
+        if (profile != null && ST14CharacterSide.IsBug(profile.Species) && _protoMan.TryIndex(ST14GalaxyWarRules.BugTheme, out var hive))
+            return hive;
+
         var high = profile?.JobPriorities.FirstOrDefault(p => p.Value == JobPriority.High).Key;
         if (high is { } job && job != default && themes.FirstOrDefault(t => t.Jobs.Contains(job)) is { } jobTheme)
             return jobTheme;
@@ -569,7 +589,7 @@ public sealed partial class ST14LobbyScreen : Control
         var first = _theme == null;
         _theme = theme;
 
-        foreach (var (frame, key) in new[] { (_briefing, "briefing"), (_dossier, "dossier"), (_links, "links"),
+        foreach (var (frame, key) in new[] { (_briefing, "briefing"), (_dossier, "dossier"),
                      (_comms, _infoShown ? "server-info" : "radio") })
         {
             if (frame == null)
@@ -577,6 +597,12 @@ public sealed partial class ST14LobbyScreen : Control
 
             frame.Title.Text = Text(key);
             frame.Title.FontColorOverride = theme.Accent;
+        }
+
+        if (_linksTitle != null)
+        {
+            _linksTitle.Text = Text("links");
+            _linksTitle.FontColorOverride = theme.Accent;
         }
 
         if (_chatTab != null)
@@ -608,6 +634,41 @@ public sealed partial class ST14LobbyScreen : Control
         }
     }
 
+    private bool _sideCharacterRequested;
+
+    /// <summary>
+    /// The war side is picked first and everything after it belongs to that side: once the player picks it, a selected
+    /// character of the other side gives way to one of this side, and a new one is made if there is none yet.
+    /// A side the server bound by a first job changes nothing here
+    /// </summary>
+    private void FollowSide()
+    {
+        var sides = _entMan.System<ST14SideClientSystem>();
+        if (!sides.ChosenHere || !_prefs.ServerDataLoaded || _prefs.Preferences is not { } prefs || sides.Side is not { } side)
+            return;
+
+        var species = side == ST14GalaxyFaction.Arachnid ? ST14CharacterSide.BugSpecies.Id : (string) HumanoidCharacterProfile.DefaultSpecies;
+        if (prefs.SelectedCharacter is HumanoidCharacterProfile selected && selected.Species == species)
+            return;
+
+        foreach (var (slot, character) in prefs.Characters)
+        {
+            if (character is not HumanoidCharacterProfile profile || profile.Species != species)
+                continue;
+
+            _prefs.SelectCharacter(slot);
+            UserInterfaceManager.GetUIController<LobbyUIController>().ReloadCharacterSetup();
+            return;
+        }
+
+        if (_sideCharacterRequested || _prefs.Settings is not { } settings || prefs.Characters.Count >= settings.MaxCharacterSlots)
+            return;
+
+        _sideCharacterRequested = true;
+        _prefs.CreateCharacter(HumanoidCharacterProfile.RandomWithSpecies(species));
+        UserInterfaceManager.GetUIController<LobbyUIController>().ReloadCharacterSetup();
+    }
+
     private string? _shownName;
     private string? _shownJob;
     private bool? _shownStarted;
@@ -617,6 +678,7 @@ public sealed partial class ST14LobbyScreen : Control
     /// </summary>
     private void UpdateInfo()
     {
+        FollowSide();
         var selected = _prefs.ServerDataLoaded ? _prefs.Preferences?.SelectedCharacter as HumanoidCharacterProfile : null;
         if (PickTheme(selected) is { } theme && theme != _theme)
             ApplyTheme(theme);

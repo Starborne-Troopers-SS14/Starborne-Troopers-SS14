@@ -1,6 +1,7 @@
 using System.Linq;
 using Content.Shared._ST14.Hive;
 using Content.Shared._ST14.Hive.Components;
+using Content.Shared._ST14.MainHub;
 using Content.Shared.Actions;
 using Content.Shared.Damage;
 using Content.Shared.Damage.Systems;
@@ -23,6 +24,7 @@ public sealed partial class ST14HiveSystem : EntitySystem
 {
     [Dependency] private IGameTiming _timing = default!;
     [Dependency] private IPrototypeManager _prototype = default!;
+    [Dependency] private MetaDataSystem _metaData = default!;
     [Dependency] private SharedActionsSystem _actions = default!;
     [Dependency] private SharedAppearanceSystem _appearance = default!;
     [Dependency] private SharedAudioSystem _audio = default!;
@@ -328,6 +330,10 @@ public sealed partial class ST14HiveSystem : EntitySystem
         var points = ent.Comp.EvolutionPoints;
         if (!HasComp<ST14BugLarvaComponent>(ent))
             points -= caste.Cost;
+
+        // a player bug keeps its number, the callsign follows the new caste: "Воин-394" becomes "Тигр-394"
+        if (ST14CharacterSide.TryParseBugName(Name(ent), out var bugNumber))
+            _metaData.SetEntityName(child, ST14CharacterSide.CasteBugName(_prototype, caste.ID, bugNumber));
 
         var childMember = EnsureComp<ST14HiveMemberComponent>(child);
         childMember.Caste = caste.ID;

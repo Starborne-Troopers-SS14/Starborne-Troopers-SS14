@@ -1,4 +1,5 @@
 using System.Linq;
+using Content.Shared._ST14.MainHub; // ST14
 using Content.Shared.Access.Components;
 using Content.Shared.Access.Systems;
 using Content.Shared.Body;
@@ -346,6 +347,13 @@ public sealed partial class StationSpawningSystem : EntitySystem
             if (loadout != null)
             {
                 EquipRoleName(jobEntity, loadout, roleProto!);
+            }
+
+            // ST14: a bug comes in as its caste and the number of its character, "Воин-394"
+            if (profile != null && ST14CharacterSide.IsBug(profile.Species) && ST14CharacterSide.TryParseBugName(profile.Name, out var bugNumber))
+            {
+                var caste = TryComp<Content.Shared._ST14.Hive.Components.ST14HiveMemberComponent>(jobEntity, out var member) ? member.Caste : null;
+                _metadata.SetEntityName(jobEntity, ST14CharacterSide.CasteBugName(ProtoMan, caste, bugNumber));
             }
 
             DoJobSpecials(job, jobEntity);
