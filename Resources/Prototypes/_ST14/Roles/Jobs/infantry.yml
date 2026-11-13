@@ -1,0 +1,173 @@
+# The line troopers of the Mobile Infantry: the rifleman, the squad leader who alone forms squads, and the signaller
+# whose radio pack carries the squad radio and who catches the frequency of the Rodger Young on a comms tower.
+# Every Federation job adds the squad radio built into the helmet (ST14SquadRadio and its receiver).
+
+- type: job
+  id: ST14Trooper
+  name: st14-job-name-trooper
+  description: st14-job-description-trooper
+  playTimeTracker: JobST14Trooper
+  startingGear: ST14TrooperGear
+  icon: JobIconST14Trooper
+  supervisors: st14-job-supervisors-trooper
+  special:
+  - !type:AddComponentSpecial
+    components:
+    - type: ST14SquadRadio
+    - type: IntrinsicRadioReceiver
+    - type: ActiveRadio
+      channels:
+      - ST14Squad
+      - ST14Rodger
+
+- type: startingGear
+  id: ST14TrooperGear
+  equipment:
+    jumpsuit: ST14JumpsuitInfantryUniform
+    head: ST14ClothingHeadHelmetCombat
+    outerClothing: ST14ClothingOuterArmorCombatVest
+    gloves: ST14ClothingHandsGlovesCombat
+    belt: ST14ClothingBeltStandard
+    shoes: ST14ClothingShoesCombatBoots
+    back: ST14ClothingBackpack
+  inhand:
+  - ST14WeaponRifleMoritaRifle
+  storage:
+    back:
+    - ST14MagazineMorita
+    - ST14MagazineMorita
+
+- type: job
+  id: ST14SquadLeader
+  name: st14-job-name-squad-leader
+  description: st14-job-description-squad-leader
+  playTimeTracker: JobST14SquadLeader
+  startingGear: ST14SquadLeaderGear
+  icon: JobIconST14SquadLeader
+  supervisors: st14-job-supervisors-squad-leader
+  special:
+  - !type:AddComponentSpecial
+    components:
+    - type: ST14SquadRadio
+    - type: IntrinsicRadioReceiver
+    - type: ActiveRadio
+      channels:
+      - ST14Squad
+      - ST14Rodger
+
+- type: startingGear
+  id: ST14SquadLeaderGear
+  equipment:
+    jumpsuit: ST14JumpsuitInfantryUniform
+    head: ST14ClothingHeadHelmetCombat
+    outerClothing: ST14ClothingOuterArmorCombatVest
+    gloves: ST14ClothingHandsGlovesFingerlessCombat
+    belt: ST14ClothingBeltStandard
+    shoes: ST14ClothingShoesCombatBoots
+    back: ST14ClothingBackpack
+  inhand:
+  - ST14WeaponRifleEPulse44
+  storage:
+    back:
+    - ST14MagazineEPulse44
+    - ST14MagazineEPulse44
+
+- type: job
+  id: ST14Signaller
+  name: st14-job-name-signaller
+  description: st14-job-description-signaller
+  playTimeTracker: JobST14Signaller
+  startingGear: ST14SignallerGear
+  icon: JobIconST14Signaller
+  supervisors: st14-job-supervisors-signaller
+  special:
+  - !type:AddComponentSpecial
+    components:
+    - type: ST14SquadRadio
+    - type: ST14Signaller
+    - type: IntrinsicRadioReceiver
+    - type: ActiveRadio
+      channels:
+      - ST14Squad
+      - ST14Rodger
+
+- type: startingGear
+  id: ST14SignallerGear
+  equipment:
+    jumpsuit: ST14JumpsuitInfantryUniform
+    head: ST14ClothingHeadHelmetCombat
+    outerClothing: ST14ClothingOuterArmorCombatVest
+    gloves: ST14ClothingHandsGlovesCombat
+    belt: ST14ClothingBeltStandard
+    shoes: ST14ClothingShoesCombatBoots
+    back: ST14ClothingBackRadioPack
+  inhand:
+  - ST14WeaponRifleMoritaCarbine
+  storage:
+    back:
+    - ST14MagazineMorita
+    - ST14MagazineMorita
+
+- type: department
+  id: ST14Infantry
+  name: st14-department-infantry
+  description: st14-department-infantry-description
+  color: "#8FA35B"
+  # engineers and medics fight in the line too, so they are infantry
+  roles:
+  - ST14SquadLeader
+  - ST14Signaller
+  - ST14Trooper
+  - ST14Engineer
+  - ST14Medic
+
+- type: playTimeTracker
+  id: JobST14Trooper
+
+- type: playTimeTracker
+  id: JobST14SquadLeader
+
+- type: playTimeTracker
+  id: JobST14Signaller
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconST14Trooper
+  icon:
+    sprite: /Textures/Interface/Misc/job_icons.rsi
+    state: SecurityOfficer
+  jobName: st14-job-name-trooper
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconST14SquadLeader
+  icon:
+    sprite: /Textures/Interface/Misc/job_icons.rsi
+    state: HeadOfSecurity
+  jobName: st14-job-name-squad-leader
+
+- type: jobIcon
+  parent: JobIcon
+  id: JobIconST14Signaller
+  icon:
+    sprite: /Textures/Interface/Misc/job_icons.rsi
+    state: Warden
+  jobName: st14-job-name-signaller
+
+# The two radio channels of the troopers. Long range: the sectors load on maps of their own, and no telecom server
+# is needed, the radio pack and the comms tower decide who hears what
+- type: radioChannel
+  id: ST14Squad
+  name: st14-chat-radio-squad
+  keycode: 'o'
+  frequency: 1460
+  color: "#8FD16A"
+  longRange: true
+
+- type: radioChannel
+  id: ST14Rodger
+  name: st14-chat-radio-rodger
+  keycode: 'r'
+  frequency: 1470
+  color: "#7FB8E8"
+  longRange: true

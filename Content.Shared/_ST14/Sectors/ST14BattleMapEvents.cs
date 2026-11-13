@@ -214,7 +214,7 @@ public readonly record struct ST14SquadInvite(int Squad, int Number, string From
 /// The squads of the side of the player, sent whenever one of them changes
 /// </summary>
 [Serializable, NetSerializable]
-public sealed class ST14SquadStateEvent(bool active, int round, ST14SquadInfo[] squads, int squad, ST14SquadInvite? invite) : EntityEventArgs
+public sealed class ST14SquadStateEvent(bool active, int round, ST14SquadInfo[] squads, int squad, ST14SquadInvite? invite, bool canCreate = true) : EntityEventArgs
 {
     public const int MaxSquadSize = 8;
 
@@ -232,6 +232,11 @@ public sealed class ST14SquadStateEvent(bool active, int round, ST14SquadInfo[] 
     public readonly int Squad = squad;
 
     public readonly ST14SquadInvite? Invite = invite;
+
+    /// <summary>
+    /// The player may form a squad: of the troopers only a squad leader does
+    /// </summary>
+    public readonly bool CanCreate = canCreate;
 }
 
 /// <summary>

@@ -1,0 +1,170 @@
+# Radio of the Mobile Infantry: the signaller's radio pack, the comms tower to the Rodger Young.
+# The energy block and the energy box are plain things for now.
+
+# The radio pack: carries the squad radio of the squad of whoever wears it, in a circle around them
+- type: entity
+  parent: ClothingBackpack
+  id: ST14ClothingBackRadioPack
+  name: signaller radio pack
+  description: A field transceiver on a frame. Worn, it carries the squad radio in a wide circle and lets the squad see each other on the battle map. Set to the frequency a comms tower holds, it also carries the Rodger Young.
+  components:
+  - type: Sprite
+    sprite: _ST14/Clothing/Back/radiopack.rsi
+    layers:
+    - state: icon
+      map: [ "base" ]
+  - type: Item
+    sprite: _ST14/Clothing/Back/radiopack.rsi
+  - type: Clothing
+    sprite: _ST14/Clothing/Back/radiopack.rsi
+  - type: Storage
+    grid:
+    - 0,0,4,2
+    maxItemSize: Normal
+  - type: ST14RadioPack
+  - type: UserInterface
+    interfaces:
+      enum.StorageUiKey.Key:
+        type: StorageBoundUserInterface
+      enum.ST14TunerUiKey.Key:
+        type: ST14TunerBoundUserInterface
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.ST14RadioPackVisuals.Active:
+        base:
+          False: { state: icon }
+          True: { state: icon-on }
+
+# The comms tower: the engineer builds it, the signaller catches the frequency on it
+- type: entity
+  id: ST14CommsTower
+  name: comms tower
+  description: A field relay to the Rodger Young in orbit. A signaller searches the frequency of the Rodger Young on its tuner; radio packs set to it carry ":r" for every squad on the planet. The frequency drifts away and only a signaller can catch a new one.
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: true
+  - type: ST14MapIcon
+    side: Federation
+  - type: Clickable
+  - type: InteractionOutline
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.45,-0.45,0.45,0.45"
+        density: 200
+        mask:
+        - MachineMask
+        layer:
+        - MachineLayer
+  - type: Sprite
+    sprite: Structures/Machines/telecomms.rsi
+    noRot: true
+    layers:
+    - state: telecom-nopower
+      map: [ "base" ]
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.ST14CommsTowerVisuals.Online:
+        base:
+          False: { state: telecom-nopower }
+          True: { state: telecom-on }
+  - type: UserInterface
+    interfaces:
+      enum.ST14TunerUiKey.Key:
+        type: ST14TunerBoundUserInterface
+  - type: Damageable
+    damageModifierSet: SteelMod
+  - type: Injurable
+    damageContainer: StructuralInorganic
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 250
+      behaviors:
+      - !type:PlaySoundBehavior
+        sound:
+          collection: MetalBreak
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+  - type: ST14CommsTower
+
+# The energy block and the energy box: for now only things to place and carry, without a mechanic of their own
+- type: entity
+  parent: BaseItem
+  id: ST14EnergyBlock
+  name: energy block
+  description: A sealed charge cell of the Mobile Infantry. The light on its face shows it is charged.
+  components:
+  - type: Sprite
+    sprite: _ST14/Objects/Power/energy_block.rsi
+    layers:
+    - state: base
+    - state: green
+  - type: Item
+    size: Small
+    sprite: _ST14/Objects/Power/energy_block.rsi
+
+- type: entity
+  id: ST14EnergyBox
+  name: energy box
+  description: A field power box of the Mobile Infantry.
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: true
+  - type: Clickable
+  - type: InteractionOutline
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.4,-0.4,0.4,0.4"
+        density: 150
+        mask:
+        - MachineMask
+        layer:
+        - MachineLayer
+  - type: Sprite
+    sprite: _ST14/Structures/Power/energy_box.rsi
+    layers:
+    - state: base
+    - state: door
+  - type: Anchorable
+  - type: Pullable
+  - type: Damageable
+    damageModifierSet: SteelMod
+  - type: Injurable
+    damageContainer: StructuralInorganic
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 150
+      behaviors:
+      - !type:PlaySoundBehavior
+        sound:
+          collection: MetalBreak
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+
+# What the engineer builds with the multitool
+- type: ST14EngineerBuildable
+  id: CommsTower
+  result: ST14CommsTower
+  cost: 400
+  buildTime: 15
+  conditions:
+  - !type:TileNotBlocked

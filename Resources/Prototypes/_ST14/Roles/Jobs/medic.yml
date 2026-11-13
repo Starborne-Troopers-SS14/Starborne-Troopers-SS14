@@ -9,6 +9,14 @@
   special:
   - !type:AddComponentSpecial
     components:
+    - type: ST14SquadRadio
+    - type: IntrinsicRadioReceiver
+    - type: ActiveRadio
+      channels:
+      - ST14Squad
+      - ST14Rodger
+  - !type:AddComponentSpecial
+    components:
     - type: ST14MedicHud
 
 - type: startingGear
@@ -23,14 +31,6 @@
     back: ST14MedicBag
   inhand:
   - ST14FieldDefibrillator
-
-- type: department
-  id: ST14Medical
-  name: st14-department-medical
-  description: st14-department-medical-description
-  color: "#5B97BC"
-  roles:
-  - ST14Medic
 
 - type: playTimeTracker
   id: JobST14Medic

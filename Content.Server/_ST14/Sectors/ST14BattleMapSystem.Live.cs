@@ -1,15 +1,18 @@
 using System.Linq;
 using System.Numerics;
+using Content.Server._ST14.Comms;
 using Content.Server._ST14.MainHub;
 using Content.Shared._ST14.MainHub;
 using Content.Shared._ST14.Sectors;
 using Content.Shared.Mobs;
+using Content.Shared.Roles;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Popups;
 using Content.Shared.Verbs;
 using Robust.Shared.Enums;
 using Robust.Shared.Network;
 using Robust.Shared.Player;
+using Robust.Shared.Prototypes;
 using Robust.Shared.Timing;
 
 namespace Content.Server._ST14.Sectors;
@@ -29,6 +32,12 @@ public sealed partial class ST14BattleMapSystem
     [Dependency] private SharedPopupSystem _popup = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private ST14SubsectorSystem _subsectors = default!;
+    [Dependency] private ST14CommsSystem _comms = default!;
+
+    /// <summary>
+    /// Of the troopers only this job forms squads, and it takes the lead of a squad it joins
+    /// </summary>
+    public static readonly ProtoId<JobPrototype> SquadLeaderJob = "ST14SquadLeader";
 
     private sealed class Squad
     {
@@ -121,12 +130,20 @@ public sealed partial class ST14BattleMapSystem
             return Array.Empty<ST14SquadMate>();
 
         var mates = new List<ST14SquadMate>();
+        var viewer = session.AttachedEntity;
         foreach (var member in squad.Members)
         {
             if (!_players.TryGetSessionById(member, out var mate) ||
                 mate.AttachedEntity is not { } body ||
                 _mobState.IsDead(body) ||
                 Place(Transform(body)) is not { } place)
+            {
+                continue;
+            }
+
+            // the squad only sees each other where the radio pack of a signaller of theirs carries
+            if (member != session.UserId &&
+                (viewer == null || !_comms.SquadCovers(squad.Id, viewer.Value) || !_comms.SquadCovers(squad.Id, body)))
             {
                 continue;
             }
@@ -160,6 +177,31 @@ public sealed partial class ST14BattleMapSystem
         return _squads.FirstOrDefault(s => s.Members.Contains(user));
     }
 
+    /// <summary>
+    /// Id of the squad of the player in the body, null without one
+    /// </summary>
+    public int? SquadIdOf(EntityUid body)
+    {
+        return TryComp<ActorComponent>(body, out var actor) ? SquadOf(actor.PlayerSession.UserId)?.Id : null;
+    }
+
+    private bool IsSquadLeader(NetUserId user)
+    {
+        return _players.TryGetSessionById(user, out var session) &&
+               session.AttachedEntity is { } body &&
+               _mind.TryGetMind(body, out var mindId, out _) &&
+               _jobs.MindTryGetJobId(mindId, out var job) &&
+               job == SquadLeaderJob;
+    }
+
+    /// <summary>
+    /// Bugs form their packs as they like, of the troopers only the squad leaders form squads
+    /// </summary>
+    private bool CanCreate(ICommonSession session)
+    {
+        return SideOf(session) != ST14GalaxyFaction.Federation || IsSquadLeader(session.UserId);
+    }
+
     private ST14SquadInfo Info(Squad squad)
     {
         var members = squad.Members.Select(m => new ST14SquadMember(NameOf(m), StatusOf(m), m == squad.Leader)).ToArray();
@@ -184,7 +226,7 @@ public sealed partial class ST14BattleMapSystem
         }
 
         var squads = _squads.Where(s => s.Side == side).OrderBy(s => s.Number).Select(Info).ToArray();
-        RaiseNetworkEvent(new ST14SquadStateEvent(true, _ticker.RoundId, squads, own?.Side == side ? own.Id : -1, invite), session);
+        RaiseNetworkEvent(new ST14SquadStateEvent(true, _ticker.RoundId, squads, own?.Side == side ? own.Id : -1, invite, CanCreate(session)), session);
     }
 
     /// <summary>
@@ -208,7 +250,7 @@ public sealed partial class ST14BattleMapSystem
         if (squad.Members.Count == 0)
             _squads.Remove(squad);
         else if (squad.Leader == user)
-            squad.Leader = squad.Members[0];
+            squad.Leader = squad.Members.FirstOrDefault(IsSquadLeader, squad.Members[0]);
     }
 
     private bool Join(ICommonSession session, int id)
@@ -225,6 +267,11 @@ public sealed partial class ST14BattleMapSystem
         Leave(session.UserId);
         squad.Members.Add(session.UserId);
         _invites.Remove(session.UserId);
+
+        // a squad leader takes the lead from a trooper
+        if (squad.Side == ST14GalaxyFaction.Federation && IsSquadLeader(session.UserId) && !IsSquadLeader(squad.Leader))
+            squad.Leader = session.UserId;
+
         return true;
     }
 
@@ -235,6 +282,14 @@ public sealed partial class ST14BattleMapSystem
 
         var session = args.SenderSession;
         var side = SideOf(session);
+        if (!CanCreate(session))
+        {
+            if (session.AttachedEntity is { } body)
+                _popup.PopupEntity(Loc.GetString("st14-squad-create-leader-only"), body, body, PopupType.Medium);
+
+            return;
+        }
+
         Leave(session.UserId);
 
         // the smallest number no squad of the side uses

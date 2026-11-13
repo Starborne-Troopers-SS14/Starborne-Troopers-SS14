@@ -145,7 +145,11 @@ public sealed class ST14SquadPanel : PanelContainer
             _column.AddChild(join);
         }
 
-        _column.AddChild(Plate(Loc.GetString("st14-squad-create"), _system.CreateSquad));
+        // ST14: of the troopers only a squad leader forms a squad
+        if (state.CanCreate)
+            _column.AddChild(Plate(Loc.GetString("st14-squad-create"), _system.CreateSquad));
+        else
+            _column.AddChild(Text(Loc.GetString("st14-squad-create-leader-only"), ST14HubFont.Regular, 12, ST14HqArtMuted));
     }
 
     private static readonly Color ST14HqArtMuted = new(0.68f, 0.71f, 0.75f);

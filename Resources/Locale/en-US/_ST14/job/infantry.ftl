@@ -1,0 +1,11 @@
+st14-job-name-trooper = Trooper
+st14-job-description-trooper = A rifleman of the Mobile Infantry: a Morita rifle, armour and the orders of the squad leader.
+st14-job-supervisors-trooper = the squad leader
+st14-job-name-squad-leader = Squad leader
+st14-job-description-squad-leader = Armed with the E-Pulse 44 energy rifle. Forms a squad and leads it into battle. Only a squad leader can form a squad, and takes command of a squad they join.
+st14-job-supervisors-squad-leader = the High Command
+st14-job-name-signaller = Signaller
+st14-job-description-signaller = Carries the radio pack: near them the squad hears each other and sees each other on the battle map. Armed with a Morita carbine. Only a signaller can find the frequency of the Rodger Young on a comms tower and set it on the pack.
+st14-job-supervisors-signaller = the squad leader
+st14-department-infantry = Mobile Infantry
+st14-department-infantry-description = The line squads of the Federation troopers.

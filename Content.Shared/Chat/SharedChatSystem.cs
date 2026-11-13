@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Content.Shared._ST14.Hive; // ST14
 using Content.Shared._ST14.Hive.Components; // ST14
+using Content.Shared._ST14.Comms; // ST14
 using Content.Shared.ActionBlocker;
 using Content.Shared.CCVar;
 using Content.Shared.Chat.Prototypes;
@@ -190,6 +191,9 @@ public abstract partial class SharedChatSystem : EntitySystem
             // ST14: bugs have no common channel, their radio is the hive
             if (HasComp<ST14HiveMemberComponent>(source))
                 channel = ProtoMan.Index(SharedST14HiveSystem.HiveChannel);
+            // ST14: troopers have no common channel either, theirs is the squad
+            else if (HasComp<ST14SquadRadioComponent>(source))
+                channel = ProtoMan.Index(ST14SquadRadioComponent.SquadChannel);
             return true;
         }
 
