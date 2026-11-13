@@ -151,19 +151,13 @@ public sealed partial class ST14WeatherVisual
     public float Width = 0.05f;
 
     /// <summary>
-    /// Glowing sparks over the particles: embers of the ash, falling stars of a meteor shower
+    /// Glowing sparks over the particles: embers of the ash
     /// </summary>
     [DataField]
     public int Embers;
 
     [DataField]
     public Color EmberColor = Color.FromHex("#FF9A40");
-
-    /// <summary>
-    /// Embers that cross the sky as long falling streaks
-    /// </summary>
-    [DataField]
-    public bool Meteors;
 
     /// <summary>
     /// Thickness of the drifting clouds at full strength, 0 to 1
@@ -246,59 +240,7 @@ public abstract partial class ST14WeatherEffect
 }
 
 /// <summary>
-/// The ground shakes: the screens of everyone on the map shake and some fall over
-/// </summary>
-public sealed partial class ST14WeatherShakeEffect : ST14WeatherEffect
-{
-    [DataField]
-    public float Strength = 1f;
-
-    [DataField]
-    public float KnockdownChance;
-
-    [DataField]
-    public TimeSpan KnockdownTime = TimeSpan.FromSeconds(2);
-}
-
-/// <summary>
-/// The ground splits: cracks open near the people on the map while the event grows, and close again, one after
-/// another, as it dies down. None is left when it is over
-/// </summary>
-public sealed partial class ST14WeatherFissureEffect : ST14WeatherEffect
-{
-    [DataField(required: true)]
-    public List<string> Decals = new();
-
-    /// <summary>
-    /// Size of the crack decals in tiles, they are centred on the spot
-    /// </summary>
-    [DataField]
-    public System.Numerics.Vector2 Size = new(6, 3);
-
-    /// <summary>
-    /// How far from a person a crack can open
-    /// </summary>
-    [DataField]
-    public float Spread = 8f;
-
-    /// <summary>
-    /// Share of cracks that open anywhere on the map rather than near someone
-    /// </summary>
-    [DataField]
-    public float Anywhere = 0.3f;
-
-    /// <summary>
-    /// Most cracks open at once on a map at full strength
-    /// </summary>
-    [DataField]
-    public int Max = 40;
-
-    [DataField]
-    public SoundSpecifier? Sound;
-}
-
-/// <summary>
-/// Something falls out of the sky near the people on the map: rocks, meteors, lightning. The strike entity shows
+/// Something falls out of the sky near the people on the map: lightning. The strike entity shows
 /// where it lands, then hits
 /// </summary>
 public sealed partial class ST14WeatherStrikeEffect : ST14WeatherEffect

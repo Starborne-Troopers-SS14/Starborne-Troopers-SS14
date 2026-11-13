@@ -1,10 +1,5 @@
 st14-weather-chat = [color=#E8A040][bold]Погода:[/bold][/color] {$message}
 
-st14-weather-earthquake = Землетрясение
-st14-weather-earthquake-warning = Земля уходит из-под ног: землетрясение! Берегитесь камней!
-st14-weather-earthquake-over = Толчки стихли.
-st14-weather-quake-fall = Толчок сбивает вас с ног!
-
 st14-weather-sandstorm = Песчаная буря
 st14-weather-sandstorm-warning = Надвигается песчаная буря! Видимость падает, песок сечёт кожу.
 st14-weather-sandstorm-over = Буря улеглась, песок оседает.
@@ -26,10 +21,6 @@ st14-weather-gale = Ураганный ветер
 st14-weather-gale-warning = Поднимается ураганный ветер! Держитесь на ногах!
 st14-weather-gale-over = Ветер стих.
 st14-weather-gust-fall = Порыв ветра валит вас с ног!
-
-st14-weather-meteors = Метеоритный дождь
-st14-weather-meteors-warning = Метеоритный дождь! Смотрите, куда падают огни, и уходите оттуда!
-st14-weather-meteors-over = Метеориты больше не падают.
 
 st14-weather-heatwave = Зной
 st14-weather-heatwave-warning = Звезда в зените, воздух раскалён: начинается зной.

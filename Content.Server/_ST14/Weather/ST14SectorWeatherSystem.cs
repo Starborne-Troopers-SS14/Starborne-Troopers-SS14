@@ -73,22 +73,6 @@ public sealed partial class ST14SectorWeatherSystem : EntitySystem
         public TimeSpan Next;
         public ActiveEvent? Active;
 
-        /// <summary>
-        /// Cracks the ground opened in an earthquake, they close when it is over
-        /// </summary>
-        public readonly List<(EntityUid Grid, DecalIndex Decal)> Cracks = new();
-
-        /// <summary>
-        /// Most cracks open at once in this event, they close in step with its strength from there
-        /// </summary>
-        public int CracksPeak;
-
-        /// <summary>
-        /// Ends of the fault lines that can still run on: where, on which grid and which way
-        /// </summary>
-        public readonly List<(EntityUid Grid, Vector2 Position, Angle Direction)> CrackTips = new();
-
-        public int CrackLines;
     }
 
     private sealed class ActiveEvent
@@ -263,7 +247,6 @@ public sealed partial class ST14SectorWeatherSystem : EntitySystem
 
         weather.Active = null;
         weather.Next = _timing.CurTime + Gap(Settings);
-        CloseCracks(weather, 0);
 
         // a new event takes the sky over itself, the clients cross over from one to the other
         if (!now)
@@ -319,8 +302,6 @@ public sealed partial class ST14SectorWeatherSystem : EntitySystem
             if (TerminatingOrDeleted(map))
                 continue;
 
-            CloseCracks(weather, 0);
-
             RemComp<ST14SectorWeatherComponent>(map);
             Slow(map, 1f);
         }
@@ -348,10 +329,6 @@ public sealed partial class ST14SectorWeatherSystem : EntitySystem
         var strength = active.Strength;
         Slow(map, 1f + (active.Proto.Speed - 1f) * strength);
 
-        // as the ground settles the cracks close one after another
-        if (weather.Cracks.Count > 0 && now > active.Ends - active.Proto.RampDown)
-            CloseCracks(weather, (int) MathF.Round(weather.CracksPeak * strength));
-
         // the first minutes of an event are only a warning of what is coming
         if (strength < 0.15f)
             return;
@@ -369,9 +346,6 @@ public sealed partial class ST14SectorWeatherSystem : EntitySystem
 
             switch (effect)
             {
-                case ST14WeatherShakeEffect shake:
-                    Shake(map, shake, strength);
-                    break;
                 case ST14WeatherStrikeEffect strike:
                     for (var n = 0; n < Math.Max(1, (int) MathF.Round(strike.Count * strength)); n++)
                     {
@@ -392,26 +366,6 @@ public sealed partial class ST14SectorWeatherSystem : EntitySystem
                     if (RandomSpot(map, sound.Spread, 0f) is { } place)
                         _audio.PlayPvs(sound.Sound, place);
                     break;
-                case ST14WeatherFissureEffect fissure:
-                    // no new cracks once the ground is settling
-                    if (weather.Cracks.Count < fissure.Max * strength && now < active.Ends - active.Proto.RampDown)
-                        OpenCrack(map, weather, fissure);
-                    break;
-            }
-        }
-    }
-
-    private void Shake(EntityUid map, ST14WeatherShakeEffect shake, float strength)
-    {
-        foreach (var (uid, outside) in Mobs(map))
-        {
-            if (HasComp<CameraRecoilComponent>(uid))
-                _recoil.KickCamera(uid, _random.NextVector2(0.3f, 1f) * shake.Strength * strength);
-
-            if (shake.KnockdownChance > 0 && _random.Prob(shake.KnockdownChance * strength) && !_mobState.IsIncapacitated(uid))
-            {
-                if (_stun.TryKnockdown(uid, shake.KnockdownTime))
-                    _popup.PopupEntity(Loc.GetString("st14-weather-quake-fall"), uid, uid, PopupType.SmallCaution);
             }
         }
     }
@@ -478,106 +432,6 @@ public sealed partial class ST14SectorWeatherSystem : EntitySystem
         {
             if (outside && TryComp<FlammableComponent>(uid, out var flammable) && flammable.OnFire)
                 _flammable.Extinguish(uid, flammable);
-        }
-    }
-
-    /// <summary>
-    /// The ground splits along fault lines: a line opens at one spot near the people, then runs on from both its ends
-    /// a piece at a time, now and then forking, until it reaches the edge of the open ground
-    /// </summary>
-    private void OpenCrack(EntityUid map, MapWeather weather, ST14WeatherFissureEffect fissure)
-    {
-        // a piece overlaps the next one a little so the line has no gaps
-        var length = fissure.Size.X * 0.9f;
-
-        if (weather.CrackTips.Count == 0 || weather.CrackLines < 3 && _random.Prob(0.12f))
-        {
-            if (RandomSpot(map, fissure.Spread, fissure.Anywhere) is not { } spot ||
-                spot.EntityId is not { Valid: true } grid || !HasComp<MapGridComponent>(grid))
-            {
-                return;
-            }
-
-            var dir = _random.NextAngle();
-            if (!PlaceCrack(weather, fissure, grid, spot.Position, dir))
-                return;
-
-            weather.CrackLines++;
-            var half = dir.ToVec() * length / 2f;
-            weather.CrackTips.Add((grid, spot.Position + half, dir));
-            weather.CrackTips.Add((grid, spot.Position - half, dir + Math.PI));
-            if (fissure.Sound != null)
-                _audio.PlayPvs(fissure.Sound, spot);
-            return;
-        }
-
-        var t = _random.Next(weather.CrackTips.Count);
-        var (tipGrid, tip, tipDir) = weather.CrackTips[t];
-        // a crack wanders a little but keeps its way
-        var way = tipDir + _random.NextFloat(-0.3f, 0.3f);
-        var step = way.ToVec() * length;
-        var centre = tip + step / 2f;
-        if (TerminatingOrDeleted(tipGrid) || !OpenGround(tipGrid, centre) || !PlaceCrack(weather, fissure, tipGrid, centre, way))
-        {
-            // the line has run into rock, a wall or the storm and ends there
-            weather.CrackTips.RemoveAt(t);
-            return;
-        }
-
-        weather.CrackTips[t] = (tipGrid, tip + step, way);
-        if (_random.Prob(0.15f))
-            weather.CrackTips.Add((tipGrid, tip + step, way + (_random.Prob(0.5f) ? 0.8 : -0.8)));
-
-        if (fissure.Sound != null && _random.Prob(0.5f))
-            _audio.PlayPvs(fissure.Sound, new EntityCoordinates(tipGrid, centre));
-    }
-
-    private bool PlaceCrack(MapWeather weather, ST14WeatherFissureEffect fissure, EntityUid grid, Vector2 centre, Angle dir)
-    {
-        // a decal is placed by its corner and turns about its centre
-        var corner = new EntityCoordinates(grid, centre - fissure.Size / 2f);
-        if (!_decals.TryAddDecal(_random.Pick(fissure.Decals), corner, out var decal, rotation: dir, zIndex: 1, cleanable: false))
-            return false;
-
-        weather.Cracks.Add((grid, decal));
-        weather.CracksPeak = Math.Max(weather.CracksPeak, weather.Cracks.Count);
-        return true;
-    }
-
-    /// <summary>
-    /// Open ground under the sky at a place of a grid: not the void, not under a roof, not the storm on the edge
-    /// </summary>
-    private bool OpenGround(EntityUid grid, Vector2 local)
-    {
-        if (!TryComp<MapGridComponent>(grid, out var gridComp))
-            return false;
-
-        var index = _map.LocalToTile(grid, gridComp, new EntityCoordinates(grid, local));
-        return _map.TryGetTileRef(grid, gridComp, index, out var tile) && !tile.Tile.IsEmpty &&
-               _weather.CanWeatherAffect((grid, gridComp, null), tile);
-    }
-
-    /// <summary>
-    /// Closes cracks until no more than <paramref name="keep"/> are left, the last opened first: the lines draw back to
-    /// where they started
-    /// </summary>
-    private void CloseCracks(MapWeather weather, int keep)
-    {
-        keep = Math.Max(0, keep);
-        if (keep == 0)
-        {
-            weather.CracksPeak = 0;
-            weather.CrackTips.Clear();
-            weather.CrackLines = 0;
-        }
-
-        while (weather.Cracks.Count > keep)
-        {
-            var i = weather.Cracks.Count - 1;
-            var (grid, decal) = weather.Cracks[i];
-            weather.Cracks.RemoveAt(i);
-            if (!TerminatingOrDeleted(grid))
-                _decals.RemoveDecal(grid, decal);
         }
     }
 

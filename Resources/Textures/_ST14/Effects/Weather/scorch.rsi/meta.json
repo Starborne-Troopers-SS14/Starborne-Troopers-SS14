@@ -1,10 +1,10 @@
 {
   "version": 1,
-  "license": "CC-BY-SA-3.0",
-  "copyright": "Made for Starborne Troopers",
+  "license": "All-Rights-Reserved",
+  "copyright": "Ground mark after a lightning strike, provided by the Starborne Troopers team",
   "size": {
-    "x": 96,
-    "y": 96
+    "x": 48,
+    "y": 48
   },
   "states": [
     {

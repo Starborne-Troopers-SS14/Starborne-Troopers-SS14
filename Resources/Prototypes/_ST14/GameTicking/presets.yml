@@ -1,0 +1,11 @@
+# The war of the sectors: a round with none of the station rules, no random station events, no antagonists, no
+# roundstart mess. Set as the default preset by ST14RoundSettingsSystem
+
+- type: gamePreset
+  id: ST14War
+  alias:
+  - st14
+  - war
+  name: st14-preset-war-title
+  description: st14-preset-war-description
+  showInVote: false
