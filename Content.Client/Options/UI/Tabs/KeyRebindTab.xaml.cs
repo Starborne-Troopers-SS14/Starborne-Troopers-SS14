@@ -173,13 +173,7 @@ namespace Content.Client.Options.UI.Tabs
             InitToggleWalk();
             AddButton(ContentKeyFunctions.ToggleKnockdown);
 
-            AddHeader("ui-options-header-camera");
-            AddButton(EngineKeyFunctions.CameraRotateLeft);
-            AddButton(EngineKeyFunctions.CameraRotateRight);
-            AddButton(EngineKeyFunctions.CameraReset);
-            AddButton(ContentKeyFunctions.ZoomIn);
-            AddButton(ContentKeyFunctions.ZoomOut);
-            AddButton(ContentKeyFunctions.ResetZoom);
+            // ST14: players can neither turn nor zoom the camera, see ContentContexts
 
             AddHeader("ui-options-header-interaction-basic");
             AddButton(EngineKeyFunctions.Use);

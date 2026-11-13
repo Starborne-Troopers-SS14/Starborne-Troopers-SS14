@@ -24,6 +24,7 @@ using Robust.Shared.Utility;
 using Robust.Shared;
 using YamlDotNet.RepresentationModel;
 using Content.Shared._ST14.Localization; // ST14
+using Content.Shared._ST14.MainHub; // ST14
 
 namespace Content.Shared.Preferences
 {
@@ -638,6 +639,8 @@ namespace Content.Shared.Preferences
             var configManager = collection.Resolve<IConfigurationManager>();
             var prototypeManager = collection.Resolve<IPrototypeManager>();
 
+            Species = ST14CharacterSide.Migrate(prototypeManager, Species, JobPriorities); // ST14: bug characters from before the bug species
+
             if (!prototypeManager.TryIndex(Species, out var speciesPrototype) || speciesPrototype.RoundStart == false)
             {
                 Species = HumanoidCharacterProfile.DefaultSpecies;
@@ -707,6 +710,12 @@ namespace Content.Shared.Preferences
                 name = GetName(Species, gender);
             }
 
+            // ST14: a bug is called by its caste and a number, nothing else
+            if (ST14CharacterSide.IsBug(Species))
+                name = ST14CharacterSide.TryParseBugName(Name, out var bugNumber)
+                    ? ST14CharacterSide.ProfileBugName(bugNumber)
+                    : GetName(Species, gender);
+
             string flavortext;
             var maxFlavorTextLength = configManager.GetCVar(CCVars.MaxFlavorTextLength);
             if (FlavorText.Length > maxFlavorTextLength)
@@ -744,6 +753,8 @@ namespace Content.Shared.Preferences
                     JobPriority.High => true,
                     _ => false
                 }));
+
+            ST14CharacterSide.FilterJobs(prototypeManager, Species, priorities); // ST14: troopers and bugs take only their own jobs
 
             var hasHighPrio = false;
             foreach (var (key, value) in priorities)
@@ -861,6 +872,10 @@ namespace Content.Shared.Preferences
         /// working inside these non entity systems is a bit wack
         public static string GetName(string species, Gender gender)
         {
+            // ST14: bugs get their caste and a number
+            if (ST14CharacterSide.IsBug(species))
+                return ST14CharacterSide.RandomBugName(IoCManager.Resolve<IRobustRandom>());
+
             var namingSystem = IoCManager.Resolve<IEntitySystemManager>().GetEntitySystem<NamingSystem>();
             return namingSystem.GetName(species, gender);
         }

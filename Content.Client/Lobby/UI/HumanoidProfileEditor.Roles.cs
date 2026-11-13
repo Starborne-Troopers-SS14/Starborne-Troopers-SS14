@@ -2,6 +2,7 @@ using System.Linq;
 using System.Numerics;
 using Content.Client.Lobby.UI.Loadouts;
 using Content.Client.Lobby.UI.Roles;
+using Content.Shared._ST14.MainHub; // ST14
 using Content.Shared.Clothing;
 using Content.Shared.Preferences;
 using Content.Shared.Preferences.Loadouts;
@@ -139,6 +140,10 @@ public sealed partial class HumanoidProfileEditor
 
         foreach (var department in departments)
         {
+            // ST14: troopers see only trooper departments, bugs only the hive
+            if (Profile != null && !department.Roles.Any(role => ST14CharacterSide.Fits(_prototypeManager, Profile.Species, role)))
+                continue;
+
             var departmentName = Loc.GetString(department.Name);
 
             if (!_jobCategories.TryGetValue(department.ID, out var category))
@@ -183,6 +188,7 @@ public sealed partial class HumanoidProfileEditor
 
             var jobs = department.Roles.Select(jobId => _prototypeManager.Index(jobId))
                 .Where(job => job.SetPreference)
+                .Where(job => Profile == null || ST14CharacterSide.Fits(_prototypeManager, Profile.Species, job.ID)) // ST14
                 .ToArray();
 
             if (JobUIComparer.TryCreate(_prototypeManager, null, out var comparer))

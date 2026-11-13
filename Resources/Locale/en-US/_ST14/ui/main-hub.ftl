@@ -103,18 +103,11 @@ st14-hub-button-support = Support
 st14-support-title = Support the project
 st14-support-status-header = Your status
 st14-support-status-none = No subscription
-st14-support-status-none-text = A Boosty subscription keeps the server running and growing. The tiers and their perks are on the right, every tab shows what a subscription unlocks.
-st14-support-status-active-text = Thank you for your support! The perks of your tier are marked green on the right.
 st14-support-boosty = Support on Boosty
-st14-support-boosty-note = [color=#9A9488]Opens boosty.to/corvaxcolonialmarines in your browser.[/color]
-st14-support-perks-header = Subscriber perks
-st14-support-tab-tiers = Tiers
-st14-support-tab-colours = Colours
 st14-support-tab-naming = Item name
 st14-support-tab-figurine = Figurine
 st14-support-tab-cosmetics = Cosmetics
 st14-support-tier-price = { $price } ₽ a month · + Discord chat
-st14-support-tier-previous = Everything from the previous tiers
 st14-support-tier-current = Your tier
 st14-support-tier-included = Included
 st14-support-tier-locked = Locked
@@ -155,15 +148,10 @@ st14-sponsor-command-arg-player = [player]
 st14-weapon-nickname = { $weapon } "{ $nickname }"
 st14-support-nickname-save = Save nickname
 st14-support-subtitle = Service guarantees citizenship, support guarantees perks
-st14-support-how-header = How to get it
-st14-support-how-text = 1. Subscribe on Boosty with the button below.
-    2. Tell the administration your in-game name (automatic account linking is coming soon).
-    3. The perks of your tier turn on on the server.
 st14-support-colours-text = Colours are saved right away and work in the game when your tier allows it.
 st14-support-figurine-title = Figurine of your character
 st14-support-soon = Coming soon
 st14-support-cosmetics-text = Cosmetics sets for Sponsorship III and Sponsorship IV are in development and will arrive in one of the next updates.
-st14-support-tiers-hint = [color=#9A9488]Click a tier card to see its perks.[/color]
 st14-support-tier-includes = Includes everything from tier { $tier }
 st14-support-tier-max = Maximum
 st14-support-ooc-other-1 = OOC: Rico: Who's going to Klendathu?
@@ -171,3 +159,17 @@ st14-support-ooc-other-2 = OOC: Dizzy: Service guarantees citizenship!
 st14-support-pick-colour = Pick a colour
 st14-support-weapons-header = Weapons
 st14-support-figurine-note = [color=#9A9488]The figurine follows your selected character and their clothes from the character editor.[/color]
+st14-support-open-perks = Perks
+st14-support-tier-month = per month · + Discord chat
+st14-support-step-1 = Subscribe on Boosty
+st14-support-step-2 = Tell the admins your in-game name
+st14-support-step-3 = The tier perks get enabled on the server
+st14-support-boosty-link = boosty.to/corvaxcolonialmarines
+st14-support-perks-of = { $tier } perks
+st14-support-tab-ooc = OOC colour
+st14-support-tab-ghost = Ghost colour
+st14-support-tab-mention = Mention
+st14-support-perk-mention = Round end mention
+st14-support-mention-title = Round over
+st14-support-mention-thanks = The Federation thanks the supporters of the project:
+st14-support-mention-text = The summary of every round lists your name among those who support Starborne Troopers.

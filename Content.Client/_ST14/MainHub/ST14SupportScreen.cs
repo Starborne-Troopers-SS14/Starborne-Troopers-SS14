@@ -48,9 +48,10 @@ public static class ST14SupporterStatus
 }
 
 /// <summary>
-/// "Support" screen of the main menu and the lobby: the player's tier with a medal, how to get a subscription,
-/// a plate leading to Boosty, the four sponsorship tiers and the perks. Perks that already work in the game
-/// (OOC and ghost colour, weapon nickname) save the choice and send it to the server, the rest is shown only
+/// "Support" screen of the main menu and the lobby, built like the mode selection of the original: four tall service
+/// cards on a starfield, one per Boosty sponsorship, with rank chevrons, a slanted banner, the price and the perks, a metal
+/// plate under each card and the way to Boosty in the bottom bar. A card or its plate opens the perks of that tier:
+/// the ones that already work (OOC and ghost colour, weapon nickname) save the choice and send it to the server
 /// </summary>
 public sealed partial class ST14SupportScreen : ST14WarScreenBase
 {
@@ -66,8 +67,10 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
     // price and the number of perk lines of every tier, the texts are in the locale
     private static readonly (string Price, int Perks)[] Tiers = { ("300", 3), ("600", 2), ("1 300", 3), ("4 200", 2) };
 
-    // the preview tab each tier card leads to
-    private static readonly int[] TierPages = { 1, 2, 3, 4 };
+    // cards of the tier row, relative to the screen centre in canvas units
+    private const float CardStep = 440f;
+    private const float CardY = -45f;
+    private static readonly Vector2 CardSize = new(410, 600);
 
     private static readonly Color[] Swatches =
     {
@@ -77,96 +80,217 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
 
     private readonly ST14TierMedal _medal;
     private readonly Label _status;
-    private readonly RichTextLabel _statusText;
-    private readonly List<PanelContainer> _steps = new();
-    private readonly List<(Button Tab, Control Page)> _pages = new();
-    private readonly List<TierCard> _tierCards = new();
+    private readonly List<Control> _rowParts = new();
+    private readonly List<ST14SponsorCard> _cards = new();
+
+    // perks view: one frame, the tabs of the open tier, every perk page built once
+    private readonly ST14LobbyFrame _perks;
+    private readonly BoxContainer _perkTabs;
+    private readonly ST14SponsorInsignia _perkInsignia;
+    private readonly Label _perkPrice;
+    private readonly RichTextLabel _perkList;
+    private readonly Label _perkState;
+    private readonly Dictionary<string, Control> _pages = new();
     private readonly List<(Label Label, int Tier, string Perk)> _locks = new();
     private readonly List<(Button Swatch, Color Color)> _oocSwatches = new();
     private readonly List<(Button Swatch, Color Color)> _ghostSwatches = new();
+    private int _openTier;
 
     private Label _oocPreview = default!;
     private EntityPrototypeView _ghost = default!;
-    private readonly ProfilePreviewSpriteView _figure;
-    private readonly ST14WoodenStand _stand;
-    private readonly EntityPrototypeView _weaponView;
-    private readonly Label _weaponPreview;
-    private readonly List<EntityPrototype> _weapons;
+    private ProfilePreviewSpriteView _figure = default!;
+    private ST14WoodenStand _stand = default!;
+    private EntityPrototypeView _weaponView = default!;
+    private Label _weaponPreview = default!;
+    private Label _mentionName = default!;
+    private List<EntityPrototype> _weapons = new();
     private int _weapon;
     private string _nickname = string.Empty;
+
+    // the perk pages of every tier, keys of _pages
+    private static readonly string[][] TierPages =
+    {
+        new[] { "ooc" },
+        new[] { "ghost", "naming" },
+        new[] { "figurine", "cosmetics" },
+        new[] { "mention", "cosmetics" },
+    };
 
     public ST14SupportScreen() : base("ST14SupportBackground")
     {
         BuildHeader();
 
-        // left: the player's status, how to subscribe and the way to Boosty
-        var statusFrame = new ST14LobbyFrame(ResCache, Loc.GetString("st14-support-status-header"));
-        Canvas.AddAt(statusFrame, new Vector2(0.5f, 0.5f), new Vector2(-640, 40), new Vector2(460, 700));
+        // the status widget top right, where the hub keeps its clock
+        _medal = new ST14TierMedal(ResCache);
+        Canvas.AddAt(_medal, new Vector2(1, 0), new Vector2(-60, 45), new Vector2(110, 110), new Vector2(1, 0));
 
-        _medal = new ST14TierMedal(ResCache) { SetSize = new Vector2(150, 150), HorizontalAlignment = HAlignment.Center };
-        statusFrame.Body.AddChild(_medal);
+        var statusCaption = ST14HubStyle.Label(ResCache, Loc.GetString("st14-support-status-header").ToUpperInvariant(), ST14HubFont.Medium, 15,
+            ST14HubStyle.Widget);
+        statusCaption.Align = Label.AlignMode.Right;
+        Canvas.AddAt(statusCaption, new Vector2(1, 0), new Vector2(-185, 70), new Vector2(420, 26), new Vector2(1, 0));
 
-        _status = ST14HubStyle.Label(ResCache, string.Empty, ST14HubFont.SemiBold, 24, ST14HubStyle.GoldLight);
-        _status.Align = Label.AlignMode.Center;
-        statusFrame.Body.AddChild(_status);
+        _status = ST14HubStyle.Label(ResCache, string.Empty, ST14HubFont.Bold, 26, Color.White, shadow: true);
+        _status.Align = Label.AlignMode.Right;
+        Canvas.AddAt(_status, new Vector2(1, 0), new Vector2(-185, 96), new Vector2(520, 40), new Vector2(1, 0));
 
-        var steps = new BoxContainer
-        {
-            Orientation = BoxContainer.LayoutOrientation.Horizontal,
-            SeparationOverride = 6,
-            HorizontalAlignment = HAlignment.Center,
-        };
+        // four service cards with their plates
         for (var tier = 1; tier <= 4; tier++)
         {
-            var step = new PanelContainer { SetSize = new Vector2(64, 30) };
-            var numeral = ST14HubStyle.Label(ResCache, ST14SupporterStatus.Numerals[tier], ST14HubFont.SemiBold, 15, Color.White);
-            numeral.Align = Label.AlignMode.Center;
-            numeral.VAlign = Label.VAlignMode.Center;
-            step.AddChild(numeral);
-            steps.AddChild(step);
-            _steps.Add(step);
+            var x = (tier - 2.5f) * CardStep;
+            var (price, count) = Tiers[tier - 1];
+            var card = new ST14SponsorCard(ResCache, tier, price, count);
+            var openTier = tier;
+            card.OnPressed += _ => OpenTier(openTier);
+            Canvas.AddAt(card, new Vector2(0.5f, 0.5f), new Vector2(x, CardY), CardSize);
+            _cards.Add(card);
+            _rowParts.Add(card);
+
+            var plate = new ST14HubButton(ResCache, Loc.GetString("st14-support-open-perks"), 19, ST14SupporterStatus.TierColors[tier]);
+            plate.OnPressed += _ => OpenTier(openTier);
+            Canvas.AddAt(plate, new Vector2(0.5f, 0.5f), new Vector2(x, CardY + CardSize.Y / 2 + 4), new Vector2(330, 64));
+            _rowParts.Add(plate);
         }
 
-        statusFrame.Body.AddChild(steps);
-
-        _statusText = Text(string.Empty, 380);
-        statusFrame.Body.AddChild(_statusText);
-
-        statusFrame.Body.AddChild(SectionTitle("st14-support-how-header"));
-        statusFrame.Body.AddChild(Text("st14-support-how-text", 380));
-        statusFrame.Body.AddChild(new Control { VerticalExpand = true });
-
-        var boosty = new ST14HubButton(ResCache, Loc.GetString("st14-support-boosty"), 21, ST14HubStyle.Orange, Color.White)
+        // how to get it: three numbered steps in a line under the cards
+        var steps = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 40 };
+        for (var i = 1; i <= 3; i++)
         {
-            MinHeight = 70,
+            var step = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 10 };
+            var number = ST14HubStyle.Label(ResCache, $"{i}", ST14HubFont.Black, 26, ST14HubStyle.Orange, shadow: true);
+            number.VAlign = Label.VAlignMode.Center;
+            step.AddChild(number);
+            var text = ST14HubStyle.Label(ResCache, Loc.GetString($"st14-support-step-{i}"), ST14HubFont.Regular, 15, ST14LobbyStyle.Text, shadow: true);
+            text.VAlign = Label.VAlignMode.Center;
+            step.AddChild(text);
+            steps.AddChild(step);
+        }
+
+        var stepsHolder = new CenterContainer();
+        stepsHolder.AddChild(steps);
+        Canvas.AddAt(stepsHolder, new Vector2(0.5f, 1), new Vector2(0, -130), new Vector2(1700, 40));
+        _rowParts.Add(stepsHolder);
+
+        // perks of one tier, opened from a card
+        _perks = new ST14LobbyFrame(ResCache, string.Empty) { Visible = false };
+        Canvas.AddAt(_perks, new Vector2(0.5f, 0.5f), new Vector2(0, -20), new Vector2(1640, 770));
+
+        var perkRow = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 16, VerticalExpand = true };
+        _perks.Body.AddChild(perkRow);
+
+        // left: the insignia and what the tier gives
+        var side = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 8, SetWidth = 330 };
+        perkRow.AddChild(side);
+        _perkInsignia = new ST14SponsorInsignia(ResCache) { SetHeight = 230, Banner = true };
+        side.AddChild(_perkInsignia);
+        _perkPrice = ST14HubStyle.Label(ResCache, string.Empty, ST14HubFont.Medium, 16, ST14LobbyStyle.Text);
+        _perkPrice.Align = Label.AlignMode.Center;
+        side.AddChild(_perkPrice);
+        _perkState = ST14HubStyle.Label(ResCache, string.Empty, ST14HubFont.SemiBold, 15, ST14HubStyle.Gold);
+        _perkState.Align = Label.AlignMode.Center;
+        side.AddChild(_perkState);
+        _perkList = new RichTextLabel { MaxWidth = 320, Margin = new Thickness(6, 8, 6, 0) };
+        side.AddChild(_perkList);
+
+        var main = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 8, HorizontalExpand = true };
+        perkRow.AddChild(main);
+        _perkTabs = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 6 };
+        main.AddChild(_perkTabs);
+
+        BuildPages(main);
+
+        AddBottomBar();
+
+        // the way to Boosty sits in the bottom bar like the plates of the hub
+        var boosty = new ST14HubButton(ResCache, Loc.GetString("st14-support-boosty"), 22, ST14HubStyle.Orange, Color.White)
+        {
             ToolTip = BoostyUrl,
         };
         boosty.OnPressed += _ => _uriOpener.OpenUri(BoostyUrl);
-        statusFrame.Body.AddChild(boosty);
-        statusFrame.Body.AddChild(Text("st14-support-boosty-note", 380));
+        Canvas.AddAt(boosty, new Vector2(1, 1), new Vector2(-30, -54), new Vector2(440, 70), new Vector2(1, 0.5f));
 
-        // right: tiers and the perk previews
-        var showcase = new ST14LobbyFrame(ResCache, Loc.GetString("st14-support-perks-header"));
-        Canvas.AddAt(showcase, new Vector2(0.5f, 0.5f), new Vector2(250, 40), new Vector2(1200, 700));
-        var tabs = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 6 };
-        showcase.Body.AddChild(tabs);
+        var note = ST14HubStyle.Label(ResCache, Loc.GetString("st14-support-boosty-link"), ST14HubFont.Regular, 14, ST14HubStyle.Widget);
+        note.Align = Label.AlignMode.Right;
+        note.VAlign = Label.VAlignMode.Center;
+        Canvas.AddAt(note, new Vector2(1, 1), new Vector2(-490, -54), new Vector2(600, 30), new Vector2(1, 0.5f));
 
-        AddPage(tabs, showcase, "st14-support-tab-tiers", BuildTiers());
+        SelectWeapon(_weapon);
+        UpdateStatus();
+        ST14SupporterStatus.Changed += UpdateStatus;
+    }
 
-        // OOC name colour (tier 1) and ghost colour (tier 2), two cards side by side
-        var colours = Page();
-        var colourCards = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 14, VerticalExpand = true };
-        colours.AddChild(colourCards);
+    protected override void Dispose(bool disposing)
+    {
+        base.Dispose(disposing);
+        ST14SupporterStatus.Changed -= UpdateStatus;
+    }
 
+    protected override void VisibilityChanged(bool newVisible)
+    {
+        base.VisibilityChanged(newVisible);
+
+        // every visit starts at the cards; the figurine is the character the player has selected right now
+        if (!newVisible)
+            return;
+
+        ShowCards();
+        LoadFigure();
+    }
+
+    /// <summary>
+    /// The exit icon steps back from the perks to the cards first
+    /// </summary>
+    protected override void GoBack()
+    {
+        if (_openTier != 0)
+        {
+            ShowCards();
+            return;
+        }
+
+        base.GoBack();
+    }
+
+    #region Building
+
+    private void BuildHeader()
+    {
+        // dark strip with a gold line under it, the title on the left like the screen names of the original
+        Canvas.Add(new TextureRect
+        {
+            Texture = ST14HubStyle.Tex(ResCache, "mask_bottom.png"),
+            Stretch = TextureRect.StretchMode.Scale,
+            ModulateSelfOverride = Color.Black.WithAlpha(0.85f),
+        }, Vector2.Zero, new Vector2(1, 0), Vector2.Zero, new Vector2(0, 200), new Vector2(0.5f, 0));
+
+        Canvas.Add(new TextureRect
+        {
+            Texture = ST14HubStyle.Tex(ResCache, "objectivebanner.png"),
+            Stretch = TextureRect.StretchMode.Scale,
+            ModulateSelfOverride = ST14HubStyle.NewsBar,
+        }, Vector2.Zero, new Vector2(1, 0), new Vector2(0, 160), new Vector2(0, 5), new Vector2(0.5f, 0));
+
+        var title = ST14HubStyle.Label(ResCache, Loc.GetString("st14-support-title").ToUpperInvariant(), ST14HubFont.Black, 46,
+            ST14HubStyle.GoldLight, shadow: true);
+        Canvas.AddAt(title, Vector2.Zero, new Vector2(70, 40), new Vector2(1100, 66), Vector2.Zero);
+
+        var subtitle = ST14HubStyle.Label(ResCache, Loc.GetString("st14-support-subtitle"), ST14HubFont.Slogan, 22, ST14HubStyle.News,
+            shadow: true);
+        Canvas.AddAt(subtitle, Vector2.Zero, new Vector2(74, 106), new Vector2(1100, 36), Vector2.Zero);
+    }
+
+    private void BuildPages(BoxContainer main)
+    {
+        // OOC name colour (tier 1)
+        var ooc = Page("ooc", main);
+        ooc.AddChild(Lock(1, "st14-support-perk-ooc"));
         var oocCard = Card();
-        colourCards.AddChild(oocCard.Root);
-        oocCard.Body.AddChild(Lock(1, "st14-support-perk-ooc"));
+        ooc.AddChild(oocCard.Root);
         var chat = new PanelContainer
         {
             PanelOverride = ST14HubStyle.Flat(Color.FromHex("#0A0A08F2"), ST14HubStyle.Gold.WithAlpha(0.35f), 1),
             VerticalExpand = true,
         };
-        var chatLines = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 6, Margin = new Thickness(12, 10) };
+        var chatLines = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 8, Margin = new Thickness(14, 12) };
         chat.AddChild(chatLines);
         chatLines.AddChild(ChatLine(Loc.GetString("st14-support-ooc-other-1"), Color.FromHex("#C9C2B0")));
         _oocPreview = ChatLine(Loc.GetString("st14-support-ooc-preview", ("name", _player.LocalSession?.Name ?? "?")), Swatches[0]);
@@ -179,14 +303,17 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
             _oocPreview.FontColorOverride = color;
             SaveChoice(ST14CVars.PerkOocColor, color.ToHex());
         }));
+        ooc.AddChild(Text("st14-support-colours-text", 1150));
 
+        // ghost colour (tier 2)
+        var ghostPage = Page("ghost", main);
+        ghostPage.AddChild(Lock(2, "st14-support-perk-ghost"));
         var ghostCard = Card();
-        colourCards.AddChild(ghostCard.Root);
-        ghostCard.Body.AddChild(Lock(2, "st14-support-perk-ghost"));
-        var ghostStand = new ST14Pedestal(ResCache) { SetSize = new Vector2(220, 230), HorizontalAlignment = HAlignment.Center, VerticalExpand = true };
+        ghostPage.AddChild(ghostCard.Root);
+        var ghostStand = new ST14Pedestal(ResCache) { SetSize = new Vector2(260, 300), HorizontalAlignment = HAlignment.Center, VerticalExpand = true };
         _ghost = new EntityPrototypeView
         {
-            Scale = new Vector2(5, 5),
+            Scale = new Vector2(6, 6),
             HorizontalAlignment = HAlignment.Center,
             VerticalAlignment = VAlignment.Bottom,
             Margin = new Thickness(0, 0, 0, 24),
@@ -200,14 +327,13 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
             _ghost.Modulate = color;
             SaveChoice(ST14CVars.PerkGhostColor, color.ToHex());
         }));
-
-        colours.AddChild(Text("st14-support-colours-text", 1100));
+        ghostPage.AddChild(Text("st14-support-colours-text", 1150));
 
         // what was picked before
-        if (Color.TryFromHex(_cfg.GetCVar(ST14CVars.PerkOocColor), out var ooc))
+        if (Color.TryFromHex(_cfg.GetCVar(ST14CVars.PerkOocColor), out var oocColor))
         {
-            _oocPreview.FontColorOverride = ooc;
-            MarkSwatch(_oocSwatches, ooc);
+            _oocPreview.FontColorOverride = oocColor;
+            MarkSwatch(_oocSwatches, oocColor);
         }
         else
         {
@@ -220,10 +346,56 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
             MarkSwatch(_ghostSwatches, ghostColor);
         }
 
-        AddPage(tabs, showcase, "st14-support-tab-colours", colours);
+        BuildNaming(main);
+        BuildFigurine(main);
 
+        // cosmetics are not made yet: a stamp says so
+        var cosmetics = Page("cosmetics", main);
+        cosmetics.AddChild(Lock(3, "st14-support-perk-cosmetics"));
+        cosmetics.AddChild(new Control { VerticalExpand = true });
+        cosmetics.AddChild(new ST14StampControl(ResCache, Loc.GetString("st14-support-soon"))
+        {
+            SetSize = new Vector2(520, 120),
+            HorizontalAlignment = HAlignment.Center,
+        });
+        var soon = Text("st14-support-cosmetics-text", 900);
+        soon.HorizontalAlignment = HAlignment.Center;
+        cosmetics.AddChild(soon);
+        cosmetics.AddChild(new Control { VerticalExpand = true });
+
+        // the round end mention (tier 4): how the closing report thanks the supporter
+        var mention = Page("mention", main);
+        mention.AddChild(Lock(4, "st14-support-perk-mention"));
+        mention.AddChild(new Control { VerticalExpand = true });
+        var report = new PanelContainer
+        {
+            PanelOverride = ST14HubStyle.Flat(Color.FromHex("#0A0A08F2"), ST14SupporterStatus.TierColors[4].WithAlpha(0.6f), 2),
+            HorizontalAlignment = HAlignment.Center,
+            MinWidth = 760,
+        };
+        var reportLines = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 10, Margin = new Thickness(24, 18) };
+        report.AddChild(reportLines);
+        var reportTitle = ST14HubStyle.Label(ResCache, Loc.GetString("st14-support-mention-title").ToUpperInvariant(), ST14HubFont.Bold, 22,
+            ST14HubStyle.GoldLight);
+        reportTitle.Align = Label.AlignMode.Center;
+        reportLines.AddChild(reportTitle);
+        var reportThanks = ST14HubStyle.Label(ResCache, Loc.GetString("st14-support-mention-thanks"), ST14HubFont.Regular, 17, ST14LobbyStyle.Text);
+        reportThanks.Align = Label.AlignMode.Center;
+        reportLines.AddChild(reportThanks);
+        _mentionName = ST14HubStyle.Label(ResCache, string.Empty, ST14HubFont.Black, 26, ST14SupporterStatus.TierColors[4], shadow: true);
+        _mentionName.Align = Label.AlignMode.Center;
+        reportLines.AddChild(_mentionName);
+        mention.AddChild(report);
+        var mentionText = Text("st14-support-mention-text", 900);
+        mentionText.HorizontalAlignment = HAlignment.Center;
+        mention.AddChild(mentionText);
+        mention.AddChild(new Control { VerticalExpand = true });
+    }
+
+    private void BuildNaming(BoxContainer main)
+    {
         // naming an item: the trooper guns, the engineer tool pistol is not a weapon to name
-        var naming = Page();
+        var naming = Page("naming", main);
         naming.AddChild(Lock(2, "st14-support-perk-naming"));
         _weapons = _protoMan.EnumeratePrototypes<EntityPrototype>()
             .Where(p => !p.Abstract && p.ID.StartsWith("ST14Weapon") && !p.ID.Contains("Engineer") && p.Components.ContainsKey("Gun"))
@@ -252,7 +424,7 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
         // display case: the gun on a lit stand and a brass plate with its new name
         var caseCard = Card();
         weaponRow.AddChild(caseCard.Root);
-        var display = new ST14Pedestal(ResCache) { SetHeight = 250, HorizontalExpand = true };
+        var display = new ST14Pedestal(ResCache) { SetHeight = 260, HorizontalExpand = true };
         _weaponView = new EntityPrototypeView
         {
             Scale = new Vector2(8, 8),
@@ -299,10 +471,12 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
         input.Text = _nickname;
         if (_weapons.Count > 0)
             list[_weapon].Selected = true;
-        AddPage(tabs, showcase, "st14-support-tab-naming", naming);
+    }
 
+    private void BuildFigurine(BoxContainer main)
+    {
         // figurine of the selected character on a wooden stand
-        var figurine = Page();
+        var figurine = Page("figurine", main);
         figurine.AddChild(Lock(3, "st14-support-perk-figurine"));
         var figureRow = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 14, VerticalExpand = true };
         var standCard = Card();
@@ -324,180 +498,26 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
         var aboutCard = Card();
         aboutCard.Body.AddChild(new Control { VerticalExpand = true });
         aboutCard.Body.AddChild(SectionTitle("st14-support-figurine-title"));
-        aboutCard.Body.AddChild(Text("st14-support-figurine-text", 660));
-        aboutCard.Body.AddChild(Text("st14-support-figurine-note", 660));
+        aboutCard.Body.AddChild(Text("st14-support-figurine-text", 700));
+        aboutCard.Body.AddChild(Text("st14-support-figurine-note", 700));
         aboutCard.Body.AddChild(new Control { VerticalExpand = true });
         figureRow.AddChild(aboutCard.Root);
         figurine.AddChild(figureRow);
-        AddPage(tabs, showcase, "st14-support-tab-figurine", figurine);
-
-        // cosmetics are not made yet: a stamp says so
-        var cosmetics = Page();
-        cosmetics.AddChild(Lock(3, "st14-support-perk-cosmetics"));
-        cosmetics.AddChild(new Control { VerticalExpand = true });
-        cosmetics.AddChild(new ST14StampControl(ResCache, Loc.GetString("st14-support-soon"))
-        {
-            SetSize = new Vector2(520, 120),
-            HorizontalAlignment = HAlignment.Center,
-        });
-        var soon = Text("st14-support-cosmetics-text", 760);
-        soon.HorizontalAlignment = HAlignment.Center;
-        cosmetics.AddChild(soon);
-        cosmetics.AddChild(new Control { VerticalExpand = true });
-        AddPage(tabs, showcase, "st14-support-tab-cosmetics", cosmetics);
-
-        AddBottomBar();
-
-        SelectWeapon(_weapon);
-        SelectPage(0);
-        UpdateStatus();
-        ST14SupporterStatus.Changed += UpdateStatus;
     }
 
-    protected override void Dispose(bool disposing)
+    private BoxContainer Page(string key, BoxContainer parent)
     {
-        base.Dispose(disposing);
-        ST14SupporterStatus.Changed -= UpdateStatus;
-    }
-
-    protected override void VisibilityChanged(bool newVisible)
-    {
-        base.VisibilityChanged(newVisible);
-
-        // the figurine is the character the player has selected right now, in the clothes they gave it
-        if (newVisible)
-            LoadFigure();
-    }
-
-    #region Building
-
-    private void BuildHeader()
-    {
-        // dark strip with a gold line under it, the title and a short line of what this screen is about
-        Canvas.Add(new TextureRect
+        var page = new BoxContainer
         {
-            Texture = ST14HubStyle.Tex(ResCache, "mask_bottom.png"),
-            Stretch = TextureRect.StretchMode.Scale,
-            ModulateSelfOverride = Color.Black.WithAlpha(0.85f),
-        }, Vector2.Zero, new Vector2(1, 0), Vector2.Zero, new Vector2(0, 170), new Vector2(0.5f, 0));
-
-        Canvas.Add(new TextureRect
-        {
-            Texture = ST14HubStyle.Tex(ResCache, "objectivebanner.png"),
-            Stretch = TextureRect.StretchMode.Scale,
-            ModulateSelfOverride = ST14HubStyle.Gold.WithAlpha(0.8f),
-        }, Vector2.Zero, new Vector2(1, 0), new Vector2(0, 128), new Vector2(0, 4), new Vector2(0.5f, 0));
-
-        var title = ST14HubStyle.Label(ResCache, Loc.GetString("st14-support-title").ToUpperInvariant(), ST14HubFont.Black, 36,
-            ST14HubStyle.GoldLight, shadow: true);
-        title.Align = Label.AlignMode.Center;
-        Canvas.AddAt(title, new Vector2(0.5f, 0), new Vector2(0, 52), new Vector2(1400, 60));
-
-        var subtitle = ST14HubStyle.Label(ResCache, Loc.GetString("st14-support-subtitle"), ST14HubFont.Regular, 17, ST14LobbyStyle.Text);
-        subtitle.Align = Label.AlignMode.Center;
-        Canvas.AddAt(subtitle, new Vector2(0.5f, 0), new Vector2(0, 100), new Vector2(1400, 30));
-    }
-
-    private BoxContainer BuildTiers()
-    {
-        var grid = new GridContainer { Columns = 2, HSeparationOverride = 12, VSeparationOverride = 12 };
-        for (var i = 0; i < Tiers.Length; i++)
-        {
-            var card = new TierCard(this, i + 1);
-            grid.AddChild(card.Root);
-            _tierCards.Add(card);
-        }
-
-        var page = Page();
-        page.AddChild(grid);
-        page.AddChild(Text("st14-support-tiers-hint", 1100));
+            Orientation = BoxContainer.LayoutOrientation.Vertical,
+            VerticalExpand = true,
+            SeparationOverride = 10,
+            Margin = new Thickness(4, 6, 4, 4),
+            Visible = false,
+        };
+        parent.AddChild(page);
+        _pages[key] = page;
         return page;
-    }
-
-    /// <summary>
-    /// One sponsorship: an accent strip, medal, name and price, a chip for the tiers it includes and the perks
-    /// </summary>
-    private sealed class TierCard
-    {
-        public readonly ContainerButton Root;
-        public readonly int Tier;
-        private readonly Label _badge;
-        private readonly RichTextLabel _perks;
-        private readonly ST14SupportScreen _screen;
-
-        public TierCard(ST14SupportScreen screen, int tier)
-        {
-            _screen = screen;
-            Tier = tier;
-            var cache = screen.ResCache;
-            var accent = ST14SupporterStatus.TierColors[tier];
-            var (price, _) = Tiers[tier - 1];
-
-            Root = new ContainerButton { HorizontalExpand = true, MinHeight = 218 };
-            Root.OnPressed += _ => screen.SelectPage(TierPages[tier - 1]);
-
-            var column = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 6 };
-            Root.AddChild(column);
-            column.AddChild(new PanelContainer { PanelOverride = ST14HubStyle.Flat(accent), MinHeight = 4 });
-
-            var head = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 10, Margin = new Thickness(10, 4, 10, 0) };
-            head.AddChild(new ST14TierMedal(cache) { Tier = tier, SetSize = new Vector2(54, 54) });
-            var names = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, HorizontalExpand = true };
-            names.AddChild(ST14HubStyle.Label(cache, $"SPONSORSHIP {ST14SupporterStatus.Numerals[tier]}", ST14HubFont.SemiBold, 19, accent));
-            names.AddChild(ST14HubStyle.Label(cache, Loc.GetString("st14-support-tier-price", ("price", price)), ST14HubFont.Medium, 17, Color.White));
-            head.AddChild(names);
-            _badge = ST14HubStyle.Label(cache, string.Empty, ST14HubFont.Medium, 13, ST14HubStyle.Gold);
-            _badge.VerticalAlignment = Control.VAlignment.Top;
-            head.AddChild(_badge);
-            column.AddChild(head);
-
-            if (tier > 1)
-            {
-                var chip = new PanelContainer
-                {
-                    PanelOverride = ST14HubStyle.Flat(accent.WithAlpha(0.12f), accent.WithAlpha(0.5f), 1),
-                    HorizontalAlignment = Control.HAlignment.Left,
-                    Margin = new Thickness(10, 0),
-                };
-                var chipText = ST14HubStyle.Label(cache, Loc.GetString("st14-support-tier-includes", ("tier", ST14SupporterStatus.Numerals[tier - 1])),
-                    ST14HubFont.Regular, 13, accent);
-                chipText.Margin = new Thickness(8, 1);
-                chip.AddChild(chipText);
-                column.AddChild(chip);
-            }
-
-            _perks = new RichTextLabel { MaxWidth = 540, Margin = new Thickness(10, 0, 10, 8) };
-            column.AddChild(_perks);
-        }
-
-        public void Update(int current)
-        {
-            var accent = ST14SupporterStatus.TierColors[Tier];
-            var open = Tier <= current;
-            var here = Tier == current;
-
-            var box = ST14HubStyle.Flat(Color.FromHex("#100F0C").WithAlpha(open ? 0.92f : 0.75f),
-                here ? ST14HubStyle.GoldLight : accent.WithAlpha(open ? 0.7f : 0.3f), here ? 3 : 1);
-            Root.StyleBoxOverride = box;
-            Root.ModulateSelfOverride = Color.White;
-
-            _badge.Text = Loc.GetString(here ? "st14-support-tier-current" : Tier == 4 ? "st14-support-tier-max" : open
-                ? "st14-support-tier-included"
-                : "st14-support-tier-locked").ToUpperInvariant();
-            _badge.FontColorOverride = here ? ST14HubStyle.GoldLight : open ? Color.FromHex("#9CE07C") : Color.FromHex("#8A8478");
-
-            var (_, count) = Tiers[Tier - 1];
-            var mark = open ? "[color=#9CE07C]✓[/color]" : "[color=#6E6A60]•[/color]";
-            var textColor = open ? "#E6DCC0" : "#A8A090";
-            var lines = Enumerable.Range(1, count)
-                .Select(p => $"{mark} [color={textColor}]{Loc.GetString($"st14-support-tier-{Tier}-perk-{p}")}[/color]");
-            _perks.SetMessage(FormattedMessage.FromMarkupOrThrow(string.Join("\n", lines)));
-        }
-    }
-
-    private static BoxContainer Page()
-    {
-        return new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, VerticalExpand = true, SeparationOverride = 10 };
     }
 
     private Label SectionTitle(string loc)
@@ -518,7 +538,7 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
     }
 
     /// <summary>
-    /// Framed card of a tab: dark glass with a thin gold edge, content in <see cref="CardParts.Body"/>
+    /// Framed card of a page: dark glass with a thin gold edge, content in <see cref="CardParts.Body"/>
     /// </summary>
     private static CardParts Card()
     {
@@ -534,7 +554,7 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
 
     private Label ChatLine(string text, Color color)
     {
-        var line = ST14HubStyle.Label(ResCache, text, ST14HubFont.Regular, 16, color);
+        var line = ST14HubStyle.Label(ResCache, text, ST14HubFont.Regular, 17, color);
         line.ClipText = true;
         return line;
     }
@@ -547,7 +567,7 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
         var grid = new GridContainer { Columns = 4, HSeparationOverride = 8, VSeparationOverride = 8, HorizontalAlignment = HAlignment.Center };
         foreach (var color in Swatches)
         {
-            var swatch = new Button { MinSize = new Vector2(64, 40), ModulateSelfOverride = Color.White };
+            var swatch = new Button { MinSize = new Vector2(72, 42), ModulateSelfOverride = Color.White };
             swatch.OnPressed += _ =>
             {
                 MarkSwatch(swatches, color);
@@ -582,27 +602,65 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
         return text;
     }
 
-    private void AddPage(BoxContainer tabs, ST14LobbyFrame frame, string loc, Control page)
-    {
-        var index = _pages.Count;
-        var tab = new Button { Text = Loc.GetString(loc), HorizontalExpand = true, MinHeight = 38 };
-        tab.OnPressed += _ => SelectPage(index);
-        tabs.AddChild(tab);
-
-        page.Margin = new Thickness(4, 10, 4, 4);
-        frame.Body.AddChild(page);
-        _pages.Add((tab, page));
-    }
-
     #endregion
 
-    private void SelectPage(int index)
+    /// <summary>
+    /// Back to the four cards
+    /// </summary>
+    private void ShowCards()
     {
-        for (var i = 0; i < _pages.Count; i++)
+        _openTier = 0;
+        _perks.Visible = false;
+        foreach (var part in _rowParts)
         {
-            var (tab, page) = _pages[i];
-            var selected = i == index;
-            page.Visible = selected;
+            part.Visible = true;
+        }
+    }
+
+    /// <summary>
+    /// Opens the perks of a tier in place of the cards
+    /// </summary>
+    public void OpenTier(int tier)
+    {
+        _openTier = Math.Clamp(tier, 1, 4);
+        foreach (var part in _rowParts)
+        {
+            part.Visible = false;
+        }
+
+        var accent = ST14SupporterStatus.TierColors[_openTier];
+        var name = $"SPONSORSHIP {ST14SupporterStatus.Numerals[_openTier]}";
+        _perks.Title.Text = Loc.GetString("st14-support-perks-of", ("tier", name)).ToUpperInvariant();
+        _perks.Title.FontColorOverride = accent;
+        _perkInsignia.Tier = _openTier;
+        _perkPrice.Text = Loc.GetString("st14-support-tier-price", ("price", Tiers[_openTier - 1].Price));
+
+        _perkTabs.RemoveAllChildren();
+        var pages = TierPages[_openTier - 1];
+        foreach (var key in pages)
+        {
+            var tab = new Button { Text = Loc.GetString($"st14-support-tab-{key}"), HorizontalExpand = true, MinHeight = 40 };
+            var page = key;
+            tab.OnPressed += _ => SelectPage(page);
+            _perkTabs.AddChild(tab);
+        }
+
+        _perks.Visible = true;
+        UpdatePerkSide();
+        SelectPage(pages[0]);
+    }
+
+    private void SelectPage(string key)
+    {
+        foreach (var (pageKey, page) in _pages)
+        {
+            page.Visible = pageKey == key;
+        }
+
+        var name = Loc.GetString($"st14-support-tab-{key}");
+        foreach (var tab in _perkTabs.Children.OfType<Button>())
+        {
+            var selected = tab.Text == name;
             tab.ModulateSelfOverride = Color.White;
             tab.StyleBoxOverride = ST14LobbyStyle.Tab(ResCache, selected);
             tab.Label.FontColorOverride = selected ? Color.Black : ST14HubStyle.Gold;
@@ -648,15 +706,30 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
 
     private void LoadFigure()
     {
+        var name = _player.LocalSession?.Name ?? string.Empty;
         if (_prefs.ServerDataLoaded && _prefs.Preferences?.SelectedCharacter is HumanoidCharacterProfile profile)
         {
             _figure.LoadPreview(profile);
-            _stand.Plate = string.IsNullOrWhiteSpace(profile.Name) ? _player.LocalSession?.Name ?? string.Empty : profile.Name;
+            if (!string.IsNullOrWhiteSpace(profile.Name))
+                name = profile.Name;
         }
-        else
-        {
-            _stand.Plate = _player.LocalSession?.Name ?? string.Empty;
-        }
+
+        _stand.Plate = name;
+        _mentionName.Text = (_player.LocalSession?.Name ?? name).ToUpperInvariant();
+    }
+
+    private void UpdatePerkSide()
+    {
+        if (_openTier == 0)
+            return;
+
+        var tier = ST14SupporterStatus.Tier;
+        var open = _openTier <= tier;
+        _perkState.Text = Loc.GetString(_openTier == tier ? "st14-support-tier-current" : open
+            ? "st14-support-tier-included"
+            : "st14-support-tier-locked").ToUpperInvariant();
+        _perkState.FontColorOverride = _openTier == tier ? ST14HubStyle.GoldLight : open ? Color.FromHex("#9CE07C") : Color.FromHex("#8A8478");
+        _perkList.SetMessage(FormattedMessage.FromMarkupOrThrow(ST14SponsorCard.PerkMarkup(_openTier, Tiers[_openTier - 1].Perks, open)));
     }
 
     private void UpdateStatus()
@@ -665,20 +738,8 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
         _medal.Tier = tier;
         _status.Text = (tier > 0 ? $"SPONSORSHIP {ST14SupporterStatus.Numerals[tier]}" : Loc.GetString("st14-support-status-none")).ToUpperInvariant();
         _status.FontColorOverride = tier > 0 ? ST14SupporterStatus.TierColors[tier] : Color.FromHex("#B8B0A0");
-        _statusText.SetMessage(FormattedMessage.FromMarkupOrThrow(Loc.GetString(tier > 0
-            ? "st14-support-status-active-text"
-            : "st14-support-status-none-text")));
 
-        for (var i = 0; i < _steps.Count; i++)
-        {
-            var stepTier = i + 1;
-            var reached = stepTier <= tier;
-            var accent = ST14SupporterStatus.TierColors[stepTier];
-            _steps[i].PanelOverride = ST14HubStyle.Flat(reached ? accent.WithAlpha(0.85f) : Color.FromHex("#1A1814"), accent.WithAlpha(reached ? 1f : 0.45f), 1);
-            _steps[i].Children.OfType<Label>().First().FontColorOverride = reached ? Color.Black : accent.WithAlpha(0.8f);
-        }
-
-        foreach (var card in _tierCards)
+        foreach (var card in _cards)
         {
             card.Update(tier);
         }
@@ -690,6 +751,265 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
                 ("perk", Loc.GetString(perk)), ("tier", ST14SupporterStatus.Numerals[lockTier])).ToUpperInvariant();
             label.FontColorOverride = open ? Color.FromHex("#9CE07C") : ST14SupporterStatus.TierColors[lockTier];
         }
+
+        UpdatePerkSide();
+    }
+}
+
+/// <summary>
+/// Tall service card of one sponsorship, drawn like the mode cards of the original: a thin frame, the rank insignia on a
+/// lit field, a slanted banner with the tier name, then the price and the perks. The player's own tier carries a stamp
+/// </summary>
+public sealed class ST14SponsorCard : ContainerButton
+{
+    private readonly IResourceCache _cache;
+    private readonly StyleBoxTexture _frame;
+    private readonly Texture _glow;
+    private readonly RichTextLabel _perks;
+    private readonly Label _badge;
+    private readonly int _perkCount;
+
+    public readonly int Tier;
+    private int _current;
+
+    public ST14SponsorCard(IResourceCache cache, int tier, string price, int perkCount)
+    {
+        _cache = cache;
+        Tier = tier;
+        _perkCount = perkCount;
+        MuteSounds = true;
+        StyleBoxOverride = new StyleBoxEmpty();
+        DefaultCursorShape = CursorShape.Hand;
+
+        _frame = new StyleBoxTexture
+        {
+            Texture = ST14HubStyle.WarTex(cache, "card_frame.png"),
+            TextureScale = new Vector2(0.5f, 0.5f),
+        };
+        _frame.SetPatchMargin(StyleBox.Margin.All, 8);
+        _glow = cache.GetResource<TextureResource>("/Textures/_ST14/Interface/Lobby/soft_glow.png").Texture;
+
+        var accent = ST14SupporterStatus.TierColors[tier];
+        var column = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 4, Margin = new Thickness(16, 10, 16, 40) };
+        AddChild(column);
+
+        _badge = ST14HubStyle.Label(cache, string.Empty, ST14HubFont.SemiBold, 13, ST14HubStyle.Gold, shadow: true);
+        _badge.Align = Label.AlignMode.Right;
+        column.AddChild(_badge);
+
+        column.AddChild(new ST14SponsorInsignia(cache) { Tier = tier, Banner = true, SetHeight = 270, MouseFilter = MouseFilterMode.Ignore });
+
+        var priceLabel = ST14HubStyle.Label(cache, $"{price} ₽", ST14HubFont.Black, 34, Color.White, shadow: true);
+        priceLabel.Align = Label.AlignMode.Center;
+        column.AddChild(priceLabel);
+        var month = ST14HubStyle.Label(cache, Loc.GetString("st14-support-tier-month"), ST14HubFont.Regular, 14, ST14LobbyStyle.Text);
+        month.Align = Label.AlignMode.Center;
+        column.AddChild(month);
+
+        var line = new PanelContainer { PanelOverride = ST14HubStyle.Flat(accent.WithAlpha(0.5f)), MinHeight = 1, Margin = new Thickness(20, 6, 20, 4) };
+        column.AddChild(line);
+
+        if (tier > 1)
+        {
+            var includes = ST14HubStyle.Label(cache, Loc.GetString("st14-support-tier-includes", ("tier", ST14SupporterStatus.Numerals[tier - 1])),
+                ST14HubFont.Medium, 13, accent);
+            includes.Align = Label.AlignMode.Center;
+            column.AddChild(includes);
+        }
+
+        _perks = new RichTextLabel { MaxWidth = 345, Margin = new Thickness(2, 2, 2, 0), MouseFilter = MouseFilterMode.Ignore };
+        column.AddChild(_perks);
+
+        OnPressed += _ => Sounds.Play(ST14HubSound.Click);
+        Update(0);
+    }
+
+    private ST14HubSoundController Sounds => UserInterfaceManager.GetUIController<ST14HubSoundController>();
+
+    /// <summary>
+    /// Perk lines of a tier: a green tick when the tier is open, a dim dot when not
+    /// </summary>
+    public static string PerkMarkup(int tier, int count, bool open)
+    {
+        var mark = open ? "[color=#9CE07C]✓[/color]" : "[color=#8A8478]▸[/color]";
+        var textColor = open ? "#E6DCC0" : "#B8B0A0";
+        var lines = Enumerable.Range(1, count)
+            .Select(p => $"{mark} [color={textColor}]{Loc.GetString($"st14-support-tier-{tier}-perk-{p}")}[/color]");
+        return string.Join("\n", lines);
+    }
+
+    public void Update(int current)
+    {
+        _current = current;
+        var open = Tier <= current;
+        _badge.Text = Loc.GetString(Tier == current ? "st14-support-tier-current" : open
+            ? "st14-support-tier-included"
+            : Tier == 4 ? "st14-support-tier-max" : "st14-support-tier-locked").ToUpperInvariant();
+        _badge.FontColorOverride = Tier == current ? ST14HubStyle.GoldLight : open ? Color.FromHex("#9CE07C") : Color.FromHex("#8A8478");
+        _perks.SetMessage(FormattedMessage.FromMarkupOrThrow(PerkMarkup(Tier, _perkCount, open)));
+    }
+
+    protected override void MouseEntered()
+    {
+        base.MouseEntered();
+        Sounds.Play(ST14HubSound.Hover);
+    }
+
+    protected override void Draw(DrawingHandleScreen handle)
+    {
+        var size = PixelSize;
+        var scale = size.Y / 600f;
+        var hover = DrawMode is DrawModeEnum.Hover or DrawModeEnum.Pressed;
+        var accent = ST14SupporterStatus.TierColors[Tier];
+        var inner = new UIBox2(5 * scale, 5 * scale, size.X - 5 * scale, size.Y - 5 * scale);
+
+        // dark field, lit from above in the tier colour, brighter under the mouse
+        handle.DrawRect(inner, Color.FromHex("#0C0B09").WithAlpha(0.94f));
+        handle.DrawTextureRect(_glow, new UIBox2(inner.Left - inner.Width * 0.3f, inner.Top - inner.Height * 0.25f,
+            inner.Right + inner.Width * 0.3f, inner.Top + inner.Height * 0.7f), accent.WithAlpha(hover ? 0.32f : 0.2f));
+
+        // thin scan lines like the screens of the original
+        for (var y = inner.Top; y < inner.Bottom; y += 4 * scale)
+        {
+            handle.DrawRect(new UIBox2(inner.Left, y, inner.Right, y + MathF.Max(1, scale)), Color.Black.WithAlpha(0.18f));
+        }
+
+        var own = Tier == _current;
+        _frame.Modulate = hover ? ST14HubStyle.GoldLight : own ? accent : Color.White;
+        _frame.Draw(handle, UIBox2.FromDimensions(Vector2.Zero, size), scale);
+
+        // the accent strip along the top edge
+        handle.DrawRect(new UIBox2(inner.Left, inner.Top, inner.Right, inner.Top + 4 * scale), accent);
+
+        base.Draw(handle);
+
+        if (own)
+        {
+            ST14ClassifiedStamp.DrawStamp(handle, _cache, Loc.GetString("st14-support-tier-current"), new Vector2(size.X / 2, size.Y * 0.36f),
+                new Vector2(300, 52) * scale, -8f, scale);
+        }
+    }
+}
+
+/// <summary>
+/// Rank insignia of a sponsorship: one to three chevrons in the tier colour, a star over them for the top tier,
+/// on a soft glow, and optionally the slanted banner with the tier name under it
+/// </summary>
+public sealed class ST14SponsorInsignia : Control
+{
+    private readonly IResourceCache _cache;
+    private readonly Texture _glow;
+    private float _time;
+
+    public int Tier = 1;
+    public bool Banner;
+
+    public ST14SponsorInsignia(IResourceCache cache)
+    {
+        _cache = cache;
+        _glow = cache.GetResource<TextureResource>("/Textures/_ST14/Interface/Lobby/soft_glow.png").Texture;
+    }
+
+    protected override void FrameUpdate(FrameEventArgs args)
+    {
+        base.FrameUpdate(args);
+        _time += args.DeltaSeconds;
+    }
+
+    protected override void Draw(DrawingHandleScreen handle)
+    {
+        base.Draw(handle);
+
+        var size = PixelSize;
+        var tier = Math.Clamp(Tier, 1, 4);
+        var accent = ST14SupporterStatus.TierColors[tier];
+        var unit = size.Y / 270f;
+        var center = new Vector2(size.X / 2, (Banner ? 105 : 135) * unit);
+        var pulse = 0.85f + 0.15f * MathF.Sin(_time * MathF.Tau / 3f);
+
+        var glow = 230 * unit;
+        handle.DrawTextureRect(_glow, UIBox2.FromDimensions(center - new Vector2(glow, glow) / 2, new Vector2(glow, glow)),
+            accent.WithAlpha(0.3f * pulse));
+
+        // chevrons stacked upwards, the top tier has three and a star
+        var chevrons = Math.Min(tier, 3);
+        var width = 150 * unit;
+        var height = 52 * unit;
+        var thick = 19 * unit;
+        var step = 30 * unit;
+        var top = center.Y - (chevrons - 1) * step / 2 + (tier == 4 ? 22 * unit : 0);
+        for (var i = 0; i < chevrons; i++)
+        {
+            var c = new Vector2(center.X, top + i * step);
+            Chevron(handle, c + new Vector2(0, 3 * unit), width, height, thick, Color.Black.WithAlpha(0.6f));
+            Chevron(handle, c, width, height, thick, accent);
+        }
+
+        if (tier == 4)
+        {
+            var starCenter = new Vector2(center.X, top - 52 * unit);
+            Star(handle, starCenter + new Vector2(0, 3 * unit), 30 * unit, Color.Black.WithAlpha(0.6f));
+            Star(handle, starCenter, 30 * unit, accent);
+        }
+
+        if (!Banner)
+            return;
+
+        // slanted banner across the card like the banners baked into the mode cards
+        var bannerCenter = new Vector2(size.X / 2, 228 * unit);
+        var baseTransform = handle.GetTransform();
+        handle.SetTransform(Matrix3x2.CreateRotation(-MathF.PI * 6.56f / 180f) * Matrix3x2.CreateTranslation(bannerCenter) * baseTransform);
+        var half = new Vector2(MathF.Min(size.X * 0.54f, 220 * unit), 26 * unit);
+        handle.DrawRect(new UIBox2(-half.X, -half.Y + 4 * unit, half.X, half.Y + 4 * unit), Color.Black.WithAlpha(0.45f));
+        handle.DrawRect(new UIBox2(-half.X, -half.Y, half.X, half.Y), accent.WithAlpha(0.92f));
+        handle.DrawRect(new UIBox2(-half.X, -half.Y, half.X, -half.Y + 2 * unit), Color.White.WithAlpha(0.35f));
+        handle.SetTransform(baseTransform);
+
+        var font = ST14HubStyle.Font(_cache, ST14HubFont.Black, Math.Max(8, (int) MathF.Round(26 * unit)));
+        ST14HubStyle.DrawRotatedText(handle, font, $"SPONSORSHIP {ST14SupporterStatus.Numerals[tier]}", bannerCenter, -6.56f,
+            Color.FromHex("#14110C"));
+    }
+
+    private static void Chevron(DrawingHandleScreen handle, Vector2 c, float width, float height, float thick, Color color)
+    {
+        var apex = new Vector2(c.X, c.Y - height / 2);
+        var apexIn = apex + new Vector2(0, thick);
+        var left = new Vector2(c.X - width / 2, c.Y + height / 2);
+        var leftIn = left + new Vector2(0, thick);
+        var right = new Vector2(c.X + width / 2, c.Y + height / 2);
+        var rightIn = right + new Vector2(0, thick);
+
+        var verts = new Vector2[12];
+        verts[0] = left;
+        verts[1] = apex;
+        verts[2] = apexIn;
+        verts[3] = left;
+        verts[4] = apexIn;
+        verts[5] = leftIn;
+        verts[6] = apex;
+        verts[7] = right;
+        verts[8] = rightIn;
+        verts[9] = apex;
+        verts[10] = rightIn;
+        verts[11] = apexIn;
+        handle.DrawPrimitives(DrawPrimitiveTopology.TriangleList, verts, color);
+    }
+
+    private static void Star(DrawingHandleScreen handle, Vector2 c, float radius, Color color)
+    {
+        var verts = new Vector2[30];
+        for (var i = 0; i < 10; i++)
+        {
+            var a0 = -MathF.PI / 2 + i * MathF.PI / 5;
+            var a1 = -MathF.PI / 2 + (i + 1) * MathF.PI / 5;
+            var r0 = i % 2 == 0 ? radius : radius * 0.42f;
+            var r1 = i % 2 == 0 ? radius * 0.42f : radius;
+            verts[i * 3] = c;
+            verts[i * 3 + 1] = c + new Vector2(MathF.Cos(a0), MathF.Sin(a0)) * r0;
+            verts[i * 3 + 2] = c + new Vector2(MathF.Cos(a1), MathF.Sin(a1)) * r1;
+        }
+
+        handle.DrawPrimitives(DrawPrimitiveTopology.TriangleList, verts, color);
     }
 }
 

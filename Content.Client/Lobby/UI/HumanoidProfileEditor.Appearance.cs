@@ -211,6 +211,7 @@ public sealed partial class HumanoidProfileEditor
     private void SetSpecies(string newSpecies)
     {
         Profile = Profile?.WithSpecies(newSpecies);
+        ST14OnSpeciesChanged(); // ST14: the other side's jobs go, the form shows what fits a trooper or a bug
         OnSkinColorOnValueChanged(); // Species may have special color prefs, make sure to update it.
         _markingsModel.OrganData = _markingManager.GetMarkingData(newSpecies);
         _markingsModel.ValidateMarkings();

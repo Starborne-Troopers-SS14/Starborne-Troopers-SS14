@@ -177,6 +177,10 @@ public sealed class ST14CharacterScreen : Control
         nameEdit.HorizontalExpand = true;
         nameEdit.Margin = new Thickness(0);
 
+        // bugs pick a hive prefix and a number instead of typing a name
+        var bugName = editor.ST14BugNameRow;
+        Move(bugName, _previewColumn);
+
         var warning = editor.FindControl<RichTextLabel>("WarningLabel");
         Move(warning, _previewColumn);
         warning.MaxWidth = float.PositiveInfinity;

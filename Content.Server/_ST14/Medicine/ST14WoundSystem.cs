@@ -605,6 +605,7 @@ public sealed partial class ST14WoundSystem : EntitySystem
             Bleed(ent, blood, drugs);
             Infection(ent, drugs);
             Bones(ent, drugs);
+            SyncDamage(ent, drugs);
             Tourniquets(ent);
             Pain(ent);
             Heart(ent, now, drugs);

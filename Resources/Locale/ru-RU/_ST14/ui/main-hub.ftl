@@ -103,18 +103,11 @@ st14-hub-button-support = Поддержка
 st14-support-title = Поддержка проекта
 st14-support-status-header = Ваш статус
 st14-support-status-none = Нет подписки
-st14-support-status-none-text = Подписка на Boosty помогает серверу жить и развиваться. Уровни и их привилегии — справа, на каждой вкладке видно, что откроет подписка.
-st14-support-status-active-text = Спасибо за поддержку! Привилегии вашего уровня отмечены справа зелёным.
 st14-support-boosty = Поддержать на Boosty
-st14-support-boosty-note = [color=#9A9488]Откроется страница boosty.to/corvaxcolonialmarines в браузере.[/color]
-st14-support-perks-header = Привилегии подписчиков
-st14-support-tab-tiers = Уровни
-st14-support-tab-colours = Цвета
 st14-support-tab-naming = Имя предмета
 st14-support-tab-figurine = Фигурка
 st14-support-tab-cosmetics = Косметика
 st14-support-tier-price = { $price } ₽ в месяц · + чат в Discord
-st14-support-tier-previous = Всё из предыдущих уровней
 st14-support-tier-current = Ваш уровень
 st14-support-tier-included = Доступно
 st14-support-tier-locked = Закрыто
@@ -155,15 +148,10 @@ st14-sponsor-command-arg-player = [ник]
 st14-weapon-nickname = { $weapon } «{ $nickname }»
 st14-support-nickname-save = Сохранить кличку
 st14-support-subtitle = Служба гарантирует гражданство, а поддержка — привилегии
-st14-support-how-header = Как получить
-st14-support-how-text = 1. Оформите подписку на Boosty кнопкой ниже.
-    2. Сообщите администрации свой ник в игре (привязка аккаунта скоро будет автоматической).
-    3. Привилегии уровня включатся на сервере.
 st14-support-colours-text = Цвета сохраняются сразу и включаются в игре, если позволяет уровень подписки.
 st14-support-figurine-title = Фигурка вашего персонажа
 st14-support-soon = Скоро будет
 st14-support-cosmetics-text = Наборы косметики для Sponsorship III и Sponsorship IV сейчас в разработке и появятся в одном из ближайших обновлений.
-st14-support-tiers-hint = [color=#9A9488]Нажмите на карточку уровня, чтобы посмотреть его привилегии.[/color]
 st14-support-tier-includes = Включает всё из уровня { $tier }
 st14-support-tier-max = Максимум
 st14-support-ooc-other-1 = OOC: Rico: Кто идёт на Клендату?
@@ -171,3 +159,17 @@ st14-support-ooc-other-2 = OOC: Dizzy: Служба гарантирует гр�
 st14-support-pick-colour = Выберите цвет
 st14-support-weapons-header = Оружие
 st14-support-figurine-note = [color=#9A9488]Фигурка обновляется, когда вы меняете персонажа или его одежду в персонализации.[/color]
+st14-support-open-perks = Привилегии
+st14-support-tier-month = в месяц · + чат в Discord
+st14-support-step-1 = Оформите подписку на Boosty
+st14-support-step-2 = Сообщите администрации свой ник в игре
+st14-support-step-3 = Привилегии уровня включатся на сервере
+st14-support-boosty-link = boosty.to/corvaxcolonialmarines
+st14-support-perks-of = Привилегии { $tier }
+st14-support-tab-ooc = Цвет в OOC
+st14-support-tab-ghost = Цвет призрака
+st14-support-tab-mention = Упоминание
+st14-support-perk-mention = Упоминание в конце раунда
+st14-support-mention-title = Раунд окончен
+st14-support-mention-thanks = Федерация благодарит за поддержку проекта:
+st14-support-mention-text = В итогах каждого раунда ваш ник будет среди тех, кто поддерживает Starborne Troopers.

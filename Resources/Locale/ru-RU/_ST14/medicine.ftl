@@ -169,7 +169,7 @@ st14-limbs-command-help = st14_limbs tear | fit <протез> | wound <част
 st14-limbs-command-nothing = Ничего не вышло.
 
 ## Должность
-st14-job-name-medic = Медик Starborne
+st14-job-name-medic = Медик
 st14-job-description-medic = Полевой медик Мобильной пехоты: жгуты, тампоны, наркоз и сердце, которое надо завести.
 st14-job-supervisors-medic = командиру
 st14-department-medical = Медицинская служба
