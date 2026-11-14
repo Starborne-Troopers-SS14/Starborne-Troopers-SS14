@@ -12,6 +12,7 @@ using Content.Shared.Chat;
 using Content.Shared.Chemistry.Components;
 using Content.Shared.Chemistry.EntitySystems;
 using Content.Shared.Damage;
+using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Prototypes;
 using Content.Shared.Damage.Systems;
 using Content.Shared.Examine;
@@ -161,6 +162,11 @@ public sealed partial class ST14WoundSystem : EntitySystem
         RemCompDeferred<TemperatureSpeedComponent>(ent);
         RemCompDeferred<ThermalRegulatorComponent>(ent);
         _alerts.ClearAlertCategory(ent.Owner, TemperatureSystem.TemperatureAlertCategory);
+
+        // the station medicine is off: no slow mending of all damage by itself and no slowdown by the total of the
+        // damage, the wounds heal and slow the body down on their own
+        RemCompDeferred<PassiveDamageComponent>(ent);
+        RemCompDeferred<SlowOnDamageComponent>(ent);
     }
 
     private void OnDamage(Entity<ST14WoundsComponent> ent, ref DamageDealtEvent args)
@@ -175,6 +181,8 @@ public sealed partial class ST14WoundSystem : EntitySystem
         var total = slash + pierce + blunt + heat;
         if (total <= 0f)
             return;
+
+        _lastHit[ent] = _timing.CurTime;
 
         ent.Comp.PainSpike = MathF.Min(70f, ent.Comp.PainSpike + total * 1.1f);
         var zone = PickZone(ent);
@@ -589,6 +597,7 @@ public sealed partial class ST14WoundSystem : EntitySystem
         if (args.NewMobState == MobState.Dead)
         {
             _nextGrunt.Remove(ent);
+            _lastHit.Remove(ent);
             ent.Comp.Pulse = 0;
             ent.Comp.Bleeding = 0f;
         }
@@ -688,7 +697,6 @@ public sealed partial class ST14WoundSystem : EntitySystem
     {
         var comp = ent.Comp;
         var total = 0f;
-        var healed = _damageable.GetTotalDamage(ent.Owner).Float() < 5f;
         var heal = 1f + drugs.Regeneration;
 
         foreach (var wound in comp.Wounds)
@@ -697,13 +705,6 @@ public sealed partial class ST14WoundSystem : EntitySystem
             {
                 var clot = MathF.Max(0f, 0.003f + drugs.Clotting) * (wound.Bandaged || wound.Packed ? 3f : 1f);
                 wound.Bleed = MathF.Max(0f, wound.Bleed - clot);
-            }
-
-            // a body the medicine healed has its small wounds closing fast
-            if (healed && !wound.Arterial && wound.Kind is ST14WoundKind.Cut or ST14WoundKind.Puncture or ST14WoundKind.Burn)
-            {
-                wound.Bleed *= 0.8f;
-                wound.Severity *= 0.9f;
             }
 
             if (wound.Kind is ST14WoundKind.Cut or ST14WoundKind.Puncture or ST14WoundKind.Burn && wound.Bleed <= 0.001f && wound.Infection < 0.3f)

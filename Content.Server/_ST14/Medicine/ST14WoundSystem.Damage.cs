@@ -23,6 +23,14 @@ public sealed partial class ST14WoundSystem
     // stock damage without a wound behind it that fades every second
     private const float FadePerSecond = 1.5f;
 
+    // a fresh bruise stays this long before it starts to fade
+    private static readonly TimeSpan FadeDelay = TimeSpan.FromSeconds(5);
+
+    /// <summary>
+    /// When a body last took damage: its bruises fade only some seconds after the last hit
+    /// </summary>
+    private readonly Dictionary<EntityUid, TimeSpan> _lastHit = new();
+
     private static readonly string[] WoundDamageTypes = { "Slash", "Piercing", "Blunt", "Heat" };
 
     private void SyncDamage(Entity<ST14WoundsComponent> ent, DrugEffects drugs)
@@ -30,6 +38,14 @@ public sealed partial class ST14WoundSystem
         // a body in critical state is the medic's: it does not crawl out of it on its own
         if (_mobState.IsIncapacitated(ent) || !HasComp<DamageableComponent>(ent))
             return;
+
+        if (_lastHit.TryGetValue(ent, out var hit))
+        {
+            if (_timing.CurTime < hit + FadeDelay)
+                return;
+
+            _lastHit.Remove(ent);
+        }
 
         var damage = _damageable.GetAllDamage(ent.Owner);
 

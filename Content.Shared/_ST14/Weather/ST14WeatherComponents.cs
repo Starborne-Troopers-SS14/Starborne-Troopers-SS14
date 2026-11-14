@@ -59,7 +59,7 @@ public sealed partial class ST14WeatherStrikeComponent : Component
     public int DecalCount;
 
     /// <summary>
-    /// One of these decals is left right where it lands and stays: the crater of a meteor
+    /// One of these decals is left right where it lands and stays: the burn of a lightning bolt
     /// </summary>
     [DataField]
     public List<string> Crater = new();

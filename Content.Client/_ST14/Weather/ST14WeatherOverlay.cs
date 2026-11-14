@@ -297,20 +297,6 @@ public sealed class ST14WeatherOverlay : Overlay
     {
         p.Seed = _random.NextFloat();
         p.Life = 0f;
-        if (v.Meteors)
-        {
-            // falling stars come in from the side the wind blows from, high over the view
-            var box = SpawnBox;
-            p.Pos = RandomIn(box) - _wind * box.Width * 0.5f + new Vector2(0, box.Height * 0.5f);
-            if (anywhere)
-                p.Pos = RandomIn(box);
-
-            var dir = Vector2.Normalize(_wind + new Vector2(0, -0.9f));
-            p.Vel = dir * v.Speed * 3f * (0.7f + 0.6f * p.Seed);
-            p.Splash = _random.NextFloat(0f, 3f);
-            return;
-        }
-
         p.Pos = RandomIn(SpawnBox);
         p.Vel = new Vector2(_random.NextFloat(-0.3f, 0.3f), _random.NextFloat(0.2f, 0.8f));
         p.Splash = 0f;
@@ -319,21 +305,6 @@ public sealed class ST14WeatherOverlay : Overlay
     private void StepEmber(ref Particle p, ST14WeatherVisual v, float dt)
     {
         p.Life += dt;
-        if (v.Meteors)
-        {
-            // a pause between falling stars, then a fast streak across the view
-            if (p.Splash > 0f)
-            {
-                p.Splash -= dt;
-                return;
-            }
-
-            p.Pos += p.Vel * dt;
-            if (!_view.Enlarged(12f).Contains(p.Pos))
-                SpawnEmber(ref p, v, false);
-            return;
-        }
-
         p.Pos += (p.Vel + _wind * 1.2f + new Vector2(MathF.Sin(_time * 3f + p.Seed * 40f) * 0.4f, 0f)) * dt;
         Wrap(ref p.Pos);
     }
@@ -583,19 +554,6 @@ public sealed class ST14WeatherOverlay : Overlay
     {
         // embers glow on their own, the night does not dim them
         var color = v.EmberColor;
-        if (v.Meteors)
-        {
-            if (p.Splash > 0f)
-                return;
-
-            var dir = Vector2.Normalize(p.Vel);
-            var length = 3.5f + 3f * p.Seed;
-            Line(p.Pos - dir * length, p.Pos, v.Width * 2.5f, color.WithAlpha(0f), color.WithAlpha(0.9f));
-            Soft(p.Pos, 0.45f, Color.White.WithAlpha(0.9f));
-            Soft(p.Pos, 1.1f, color.WithAlpha(0.45f));
-            return;
-        }
-
         var flicker = 0.55f + 0.45f * MathF.Sin(p.Life * 9f + p.Seed * 30f);
         Soft(p.Pos, 0.1f + 0.08f * p.Seed, color.WithAlpha(flicker));
         Soft(p.Pos, 0.35f, color.WithAlpha(flicker * 0.25f));

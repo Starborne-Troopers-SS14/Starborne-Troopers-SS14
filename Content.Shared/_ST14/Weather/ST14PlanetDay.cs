@@ -66,10 +66,11 @@ public static class ST14PlanetDay
 
     private static readonly (float Height, Color Color)[] Sky =
     {
-        (-1f, Color.FromHex("#3A4870")),
-        (-0.22f, Color.FromHex("#44527A")),
-        (-0.1f, Color.FromHex("#56507A")),
-        (-0.02f, Color.FromHex("#6A4458")),
+        // deep night is pitch black: only lamps, flares and fires light the ground
+        (-1f, Color.FromHex("#000000")),
+        (-0.22f, Color.FromHex("#000000")),
+        (-0.1f, Color.FromHex("#0C0C18")),
+        (-0.02f, Color.FromHex("#3A2838")),
         (0.04f, Color.FromHex("#D27E52")),
         (0.12f, Color.FromHex("#E8B486")),
         (0.28f, Color.FromHex("#E6D6B8")),

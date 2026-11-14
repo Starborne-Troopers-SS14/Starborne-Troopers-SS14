@@ -1,10 +1,5 @@
 st14-weather-chat = [color=#E8A040][bold]Weather:[/bold][/color] {$message}
 
-st14-weather-earthquake = Earthquake
-st14-weather-earthquake-warning = The ground heaves: earthquake! Watch out for falling rocks!
-st14-weather-earthquake-over = The tremors have died down.
-st14-weather-quake-fall = A tremor knocks you off your feet!
-
 st14-weather-sandstorm = Sandstorm
 st14-weather-sandstorm-warning = A sandstorm is closing in! Visibility drops and the sand cuts the skin.
 st14-weather-sandstorm-over = The storm has passed, the sand settles.
@@ -26,10 +21,6 @@ st14-weather-gale = Gale
 st14-weather-gale-warning = A gale is rising! Keep your footing!
 st14-weather-gale-over = The wind has died down.
 st14-weather-gust-fall = A gust of wind knocks you down!
-
-st14-weather-meteors = Meteor shower
-st14-weather-meteors-warning = Meteor shower! Watch where the lights fall and get away from there!
-st14-weather-meteors-over = The meteors have stopped falling.
 
 st14-weather-heatwave = Heatwave
 st14-weather-heatwave-warning = The star stands at its zenith and the air is scorching: a heatwave begins.

@@ -14,76 +14,6 @@
 
 - type: entity
   parent: ST14WeatherStrikeBase
-  id: ST14WeatherFallingRock
-  name: falling rock
-  components:
-  - type: Sprite
-    state: shadow
-  - type: ST14WeatherStrike
-    delay: 2.2
-    radius: 1.2
-    damage:
-      types:
-        Blunt: 25
-    knockdown: 2
-    impactSound:
-      collection: ST14WeatherRockHit
-      params:
-        volume: 4
-        maxDistance: 30
-    effect: ST14WeatherDust
-    leave: ST14RockFormationShortRocks
-    leaveChance: 0.25
-    decals: [ ST14SmallRock1, ST14SmallRock2, ST14SmallRock3, ST14Cracks1, ST14Cracks2, ST14Cracks3 ]
-    decalCount: 3
-    shakeRange: 9
-
-- type: entity
-  parent: ST14WeatherStrikeBase
-  id: ST14WeatherMeteor
-  name: meteor
-  components:
-  - type: Sprite
-    layers:
-    - state: glow
-      shader: unshaded
-  - type: PointLight
-    radius: 3
-    energy: 2
-    color: '#FF8C40'
-  - type: ST14WeatherStrike
-    delay: 3.5
-    radius: 1.5
-    damage:
-      types:
-        Blunt: 20
-        Heat: 15
-    knockdown: 3
-    fallSound:
-      collection: ST14WeatherMeteorFall
-      params:
-        volume: 2
-        maxDistance: 40
-    impactSound:
-      collection: ST14WeatherMeteorImpact
-      params:
-        volume: 6
-        maxDistance: 50
-    effect: ST14WeatherDust
-    explosion: Default
-    explosionIntensity: 25
-    explosionSlope: 6
-    explosionMaxTile: 5
-    leave: ST14RockFormationShortRocks
-    leaveChance: 0.15
-    decals: [ ST14FlatRock1, ST14FlatRock2, ST14SmallRock1, ST14SmallRock2 ]
-    decalCount: 4
-    crater: [ ST14WeatherCrater1, ST14WeatherCrater2, ST14WeatherCrater3 ]
-    craterSize: 3
-    shakeRange: 16
-
-- type: entity
-  parent: ST14WeatherStrikeBase
   id: ST14WeatherLightning
   name: lightning
   components:
@@ -108,7 +38,7 @@
     effect: ST14WeatherBolt
     flash: true
     crater: [ ST14WeatherScorch1, ST14WeatherScorch2, ST14WeatherScorch3 ]
-    craterSize: 3
+    craterSize: 1.5
     shakeRange: 12
 
 # The look of the hits
