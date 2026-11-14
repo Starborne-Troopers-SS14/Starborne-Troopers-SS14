@@ -92,3 +92,22 @@ entity-condition-guidebook-internals =
         [true] использует балон
         *[false] дышит атмосферой
     }
+
+entity-condition-guidebook-total-satiation =
+    { $max ->
+        [2147483648] у цели не менее { NATURALFIXED($min, 2) } единиц потребности «{ $type }»
+        *[other] { $min ->
+            [0] у цели не более { NATURALFIXED($max, 2) } единиц потребности «{ $type }»
+            *[other] у цели от { NATURALFIXED($min, 2) } до { NATURALFIXED($max, 2) } единиц потребности «{ $type }»
+            }
+    }
+entity-condition-guidebook-mouth-uncovered-condition =
+    рот существа не закрыт
+entity-condition-guidebook-bloodlevel =
+    { $max ->
+        [2147483648] у цели не менее { NATURALFIXED($min, 2) }% общего объёма крови
+        *[other] { $min ->
+            [0] у цели не более { NATURALFIXED($max, 2) }% общего объёма крови
+            *[other] у цели от { NATURALFIXED($min, 2) }% до { NATURALFIXED($max, 2) }% общего объёма крови
+            }
+    }

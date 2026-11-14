@@ -57,3 +57,7 @@ ent-ClothingOuterFlannelGreen = зелёная фланелевая куртка
     .desc = Старомодная зелёная фланелевая куртка для космической осени.
 ent-ClothingOuterRedRacoon = костюм рыжего енота
     .desc = Пушистый костюм рыжего енота!
+ent-ClothingOuterWizardAbyss = мантия волшебника Бездны
+    .desc = Мантия с модным кожаным жилетом, потрескивающая от рунической энергии.
+ent-ClothingOuterWizardBlue = синяя мантия волшебника
+    .desc = { ent-ClothingOuterWizard.desc }

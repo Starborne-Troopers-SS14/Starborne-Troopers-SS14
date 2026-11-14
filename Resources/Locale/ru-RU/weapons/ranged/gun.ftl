@@ -62,3 +62,8 @@ gun-speedloader-empty = Спидлоадер пуст
 # GunSpreadModifier
 examine-gun-spread-modifier-reduction = Разброс снижен на [color=yellow]{ $percentage }%[/color].
 examine-gun-spread-modifier-increase = Разброс повышен на [color=yellow]{ $percentage }%[/color].
+gun-access-locked = Для управления { $target } требуется доступ!
+gun-toggle-on = { CAPITALIZE($target) } включается.
+gun-toggle-off = { CAPITALIZE($target) } выключается.
+gun-not-anchored = { CAPITALIZE($target) } необходимо закрепить на полу!
+gun-network-ammo-examine = Текущий тип снаряда: [color=yellow]{ $ammo }[/color].

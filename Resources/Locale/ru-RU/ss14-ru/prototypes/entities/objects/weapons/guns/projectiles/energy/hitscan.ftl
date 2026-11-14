@@ -1,0 +1,12 @@
+ent-RedLaserMakeshift = слабый красный лазерный луч
+    .desc = { "" }
+ent-LaserHitscanBase = { ent-BasicHitscan }
+    .desc = { ent-BasicHitscan.desc }
+ent-RangeLaser = зелёный лазер
+    .desc = { ent-LaserHitscanBase.desc }
+ent-XenoborgLaser = синий усиленный лазерный луч
+    .desc = { ent-LaserHitscanBase.desc }
+ent-XenoborgFireLaser = зажигательный лазерный луч ксеноборга
+    .desc = { ent-RedMediumLaser.desc }
+ent-XenoborgHeavyLaser = синий высокоэнергетический лазерный луч
+    .desc = { ent-LaserHitscanBase.desc }

@@ -22,3 +22,5 @@ ent-MobAdultSlimesYellow = жёлтый слайм
 ent-MobAdultSlimesYellowAngry = жёлтый слайм
     .desc = { ent-MobAdultSlimesYellow.desc }
     .suffix = Злой
+ent-BaseAdultSlimesAngry = базовый злой слайм
+    .desc = { "" }

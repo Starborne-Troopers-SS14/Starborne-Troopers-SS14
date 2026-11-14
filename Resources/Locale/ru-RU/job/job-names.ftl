@@ -124,3 +124,5 @@ JobStationEngineer = инженер
 JobTechnicalAssistant = технический ассистент
 JobVisitor = посетитель
 JobWarden = смотритель
+job-name-tram-driver = Водитель трамвая
+job-name-sus = Подозрительный

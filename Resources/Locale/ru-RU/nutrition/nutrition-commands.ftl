@@ -10,3 +10,12 @@ cmd-setnutrit-error-invalid-threshold = некорректный { $thresholdTyp
 
 cmd-thirsty-desc = вызвать жажду
 cmd-thirsty-help = устанавливает уровень жажды на Засуха
+cmd-nutrition-satiation-need = потребность «{ $satiation }»
+cmd-setsatiation-desc = Устанавливает уровень вашей потребности.
+cmd-setsatiation-help = Устанавливает указанную потребность на заданный порог.
+cmd-nutrition-setsatiation-prototype-error = Недопустимая потребность «{ $satiation-proto-id }»
+cmd-nutrition-setsatiation-no-matching-key-error = Неизвестный ключ «{ $key }» для потребности «{ $satiation-proto-id }»
+cmd-nutrition-setsatiation-hint-key = Ключ значения потребности
+cmd-nutrition-setsatiation-hint-max-value = Максимальное значение
+cmd-unsatiate-desc = Доводит ваши потребности до критического уровня.
+cmd-unsatiate-help = Устанавливает указанные потребности на критический порог. Действует на указанные типы потребностей или на все типы, если ни один не указан.

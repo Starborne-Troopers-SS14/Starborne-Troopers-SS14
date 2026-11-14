@@ -178,3 +178,7 @@ chat-speech-verb-wawa-1 = произносит
 chat-speech-verb-wawa-2 = заявляет
 chat-speech-verb-wawa-3 = объявляет
 chat-speech-verb-wawa-4 = размышляет
+chat-manager-sender-announcement-wrap-message-signed = [font size=14][bold]Объявление от { $sender }:[/bold][/font][font size=12]
+    { $message }[bold]
+    Отправлено: { $signature }[/bold][/font]
+chat-speech-verb-name-horror = Ужас

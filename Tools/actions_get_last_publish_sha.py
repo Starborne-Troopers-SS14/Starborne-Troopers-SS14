@@ -28,29 +28,20 @@ def get_last_publish_sha() -> str:
 def main():
     github_output = os.environ.get("GITHUB_OUTPUT")
 
+    # If the value was already provided via the environment, propagate it to the
+    # step output instead of recomputing it.
     last_sha = os.environ.get("LAST_PUBLISH_SHA")
     if last_sha:
         print(f"LAST_PUBLISH_SHA is already set, using it: {last_sha}")
-    else:
-        try:
-            last_sha = get_last_publish_sha()
-        except Exception as e:
-            if "Could not find a previous successful workflow run" not in str(e):
-                raise
+        if github_output:
+            with open(github_output, "a") as f:
+                f.write(f"last_publish_sha={last_sha}\n")
+        return
 
-            # First publish: use the current commit as the baseline.
-            last_sha = os.environ.get("GITHUB_SHA")
-            if not last_sha:
-                raise RuntimeError(
-                    "No previous successful publish found and GITHUB_SHA is unset"
-                ) from e
-
-            print(
-                "No previous successful publish found; "
-                f"using current commit as baseline: {last_sha}"
-            )
+    last_sha = get_last_publish_sha()
 
     if github_output:
+        # Write to the action step output so later steps can reuse it.
         with open(github_output, "a") as f:
             f.write(f"last_publish_sha={last_sha}\n")
 

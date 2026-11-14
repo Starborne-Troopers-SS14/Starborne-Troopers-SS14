@@ -1,3 +1,3 @@
 ent-ClothingHeadsetChameleon = гарнитура пассажира
-    .desc = An updated, modular intercom that fits over the head. Takes encryption keys.
+    .desc = Современная модульная гарнитура, надеваемая на голову. Принимает ключи шифрования.
     .suffix = Хамелеон

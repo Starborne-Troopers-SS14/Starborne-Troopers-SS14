@@ -149,3 +149,6 @@ admin-trick-pause-map-description = Ставит выбранную карту �
 admin-trick-snap-joints-description = Удаляет все физические шарниры из объекта. К сожалению, не отщёлкивает все кости в теле.
 admin-trick-minigun-fire-description = Заставляет целевое оружие стрелять как миниган (очень быстро).
 admin-trick-set-bullet-amount-description = Быстро устанавливает значение количества незаспавненных патронов в оружии.
+admin-smite-heartattack-name = Сердечный приступ
+admin-smite-heartattack-description = Мгновенно убивает цель уроном от удушья.
+admin-smite-ghostkick-reason = Кара небесная.

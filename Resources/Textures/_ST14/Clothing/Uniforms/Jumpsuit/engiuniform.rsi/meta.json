@@ -1,7 +1,12 @@
 {
   "version": 1,
+<<<<<<<< HEAD:Resources/Textures/_ST14/Clothing/Uniforms/Jumpsuit/engiuniform.rsi/meta.json
   "license": "All-Rights-Reserved",
   "copyright": "Made by PatoGrone",
+========
+  "license": "CC-BY-3.0",
+  "copyright": "By ketufaispikinut, jumpskirt edit by jckspjf (Github)",
+>>>>>>>> space-wizards/master:Resources/Textures/Clothing/Uniforms/Jumpskirts/Service/tramdriver.rsi/meta.json
   "size": {
     "x": 32,
     "y": 32

@@ -97,7 +97,7 @@ public sealed partial class CEWeatherCommand : LocalizedCommands
                 if (!proto.ID.StartsWith("CE"))
                     continue;
 
-                if (!proto.HasComponent<WeatherStatusEffectComponent>(_compFactory))
+                if (!proto.HasComp<WeatherStatusEffectComponent>(_compFactory))
                     continue;
 
                 opts.Add(new CompletionOption(proto.ID, proto.Name));

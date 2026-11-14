@@ -208,3 +208,8 @@ loadout-group-reporter-head = Репортёр, голова
 loadout-group-reporter-outerclothing = Репортёр, верхняя одежда
 
 loadout-group-psychologist-jumpsuit = Психолог, комбинезон
+loadout-group-chaplain-shoes = Священник, обувь
+loadout-group-tramdriver-jumpsuit = Водитель трамвая, комбинезон
+loadout-group-tramdriver-outerclothing = Водитель трамвая, верхняя одежда
+loadout-group-tramdriver-hat = Водитель трамвая, головной убор
+loadout-group-tramdriver-gloves = Водитель трамвая, перчатки

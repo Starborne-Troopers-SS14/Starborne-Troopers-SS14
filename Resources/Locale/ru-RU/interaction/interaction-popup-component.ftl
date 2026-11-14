@@ -110,3 +110,7 @@ petting-failure-tesla = Вы тянетесь погладить { $target }, н
 
 petting-success-mail-teleporter = Вы гладите { $target } по { POSS-ADJ($target) } послушной, холодной обшивке.
 petting-failure-mail-teleporter = Вы тянетесь погладить { $target }, но { SUBJECT($target) } занимается сортировкой почты!
+petting-success-headslug = Вы гладите { THE($target) } по { POSS-ADJ($target) } сочащейся поверхности.
+petting-success-elder-headslug = Вы гладите { THE($target) } по { POSS-ADJ($target) } пульсирующей коже.
+petting-failure-headslug = Вы пытаетесь погладить { THE($target) }, но ваша рука погружается в { POSS-ADJ($target) } плоть.
+petting-failure-elder-headslug = Вы пытаетесь погладить { THE($target) }, но { SUBJECT($target) } чуть не кусает вас!

@@ -70,3 +70,4 @@ steal-target-groups-animal-morty = Морти
 steal-target-groups-animal-renault = Алиса
 steal-target-groups-animal-shiva = Шива
 steal-target-groups-animal-tropico = Тропико
+steal-target-groups-heads-hardsuits = скафандр главы отдела

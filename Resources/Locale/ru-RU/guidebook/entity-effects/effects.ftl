@@ -557,3 +557,42 @@ entity-effect-disarm =
         [1] Обезоруживает
         *[other] обезоружить
     } цель
+
+entity-effect-guidebook-satiate =
+    { $chance ->
+        [1] Удовлетворяет
+        *[other] удовлетворить
+    } потребность «{ $type }» { $relative ->
+        [1] с обычной эффективностью
+        *[other] с эффективностью в { NATURALFIXED($relative, 3) } раза выше обычной
+    }
+entity-effect-guidebook-plant-change-trait =
+    { $chance ->
+        [1] { $change ->
+            [Add] Добавляет растению признак «{ $trait }»
+            [Remove] Удаляет у растения признак «{ $trait }»
+            [Toggle] Переключает у растения признак «{ $trait }»
+            *[other] Меняет у растения признак «{ $trait }»
+            }
+        *[other] { $change ->
+            [Add] добавить растению признак «{ $trait }»
+            [Remove] удалить у растения признак «{ $trait }»
+            [Toggle] переключить у растения признак «{ $trait }»
+            *[other] изменить у растения признак «{ $trait }»
+            }
+    }
+entity-effect-guidebook-plant-mutate-exude-gasses =
+    { $chance ->
+        [1] Мутирует
+        *[other] мутировать
+    } растение, чтобы оно выделяло газы в количестве от { $minValue } до { $maxValue } моль
+entity-effect-guidebook-plant-mutate-consume-gasses =
+    { $chance ->
+        [1] Мутирует
+        *[other] мутировать
+    } растение, чтобы оно потребляло газы в количестве от { $minValue } до { $maxValue } моль
+entity-effect-guidebook-make-trap-in-container =
+    { $chance ->
+        [1] Запирает
+        *[other] запереть
+    } существо внутри { $entityname }

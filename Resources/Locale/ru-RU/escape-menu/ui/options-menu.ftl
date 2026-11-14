@@ -165,7 +165,7 @@ ui-options-function-alt-activate-item-in-world = Альтернативно ис
 ui-options-function-drop = Положить предмет
 ui-options-function-examine-entity = Осмотреть
 ui-options-function-swap-hands = Поменять руки
-ui-options-function-swap-hands-reverse = Swap hands (other direction)
+ui-options-function-swap-hands-reverse = Поменять руки (в обратную сторону)
 ui-options-function-move-stored-item = Переместить хранящийся объект
 ui-options-function-rotate-stored-item = Повернуть хранящийся объект
 ui-options-function-save-item-location = Сохранить расположение объекта
@@ -319,11 +319,11 @@ ui-options-function-text-cut = Вырезать
 ui-options-function-text-paste = Вставить
 ui-options-function-text-history-prev = Предыдущее с истории
 ui-options-function-text-history-next = Следующее с истории
-ui-options-function-text-release-focus = Release focus
+ui-options-function-text-release-focus = Снять фокус ввода
 ui-options-function-text-scroll-to-bottom = Пролистать вниз
-ui-options-function-text-tab-complete = Tab completion
-ui-options-function-text-complete-next = Complete next
-ui-options-function-text-complete-prev = Complete previous
+ui-options-function-text-tab-complete = Автодополнение по Tab
+ui-options-function-text-complete-next = Следующий вариант автодополнения
+ui-options-function-text-complete-prev = Предыдущий вариант автодополнения
 
 ## Network menu
 
@@ -442,3 +442,13 @@ ui-options-admin-overlay-ghost-hide-distance = Расстояние от кур�
 
 ui-options-admin-strip-overlay-title = Оверлей обыска
 ui-options-admin-strip-overlay-setting = Показывать админ-вид обыска по умолчанию
+ui-options-mute-unfocused = Отключать звук, когда окно не в фокусе
+ui-options-audio-device = Устройство вывода:
+ui-options-audio-device-default = Системное по умолчанию
+ui-options-max-fps = Максимальный FPS:
+ui-options-max-fps-display-rate = Частота обновления экрана
+ui-options-max-fps-tooltip = Максимальная частота кадров клиента. Установите 0, чтобы убрать ограничение. Не действует при включённой вертикальной синхронизации.
+ui-options-hud-theme-trasen = Trasen-Knox
+ui-options-chat-preview = Показывать предпросмотр сообщения в облачке при вводе
+ui-options-preview-bubble-background-opacity = Непрозрачность фона облачка предпросмотра
+ui-options-vacuum-overlay-intensity = Интенсивность оверлея вакуума

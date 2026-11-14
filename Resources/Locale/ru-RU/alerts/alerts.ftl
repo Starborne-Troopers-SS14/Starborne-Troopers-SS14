@@ -125,3 +125,5 @@ alerts-stealthy-desc = Определяет режим скрытой кражи
 
 alerts-prying-name = Вскрытие
 alerts-prying-desc = Вы можете вскрывать двери, используя альтернативное взаимодействие.
+alerts-changeling-chemicals-name = Химикаты
+alerts-changeling-chemicals-desc = Химикаты, хранящиеся в наших железах. Они необходимы для работы многих наших способностей и восстанавливаются со временем.

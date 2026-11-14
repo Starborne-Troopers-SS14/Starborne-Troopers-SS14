@@ -198,3 +198,4 @@ spray-painter-style-canisters-plasma = Плазма
 spray-painter-style-canisters-storage = Хранение
 spray-painter-style-canisters-tritium = Тритий
 spray-painter-style-canisters-water-vapor = Водяной пар
+spray-painter-style-airlockstandard-service = Сервис

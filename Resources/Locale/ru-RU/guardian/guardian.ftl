@@ -27,4 +27,5 @@ guardian-host-critical-warn = ВАШ ХОЗЯИН РАНЕН!
 guardian-host-death-warn = ВЫ ПЕРЕСТАЁТЕ СУЩЕСТВОВАТЬ
 guardian-death-warn = ВАШЕ ТЕЛО ПРОНЗАЕТ СУБАТОМНАЯ БОЛЬ, КОГДА ОНО РАСПАДАЕТСЯ!
 guardian-attack-host = Вы не можете атаковать своего хозяина.
-
+guardian-injector-empty-invalid-creation = Инжектор израсходован.
+guardian-injector-empty-examine = [color=#ba1919]Инжектор израсходован.[/color]

@@ -18,3 +18,5 @@ reagent-desc-welding-fuel = Используется сварщиками для
 
 reagent-name-fluorosurfactant = фторсурфактант
 reagent-desc-fluorosurfactant = Перфторированная сульфоновая кислота, образующая пену при смешивании с водой.
+reagent-name-xenoborg-oil = масло ксеноборга
+reagent-desc-xenoborg-oil = Лёгкое масло, используемое, чтобы заставлять органиков поскальзываться и поджигать их.

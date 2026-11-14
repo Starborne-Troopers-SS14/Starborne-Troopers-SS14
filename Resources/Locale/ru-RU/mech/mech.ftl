@@ -21,3 +21,4 @@ mech-no-enter = Вы не можете пилотировать это.
 mech-eject-pilot-alert = { $user } вытаскивает пилота из { $item }!
 
 mech-construction-guide-string = Все механические детали должны быть прикреплены к каркасу.
+mech-construction-guide-string-vim = К упряжи необходимо прикрепить две ноги борга и шлем EVA.

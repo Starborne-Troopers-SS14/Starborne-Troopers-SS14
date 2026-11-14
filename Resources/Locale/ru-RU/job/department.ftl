@@ -10,3 +10,5 @@ department-Silicon = Синтетики
 department-Specific = На определённых станциях
 
 department-Unknown = Неизвестный
+department-Service = Сервис
+department-Task-Force = Оперативная группа

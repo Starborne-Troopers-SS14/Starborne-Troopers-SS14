@@ -67,3 +67,5 @@ ent-DrinkBeerCan = баночка пива
 ent-DrinkWineCan = баночка вина
     .desc = Ваш путь к веселью и забвению всех забот!
     .suffix = { ent-DrinkCanBaseFull.suffix }
+ent-DrinkColaCanBase = { ent-DrinkColaCan }
+    .desc = Сладкий газированный безалкогольный напиток.

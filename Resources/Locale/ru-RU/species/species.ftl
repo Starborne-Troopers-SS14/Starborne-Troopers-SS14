@@ -15,3 +15,4 @@ species-name-vulpkanin = Вульпканин
 ## Misc species things
 
 snail-hurt-by-salt-popup = Солевой раствор жжёт как кислота!
+species-name-horror = Шаркающая мерзость

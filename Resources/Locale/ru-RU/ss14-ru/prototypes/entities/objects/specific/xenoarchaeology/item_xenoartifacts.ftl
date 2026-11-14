@@ -8,3 +8,6 @@ ent-ArtifactFragment = фрагмент артефакта
 ent-ArtifactFragment1 = { ent-ArtifactFragment }
     .desc = { ent-ArtifactFragment.desc }
     .suffix = Один
+ent-DummyArtifactItem = { ent-BaseXenoArtifactItem }
+    .desc = { ent-BaseXenoArtifactItem.desc }
+    .suffix = Отладка

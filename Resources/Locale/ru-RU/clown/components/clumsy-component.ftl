@@ -8,3 +8,6 @@ clumsy-hypospray-fail-message = Ой! Вы сделали инъекцию се�
 
 clumsy-catch-fail-message-user = { CAPITALIZE($item) } попадает вам в голову!
 clumsy-catch-fail-message-others = { CAPITALIZE($item) } попадает в голову { $catcher }!
+clumsy-defibrillator-fail-message = Упс! Вы ударили себя током.
+clumsy-grab-fail-message-user = { CAPITALIZE(THE($item)) } выскальзывает из ваших рук...
+clumsy-grab-fail-message-others = { CAPITALIZE(THE($item)) } выскальзывает из рук...

@@ -26,3 +26,5 @@ ent-HoloprojectorSecurity = проектор голобарьера
 ent-HoloprojectorSecurityEmpty = { ent-HoloprojectorSecurity }
     .desc = { ent-HoloprojectorSecurity.desc }
     .suffix = Пустой
+ent-HoloprojectorXenoField = проектор отражающего поля ксеноборгов
+    .desc = Инопланетное устройство, создающее поля, которые отражают снаряды.

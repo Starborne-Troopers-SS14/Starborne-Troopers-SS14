@@ -5,3 +5,4 @@ shuffle-artifact-popup = Вы чувствуете, как мгновенно т
 charge-artifact-popup = Вы чувствуете, как воздух наполняется электричеством.
 
 activate-artifact-popup-self = Вы активируете узел { $node }.
+interact-artifact-more = Он жаждет большего...

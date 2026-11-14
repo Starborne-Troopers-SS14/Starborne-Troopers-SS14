@@ -65,3 +65,5 @@ trait-hemophilia-desc = Ваш организм не справляется со
 
 trait-impaired-mobility-name = Нарушение подвижности
 trait-impaired-mobility-desc = Вам тяжело передвигаться без посторонней помощи.
+trait-blink-dyspraxia-name = Диспраксия моргания
+trait-blink-dyspraxia-desc = Вашим векам не хватает координации. Моргание требует осознанных усилий, а иногда глаза просто отказываются двигаться синхронно.

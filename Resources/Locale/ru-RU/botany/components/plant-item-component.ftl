@@ -1,0 +1,12 @@
+plant-hoe-component-already-seeded-popup = Вы удаляете сорняки из { $name }.
+plant-hoe-component-remove-weeds-others-popup = { $otherName } начинает вырывать сорняки.
+plant-hoe-component-no-weeds-popup = Здесь нет сорняков! Пропалывать нечего.
+plant-shovel-component-remove-plant-popup = Вы убираете растение из { $name }.
+plant-shovel-component-remove-plant-others-popup = { $name } убирает растение.
+plant-shovel-component-no-plant-popup = Здесь нет растения, которое можно убрать.
+plant-sample-component-early-sample-popup = Растение ещё недостаточно выросло, чтобы взять образец.
+plant-sample-component-already-sampled-popup = С этого растения уже взяли образец.
+plant-sample-component-take-sample-popup = Вы берёте образец растения «{ $seedName }».
+plant-sample-component-dead-plant-popup = Это растение мертво.
+plant-produce-component-compost-popup = Вы отправляете { $usingItem } в { $owner } на компост.
+plant-produce-component-compost-others-popup = { $user } отправляет { $usingItem } в { $owner } на компост.

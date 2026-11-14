@@ -126,3 +126,6 @@ ent-ButtonFrameExit = { ent-ButtonFrame }
 ent-ButtonFrameJanitor = { ent-ButtonFrame }
     .desc = { ent-ButtonFrame.desc }
     .suffix = Уборщик
+ent-ButtonFrameWhite = { ent-ButtonFrame }
+    .desc = { ent-ButtonFrame.desc }
+    .suffix = Белый

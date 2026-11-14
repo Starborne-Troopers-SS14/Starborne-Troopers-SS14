@@ -1,0 +1,10 @@
+examinable-satiation-component-examine-hunger-full = { examinable-hunger-component-examine-overfed }
+examinable-satiation-component-examine-hunger-okay = { examinable-hunger-component-examine-okay }
+examinable-satiation-component-examine-hunger-concerned = { examinable-hunger-component-examine-peckish }
+examinable-satiation-component-examine-hunger-desperate = { examinable-hunger-component-examine-starving }
+examinable-satiation-component-examine-hunger-none = { examinable-hunger-component-examine-none }
+examinable-satiation-component-examine-thirst-full = В { POSS-ADJ($entity) } организме явно достаточно воды!
+examinable-satiation-component-examine-thirst-okay = { CAPITALIZE(SUBJECT($entity)) }, похоже, не { CONJUGATE-BASIC($entity, "испытывают", "испытывает") } жажды.
+examinable-satiation-component-examine-thirst-concerned = { CAPITALIZE(SUBJECT($entity)) } явно { CONJUGATE-BASIC($entity, "хотят", "хочет") } пить.
+examinable-satiation-component-examine-thirst-desperate = { CAPITALIZE(SUBJECT($entity)) } отчаянно { CONJUGATE-BASIC($entity, "нуждаются", "нуждается") } в воде!
+examinable-satiation-component-examine-thirst-none = { CAPITALIZE(SUBJECT($entity)) }, похоже, никогда не { CONJUGATE-BASIC($entity, "испытывают", "испытывает") } жажды.

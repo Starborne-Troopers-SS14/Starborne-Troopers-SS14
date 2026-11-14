@@ -96,3 +96,7 @@ ent-StationAiUploadCircuitboard = консоль загрузки ИИ (конс
     .desc = Консольная плата для консоли загрузки ИИ.
 ent-StationAiFixerCircuitboard = консоль восстановления ИИ (консольная плата)
     .desc = Консольная плата для консоли восстановления ИИ.
+ent-StationTeleportersControlCircuitboard = консоль управления телепортами (консольная плата)
+    .desc = Печатная плата для консоли управления телепортами.
+ent-SyndicateTeleportersControlCircuitboard = консоль управления телепортами Синдиката (консольная плата)
+    .desc = Печатная плата для консоли управления телепортами.

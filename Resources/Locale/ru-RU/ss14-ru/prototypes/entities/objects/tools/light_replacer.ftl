@@ -3,3 +3,6 @@ ent-LightReplacer = лампозаменитель
 ent-LightReplacerEmpty = { ent-LightReplacer }
     .desc = { ent-LightReplacer.desc }
     .suffix = Пустой
+ent-LightReplacerFilled = { ent-LightReplacer }
+    .desc = { ent-LightReplacer.desc }
+    .suffix = Заполненный

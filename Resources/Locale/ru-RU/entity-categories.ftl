@@ -8,3 +8,4 @@ entity-category-name-status-effects = Статусные эффекты
 entity-category-name-xeno-artifact-effects = Эффекты ксено-артефактов
 
 entity-category-suffix-donotmap = НЕ МАППИТЬ
+entity-category-name-xeno-artifact-triggers = Триггеры ксеноартефактов
