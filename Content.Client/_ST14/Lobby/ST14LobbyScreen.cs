@@ -218,7 +218,7 @@ public sealed partial class ST14LobbyScreen : Control
         support.OnPressed += _ => _support.Visible = true;
         buttons.Insert(0, support);
         buttons.AddRange(_lobby.HeaderContainer.Children.Where(c => c is BaseButton).ToList());
-        buttons.Add(_lobby.LeaveButton);
+        // leaving the server is only in the main menu
 
         foreach (var button in buttons)
         {

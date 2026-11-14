@@ -5,6 +5,7 @@ using Content.Shared.GameTicking;
 using Content.Shared.Humanoid.Prototypes;
 using Content.Shared.Preferences;
 using Content.Shared.Roles;
+using Content.Shared.Traits;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Random;
 
@@ -17,6 +18,11 @@ namespace Content.Shared._ST14.MainHub;
 public static class ST14CharacterSide
 {
     public static readonly ProtoId<SpeciesPrototype> BugSpecies = "ST14Bug";
+
+    /// <summary>
+    /// Trait categories the character editor does not offer: a trooper picks only speech traits
+    /// </summary>
+    public static readonly HashSet<ProtoId<TraitCategoryPrototype>> HiddenTraitCategories = new() { "Disabilities", "Quirks" };
 
     public static bool IsBug(string species)
     {
