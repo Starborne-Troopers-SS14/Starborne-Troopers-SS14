@@ -83,9 +83,20 @@ public sealed partial class ST14EnergyBoxSystem : EntitySystem
 
     private void OnBoxMapInit(Entity<ST14EnergyBoxComponent> ent, ref MapInitEvent args)
     {
-        _slots.SetLock(ent.Owner, ent.Comp.BlockSlot, ent.Comp.Door != ST14EnergyBoxDoor.Open);
+        LockSlot(ent, ent.Comp.Door != ST14EnergyBoxDoor.Open);
         TakeBlock(ent);
         UpdateVisuals(ent);
+    }
+
+    /// <summary>
+    /// Locks the block slot. A panel without ItemSlots (a bare entity in tests) has nothing to lock
+    /// </summary>
+    private void LockSlot(Entity<ST14EnergyBoxComponent> ent, bool locked)
+    {
+        if (!TryComp<ItemSlotsComponent>(ent, out var slots))
+            return;
+
+        _slots.SetLock((ent.Owner, slots), ent.Comp.BlockSlot, locked);
     }
 
     private void OnBlockInserted(Entity<ST14EnergyBoxComponent> ent, ref EntInsertedIntoContainerMessage args)
@@ -185,7 +196,7 @@ public sealed partial class ST14EnergyBoxSystem : EntitySystem
         }
 
         // The block can only be put in or taken out with the door all the way open
-        _slots.SetLock(ent.Owner, ent.Comp.BlockSlot, door != ST14EnergyBoxDoor.Open);
+        LockSlot(ent, door != ST14EnergyBoxDoor.Open);
         UpdateVisuals(ent);
     }
 
