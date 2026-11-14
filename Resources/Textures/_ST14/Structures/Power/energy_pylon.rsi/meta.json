@@ -1,0 +1,25 @@
+{
+    "version": 1,
+    "license": "All-Rights-Reserved",
+    "copyright": "Made for Starborne Troopers. All rights reserved.",
+    "size": {
+        "x": 32,
+        "y": 96
+    },
+    "states": [
+        {
+            "name": "base"
+        },
+        {
+            "name": "lights",
+            "delays": [
+                [
+                    0.12,
+                    0.12,
+                    0.12,
+                    0.12
+                ]
+            ]
+        }
+    ]
+}

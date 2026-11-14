@@ -97,26 +97,44 @@
         acts: [ "Destruction" ]
   - type: ST14CommsTower
 
-# The energy block and the energy box: for now only things to place and carry, without a mechanic of their own
+# The energy block and the energy box: the box with a charged block in it powers the energy pylons around it
+# (Resources/Prototypes/_ST14/Entities/Structures/Power/energy_fence.yml)
 - type: entity
   parent: BaseItem
   id: ST14EnergyBlock
   name: energy block
-  description: A sealed charge cell of the Mobile Infantry. The light on its face shows it is charged.
+  description: A sealed charge cell of the Mobile Infantry. The light on its face shows how much charge is left.
   components:
   - type: Sprite
     sprite: _ST14/Objects/Power/energy_block.rsi
     layers:
     - state: base
     - state: green
+      map: [ "charge" ]
   - type: Item
     size: Small
     sprite: _ST14/Objects/Power/energy_block.rsi
+  - type: Tag
+    tags:
+    - ST14EnergyBlock
+  - type: Battery
+    maxCharge: 1000
+    startingCharge: 1000
+  - type: ExaminableBattery
+  - type: BatteryVisuals
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.BatteryVisuals.State:
+        charge:
+          Full: { state: green }
+          Neither: { state: yellow }
+          Empty: { state: red }
 
 - type: entity
   id: ST14EnergyBox
   name: energy box
-  description: A field power box of the Mobile Infantry.
+  description: A field power box of the Mobile Infantry. With a charged energy block inside it powers every energy pylon within ten tiles.
   placement:
     mode: SnapgridCenter
   components:
@@ -142,6 +160,28 @@
     layers:
     - state: base
     - state: door
+    - state: battery-in
+      map: [ "block" ]
+      visible: false
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.ST14EnergyBoxVisuals.HasBlock:
+        block:
+          True: { visible: true }
+          False: { visible: false }
+  - type: ItemSlots
+    slots:
+      energy_block:
+        name: st14-energy-box-slot
+        startingItem: ST14EnergyBlock
+        whitelist:
+          tags:
+          - ST14EnergyBlock
+  - type: ContainerContainer
+    containers:
+      energy_block: !type:ContainerSlot
+  - type: ST14EnergyBox
   - type: Anchorable
   - type: Pullable
   - type: Damageable

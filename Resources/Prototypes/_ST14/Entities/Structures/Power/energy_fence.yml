@@ -1,0 +1,176 @@
+# Энергостены: инженер ставит пилоны, энергощиток с энергоблоком их питает,
+# между запитанными пилонами на одной прямой бьёт луч, который жжёт и отбрасывает жуков
+
+- type: soundCollection
+  id: ST14EnergyZap
+  files:
+  - /Audio/_ST14/Structures/EnergyFence/zap1.wav
+  - /Audio/_ST14/Structures/EnergyFence/zap2.wav
+  - /Audio/_ST14/Structures/EnergyFence/zap3.wav
+
+- type: entity
+  id: ST14EnergyPylon
+  name: energy pylon
+  description: A field pylon of the Mobile Infantry. Powered from an energy box nearby, it throws a crackling arc to the next pylon in a straight line up to seven tiles away. Bugs that cross the arc are burnt and thrown back.
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: true
+  - type: Clickable
+  - type: InteractionOutline
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.35,-0.4,0.35,0.3"
+        density: 200
+        mask:
+        - MachineMask
+        layer:
+        - MachineLayer
+  - type: Sprite
+    sprite: _ST14/Structures/Power/energy_pylon.rsi
+    noRot: true
+    offset: 0,1
+    layers:
+    - state: base
+    - state: lights
+      map: [ "lights" ]
+      shader: unshaded
+      visible: false
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.ST14EnergyPylonVisuals.Powered:
+        lights:
+          True: { visible: true }
+          False: { visible: false }
+  - type: PointLight
+    enabled: false
+    radius: 2.5
+    energy: 1.4
+    color: "#fff0c0"
+    offset: 0,1
+  - type: AmbientSound
+    enabled: false
+    volume: -8
+    range: 7
+    sound:
+      path: /Audio/_ST14/Structures/EnergyFence/crackle_loop.wav
+  - type: Anchorable
+  - type: Damageable
+    damageModifierSet: SteelMod
+  - type: Injurable
+    damageContainer: StructuralInorganic
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 200
+      behaviors:
+      - !type:PlaySoundBehavior
+        sound:
+          collection: MetalBreak
+      - !type:SpawnEntitiesBehavior
+        spawn:
+          EffectSparks:
+            min: 1
+            max: 1
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+  - type: ST14EnergyPylon
+
+# Один тайл луча. Не твёрдый: десантники проходят, жуков бьёт током
+- type: entity
+  abstract: true
+  id: ST14EnergyBeamBase
+  name: energy arc
+  description: A crackling arc between two pylons. Troopers pass through it; bugs burn.
+  categories: [ HideSpawnMenu ]
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    noRot: true
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      beam:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,-0.2,0.5,0.2"
+        hard: false
+        layer:
+        - SlipLayer
+  - type: Sprite
+    drawdepth: Effects
+    noRot: true
+  - type: PointLight
+    radius: 1.5
+    energy: 0.9
+    color: "#8fd8ff"
+  - type: ST14EnergyBeam
+    damage:
+      types:
+        Shock: 40
+    whitelist:
+      components:
+      - ST14HiveMember
+    hitSound:
+      collection: ST14EnergyZap
+      params:
+        volume: -2
+        variation: 0.1
+
+- type: entity
+  parent: ST14EnergyBeamBase
+  id: ST14EnergyBeamHorizontal
+  components:
+  - type: Sprite
+    sprite: _ST14/Structures/Power/energy_beam.rsi
+    offset: 0,1
+    layers:
+    - state: horizontal
+      shader: unshaded
+
+- type: entity
+  parent: ST14EnergyBeamBase
+  id: ST14EnergyBeamVertical
+  components:
+  - type: Fixtures
+    fixtures:
+      beam:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.2,-0.5,0.2,0.5"
+        hard: false
+        layer:
+        - SlipLayer
+  - type: Sprite
+    sprite: _ST14/Structures/Power/energy_beam_vertical.rsi
+    offset: 0,1.0625
+    layers:
+    - state: vertical
+      shader: unshaded
+
+# Что строит инженер мультитулом
+- type: ST14EngineerBuildable
+  id: EnergyPylon
+  result: ST14EnergyPylon
+  cost: 150
+  buildTime: 8
+  conditions:
+  - !type:TileNotBlocked
+
+- type: ST14EngineerBuildable
+  id: EnergyBox
+  result: ST14EnergyBox
+  cost: 200
+  buildTime: 10
+  conditions:
+  - !type:TileNotBlocked
