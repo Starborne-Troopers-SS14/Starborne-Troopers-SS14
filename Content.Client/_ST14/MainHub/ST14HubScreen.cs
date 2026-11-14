@@ -54,6 +54,9 @@ public sealed partial class ST14HubScreen : Control
     private const float RowStep = 212.68f;
     private static readonly Vector2 PlateSize = new(187.68f, 70f);
 
+    // middle of the grey band of the bottom bar, where the plates and the icons stand
+    private const float PlateCenter = ST14HubStyle.HubBarBottom + (ST14HubStyle.HubBarHeight - ST14HubStyle.HubBarTop - ST14HubStyle.HubBarBottom) / 2;
+
     private readonly ST14AnimatedScene _scene;
     private readonly ST14NewsTicker _newsTicker;
     private readonly Label _hourLabel;
@@ -85,13 +88,14 @@ public sealed partial class ST14HubScreen : Control
         AddChild(canvas);
 
         // Bottom bar and the status line above it
-        canvas.Add(new PanelContainer { PanelOverride = ST14HubStyle.MainBar(_resCache) },
-            new Vector2(0, 1), new Vector2(1, 1), Vector2.Zero, new Vector2(0, 93), new Vector2(0.5f, 1));
+        // the plates sit inside the grey band of the bar with the same gap above and below
+        canvas.Add(new PanelContainer { PanelOverride = ST14HubStyle.HubBar(_resCache) },
+            new Vector2(0, 1), new Vector2(1, 1), Vector2.Zero, new Vector2(0, ST14HubStyle.HubBarHeight), new Vector2(0.5f, 1));
 
         _statusLabel = ST14HubStyle.Label(_resCache, string.Empty, ST14HubFont.Italic, 15, Color.White);
         _statusLabel.Align = Label.AlignMode.Center;
         _statusLabel.VAlign = Label.VAlignMode.Center;
-        canvas.AddAt(_statusLabel, new Vector2(0.5f, 0.5f), new Vector2(0, 431), new Vector2(827, 32));
+        canvas.AddAt(_statusLabel, new Vector2(0.5f, 1), new Vector2(0, -(ST14HubStyle.HubBarHeight - ST14HubStyle.HubBarTop / 2)), new Vector2(827, 32));
 
         // News banner
         canvas.Add(new TextureRect
@@ -186,14 +190,14 @@ public sealed partial class ST14HubScreen : Control
 
         var settingsButton = new ST14HubIconButton(ST14HubStyle.Tex(_resCache, "gear.png"), ST14HubStyle.Gold);
         settingsButton.OnPressed += _ => _settings!.Show();
-        canvas.AddAt(settingsButton, new Vector2(1, 1), new Vector2(-122.5f, -25), new Vector2(60, 60), new Vector2(1, 1));
+        canvas.AddAt(settingsButton, new Vector2(1, 1), new Vector2(-122.5f, -PlateCenter), new Vector2(60, 60), new Vector2(1, 0.5f));
 
         var exitButton = new ST14HubIconButton(ST14HubStyle.Tex(_resCache, "power.png"), ST14HubStyle.Gold)
         {
             PressSound = ST14HubSound.Back,
         };
         exitButton.OnPressed += _ => _console.ExecuteCommand("disconnect");
-        canvas.AddAt(exitButton, new Vector2(1, 1), new Vector2(-37.5f, -25), new Vector2(60, 60), new Vector2(1, 1));
+        canvas.AddAt(exitButton, new Vector2(1, 1), new Vector2(-37.5f, -PlateCenter), new Vector2(60, 60), new Vector2(1, 0.5f));
 
         // Settings cover the hub when opened
         _settings = new ST14SettingsScreen { Visible = false };
@@ -226,7 +230,7 @@ public sealed partial class ST14HubScreen : Control
         var button = new ST14HubButton(_resCache, Loc.GetString(loc), 21, tint, textColor);
         // the original starts the row with a big "Continue" card, here the plates take its place
         var x = RowLeft + PlateSize.X / 2 + RowStep * index;
-        canvas.AddAt(button, new Vector2(0, 1), new Vector2(x, -54), PlateSize);
+        canvas.AddAt(button, new Vector2(0, 1), new Vector2(x, -PlateCenter), PlateSize);
         return button;
     }
 

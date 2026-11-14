@@ -241,8 +241,9 @@ public sealed class ST14CharacterScreen : Control
         var bodyTop = HeaderHeight + Gap;
         var bodyHeight = MathF.Max(0, h - bodyTop);
 
-        var rosterWidth = Math.Clamp(w * 0.2f, 230, 330);
-        var previewWidth = Math.Clamp(w * 0.24f, 270, 380);
+        // the roster is the widest side column, names and jobs of the characters fit in it
+        var rosterWidth = Math.Clamp(w * 0.26f, 280, 470);
+        var previewWidth = Math.Clamp(w * 0.2f, 250, 340);
         var formWidth = w - rosterWidth - previewWidth - Gap * 2;
         if (formWidth < 360)
         {

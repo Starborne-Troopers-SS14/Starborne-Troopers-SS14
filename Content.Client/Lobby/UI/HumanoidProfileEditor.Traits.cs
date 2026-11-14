@@ -1,6 +1,7 @@
 using System.Linq;
 using Content.Client.Lobby.UI.Roles;
 using Content.Client.Stylesheets;
+using Content.Shared._ST14.MainHub; // ST14
 using Content.Shared.Traits;
 using Robust.Client.UserInterface.Controls;
 using Robust.Shared.Utility;
@@ -44,6 +45,10 @@ public sealed partial class HumanoidProfileEditor
             }
 
             if (!_prototypeManager.HasIndex(trait.Category))
+                continue;
+
+            // ST14: troopers pick only speech traits, no disabilities or quirks
+            if (ST14CharacterSide.HiddenTraitCategories.Contains(trait.Category.Value))
                 continue;
 
             var group = traitGroups.GetOrNew(trait.Category);

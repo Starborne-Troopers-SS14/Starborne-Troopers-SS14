@@ -103,6 +103,23 @@ public static class ST14HubStyle
     }
 
     /// <summary>
+    /// Height of the main menu bar in canvas units and the gap its plates keep above and below inside the grey band
+    /// </summary>
+    public const float HubBarHeight = 136f;
+    public const float HubBarBottom = 16f;
+    public const float HubBarTop = 34f;
+
+    /// <summary>
+    /// Bottom bar of the main menu: the grey band of the texture stretches, so the plates sit inside it with the same
+    /// margin above and below. The band runs from <see cref="HubBarTop"/> under the top of the bar to
+    /// <see cref="HubBarBottom"/> over its bottom
+    /// </summary>
+    public static StyleBoxTexture HubBar(IResourceCache cache)
+    {
+        return Patch(cache, "mainbar.png", 0, 72, 0, 36);
+    }
+
+    /// <summary>
     /// Dark bar along the bottom of the screen
     /// </summary>
     public static StyleBoxTexture MainBar(IResourceCache cache)

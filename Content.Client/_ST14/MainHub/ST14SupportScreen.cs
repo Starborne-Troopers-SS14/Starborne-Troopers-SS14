@@ -83,7 +83,8 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
     private readonly List<Control> _rowParts = new();
     private readonly List<ST14SponsorCard> _cards = new();
     private readonly List<ST14HubButton> _perkPlates = new();
-    private readonly List<ST14HubButton> _subscribePlates = new();
+    private readonly List<(RichTextLabel Label, float Width)> _wrapped = new();
+    private float _wrapScale = -1;
 
     // perks view: one frame, the tabs of the open tier, every perk page built once
     private readonly ST14LobbyFrame _perks;
@@ -93,7 +94,6 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
     private readonly RichTextLabel _perkList;
     private readonly Label _perkState;
     private readonly Dictionary<string, Control> _pages = new();
-    private readonly List<(Label Label, int Tier, string Perk)> _locks = new();
     private readonly List<(Button Swatch, Color Color)> _oocSwatches = new();
     private readonly List<(Button Swatch, Color Color)> _ghostSwatches = new();
     private int _openTier;
@@ -124,7 +124,7 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
 
         // the status widget top right, where the hub keeps its clock
         _medal = new ST14TierMedal(ResCache);
-        Canvas.AddAt(_medal, new Vector2(1, 0), new Vector2(-60, 45), new Vector2(110, 110), new Vector2(1, 0));
+        Canvas.AddAt(_medal, new Vector2(1, 0), new Vector2(-60, 52), new Vector2(96, 96), new Vector2(1, 0));
 
         var statusCaption = ST14HubStyle.Label(ResCache, Loc.GetString("st14-support-status-header").ToUpperInvariant(), ST14HubFont.Medium, 15,
             ST14HubStyle.Widget);
@@ -147,22 +147,13 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
             _cards.Add(card);
             _rowParts.Add(card);
 
-            // two plates under the card: what the tier gives, and the way to get it
+            // one plate under the card: what the tier gives. The way to Boosty is the single plate in the bottom bar
             var plateY = CardY + CardSize.Y / 2 + 4;
-            var plate = new ST14HubButton(ResCache, Loc.GetString("st14-support-open-perks"), 18, ST14SupporterStatus.TierColors[tier]);
+            var plate = new ST14HubButton(ResCache, Loc.GetString("st14-support-open-perks"), 19, ST14SupporterStatus.TierColors[tier]);
             plate.OnPressed += _ => OpenTier(openTier);
-            Canvas.AddAt(plate, new Vector2(0.5f, 0.5f), new Vector2(x - 103, plateY), new Vector2(200, 60));
+            Canvas.AddAt(plate, new Vector2(0.5f, 0.5f), new Vector2(x, plateY), new Vector2(300, 62));
             _rowParts.Add(plate);
             _perkPlates.Add(plate);
-
-            var subscribe = new ST14HubButton(ResCache, Loc.GetString("st14-support-subscribe"), 18, ST14HubStyle.Orange, Color.White)
-            {
-                ToolTip = BoostyUrl,
-            };
-            subscribe.OnPressed += _ => _uriOpener.OpenUri(BoostyUrl);
-            Canvas.AddAt(subscribe, new Vector2(0.5f, 0.5f), new Vector2(x + 103, plateY), new Vector2(200, 60));
-            _rowParts.Add(subscribe);
-            _subscribePlates.Add(subscribe);
         }
 
         // how it works: a dark strip with the three numbered steps and the promise that nothing of it helps in battle
@@ -180,13 +171,13 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
         var steps = new BoxContainer
         {
             Orientation = BoxContainer.LayoutOrientation.Horizontal,
-            SeparationOverride = 40,
+            SeparationOverride = 34,
             HorizontalAlignment = HAlignment.Center,
         };
         var howTitle = ST14HubStyle.Label(ResCache, Loc.GetString("st14-support-how").ToUpperInvariant(), ST14HubFont.Bold, 16, ST14HubStyle.GoldLight,
             shadow: true);
-        howTitle.VAlign = Label.VAlignMode.Center;
-        steps.AddChild(howTitle);
+        howTitle.Align = Label.AlignMode.Center;
+        howColumn.AddChild(howTitle);
         for (var i = 1; i <= 3; i++)
         {
             var step = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 10 };
@@ -203,12 +194,13 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
         var fair = ST14HubStyle.Label(ResCache, Loc.GetString("st14-support-fair"), ST14HubFont.Italic, 14, ST14HubStyle.Widget);
         fair.Align = Label.AlignMode.Center;
         howColumn.AddChild(fair);
-        Canvas.AddAt(how, new Vector2(0.5f, 1), new Vector2(0, -150), new Vector2(1500, 84));
+        Canvas.AddAt(how, new Vector2(0.5f, 1), new Vector2(0, -158), new Vector2(1700, 108));
         _rowParts.Add(how);
 
         // perks of one tier, opened from a card
         _perks = new ST14LobbyFrame(ResCache, string.Empty) { Visible = false };
-        Canvas.AddAt(_perks, new Vector2(0.5f, 0.5f), new Vector2(0, -20), new Vector2(1640, 770));
+        // under the gold line of the header, above the bottom bar
+        Canvas.AddAt(_perks, new Vector2(0.5f, 0.5f), new Vector2(0, 40), new Vector2(1640, 730));
 
         var perkRow = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 16, VerticalExpand = true };
         _perks.Body.AddChild(perkRow);
@@ -218,13 +210,16 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
         perkRow.AddChild(side);
         _perkInsignia = new ST14SponsorInsignia(ResCache) { SetHeight = 230, Banner = true };
         side.AddChild(_perkInsignia);
-        _perkPrice = ST14HubStyle.Label(ResCache, string.Empty, ST14HubFont.Medium, 16, ST14LobbyStyle.Text);
+        _perkPrice = ST14HubStyle.Label(ResCache, string.Empty, ST14HubFont.Black, 28, Color.White, shadow: true);
         _perkPrice.Align = Label.AlignMode.Center;
         side.AddChild(_perkPrice);
+        var perkMonth = ST14HubStyle.Label(ResCache, Loc.GetString("st14-support-tier-month"), ST14HubFont.Regular, 14, ST14LobbyStyle.Text);
+        perkMonth.Align = Label.AlignMode.Center;
+        side.AddChild(perkMonth);
         _perkState = ST14HubStyle.Label(ResCache, string.Empty, ST14HubFont.SemiBold, 15, ST14HubStyle.Gold);
         _perkState.Align = Label.AlignMode.Center;
         side.AddChild(_perkState);
-        _perkList = new RichTextLabel { MaxWidth = 320, Margin = new Thickness(6, 8, 6, 0) };
+        _perkList = Wrapped(new RichTextLabel { Margin = new Thickness(6, 8, 6, 0) }, 310);
         side.AddChild(_perkList);
 
         var main = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 8, HorizontalExpand = true };
@@ -318,7 +313,6 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
     {
         // OOC name colour (tier 1)
         var ooc = Page("ooc", main);
-        ooc.AddChild(Lock(1, "st14-support-perk-ooc"));
         var oocCard = Card();
         ooc.AddChild(oocCard.Root);
         var chat = new PanelContainer
@@ -343,7 +337,6 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
 
         // ghost colour (tier 2)
         var ghostPage = Page("ghost", main);
-        ghostPage.AddChild(Lock(2, "st14-support-perk-ghost"));
         var ghostCard = Card();
         ghostPage.AddChild(ghostCard.Root);
         var ghostStand = new ST14Pedestal(ResCache) { SetSize = new Vector2(260, 300), HorizontalAlignment = HAlignment.Center, VerticalExpand = true };
@@ -387,7 +380,6 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
 
         // cosmetics are not made yet: a stamp says so
         var cosmetics = Page("cosmetics", main);
-        cosmetics.AddChild(Lock(3, "st14-support-perk-cosmetics"));
         cosmetics.AddChild(new Control { VerticalExpand = true });
         cosmetics.AddChild(new ST14StampControl(ResCache, Loc.GetString("st14-support-soon"))
         {
@@ -401,7 +393,6 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
 
         // the round end mention (tier 4): how the closing report thanks the supporter
         var mention = Page("mention", main);
-        mention.AddChild(Lock(4, "st14-support-perk-mention"));
         mention.AddChild(new Control { VerticalExpand = true });
         var report = new PanelContainer
         {
@@ -432,7 +423,6 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
     {
         // naming an item: the trooper guns, the engineer tool pistol is not a weapon to name
         var naming = Page("naming", main);
-        naming.AddChild(Lock(2, "st14-support-perk-naming"));
         _weapons = _protoMan.EnumeratePrototypes<EntityPrototype>()
             .Where(p => !p.Abstract && p.ID.StartsWith("ST14Weapon") && !p.ID.Contains("Engineer") && p.Components.ContainsKey("Gun"))
             .OrderBy(p => p.Name)
@@ -513,7 +503,6 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
     {
         // figurine of the selected character on a wooden stand
         var figurine = Page("figurine", main);
-        figurine.AddChild(Lock(3, "st14-support-perk-figurine"));
         var figureRow = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 14, VerticalExpand = true };
         var standCard = Card();
         standCard.Root.HorizontalExpand = false;
@@ -560,16 +549,6 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
     {
         var label = ST14HubStyle.Label(ResCache, Loc.GetString(loc).ToUpperInvariant(), ST14HubFont.SemiBold, 17, ST14HubStyle.GoldLight);
         label.Margin = new Thickness(6, 6, 6, 0);
-        return label;
-    }
-
-    /// <summary>
-    /// Line above a perk preview: the perk name and whether the current tier has it
-    /// </summary>
-    private Label Lock(int tier, string perk)
-    {
-        var label = ST14HubStyle.Label(ResCache, string.Empty, ST14HubFont.Medium, 16, ST14HubStyle.Gold);
-        _locks.Add((label, tier, perk));
         return label;
     }
 
@@ -629,13 +608,45 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
         }
     }
 
-    private static RichTextLabel Text(string loc, float maxWidth)
+    private RichTextLabel Text(string loc, float maxWidth)
     {
         // rich text measures itself on one line inside the canvas, the width cap makes it wrap inside the frame
-        var text = new RichTextLabel { Margin = new Thickness(6, 4, 6, 4), MaxWidth = maxWidth };
+        var text = Wrapped(new RichTextLabel { Margin = new Thickness(6, 4, 6, 4) }, maxWidth);
         if (loc.Length > 0)
             text.SetMessage(FormattedMessage.FromMarkupOrThrow(Loc.GetString(loc)));
         return text;
+    }
+
+    /// <summary>
+    /// Rich text does not scale with the canvas: its wrap width in canvas units is kept and turned into the width on
+    /// screen whenever the canvas scale changes, so the text never runs out of its frame on a smaller window
+    /// </summary>
+    private RichTextLabel Wrapped(RichTextLabel label, float width)
+    {
+        label.MaxWidth = width;
+        _wrapped.Add((label, width));
+        _wrapScale = -1;
+        return label;
+    }
+
+    protected override void FrameUpdate(FrameEventArgs args)
+    {
+        base.FrameUpdate(args);
+
+        var scale = Canvas.CanvasScale;
+        if (MathF.Abs(scale - _wrapScale) < 0.001f || scale <= 0)
+            return;
+
+        _wrapScale = scale;
+        foreach (var (label, width) in _wrapped)
+        {
+            label.MaxWidth = width * scale;
+        }
+
+        foreach (var card in _cards)
+        {
+            card.SetWrapScale(scale);
+        }
     }
 
     #endregion
@@ -669,7 +680,7 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
         _perks.Title.Text = Loc.GetString("st14-support-perks-of", ("tier", name)).ToUpperInvariant();
         _perks.Title.FontColorOverride = accent;
         _perkInsignia.Tier = _openTier;
-        _perkPrice.Text = Loc.GetString("st14-support-tier-price", ("price", Tiers[_openTier - 1].Price));
+        _perkPrice.Text = $"{Tiers[_openTier - 1].Price} ₽";
 
         _perkTabs.RemoveAllChildren();
         var pages = TierPages[_openTier - 1];
@@ -780,21 +791,11 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
             card.Update(tier);
         }
 
-        // an open tier is set up, not bought: its plate says so and the way to Boosty is only for the tiers above
+        // an open tier is set up, not bought: its plate says so
         for (var i = 0; i < _perkPlates.Count; i++)
         {
             var open = i + 1 <= tier;
             _perkPlates[i].Text = Loc.GetString(open ? "st14-support-set-up" : "st14-support-open-perks");
-            _subscribePlates[i].Disabled = open;
-            _subscribePlates[i].Text = Loc.GetString(open ? "st14-support-subscribed" : "st14-support-subscribe");
-        }
-
-        foreach (var (label, lockTier, perk) in _locks)
-        {
-            var open = tier >= lockTier;
-            label.Text = Loc.GetString(open ? "st14-support-perk-open" : "st14-support-perk-locked",
-                ("perk", Loc.GetString(perk)), ("tier", ST14SupporterStatus.Numerals[lockTier])).ToUpperInvariant();
-            label.FontColorOverride = open ? Color.FromHex("#9CE07C") : ST14SupporterStatus.TierColors[lockTier];
         }
 
         UpdatePerkSide();
@@ -803,7 +804,7 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
 
 /// <summary>
 /// Tall service card of one sponsorship, drawn like the mode cards of the original: a thin frame, the rank insignia on a
-/// lit field, a slanted banner with the tier name, then the price and the perks. The player's own tier carries a stamp
+/// lit field, a slanted banner with the tier name, then the price and the perks. The player's own tier has a lit frame
 /// </summary>
 public sealed class ST14SponsorCard : ContainerButton
 {
@@ -825,6 +826,8 @@ public sealed class ST14SponsorCard : ContainerButton
         MuteSounds = true;
         StyleBoxOverride = new StyleBoxEmpty();
         DefaultCursorShape = CursorShape.Hand;
+        // the lit field stays inside the card instead of tinting the header above it
+        RectClipContent = true;
 
         _frame = new StyleBoxTexture
         {
@@ -862,7 +865,7 @@ public sealed class ST14SponsorCard : ContainerButton
             column.AddChild(includes);
         }
 
-        _perks = new RichTextLabel { MaxWidth = 345, Margin = new Thickness(2, 2, 2, 0), MouseFilter = MouseFilterMode.Ignore };
+        _perks = new RichTextLabel { MaxWidth = PerksWidth, Margin = new Thickness(2, 2, 2, 0), MouseFilter = MouseFilterMode.Ignore };
         column.AddChild(_perks);
 
         OnPressed += _ => Sounds.Play(ST14HubSound.Click);
@@ -870,6 +873,14 @@ public sealed class ST14SponsorCard : ContainerButton
     }
 
     private ST14HubSoundController Sounds => UserInterfaceManager.GetUIController<ST14HubSoundController>();
+
+    // wrap width of the perk lines in canvas units, inside the card margins
+    private const float PerksWidth = 370;
+
+    public void SetWrapScale(float scale)
+    {
+        _perks.MaxWidth = PerksWidth * scale;
+    }
 
     /// <summary>
     /// Perk lines of a tier: a green tick when the tier is open, a dim dot when not
@@ -926,13 +937,8 @@ public sealed class ST14SponsorCard : ContainerButton
         // the accent strip along the top edge
         handle.DrawRect(new UIBox2(inner.Left, inner.Top, inner.Right, inner.Top + 4 * scale), accent);
 
+        // the player's own tier is told by the badge in the corner, nothing is drawn over the insignia
         base.Draw(handle);
-
-        if (own)
-        {
-            ST14ClassifiedStamp.DrawStamp(handle, _cache, Loc.GetString("st14-support-tier-current"), new Vector2(size.X / 2, size.Y * 0.36f),
-                new Vector2(300, 52) * scale, -8f, scale);
-        }
     }
 }
 
@@ -943,7 +949,6 @@ public sealed class ST14SponsorCard : ContainerButton
 public sealed class ST14SponsorInsignia : Control
 {
     private readonly IResourceCache _cache;
-    private readonly Texture _glow;
     private float _time;
 
     public int Tier = 1;
@@ -952,7 +957,6 @@ public sealed class ST14SponsorInsignia : Control
     public ST14SponsorInsignia(IResourceCache cache)
     {
         _cache = cache;
-        _glow = cache.GetResource<TextureResource>("/Textures/_ST14/Interface/Lobby/soft_glow.png").Texture;
     }
 
     protected override void FrameUpdate(FrameEventArgs args)
@@ -972,9 +976,12 @@ public sealed class ST14SponsorInsignia : Control
         var center = new Vector2(size.X / 2, (Banner ? 105 : 135) * unit);
         var pulse = 0.85f + 0.15f * MathF.Sin(_time * MathF.Tau / 3f);
 
-        var glow = 230 * unit;
-        handle.DrawTextureRect(_glow, UIBox2.FromDimensions(center - new Vector2(glow, glow) / 2, new Vector2(glow, glow)),
-            accent.WithAlpha(0.3f * pulse));
+        // round glow of stacked discs: a square glow texture showed its edges behind the chevrons
+        var glow = 105 * unit;
+        for (var i = 0; i < 12; i++)
+        {
+            handle.DrawCircle(center, glow * (1f - i / 12f), accent.WithAlpha(0.035f * pulse));
+        }
 
         // chevrons stacked upwards, the top tier has three and a star
         var chevrons = Math.Min(tier, 3);
@@ -1004,15 +1011,27 @@ public sealed class ST14SponsorInsignia : Control
         var bannerCenter = new Vector2(size.X / 2, 228 * unit);
         var baseTransform = handle.GetTransform();
         handle.SetTransform(Matrix3x2.CreateRotation(-MathF.PI * 6.56f / 180f) * Matrix3x2.CreateTranslation(bannerCenter) * baseTransform);
-        var half = new Vector2(MathF.Min(size.X * 0.54f, 220 * unit), 26 * unit);
+        // the turned band stays inside the control, so it never runs out of the card or the side column
+        var turn = MathF.PI * 6.56f / 180f;
+        var bandHeight = 26 * unit;
+        var halfWidth = MathF.Min((size.X / 2 - bandHeight * MathF.Sin(turn)) / MathF.Cos(turn), 220 * unit);
+        var half = new Vector2(halfWidth, bandHeight);
         handle.DrawRect(new UIBox2(-half.X, -half.Y + 4 * unit, half.X, half.Y + 4 * unit), Color.Black.WithAlpha(0.45f));
         handle.DrawRect(new UIBox2(-half.X, -half.Y, half.X, half.Y), accent.WithAlpha(0.92f));
         handle.DrawRect(new UIBox2(-half.X, -half.Y, half.X, -half.Y + 2 * unit), Color.White.WithAlpha(0.35f));
         handle.SetTransform(baseTransform);
 
-        var font = ST14HubStyle.Font(_cache, ST14HubFont.Black, Math.Max(8, (int) MathF.Round(26 * unit)));
-        ST14HubStyle.DrawRotatedText(handle, font, $"SPONSORSHIP {ST14SupporterStatus.Numerals[tier]}", bannerCenter, -6.56f,
-            Color.FromHex("#14110C"));
+        // the caption shrinks until it fits the band with a margin at both ends
+        var caption = $"SPONSORSHIP {ST14SupporterStatus.Numerals[tier]}";
+        var fontSize = Math.Max(8, (int) MathF.Round(26 * unit));
+        var font = ST14HubStyle.Font(_cache, ST14HubFont.Black, fontSize);
+        while (fontSize > 8 && handle.GetDimensions(font, caption, 1f).X > half.X * 2 * 0.86f)
+        {
+            fontSize--;
+            font = ST14HubStyle.Font(_cache, ST14HubFont.Black, fontSize);
+        }
+
+        ST14HubStyle.DrawRotatedText(handle, font, caption, bannerCenter, -6.56f, Color.FromHex("#14110C"));
     }
 
     private static void Chevron(DrawingHandleScreen handle, Vector2 c, float width, float height, float thick, Color color)
@@ -1065,7 +1084,6 @@ public sealed class ST14SponsorInsignia : Control
 public sealed class ST14TierMedal : Control
 {
     private readonly IResourceCache _cache;
-    private readonly Texture _glow;
     private float _time;
 
     public int Tier;
@@ -1073,7 +1091,6 @@ public sealed class ST14TierMedal : Control
     public ST14TierMedal(IResourceCache cache)
     {
         _cache = cache;
-        _glow = cache.GetResource<TextureResource>("/Textures/_ST14/Interface/Lobby/soft_glow.png").Texture;
     }
 
     protected override void FrameUpdate(FrameEventArgs args)
@@ -1086,28 +1103,33 @@ public sealed class ST14TierMedal : Control
     {
         base.Draw(handle);
 
+        // a round badge inside its own box: no glow spilling over the header, the ring pulses a little instead
         var size = PixelSize;
         var center = size / 2;
-        var radius = MathF.Min(size.X, size.Y) * 0.42f;
+        var radius = MathF.Min(size.X, size.Y) * 0.46f;
         var color = ST14SupporterStatus.TierColors[Math.Clamp(Tier, 0, 4)];
-        var pulse = 0.8f + 0.2f * MathF.Sin(_time * MathF.Tau / 3f);
-
-        if (Tier > 0)
-        {
-            var glow = radius * 2.4f;
-            handle.DrawTextureRect(_glow, UIBox2.FromDimensions(center - new Vector2(glow, glow) / 2, new Vector2(glow, glow)),
-                color.WithAlpha(0.35f * pulse));
-        }
+        var pulse = Tier > 0 ? 0.75f + 0.25f * MathF.Sin(_time * MathF.Tau / 3f) : 0.6f;
 
         handle.DrawCircle(center, radius, Color.FromHex("#14120E"));
-        handle.DrawCircle(center, radius, color, false);
-        handle.DrawCircle(center, radius * 0.86f, color.WithAlpha(0.6f), false);
-        handle.DrawCircle(center, radius * 0.84f, color.WithAlpha(Tier > 0 ? 0.18f : 0.06f));
+        handle.DrawCircle(center, radius * 0.9f, color.WithAlpha(Tier > 0 ? 0.16f : 0.05f));
+        for (var ring = 0f; ring < 2.5f; ring += 0.5f)
+        {
+            handle.DrawCircle(center, radius - ring * UIScale, color.WithAlpha(pulse), false);
+        }
 
-        var font = ST14HubStyle.Font(_cache, ST14HubFont.Black, Math.Max(8, (int) (radius * 0.75f)));
+        handle.DrawCircle(center, radius * 0.86f, color.WithAlpha(0.5f), false);
+
         var text = ST14SupporterStatus.Numerals[Math.Clamp(Tier, 0, 4)];
-        var dims = handle.GetDimensions(font, text, 1f);
-        handle.DrawString(font, center - dims / 2, text, 1f, Tier > 0 ? color : color.WithAlpha(0.7f));
+        var fontSize = Math.Max(8, (int) (radius * 0.8f / UIScale));
+        var font = ST14HubStyle.Font(_cache, ST14HubFont.Black, fontSize);
+        while (fontSize > 8 && handle.GetDimensions(font, text, UIScale).X > radius * 1.3f)
+        {
+            fontSize--;
+            font = ST14HubStyle.Font(_cache, ST14HubFont.Black, fontSize);
+        }
+
+        var dims = handle.GetDimensions(font, text, UIScale);
+        handle.DrawString(font, center - dims / 2, text, UIScale, Tier > 0 ? color : color.WithAlpha(0.7f));
     }
 }
 

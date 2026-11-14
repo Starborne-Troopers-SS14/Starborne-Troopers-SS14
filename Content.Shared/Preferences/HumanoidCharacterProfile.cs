@@ -854,6 +854,10 @@ namespace Content.Shared.Preferences
                 if (!protoManager.Resolve(traitProto.Category, out var category))
                     continue;
 
+                // ST14: disabilities and quirks are not offered to troopers
+                if (ST14CharacterSide.HiddenTraitCategories.Contains(category.ID))
+                    continue;
+
                 var existing = groups.GetOrNew(category.ID);
                 existing += traitProto.Cost;
 
