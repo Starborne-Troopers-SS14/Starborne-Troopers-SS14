@@ -4,9 +4,12 @@ using Content.Shared._ST14.EnergyFence;
 using Content.Shared.Containers.ItemSlots;
 using Content.Shared.Examine;
 using Content.Shared.Interaction;
+using Content.Shared.Mind;
+using Content.Shared.Popups;
 using Content.Shared.Power;
 using Content.Shared.Power.Components;
 using Content.Shared.Power.EntitySystems;
+using Content.Shared.Roles.Jobs;
 using Content.Shared.Verbs;
 using Robust.Shared.Audio.Systems;
 using Robust.Shared.Containers;
@@ -29,6 +32,9 @@ public sealed partial class ST14EnergyBoxSystem : EntitySystem
     [Dependency] private SharedBatterySystem _battery = default!;
     [Dependency] private SharedAppearanceSystem _appearance = default!;
     [Dependency] private SharedAudioSystem _audio = default!;
+    [Dependency] private SharedPopupSystem _popup = default!;
+    [Dependency] private SharedMindSystem _mind = default!;
+    [Dependency] private SharedJobSystem _jobs = default!;
 
     /// <summary>
     /// How often the block's own battery is told its charge while it sits in a panel
@@ -72,13 +78,14 @@ public sealed partial class ST14EnergyBoxSystem : EntitySystem
 
         box.Comp.Breaker = on;
         _audio.PlayPvs(box.Comp.BreakerSound, box);
-        UpdateVisuals(box, force: true);
+        UpdateVisuals(box);
     }
 
     private void OnBoxMapInit(Entity<ST14EnergyBoxComponent> ent, ref MapInitEvent args)
     {
+        _slots.SetLock(ent.Owner, ent.Comp.BlockSlot, ent.Comp.Door != ST14EnergyBoxDoor.Open);
         TakeBlock(ent);
-        UpdateVisuals(ent, force: true);
+        UpdateVisuals(ent);
     }
 
     private void OnBlockInserted(Entity<ST14EnergyBoxComponent> ent, ref EntInsertedIntoContainerMessage args)
@@ -87,7 +94,7 @@ public sealed partial class ST14EnergyBoxSystem : EntitySystem
             return;
 
         TakeBlock(ent);
-        UpdateVisuals(ent, force: true);
+        UpdateVisuals(ent);
     }
 
     private void OnBlockRemoved(Entity<ST14EnergyBoxComponent> ent, ref EntRemovedFromContainerMessage args)
@@ -100,7 +107,7 @@ public sealed partial class ST14EnergyBoxSystem : EntitySystem
 
         ent.Comp.Block = null;
         ent.Comp.Charge = 0f;
-        UpdateVisuals(ent, force: true);
+        UpdateVisuals(ent);
     }
 
     private void TakeBlock(Entity<ST14EnergyBoxComponent> ent)
@@ -129,12 +136,84 @@ public sealed partial class ST14EnergyBoxSystem : EntitySystem
             return;
 
         args.Handled = true;
-        SetBreaker(ent, !ent.Comp.Breaker, args.User);
+        TryToggleDoor(ent, args.User);
+    }
+
+    /// <summary>
+    /// Whether the user's job lets them into the box
+    /// </summary>
+    public bool CanOpen(Entity<ST14EnergyBoxComponent> ent, EntityUid user)
+    {
+        if (ent.Comp.RequiredJob is not { } job)
+            return true;
+
+        return _mind.TryGetMind(user, out var mindId, out _) && _jobs.MindHasJobWithId(mindId, job);
+    }
+
+    /// <summary>
+    /// Opens a closed door or closes an open one. A door already moving is left alone
+    /// </summary>
+    public bool TryToggleDoor(Entity<ST14EnergyBoxComponent> ent, EntityUid? user)
+    {
+        if (ent.Comp.Door is ST14EnergyBoxDoor.Opening or ST14EnergyBoxDoor.Closing)
+            return false;
+
+        if (user != null && !CanOpen(ent, user.Value))
+        {
+            _popup.PopupEntity(Loc.GetString("st14-energy-box-engineer-only"), ent, user.Value);
+            return false;
+        }
+
+        SetDoor(ent, ent.Comp.Door == ST14EnergyBoxDoor.Closed ? ST14EnergyBoxDoor.Opening : ST14EnergyBoxDoor.Closing);
+        return true;
+    }
+
+    private void SetDoor(Entity<ST14EnergyBoxComponent> ent, ST14EnergyBoxDoor door)
+    {
+        ent.Comp.Door = door;
+
+        switch (door)
+        {
+            case ST14EnergyBoxDoor.Opening:
+                ent.Comp.DoorDone = _timing.CurTime + ent.Comp.DoorTime;
+                _audio.PlayPvs(ent.Comp.OpenSound, ent);
+                break;
+            case ST14EnergyBoxDoor.Closing:
+                ent.Comp.DoorDone = _timing.CurTime + ent.Comp.DoorTime;
+                _audio.PlayPvs(ent.Comp.CloseSound, ent);
+                break;
+        }
+
+        // The block can only be put in or taken out with the door all the way open
+        _slots.SetLock(ent.Owner, ent.Comp.BlockSlot, door != ST14EnergyBoxDoor.Open);
+        UpdateVisuals(ent);
+    }
+
+    public override void Update(float frameTime)
+    {
+        base.Update(frameTime);
+
+        var now = _timing.CurTime;
+        var query = EntityQueryEnumerator<ST14EnergyBoxComponent>();
+        while (query.MoveNext(out var uid, out var box))
+        {
+            if (now < box.DoorDone || Paused(uid))
+                continue;
+
+            if (box.Door == ST14EnergyBoxDoor.Opening)
+                SetDoor((uid, box), ST14EnergyBoxDoor.Open);
+            else if (box.Door == ST14EnergyBoxDoor.Closing)
+                SetDoor((uid, box), ST14EnergyBoxDoor.Closed);
+        }
     }
 
     private void OnBoxVerbs(Entity<ST14EnergyBoxComponent> ent, ref GetVerbsEvent<AlternativeVerb> args)
     {
         if (!args.CanAccess || !args.CanInteract || !args.CanComplexInteract)
+            return;
+
+        // The breaker sits inside, behind the door
+        if (ent.Comp.Door != ST14EnergyBoxDoor.Open || !CanOpen(ent, args.User))
             return;
 
         var user = args.User;
@@ -247,7 +326,7 @@ public sealed partial class ST14EnergyBoxSystem : EntitySystem
         }
     }
 
-    private void UpdateVisuals(Entity<ST14EnergyBoxComponent> ent, bool force = false)
+    private void UpdateVisuals(Entity<ST14EnergyBoxComponent> ent)
     {
         ent.Comp.NextVisuals = _timing.CurTime + VisualsDelay;
 
@@ -264,9 +343,15 @@ public sealed partial class ST14EnergyBoxSystem : EntitySystem
             discharging = battery.Enabled && battery.CurrentSupply > battery.CurrentReceiving * battery.Efficiency + 1f;
         }
 
-        _appearance.SetData(ent, ST14EnergyBoxVisuals.Breaker, ent.Comp.Breaker);
+        // The lights are on the screen of the door: they go away with it
+        var closed = ent.Comp.Door == ST14EnergyBoxDoor.Closed;
+
+        _appearance.SetData(ent, ST14EnergyBoxVisuals.Door, ent.Comp.Door);
         _appearance.SetData(ent, ST14EnergyBoxVisuals.HasBlock, hasBlock);
-        _appearance.SetData(ent, ST14EnergyBoxVisuals.ChargeLevel, level);
-        _appearance.SetData(ent, ST14EnergyBoxVisuals.Discharging, discharging);
+        _appearance.SetData(ent, ST14EnergyBoxVisuals.Breaker,
+            !closed ? ST14EnergyBoxLight.Hidden : ent.Comp.Breaker ? ST14EnergyBoxLight.On : ST14EnergyBoxLight.Off);
+        _appearance.SetData(ent, ST14EnergyBoxVisuals.ChargeLevel, closed && hasBlock ? level : -1);
+        _appearance.SetData(ent, ST14EnergyBoxVisuals.SlotEmpty, closed && !hasBlock);
+        _appearance.SetData(ent, ST14EnergyBoxVisuals.Discharging, closed && discharging);
     }
 }

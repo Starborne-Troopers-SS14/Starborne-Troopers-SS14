@@ -32,6 +32,7 @@
   - ST14EngineerMultitool
   storage:
     back:
+    - ST14EnergyBlock
     - ST14FieldKit
     - ST14EntrenchingTool
     - trayScanner

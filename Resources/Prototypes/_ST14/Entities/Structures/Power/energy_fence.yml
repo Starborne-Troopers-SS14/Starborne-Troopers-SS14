@@ -121,7 +121,7 @@
 - type: entity
   id: ST14EnergyBox
   name: energy box
-  description: A field power panel of the Mobile Infantry. Takes power from field generators by MV cable and gives it to the pylons by LV cable, but only with an energy block inside. The block stores the surplus and covers a shortfall.
+  description: A field power panel of the Mobile Infantry. Takes power from field generators by MV cable and gives it to the pylons by LV cable, but only with an energy block inside. The block stores the surplus and covers a shortfall. Only an engineer can open it.
   placement:
     mode: SnapgridCenter
   components:
@@ -146,10 +146,11 @@
     sprite: _ST14/Structures/Power/energy_box.rsi
     layers:
     - state: base
-    - state: door
     - state: battery-in
       map: [ "block" ]
       visible: false
+    - state: door
+      map: [ "door" ]
     - state: breaker_on
       map: [ "breaker" ]
       shader: unshaded
@@ -165,38 +166,47 @@
       shader: unshaded
       visible: false
   - type: Appearance
+  # The server hides the screen lights itself while the door is not closed
   - type: GenericVisualizer
     visuals:
-      enum.ST14EnergyBoxVisuals.Breaker:
-        breaker:
-          True: { state: breaker_on }
-          False: { state: breaker_off }
+      enum.ST14EnergyBoxVisuals.Door:
+        door:
+          Closed: { state: door }
+          Opening: { state: opening }
+          Open: { state: open }
+          Closing: { state: closing }
       enum.ST14EnergyBoxVisuals.HasBlock:
         block:
           True: { visible: true }
           False: { visible: false }
-        charge:
-          True: { visible: true }
-          False: { visible: false }
-        slot:
-          True: { visible: false }
-          False: { visible: true }
+      enum.ST14EnergyBoxVisuals.Breaker:
+        breaker:
+          Hidden: { visible: false }
+          On: { state: breaker_on, visible: true }
+          Off: { state: breaker_off, visible: true }
       enum.ST14EnergyBoxVisuals.ChargeLevel:
         charge:
-          0: { state: block_0 }
-          1: { state: block_1 }
-          2: { state: block_2 }
-          3: { state: block_3 }
-          4: { state: block_4 }
+          -1: { visible: false }
+          0: { state: block_0, visible: true }
+          1: { state: block_1, visible: true }
+          2: { state: block_2, visible: true }
+          3: { state: block_3, visible: true }
+          4: { state: block_4, visible: true }
+      enum.ST14EnergyBoxVisuals.SlotEmpty:
+        slot:
+          True: { visible: true }
+          False: { visible: false }
       enum.ST14EnergyBoxVisuals.Discharging:
         discharging:
           True: { visible: true }
           False: { visible: false }
+  # Built empty: the engineer opens the door and puts in the block from his backpack
   - type: ItemSlots
     slots:
       energy_block:
         name: st14-energy-box-slot
-        startingItem: ST14EnergyBlock
+        locked: true
+        lockedFailPopup: st14-energy-box-closed
         whitelist:
           tags:
           - ST14EnergyBlock
@@ -263,8 +273,9 @@
     - state: green
       map: [ "charge" ]
       shader: unshaded
+  # Large, not Huge, so it fits in the engineer's backpack with the rest of his kit
   - type: Item
-    size: Huge
+    size: Large
     sprite: _ST14/Objects/Power/energy_block.rsi
   - type: MultiHandedItem
   - type: HeldSpeedModifier

@@ -1,6 +1,7 @@
 using System.Numerics;
 using Content.Shared.DoAfter;
 using Content.Shared.Maps;
+using Content.Shared.Roles;
 using Content.Shared.Whitelist;
 using Robust.Shared.Audio;
 using Robust.Shared.GameStates;
@@ -192,6 +193,36 @@ public sealed partial class ST14EnergyBoxComponent : Component
     public SoundSpecifier? BreakerSound = new SoundPathSpecifier("/Audio/Machines/machine_switch.ogg");
 
     /// <summary>
+    /// Only someone with this job can open the door. Null: anyone
+    /// </summary>
+    [DataField]
+    public ProtoId<JobPrototype>? RequiredJob = "ST14Engineer";
+
+    /// <summary>
+    /// Door state. The block slot and the breaker can only be reached with the door open
+    /// </summary>
+    [DataField]
+    public ST14EnergyBoxDoor Door = ST14EnergyBoxDoor.Closed;
+
+    /// <summary>
+    /// Length of the opening and closing animations
+    /// </summary>
+    [DataField]
+    public TimeSpan DoorTime = TimeSpan.FromSeconds(0.48);
+
+    [DataField]
+    public SoundSpecifier? OpenSound = new SoundPathSpecifier("/Audio/Machines/shutter.ogg");
+
+    [DataField]
+    public SoundSpecifier? CloseSound = new SoundPathSpecifier("/Audio/Machines/shutter.ogg");
+
+    /// <summary>
+    /// When the door finishes opening or closing
+    /// </summary>
+    [ViewVariables]
+    public TimeSpan DoorDone;
+
+    /// <summary>
     /// The block's charge while it sits in the panel. Written back to the block now and then, not every tick
     /// </summary>
     [ViewVariables]
@@ -315,12 +346,47 @@ public enum ST14EnergyPylonState : byte
 }
 
 [Serializable, NetSerializable]
+public enum ST14EnergyBoxDoor : byte
+{
+    Closed,
+    Opening,
+    Open,
+    Closing,
+}
+
+/// <summary>
+/// The lights on the door screen are set by the server already combined with the door state:
+/// with the door away from closed every one of them is hidden
+/// </summary>
+[Serializable, NetSerializable]
 public enum ST14EnergyBoxVisuals : byte
 {
-    Breaker,
+    Door,
     HasBlock,
+
+    /// <summary>
+    /// <see cref="ST14EnergyBoxLight"/>
+    /// </summary>
+    Breaker,
+
+    /// <summary>
+    /// -1 hidden, 0 to 4
+    /// </summary>
     ChargeLevel,
+
+    /// <summary>
+    /// The blinking "no block" light
+    /// </summary>
+    SlotEmpty,
     Discharging,
+}
+
+[Serializable, NetSerializable]
+public enum ST14EnergyBoxLight : byte
+{
+    Hidden,
+    On,
+    Off,
 }
 
 [Serializable, NetSerializable]

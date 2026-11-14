@@ -2,6 +2,7 @@ using Content.IntegrationTests.Fixtures;
 using Content.Server._ST14.EnergyFence;
 using Content.Server.Power.Components;
 using Content.Shared._ST14.EnergyFence;
+using Content.Shared.Containers.ItemSlots;
 using Content.Shared.Damage.Components;
 using Content.Shared.Damage.Systems;
 using Content.Shared.FixedPoint;
@@ -118,6 +119,21 @@ public sealed class ST14EnergyFenceTest : GameTest
             pylonB = entMan.SpawnEntity("ST14EnergyPylon", new EntityCoordinates(map.Grid, 7.5f, 3.5f));
         });
 
+        // The box is built empty and closed: open the door, put the block in
+        await server.WaitPost(() =>
+        {
+            var boxEnt = (box, entMan.GetComponent<ST14EnergyBoxComponent>(box));
+            Assert.That(boxes.GetBlock(boxEnt), Is.Null, "The energy box was built with a block in it.");
+            Assert.That(boxes.TryToggleDoor(boxEnt, null), "The energy box door did not open.");
+        });
+        await pair.RunSeconds(1f);
+        await server.WaitPost(() =>
+        {
+            var block = entMan.SpawnEntity("ST14EnergyBlock", entMan.GetComponent<TransformComponent>(box).Coordinates);
+            Assert.That(entMan.System<ItemSlotsSystem>().TryInsert((box, null), "energy_block", block, null),
+                "The energy block did not go into the open box.");
+        });
+
         // Past the power-up delay
         await pair.RunSeconds(2.5f);
 
@@ -179,7 +195,7 @@ public sealed class ST14EnergyFenceTest : GameTest
 
             // No block: no current at all
             var block = boxes.GetBlock((box, entMan.GetComponent<ST14EnergyBoxComponent>(box)));
-            Assert.That(block, Is.Not.Null, "The energy box was built without an energy block.");
+            Assert.That(block, Is.Not.Null, "The energy block fell out of the box.");
             Assert.That(battery.GetCharge(block!.Value).Charge, Is.LessThan(battery.GetCharge(block.Value).MaxCharge),
                 "The energy box did not write the drained charge back into the block.");
             entMan.DeleteEntity(block);

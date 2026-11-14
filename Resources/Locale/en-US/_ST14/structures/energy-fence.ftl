@@ -5,6 +5,8 @@ st14-energy-box-examine-breaker-on = The breaker is [color=lime]on[/color].
 st14-energy-box-examine-breaker-off = The breaker is [color=red]off[/color].
 st14-energy-box-verb-breaker-on = Switch the breaker on
 st14-energy-box-verb-breaker-off = Switch the breaker off
+st14-energy-box-engineer-only = Only an engineer can open the energy box.
+st14-energy-box-closed = Open the energy box first.
 
 st14-energy-pylon-examine-unanchored = The pylon is [color=red]not bolted down[/color].
 st14-energy-pylon-examine-unpowered = The pylon is [color=red]unpowered[/color]: it needs an LV cable from an energy box.
