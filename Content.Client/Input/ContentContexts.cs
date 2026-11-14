@@ -35,7 +35,10 @@ namespace Content.Client.Input
             common.AddFunction(ContentKeyFunctions.RotateStoredItem);
             common.AddFunction(ContentKeyFunctions.SaveItemLocation);
             common.AddFunction(ContentKeyFunctions.Point);
-            // ST14: the camera is fixed for players, no zoom keys and no camera turning (the engine adds those)
+            // ST14: the camera does not turn (the engine adds those keys), it zooms with the numpad and the wheel
+            common.AddFunction(ContentKeyFunctions.ZoomOut);
+            common.AddFunction(ContentKeyFunctions.ZoomIn);
+            common.AddFunction(ContentKeyFunctions.ResetZoom);
             common.RemoveFunction(EngineKeyFunctions.CameraRotateLeft);
             common.RemoveFunction(EngineKeyFunctions.CameraRotateRight);
             common.RemoveFunction(EngineKeyFunctions.CameraReset);

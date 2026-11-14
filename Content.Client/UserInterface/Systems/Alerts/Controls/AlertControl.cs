@@ -58,14 +58,18 @@ namespace Content.Client.UserInterface.Systems.Alerts.Controls
             TooltipSupplier = SupplyTooltip;
             Alert = alert;
 
-            HorizontalAlignment = HAlignment.Left;
+            // ST14: every alert is one 64 px cell centred in the column, a big icon is scaled into it instead of
+            // spilling over its neighbours, so the column stays straight and the values do not overlap
+            HorizontalAlignment = HAlignment.Center;
+            SetSize = new Vector2(64, 64);
             _severity = severity;
             _icon = new SpriteView
             {
                 Scale = new Vector2(2, 2),
                 MaxSize = new Vector2(64, 64),
-                Stretch = SpriteView.StretchMode.None,
-                HorizontalAlignment = HAlignment.Left
+                Stretch = SpriteView.StretchMode.Fit,
+                HorizontalAlignment = HAlignment.Center,
+                VerticalAlignment = VAlignment.Center,
             };
 
             SetupIcon();

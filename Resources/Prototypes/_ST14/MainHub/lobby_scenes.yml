@@ -3,6 +3,8 @@
 
 - type: st14HubScene
   id: ST14LobbyOrbit
+  title: st14-lobby-background-orbit
+  artist: st14-lobby-background-artist-terran-command
   layers:
   - id: space
     texture: /Textures/_ST14/Interface/Lobby/Backgrounds/space.png
@@ -108,6 +110,8 @@
 
 - type: st14HubScene
   id: ST14LobbyHeadquarters
+  title: st14-lobby-background-headquarters
+  artist: st14-lobby-background-artist-terran-command
   layers:
   - id: background
     texture: /Textures/_ST14/Interface/Lobby/Backgrounds/hq_background.png
@@ -165,6 +169,8 @@
 # Bug lobby: a horde of warrior bugs runs across a burning desert. Bugs only run straight and bob a little, nothing sways.
 - type: st14HubScene
   id: ST14LobbyHorde
+  title: st14-lobby-background-horde
+  artist: st14-lobby-background-artist-terran-command
   layers:
   - id: sky
     texture: /Textures/_ST14/Interface/Lobby/Backgrounds/bug_sky.png
@@ -364,13 +370,15 @@
       breathePeriod: 16
       phase: 0.4
 
-# Support screen: deep space with a warm nebula, Klendathu low on the left and the Mobile Infantry emblem large and dim
-# behind the panels. Only slow drift and breathing.
+# Support screen: the fleet in orbit. A cold blue nebula over the stars, the line of a planet along the bottom, a
+# cruiser high on the right and a pair of dropships on the left, the Mobile Infantry emblem dim behind the cards.
+# Everything big stays at the edges and dark so the cards read; only slow drift and breathing.
 - type: st14HubScene
   id: ST14SupportBackground
   layers:
   - id: space
     texture: /Textures/_ST14/Interface/Lobby/Backgrounds/space.png
+    color: "#B8C4D8FF"
     anchorMin: 0, 0
     anchorMax: 1, 1
     position: 0, 0
@@ -384,49 +392,59 @@
     size: 2100, 1181
     pivot: 0.5, 0.5
     drift:
-      offset: 8, 4
-      offsetPeriod: 90
-  - id: galaxy
-    texture: /Textures/_ST14/Interface/Lobby/Backgrounds/galaxy.png
-    color: "#FFC89070"
-    anchorMin: 0.5, 0.5
-    anchorMax: 0.5, 0.5
-    position: 380, -120
-    size: 1500, 1195
-    pivot: 0.5, 0.5
-    drift:
-      breathe: 0.02
-      breathePeriod: 32
-      offset: 10, 4
-      offsetPeriod: 60
+      offset: -10, 3
+      offsetPeriod: 100
   - id: nebula
     texture: /Textures/_ST14/Interface/Lobby/Backgrounds/nebula.png
-    color: "#E8B48C60"
+    color: "#7FA6D850"
     anchorMin: 0.5, 0.5
     anchorMax: 0.5, 0.5
-    position: 0, 220
+    position: 0, -250
     size: 2600, 642
     pivot: 0.5, 0.5
     drift:
       breathe: 0.015
-      breathePeriod: 28
-      offset: 24, 0
-      offsetPeriod: 70
-      phase: 0.3
-  - id: planet
-    texture: /Textures/_ST14/Interface/Lobby/Backgrounds/planet.png
-    color: "#B0B0B0FF"
-    anchorMin: 0, 1
-    anchorMax: 0, 1
-    position: 120, 160
-    size: 900, 900
+      breathePeriod: 30
+      offset: -24, 0
+      offsetPeriod: 75
+  - id: atmosphere
+    texture: /Textures/_ST14/Interface/Lobby/Backgrounds/atmosphere.png
+    color: "#8CB0E0B0"
+    anchorMin: 0.5, 1
+    anchorMax: 0.5, 1
+    position: 0, 120
+    size: 2560, 713
     pivot: 0.5, 0.5
     drift:
-      breathe: 0.006
-      breathePeriod: 45
+      breathe: 0.008
+      breathePeriod: 40
+  - id: cruiser
+    texture: /Textures/_ST14/Interface/Lobby/Backgrounds/cruiser.png
+    color: "#6E7890D0"
+    anchorMin: 1, 0
+    anchorMax: 1, 0
+    position: -330, 250
+    size: 980, 475
+    pivot: 0.5, 0.5
+    drift:
+      offset: -30, 6
+      offsetPeriod: 120
+      phase: 0.3
+  - id: dropships
+    texture: /Textures/_ST14/Interface/Lobby/Backgrounds/dropships.png
+    color: "#808AA0C0"
+    anchorMin: 0, 0
+    anchorMax: 0, 0
+    position: 260, 330
+    size: 330, 191
+    pivot: 0.5, 0.5
+    drift:
+      offset: 40, -8
+      offsetPeriod: 50
+      phase: 0.6
   - id: emblem
     texture: /Textures/_ST14/Interface/Lobby/Backgrounds/mi_logo.png
-    color: "#D4C48A22"
+    color: "#C8D4E81A"
     anchorMin: 0.5, 0.5
     anchorMax: 0.5, 0.5
     position: 0, 40

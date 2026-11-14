@@ -15,6 +15,18 @@ public sealed partial class ST14HubScenePrototype : IPrototype
     public string ID { get; private set; } = default!;
 
     /// <summary>
+    /// Locale key of the name of the background, shown in the lobby
+    /// </summary>
+    [DataField]
+    public LocId? Title { get; private set; }
+
+    /// <summary>
+    /// Locale key of the author or the source of the art, shown next to the name
+    /// </summary>
+    [DataField]
+    public LocId? Artist { get; private set; }
+
+    /// <summary>
     /// Length of the keyframed animation in seconds, curves hold their last value after it
     /// </summary>
     [DataField]

@@ -2,6 +2,7 @@ using System.Linq;
 using Content.Server.Administration.Managers;
 using Content.Server.Station.Components;
 using Content.Server.Station.Events;
+using Content.Shared._ST14.MainHub; // ST14
 using Content.Shared.Antag;
 using Content.Shared.CCVar;
 using Content.Shared.Preferences;
@@ -21,6 +22,7 @@ public sealed partial class ServerStationJobsSystem
     [Dependency] private IBanManager _banManager = default!;
     [Dependency] private SharedJobSystem _jobs = default!;
     [Dependency] private AntagSelectionSystem _antag = default!;
+    [Dependency] private IPrototypeManager _st14Protos = default!; // ST14
 
     private int GetJobWeight(EntityUid station, JobPrototype job)
     {
@@ -295,6 +297,14 @@ public sealed partial class ServerStationJobsSystem
                 var candidates = new StationJobsGetCandidatesEvent(player, allowed);
                 RaiseLocalEvent(ref candidates);
                 overflows.RemoveAll(job => !allowed.Contains(job.Id));
+
+                // the basic job of the side of the character, not a random one of the open jobs
+                var fallback = ST14CharacterSide.FallbackJob(_st14Protos, profile.Species);
+                if (fallback != null && overflows.Contains(fallback.Value))
+                {
+                    assignedJobs.Add(player, (fallback.Value, station));
+                    break;
+                }
                 // ST14 end
 
                 _random.Shuffle(overflows);

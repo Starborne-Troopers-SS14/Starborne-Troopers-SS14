@@ -1,3 +1,4 @@
+using Content.Client._ST14.MainHub; // ST14
 using Content.Client.Info;
 using Content.Client.Info.PlaytimeStats;
 using Content.Client.Resources;
@@ -12,6 +13,7 @@ using Robust.Client.UserInterface.XAML;
 using Robust.Shared.Configuration;
 using Robust.Shared.Player;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Random; // ST14
 
 namespace Content.Client.Lobby.UI
 {
@@ -54,7 +56,9 @@ namespace Content.Client.Lobby.UI
 
             _createNewCharacterButton.OnPressed += args =>
             {
-                _preferencesManager.CreateCharacter(HumanoidCharacterProfile.Random().WithJobFromCvar(_cfg));
+                // ST14: a character of the side of the player, a random species was snapped back from at once
+                _preferencesManager.CreateCharacter(IoCManager.Resolve<IEntityManager>().System<ST14SideClientSystem>()
+                    .NewCharacter(_protomanager, IoCManager.Resolve<IRobustRandom>()));
                 ReloadCharacterPickers();
                 args.Event.Handle();
             };
@@ -66,6 +70,13 @@ namespace Content.Client.Lobby.UI
 
             _cfg.OnValueChanged(CCVars.SeeOwnNotes, p => AdminRemarksButton.Visible = p, true);
             _cfg.OnValueChanged(CCVars.GameMaxCharacterSlots, _ => ReloadCharacterPickers());
+
+            // ST14: the roster shows only the characters of the side, it follows a side picked later
+            IoCManager.Resolve<IEntityManager>().System<ST14SideClientSystem>().Changed += () =>
+            {
+                if (!Disposed)
+                    ReloadCharacterPickers();
+            };
         }
 
         /// <summary>
@@ -91,10 +102,15 @@ namespace Content.Client.Lobby.UI
                     ("maxCharacters", maxCharactersSlots));
 
             var selectedSlot = _preferencesManager.Preferences?.SelectedCharacterIndex;
+            var st14Sides = IoCManager.Resolve<IEntityManager>().System<ST14SideClientSystem>(); // ST14
 
             foreach (var (slot, character) in _preferencesManager.Preferences!.Characters)
             {
                 numberOfFullSlots++;
+
+                // ST14: characters of the other side of the war are kept but not shown, they could not play here
+                if (!st14Sides.Fits(character))
+                    continue;
                 var characterPickerButton = new CharacterPickerButton(_protomanager,
                     _playerManager,
                     characterButtonsGroup,

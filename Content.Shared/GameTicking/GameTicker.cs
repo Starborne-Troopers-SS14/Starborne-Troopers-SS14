@@ -217,6 +217,12 @@ public sealed partial class RoundEndMessageEvent : EntityEventArgs
         public bool Observer;
 
         public bool Connected;
+
+        /// <summary>
+        /// ST14: supporter tier of the player, 0 is none, 1 to 4 the subscriptions. The end credits put them first
+        /// </summary>
+        [DataField]
+        public int ST14SupporterTier;
     }
 
     public string GamemodeTitle { get; }

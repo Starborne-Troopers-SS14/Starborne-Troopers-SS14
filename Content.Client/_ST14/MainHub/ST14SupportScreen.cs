@@ -82,6 +82,8 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
     private readonly Label _status;
     private readonly List<Control> _rowParts = new();
     private readonly List<ST14SponsorCard> _cards = new();
+    private readonly List<ST14HubButton> _perkPlates = new();
+    private readonly List<ST14HubButton> _subscribePlates = new();
 
     // perks view: one frame, the tabs of the open tier, every perk page built once
     private readonly ST14LobbyFrame _perks;
@@ -145,14 +147,46 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
             _cards.Add(card);
             _rowParts.Add(card);
 
-            var plate = new ST14HubButton(ResCache, Loc.GetString("st14-support-open-perks"), 19, ST14SupporterStatus.TierColors[tier]);
+            // two plates under the card: what the tier gives, and the way to get it
+            var plateY = CardY + CardSize.Y / 2 + 4;
+            var plate = new ST14HubButton(ResCache, Loc.GetString("st14-support-open-perks"), 18, ST14SupporterStatus.TierColors[tier]);
             plate.OnPressed += _ => OpenTier(openTier);
-            Canvas.AddAt(plate, new Vector2(0.5f, 0.5f), new Vector2(x, CardY + CardSize.Y / 2 + 4), new Vector2(330, 64));
+            Canvas.AddAt(plate, new Vector2(0.5f, 0.5f), new Vector2(x - 103, plateY), new Vector2(200, 60));
             _rowParts.Add(plate);
+            _perkPlates.Add(plate);
+
+            var subscribe = new ST14HubButton(ResCache, Loc.GetString("st14-support-subscribe"), 18, ST14HubStyle.Orange, Color.White)
+            {
+                ToolTip = BoostyUrl,
+            };
+            subscribe.OnPressed += _ => _uriOpener.OpenUri(BoostyUrl);
+            Canvas.AddAt(subscribe, new Vector2(0.5f, 0.5f), new Vector2(x + 103, plateY), new Vector2(200, 60));
+            _rowParts.Add(subscribe);
+            _subscribePlates.Add(subscribe);
         }
 
-        // how to get it: three numbered steps in a line under the cards
-        var steps = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 40 };
+        // how it works: a dark strip with the three numbered steps and the promise that nothing of it helps in battle
+        var how = new PanelContainer
+        {
+            PanelOverride = ST14HubStyle.Flat(Color.FromHex("#0A0A08D8"), ST14HubStyle.Gold.WithAlpha(0.35f), 1),
+        };
+        var howColumn = new BoxContainer
+        {
+            Orientation = BoxContainer.LayoutOrientation.Vertical,
+            SeparationOverride = 4,
+            Margin = new Thickness(20, 8),
+        };
+        how.AddChild(howColumn);
+        var steps = new BoxContainer
+        {
+            Orientation = BoxContainer.LayoutOrientation.Horizontal,
+            SeparationOverride = 40,
+            HorizontalAlignment = HAlignment.Center,
+        };
+        var howTitle = ST14HubStyle.Label(ResCache, Loc.GetString("st14-support-how").ToUpperInvariant(), ST14HubFont.Bold, 16, ST14HubStyle.GoldLight,
+            shadow: true);
+        howTitle.VAlign = Label.VAlignMode.Center;
+        steps.AddChild(howTitle);
         for (var i = 1; i <= 3; i++)
         {
             var step = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 10 };
@@ -165,10 +199,12 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
             steps.AddChild(step);
         }
 
-        var stepsHolder = new CenterContainer();
-        stepsHolder.AddChild(steps);
-        Canvas.AddAt(stepsHolder, new Vector2(0.5f, 1), new Vector2(0, -130), new Vector2(1700, 40));
-        _rowParts.Add(stepsHolder);
+        howColumn.AddChild(steps);
+        var fair = ST14HubStyle.Label(ResCache, Loc.GetString("st14-support-fair"), ST14HubFont.Italic, 14, ST14HubStyle.Widget);
+        fair.Align = Label.AlignMode.Center;
+        howColumn.AddChild(fair);
+        Canvas.AddAt(how, new Vector2(0.5f, 1), new Vector2(0, -150), new Vector2(1500, 84));
+        _rowParts.Add(how);
 
         // perks of one tier, opened from a card
         _perks = new ST14LobbyFrame(ResCache, string.Empty) { Visible = false };
@@ -744,6 +780,15 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
             card.Update(tier);
         }
 
+        // an open tier is set up, not bought: its plate says so and the way to Boosty is only for the tiers above
+        for (var i = 0; i < _perkPlates.Count; i++)
+        {
+            var open = i + 1 <= tier;
+            _perkPlates[i].Text = Loc.GetString(open ? "st14-support-set-up" : "st14-support-open-perks");
+            _subscribePlates[i].Disabled = open;
+            _subscribePlates[i].Text = Loc.GetString(open ? "st14-support-subscribed" : "st14-support-subscribe");
+        }
+
         foreach (var (label, lockTier, perk) in _locks)
         {
             var open = tier >= lockTier;
@@ -812,7 +857,7 @@ public sealed class ST14SponsorCard : ContainerButton
         if (tier > 1)
         {
             var includes = ST14HubStyle.Label(cache, Loc.GetString("st14-support-tier-includes", ("tier", ST14SupporterStatus.Numerals[tier - 1])),
-                ST14HubFont.Medium, 13, accent);
+                ST14HubFont.Medium, 15, accent);
             includes.Align = Label.AlignMode.Center;
             column.AddChild(includes);
         }
@@ -834,7 +879,7 @@ public sealed class ST14SponsorCard : ContainerButton
         var mark = open ? "[color=#9CE07C]✓[/color]" : "[color=#8A8478]▸[/color]";
         var textColor = open ? "#E6DCC0" : "#B8B0A0";
         var lines = Enumerable.Range(1, count)
-            .Select(p => $"{mark} [color={textColor}]{Loc.GetString($"st14-support-tier-{tier}-perk-{p}")}[/color]");
+            .Select(p => $"[font size=16]{mark} [color={textColor}]{Loc.GetString($"st14-support-tier-{tier}-perk-{p}")}[/color][/font]");
         return string.Join("\n", lines);
     }
 

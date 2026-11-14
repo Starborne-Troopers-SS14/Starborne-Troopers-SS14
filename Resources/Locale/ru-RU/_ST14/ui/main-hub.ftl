@@ -172,4 +172,25 @@ st14-support-tab-mention = Упоминание
 st14-support-perk-mention = Упоминание в конце раунда
 st14-support-mention-title = Раунд окончен
 st14-support-mention-thanks = Федерация благодарит за поддержку проекта:
-st14-support-mention-text = В итогах каждого раунда ваш ник будет среди тех, кто поддерживает Starborne Troopers.
+st14-support-mention-text = В титрах в конце каждого раунда ваш ник идёт первым среди поддержавших проект, крупно и в цвете вашего уровня.
+
+# Names of the lobby backgrounds, shown at the bottom of the lobby
+st14-lobby-background-orbit = Орбита
+st14-lobby-background-headquarters = Штаб
+st14-lobby-background-horde = Орда
+st14-lobby-background-artist-terran-command = Starship Troopers: Terran Command
+st14-lobby-background-artist-unknown = неизвестен
+
+# End credits of a round
+st14-credits-title = КОНЕЦ РАУНДА
+st14-credits-round = Раунд { $id } · { $duration }
+st14-credits-supporters = Поддержали проект
+st14-credits-players = В ролях
+st14-credits-thanks = Спасибо за игру!
+st14-credits-skip = Пропустить
+st14-credits-faster = Быстрее
+st14-support-subscribe = Оформить
+st14-support-subscribed = Оформлено
+st14-support-set-up = Настроить
+st14-support-how = Как получить
+st14-support-fair = Подписка — это благодарность проекту: только цвета, косметика и место в титрах. В бою она не помогает.

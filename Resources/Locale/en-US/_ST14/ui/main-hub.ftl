@@ -172,4 +172,25 @@ st14-support-tab-mention = Mention
 st14-support-perk-mention = Round end mention
 st14-support-mention-title = Round over
 st14-support-mention-thanks = The Federation thanks the supporters of the project:
-st14-support-mention-text = The summary of every round lists your name among those who support Starborne Troopers.
+st14-support-mention-text = The credits at the end of every round list your name first among the supporters, big and in the colour of your tier.
+
+# Names of the lobby backgrounds, shown at the bottom of the lobby
+st14-lobby-background-orbit = Orbit
+st14-lobby-background-headquarters = Headquarters
+st14-lobby-background-horde = Horde
+st14-lobby-background-artist-terran-command = Starship Troopers: Terran Command
+st14-lobby-background-artist-unknown = unknown
+
+# End credits of a round
+st14-credits-title = ROUND OVER
+st14-credits-round = Round { $id } · { $duration }
+st14-credits-supporters = Supported the project
+st14-credits-players = Starring
+st14-credits-thanks = Thanks for playing!
+st14-credits-skip = Skip
+st14-credits-faster = Faster
+st14-support-subscribe = Subscribe
+st14-support-subscribed = Subscribed
+st14-support-set-up = Set up
+st14-support-how = How to get it
+st14-support-fair = A subscription is a thank-you to the project: colours, cosmetics and a place in the credits. It does not help in battle.

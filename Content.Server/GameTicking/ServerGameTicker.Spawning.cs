@@ -4,6 +4,7 @@ using System.Numerics;
 using Content.Server.Administration.Managers;
 using Content.Server.Administration.Systems;
 using Content.Server.GameTicking.Events;
+using Content.Shared._ST14.MainHub; // ST14
 using Content.Shared.CCVar;
 using Content.Shared.Database;
 using Content.Shared.GameTicking;
@@ -240,6 +241,20 @@ namespace Content.Server.GameTicking
                 character.JobPriorities,
                 true,
                 restrictedRoles);
+
+            // ST14-START: the wanted jobs are taken, the player agreed to the basic job of the side
+            if (jobId == null
+                && character.PreferenceUnavailable == PreferenceUnavailableMode.SpawnAsOverflow
+                && ST14CharacterSide.FallbackJob(ProtoMan, character.Species) is { } st14Fallback
+                && !restrictedRoles.Contains(st14Fallback))
+            {
+                jobId = _stationJobs.PickBestAvailableJobWithPriority(station,
+                    new Dictionary<ProtoId<JobPrototype>, JobPriority> { [st14Fallback] = JobPriority.High },
+                    true,
+                    restrictedRoles);
+            }
+            // ST14-STOP
+
             // If no job available, stay in lobby, or if no lobby spawn as observer
             if (jobId is null)
             {
@@ -258,7 +273,7 @@ namespace Content.Server.GameTicking
 
             DoSpawn(player, character, station, jobId, silent, out var mob, out var jobPrototype, out var jobName);
 
-            if (lateJoin && !silent)
+            if (lateJoin && !silent && ST14ArrivalAnnouncements) // ST14
             {
                 if (jobPrototype.JoinNotifyCrew)
                 {

@@ -760,6 +760,8 @@ namespace Content.Shared.Preferences
                 }));
 
             ST14CharacterSide.FilterJobs(prototypeManager, Species, priorities); // ST14: troopers and bugs take only their own jobs
+            if (configManager.GetCVar(Content.Shared._ST14.CCVar.ST14CVars.NoPassenger)) // ST14: no passenger in the war
+                ST14CharacterSide.ReplacePassenger(prototypeManager, Species, priorities);
 
             var hasHighPrio = false;
             foreach (var (key, value) in priorities)

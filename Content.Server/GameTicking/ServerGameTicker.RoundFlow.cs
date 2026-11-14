@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Numerics;
 using Content.Server.Announcements;
+using Content.Server._ST14.Supporter; // ST14
 using Content.Server.Discord;
 using Content.Server.GameTicking.Events;
 using Content.Server.Roles;
@@ -548,14 +549,15 @@ public sealed partial class ServerGameTicker
                 JobPrototypes = roles.Where(role => !role.Antagonist).Select(role => role.Prototype).ToArray(),
                 AntagPrototypes = roles.Where(role => role.Antagonist).Select(role => role.Prototype).ToArray(),
                 Observer = observer,
-                Connected = connected
+                Connected = connected,
+                ST14SupporterTier = userId is { } st14User ? EntityManager.System<ST14SupporterSystem>().GetTier(st14User) : 0, // ST14
             };
             listOfPlayerInfo.Add(playerEndRoundInfo);
         }
 
         // This ordering mechanism isn't great (no ordering of minds) but functions
         var listOfPlayerInfoFinal = listOfPlayerInfo.OrderBy(pi => pi.PlayerOOCName).ToArray();
-        var sound = RoundEndSoundCollection == null ? null : Audio.ResolveSound(new SoundCollectionSpecifier(RoundEndSoundCollection));
+        var sound = string.IsNullOrEmpty(RoundEndSoundCollection) ? null : Audio.ResolveSound(new SoundCollectionSpecifier(RoundEndSoundCollection)); // ST14: an empty collection means no sound
 
         var roundEndMessageEvent = new RoundEndMessageEvent(
             gamemodeTitle,

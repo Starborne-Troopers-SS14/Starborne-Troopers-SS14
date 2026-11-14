@@ -25,6 +25,12 @@ public sealed partial class ST14LobbyThemePrototype : IPrototype
     /// <summary>
     /// Start of the locale keys of the panel titles and status lines, like "st14-lobby" for "st14-lobby-briefing"
     /// </summary>
+    /// <summary>
+    /// The job a character of this side gets when none of its wanted jobs is open, if the player asked for it
+    /// </summary>
+    [DataField]
+    public ProtoId<JobPrototype>? FallbackJob;
+
     [DataField]
     public string LocPrefix = "st14-lobby";
 

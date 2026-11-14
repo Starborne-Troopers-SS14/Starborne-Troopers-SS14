@@ -20,6 +20,7 @@ namespace Content.Client.Voting.UI
 
             Text = Loc.GetString("ui-vote-menu-button");
             ToggleMode = true;
+            Visible = false; // ST14: no player votes in the war, admins call them from the console
             OnPressed += OnOnPressed;
         }
 

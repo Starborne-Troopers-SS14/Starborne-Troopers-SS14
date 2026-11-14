@@ -86,6 +86,7 @@ public sealed partial class ST14SettingsScreen : Control
         OnOpened?.Invoke();
     }
 
+
     public void Close()
     {
         Visible = false;
@@ -175,6 +176,8 @@ public sealed partial class ST14SettingsScreen : Control
                 option.StyleIdentifier = DropDownId;
                 option.MinHeight = 30;
                 option.MinWidth = 200;
+                // the drop down takes the rest of the row, long values were cut at 200 px
+                option.HorizontalExpand = true;
                 break;
             case CheckBox checkBox:
                 checkBox.TextureRect.StyleIdentifier = ControlId;
@@ -202,8 +205,15 @@ public sealed partial class ST14SettingsScreen : Control
                 label.ClipText = true;
                 break;
             // name column of the option rows is 400 px wide, too much for the windows of the original
+            // a fixed column, so the sliders and drop downs of every row start at the same x; a cut name shows in full
+            // on hover
             case Label { MinWidth: 400 } rowName:
                 rowName.MinWidth = 300;
+                rowName.SetWidth = 300;
+                rowName.ClipText = true;
+                rowName.Margin = new Thickness(0, 0, 12, 0);
+                rowName.ToolTip = rowName.Text;
+                rowName.MouseFilter = MouseFilterMode.Pass;
                 break;
             case ScrollContainer scroll:
                 scroll.HScrollEnabled = false;
