@@ -169,6 +169,7 @@ namespace Content.Client.Lobby.UI
             {
                 VoiceButton.SelectId(args.Id);
                 SetVoice(_voices[args.Id]);
+                ST14PreviewVoice(_voices[args.Id]); // ST14
             };
 
             #endregion
@@ -264,8 +265,7 @@ namespace Content.Client.Lobby.UI
                 Loc.GetString("humanoid-profile-editor-preference-unavailable-stay-in-lobby-button"),
                 (int)PreferenceUnavailableMode.StayInLobby);
             PreferenceUnavailableButton.AddItem(
-                Loc.GetString("humanoid-profile-editor-preference-unavailable-spawn-as-overflow-button",
-                              ("overflowJob", Loc.GetString(GameTicker.FallbackOverflowJobName))),
+                ST14FallbackJobText(), // ST14: the basic job of the side, not the passenger
                 (int)PreferenceUnavailableMode.SpawnAsOverflow);
 
             PreferenceUnavailableButton.OnItemSelected += args =>

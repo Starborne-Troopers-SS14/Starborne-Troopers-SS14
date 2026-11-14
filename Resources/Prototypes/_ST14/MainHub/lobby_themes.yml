@@ -5,6 +5,7 @@
 - type: st14LobbyTheme
   id: ST14Troopers
   scene: ST14LobbyOrbit
+  fallbackJob: ST14Trooper # given when the wanted jobs are taken and the player agreed to the basic job of the side
   locPrefix: st14-lobby
   accent: "#F7D68C"
   standLight: "#5CBFE6"
@@ -13,6 +14,7 @@
   id: ST14Arachnids
   scene: ST14LobbyHorde
   jobs: [ ST14Bug, ST14BrainBug ]
+  fallbackJob: ST14Bug # given when the wanted jobs are taken and the player agreed to the basic job of the side
   locPrefix: st14-lobby-bugs
   accent: "#FF9A52"
   standLight: "#FF5A2A"

@@ -173,7 +173,11 @@ namespace Content.Client.Options.UI.Tabs
             InitToggleWalk();
             AddButton(ContentKeyFunctions.ToggleKnockdown);
 
-            // ST14: players can neither turn nor zoom the camera, see ContentContexts
+            // ST14: players cannot turn the camera, they zoom it with these keys and the mouse wheel, see ContentContexts
+            AddHeader("ui-options-header-camera");
+            AddButton(ContentKeyFunctions.ZoomIn);
+            AddButton(ContentKeyFunctions.ZoomOut);
+            AddButton(ContentKeyFunctions.ResetZoom);
 
             AddHeader("ui-options-header-interaction-basic");
             AddButton(EngineKeyFunctions.Use);

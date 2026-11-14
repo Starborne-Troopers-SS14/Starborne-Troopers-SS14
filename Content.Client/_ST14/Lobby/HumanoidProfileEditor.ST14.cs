@@ -1,7 +1,12 @@
 using System.Linq;
 using Content.Client._ST14.MainHub;
 using Content.Shared._ST14.MainHub;
+using Content.Shared.Chat.Prototypes;
 using Content.Shared.Preferences;
+using Robust.Shared.Audio;
+using Robust.Shared.Audio.Systems;
+using Robust.Shared.Player;
+using Robust.Shared.Prototypes;
 using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 
@@ -21,6 +26,27 @@ public sealed partial class HumanoidProfileEditor
     private BoxContainer? _st14BugNameRow;
     private LineEdit? _st14Number;
     private bool _st14Updating;
+
+    private static readonly ProtoId<EmotePrototype> ST14PreviewEmote = "Scream";
+    private EntityUid? _st14VoicePreview;
+
+    /// <summary>
+    /// A picked voice is heard at once: its scream, or any sound it has if it has no scream. The last preview
+    /// stops when the next one starts, so quick clicks through the list do not pile up
+    /// </summary>
+    private void ST14PreviewVoice(EmoteSoundsPrototype voice)
+    {
+        var sound = voice.Sounds.GetValueOrDefault(ST14PreviewEmote) ?? voice.Sounds.Values.FirstOrDefault() ?? voice.FallbackSound;
+        if (sound == null)
+            return;
+
+        var audio = _entManager.System<SharedAudioSystem>();
+        if (_st14VoicePreview is { } old)
+            audio.Stop(old);
+
+        var audioParams = voice.GeneralParams ?? AudioParams.Default;
+        _st14VoicePreview = audio.PlayGlobal(sound, Filter.Local(), false, audioParams)?.Entity;
+    }
 
     private bool ST14IsBug => Profile != null && ST14CharacterSide.IsBug(Profile.Species);
 
@@ -136,6 +162,20 @@ public sealed partial class HumanoidProfileEditor
     }
 
     /// <summary>
+    /// Text of the "basic job when the wanted ones are taken" option: the trooper for the Federation, the bug job
+    /// for the hive, as the fallbackJob of the lobby theme of the side says
+    /// </summary>
+    private string ST14FallbackJobText()
+    {
+        var species = Profile?.Species ?? ST14SideSpecies() ?? HumanoidCharacterProfile.DefaultSpecies;
+        var job = ST14CharacterSide.FallbackJob(_prototypeManager, species) is { } id
+                  && _prototypeManager.TryIndex(id, out var proto)
+            ? proto.LocalizedName
+            : Loc.GetString("st14-preference-unavailable-fallback-unknown");
+        return Loc.GetString("st14-preference-unavailable-fallback", ("job", job));
+    }
+
+    /// <summary>
     /// The species the war side asks for, null while the side is not known
     /// </summary>
     private string? ST14SideSpecies()
@@ -165,11 +205,19 @@ public sealed partial class HumanoidProfileEditor
 
         var human = !ST14IsBug;
 
+        PreferenceUnavailableButton.SetItemText(
+            PreferenceUnavailableButton.GetIdx((int) PreferenceUnavailableMode.SpawnAsOverflow),
+            ST14FallbackJobText());
+
         foreach (var control in new Control[] { AgeEdit, SexButton, VoiceButton, PronounsButton, ShowClothes })
         {
             if (control.Parent is { } row)
                 row.Visible = human;
         }
+
+        // the war spawns everyone at the front, there is no arrivals or cryo to prefer
+        if (SpawnPriorityButton.Parent is { } spawnPriority)
+            spawnPriority.Visible = false;
 
         if (EyeColorPicker.Parent is { } eyes)
             eyes.Visible = human;

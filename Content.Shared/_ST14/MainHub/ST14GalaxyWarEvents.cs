@@ -26,6 +26,11 @@ public static class ST14GalaxyWarRules
     public static readonly ProtoId<ST14LobbyThemePrototype> BugTheme = "ST14Arachnids";
 
     /// <summary>
+    /// Lobby theme of the troopers of the Federation
+    /// </summary>
+    public static readonly ProtoId<ST14LobbyThemePrototype> TrooperTheme = "ST14Troopers";
+
+    /// <summary>
     /// The sides that have a command of their own
     /// </summary>
     public static readonly ST14GalaxyFaction[] Sides = { ST14GalaxyFaction.Federation, ST14GalaxyFaction.Arachnid };

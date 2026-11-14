@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using Content.Shared._ST14.Hive;
+using Content.Shared.GameTicking;
 using Content.Shared.Humanoid.Prototypes;
 using Content.Shared.Preferences;
 using Content.Shared.Roles;
@@ -33,6 +34,28 @@ public static class ST14CharacterSide
     public static bool Fits(IPrototypeManager protoMan, string species, ProtoId<JobPrototype> job)
     {
         return IsBugJob(protoMan, job) == IsBug(species);
+    }
+
+    /// <summary>
+    /// The basic job of the side of the species, given when the wanted jobs are all taken: the fallbackJob of the
+    /// lobby theme of that side
+    /// </summary>
+    public static ProtoId<JobPrototype>? FallbackJob(IPrototypeManager protoMan, string species)
+    {
+        var theme = IsBug(species) ? ST14GalaxyWarRules.BugTheme : ST14GalaxyWarRules.TrooperTheme;
+        return protoMan.TryIndex(theme, out var proto) ? proto.FallbackJob : null;
+    }
+
+    /// <summary>
+    /// The passenger of the stock game becomes the basic job of the side, at the priority the passenger had
+    /// </summary>
+    public static void ReplacePassenger(IPrototypeManager protoMan, string species, Dictionary<ProtoId<JobPrototype>, JobPriority> jobs)
+    {
+        if (!jobs.Remove(GameTicker.FallbackOverflowJob, out var priority) || FallbackJob(protoMan, species) is not { } fallback)
+            return;
+
+        if (!jobs.ContainsKey(fallback))
+            jobs[fallback] = jobs.ContainsValue(JobPriority.High) ? JobPriority.Medium : priority;
     }
 
     /// <summary>

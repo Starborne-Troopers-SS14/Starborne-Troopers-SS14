@@ -85,6 +85,12 @@ binds:
 - function: ResetZoom
   type: State
   key: NumpadNum5
+- function: ZoomOut # ST14
+  type: State
+  key: NumpadSubtract
+- function: ZoomIn # ST14
+  type: State
+  key: NumpadAdd
 # Misc
 - function: ShowEscapeMenu
   type: State

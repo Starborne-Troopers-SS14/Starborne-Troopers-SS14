@@ -5,6 +5,13 @@ namespace Content.Shared._ST14.CCVar;
 [CVarDefs]
 public static partial class ST14CVars
 {
+    /// <summary>
+    /// There is no passenger in the war: a character that wants it gets the basic job of its side instead, a new
+    /// player starts as a trooper. Off in the tests, their stations hand out passengers
+    /// </summary>
+    public static readonly CVarDef<bool> NoPassenger =
+        CVarDef.Create("st14.no_passenger", true, CVar.SERVER | CVar.REPLICATED);
+
     //game-wide st14 difficulty cvar
     public static readonly CVarDef<float> DifficultyMultiplier =
         CVarDef.Create("st14.difficulty_multiplier", 1f, CVar.SERVER | CVar.REPLICATED | CVar.ARCHIVE);

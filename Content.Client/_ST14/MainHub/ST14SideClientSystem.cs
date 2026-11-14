@@ -1,4 +1,8 @@
 using Content.Shared._ST14.MainHub;
+using Content.Shared.Preferences;
+using Content.Shared.Roles;
+using Robust.Shared.Prototypes;
+using Robust.Shared.Random;
 
 namespace Content.Client._ST14.MainHub;
 
@@ -38,6 +42,41 @@ public sealed class ST14SideClientSystem : EntitySystem
         Region = ev.Region;
         Known = true;
         Changed?.Invoke();
+    }
+
+    /// <summary>
+    /// The species of the characters of the side the player is bound to, null while there is no side
+    /// </summary>
+    public string? SideSpecies => Side switch
+    {
+        ST14GalaxyFaction.Arachnid => ST14CharacterSide.BugSpecies.Id,
+        ST14GalaxyFaction.Federation => HumanoidCharacterProfile.DefaultSpecies,
+        _ => null,
+    };
+
+    /// <summary>
+    /// The character can play for the side of the player, any character fits while there is no side
+    /// </summary>
+    public bool Fits(HumanoidCharacterProfile profile)
+    {
+        return SideSpecies is not { } species || profile.Species == species;
+    }
+
+    /// <summary>
+    /// A new random character of the side of the player with the basic job of that side on high priority.
+    /// Made like this the new character fits the side at once and can be selected, a random species could not
+    /// </summary>
+    public HumanoidCharacterProfile NewCharacter(IPrototypeManager protoMan, IRobustRandom random)
+    {
+        var species = SideSpecies ?? HumanoidCharacterProfile.DefaultSpecies;
+        var profile = HumanoidCharacterProfile.RandomWithSpecies(species);
+        if (ST14CharacterSide.IsBug(species))
+            profile = profile.WithName(ST14CharacterSide.RandomBugName(random));
+
+        if (ST14CharacterSide.FallbackJob(protoMan, species) is { } job)
+            profile = profile.WithJobPriorities(new[] { new KeyValuePair<ProtoId<JobPrototype>, JobPriority>(job, JobPriority.High) });
+
+        return profile;
     }
 
     public void Request()

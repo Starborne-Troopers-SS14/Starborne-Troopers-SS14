@@ -7,7 +7,7 @@ using Content.Client.GameTicking;
 using Content.Client.Info;
 using Content.Client.Lobby;
 using Content.Client.Lobby.UI;
-using Content.Client.Voting.UI;
+using Content.Client.Message;
 using Content.Shared.Preferences;
 using Content.Shared.Roles;
 using Robust.Client.ResourceManagement;
@@ -15,6 +15,7 @@ using Robust.Client.UserInterface;
 using Robust.Client.UserInterface.Controls;
 using Robust.Shared.Configuration;
 using Robust.Shared.Prototypes;
+using Robust.Shared.Random;
 using Robust.Shared.Timing;
 
 namespace Content.Client._ST14.Lobby;
@@ -55,6 +56,10 @@ public sealed partial class ST14LobbyScreen : Control
     private readonly Label _status;
     private readonly Label _name;
     private readonly Label _job;
+    private static readonly ProtoId<ST14HubScenePrototype> LobbyScene = "ST14LobbyOrbit";
+    private static readonly ProtoId<ST14HubScenePrototype> EditorScene = "ST14LobbyHeadquarters";
+    private readonly RichTextLabel _background = new();
+    private string? _backgroundShown;
 
     private bool _editorShown;
     private bool _infoShown;
@@ -76,11 +81,11 @@ public sealed partial class ST14LobbyScreen : Control
         Name = ScreenName;
 
         _lobbyScene = new ST14AnimatedScene { ScanlineAlpha = 0.25f };
-        _lobbyScene.SetScene("ST14LobbyOrbit");
+        _lobbyScene.SetScene(LobbyScene);
         AddChild(_lobbyScene);
 
         _editorScene = new ST14AnimatedScene { ScanlineAlpha = 0.25f, Visible = false };
-        _editorScene.SetScene("ST14LobbyHeadquarters");
+        _editorScene.SetScene(EditorScene);
         AddChild(_editorScene);
 
         _status = ST14HubStyle.Label(cache, string.Empty, ST14HubFont.Medium, 15, ST14LobbyStyle.Text);
@@ -197,10 +202,8 @@ public sealed partial class ST14LobbyScreen : Control
         name.FontColorOverride = ST14HubStyle.GoldLight;
         name.ClipText = true;
 
-        // AHelp, vote, settings, back to the main menu, leave
+        // AHelp, settings, back to the main menu, leave. The war has no player votes, the vote button stays hidden
         var buttons = new List<Control> { _lobby.AHelpButton };
-        if (_lobby.FindControl<VoteCallMenuButton>("CallVoteButton") is { } vote)
-            buttons.Add(vote);
         // our full screen settings instead of the stock options window, the stock button stays hidden in the old lobby
         var settings = new Button { Text = _lobby.OptionsButton.Text, StyleClasses = { "ButtonBig" } };
         settings.OnPressed += _ => _settings.Show();
@@ -240,8 +243,10 @@ public sealed partial class ST14LobbyScreen : Control
         bar.AddChild(row);
 
         Move(_lobby.LobbySong, row);
-        Move(_lobby.LobbyBackground, row);
-        foreach (var label in new[] { _lobby.LobbySong, _lobby.LobbyBackground })
+        // the stock label names the random station art the server picked, not the scene behind the lobby
+        _lobby.LobbyBackground.Visible = false;
+        row.AddChild(_background);
+        foreach (var label in new Control[] { _lobby.LobbySong, _background })
         {
             label.VerticalAlignment = VAlignment.Center;
             label.HorizontalAlignment = HAlignment.Left;
@@ -534,6 +539,8 @@ public sealed partial class ST14LobbyScreen : Control
             }
         }
 
+        UpdateBackgroundLabel(editor ? EditorScene : _theme?.Scene ?? LobbyScene);
+
         if (editor && _lobby.CharacterSetupState.Children.FirstOrDefault(c => c is CharacterSetupGui) is CharacterSetupGui gui)
             _editor.Take(gui);
 
@@ -543,6 +550,26 @@ public sealed partial class ST14LobbyScreen : Control
 
         _infoTimer = 0.5f;
         UpdateInfo();
+    }
+
+    /// <summary>
+    /// "Фон лобби: name, автор: artist" for the scene that is behind the lobby now
+    /// </summary>
+    private void UpdateBackgroundLabel(ProtoId<ST14HubScenePrototype> scene)
+    {
+        if (_backgroundShown == scene.Id)
+            return;
+
+        _backgroundShown = scene.Id;
+        if (!_protoMan.TryIndex(scene, out var proto) || proto.Title is not { } title)
+        {
+            _background.SetMarkup(Loc.GetString("lobby-state-background-no-background-text"));
+            return;
+        }
+
+        _background.SetMarkup(Loc.GetString("lobby-state-background-text",
+            ("backgroundTitle", Loc.GetString(title)),
+            ("backgroundArtist", proto.Artist is { } artist ? Loc.GetString(artist) : Loc.GetString("st14-lobby-background-artist-unknown"))));
     }
 
     /// <summary>
@@ -665,7 +692,7 @@ public sealed partial class ST14LobbyScreen : Control
             return;
 
         _sideCharacterRequested = true;
-        _prefs.CreateCharacter(HumanoidCharacterProfile.RandomWithSpecies(species));
+        _prefs.CreateCharacter(sides.NewCharacter(_protoMan, IoCManager.Resolve<IRobustRandom>()));
         UserInterfaceManager.GetUIController<LobbyUIController>().ReloadCharacterSetup();
     }
 
