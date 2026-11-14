@@ -4,6 +4,18 @@
   parent: BaseFloorPlanet
   sprite: /Textures/_ST14/Tiles/Dunes/dunes.png
   variants: 16
+  # The sand covers what lies under it: cables are hidden (a T-ray shows them) and cannot be laid
+  # until a trooper digs a trench with an entrenching tool
+  isSubfloor: false
+  footstepSounds:
+    collection: FootstepAsteroid
+
+# A small trench for a cable, dug with an entrenching tool and filled back into dunes
+- type: tile
+  id: ST14FloorDunesTrench
+  name: st14-tiles-dunes-trench
+  parent: BaseFloorPlanet
+  sprite: /Textures/_ST14/Tiles/Dunes/dunes_trench.png
   footstepSounds:
     collection: FootstepAsteroid
 

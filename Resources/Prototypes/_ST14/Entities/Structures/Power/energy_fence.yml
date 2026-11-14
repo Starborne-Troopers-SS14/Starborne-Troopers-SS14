@@ -1,5 +1,6 @@
-# Энергостены: инженер ставит пилоны, энергощиток с энергоблоком их питает,
-# между запитанными пилонами на одной прямой бьёт луч, который жжёт и отбрасывает жуков
+# Electric fence. Field generators feed MV cable, the energy box (power panel) with an energy block in it turns it
+# into LV for the pylons; anchored pylons pair up by themselves and burn bugs that come near the line between them.
+# Code: Content.Server/_ST14/EnergyFence, arcs are drawn by Content.Client/_ST14/ElectricFence
 
 - type: soundCollection
   id: ST14EnergyZap
@@ -11,7 +12,7 @@
 - type: entity
   id: ST14EnergyPylon
   name: energy pylon
-  description: A field pylon of the Mobile Infantry. Powered from an energy box nearby, it throws a crackling arc to the next pylon in a straight line up to seven tiles away. Bugs that cross the arc are burnt and thrown back.
+  description: A field pylon of the Mobile Infantry. Powered by cable from an energy box, it pairs with the nearest pylons up to nine tiles away and burns bugs that come near the line between them.
   placement:
     mode: SnapgridCenter
   components:
@@ -38,22 +39,32 @@
     offset: 0,1
     layers:
     - state: base
-    - state: lights
+      map: [ "base" ]
+    - state: nopower
       map: [ "lights" ]
       shader: unshaded
-      visible: false
+  - type: Icon
+    sprite: _ST14/Structures/Power/energy_pylon.rsi
+    state: icon
   - type: Appearance
   - type: GenericVisualizer
     visuals:
-      enum.ST14EnergyPylonVisuals.Powered:
+      enum.ST14EnergyPylonVisuals.State:
+        base:
+          Unanchored: { state: unanchored }
+          NoPower: { state: base }
+          Idle: { state: base }
+          Active: { state: base }
         lights:
-          True: { visible: true }
-          False: { visible: false }
+          Unanchored: { visible: false }
+          NoPower: { state: nopower, visible: true }
+          Idle: { state: idle, visible: true }
+          Active: { state: active, visible: true }
   - type: PointLight
     enabled: false
     radius: 2.5
-    energy: 1.4
-    color: "#fff0c0"
+    energy: 0.6
+    color: "#9fd8ff"
     offset: 0,1
   - type: AmbientSound
     enabled: false
@@ -61,6 +72,9 @@
     range: 7
     sound:
       path: /Audio/_ST14/Structures/EnergyFence/crackle_loop.wav
+  - type: ApcPowerReceiver
+    powerLoad: 1000
+  - type: ExtensionCableReceiver
   - type: Anchorable
   - type: Damageable
     damageModifierSet: SteelMod
@@ -83,41 +97,6 @@
       - !type:DoActsBehavior
         acts: [ "Destruction" ]
   - type: ST14EnergyPylon
-
-# Один тайл луча. Не твёрдый: десантники проходят, жуков бьёт током
-- type: entity
-  abstract: true
-  id: ST14EnergyBeamBase
-  name: energy arc
-  description: A crackling arc between two pylons. Troopers pass through it; bugs burn.
-  categories: [ HideSpawnMenu ]
-  placement:
-    mode: SnapgridCenter
-  components:
-  - type: Transform
-    noRot: true
-  - type: Physics
-    bodyType: Static
-  - type: Fixtures
-    fixtures:
-      beam:
-        shape:
-          !type:PhysShapeAabb
-          bounds: "-0.5,-0.2,0.5,0.2"
-        hard: false
-        layer:
-        - SlipLayer
-  - type: Sprite
-    drawdepth: Effects
-    noRot: true
-  - type: PointLight
-    radius: 1.5
-    energy: 0.9
-    color: "#8fd8ff"
-  - type: ST14EnergyBeam
-    damage:
-      types:
-        Shock: 40
     whitelist:
       components:
       - ST14HiveMember
@@ -127,38 +106,310 @@
         volume: -2
         variation: 0.1
 
+# Glow the client hangs on a bug wrapped by an arc
 - type: entity
-  parent: ST14EnergyBeamBase
-  id: ST14EnergyBeamHorizontal
+  id: ST14FenceArcGlow
+  categories: [ HideSpawnMenu ]
   components:
-  - type: Sprite
-    sprite: _ST14/Structures/Power/energy_beam.rsi
-    offset: 0,1
-    layers:
-    - state: horizontal
-      shader: unshaded
+  - type: PointLight
+    radius: 1.8
+    energy: 1.6
+    color: "#8fd8ff"
+    netsync: false
 
+# Power panel: MV from generators in, LV to the pylons out, only with an energy block inside
 - type: entity
-  parent: ST14EnergyBeamBase
-  id: ST14EnergyBeamVertical
+  id: ST14EnergyBox
+  name: energy box
+  description: A field power panel of the Mobile Infantry. Takes power from field generators by MV cable and gives it to the pylons by LV cable, but only with an energy block inside. The block stores the surplus and covers a shortfall.
+  placement:
+    mode: SnapgridCenter
   components:
+  - type: Transform
+    anchored: true
+  - type: Clickable
+  - type: InteractionOutline
+  - type: Physics
+    bodyType: Static
   - type: Fixtures
     fixtures:
-      beam:
+      fix1:
         shape:
           !type:PhysShapeAabb
-          bounds: "-0.2,-0.5,0.2,0.5"
-        hard: false
+          bounds: "-0.4,-0.4,0.4,0.4"
+        density: 150
+        mask:
+        - MachineMask
         layer:
-        - SlipLayer
+        - MachineLayer
   - type: Sprite
-    sprite: _ST14/Structures/Power/energy_beam_vertical.rsi
-    offset: 0,1.0625
+    sprite: _ST14/Structures/Power/energy_box.rsi
     layers:
-    - state: vertical
+    - state: base
+    - state: door
+    - state: battery-in
+      map: [ "block" ]
+      visible: false
+    - state: breaker_on
+      map: [ "breaker" ]
       shader: unshaded
+    - state: block_0
+      map: [ "charge" ]
+      shader: unshaded
+      visible: false
+    - state: slot_empty
+      map: [ "slot" ]
+      shader: unshaded
+    - state: discharging
+      map: [ "discharging" ]
+      shader: unshaded
+      visible: false
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.ST14EnergyBoxVisuals.Breaker:
+        breaker:
+          True: { state: breaker_on }
+          False: { state: breaker_off }
+      enum.ST14EnergyBoxVisuals.HasBlock:
+        block:
+          True: { visible: true }
+          False: { visible: false }
+        charge:
+          True: { visible: true }
+          False: { visible: false }
+        slot:
+          True: { visible: false }
+          False: { visible: true }
+      enum.ST14EnergyBoxVisuals.ChargeLevel:
+        charge:
+          0: { state: block_0 }
+          1: { state: block_1 }
+          2: { state: block_2 }
+          3: { state: block_3 }
+          4: { state: block_4 }
+      enum.ST14EnergyBoxVisuals.Discharging:
+        discharging:
+          True: { visible: true }
+          False: { visible: false }
+  - type: ItemSlots
+    slots:
+      energy_block:
+        name: st14-energy-box-slot
+        startingItem: ST14EnergyBlock
+        whitelist:
+          tags:
+          - ST14EnergyBlock
+  - type: ContainerContainer
+    containers:
+      energy_block: !type:ContainerSlot
+  - type: NodeContainer
+    examinable: true
+    nodes:
+      input:
+        !type:CableDeviceNode
+        nodeGroupID: MVPower
+      output:
+        !type:CableDeviceNode
+        nodeGroupID: Apc
+  - type: BatteryCharger
+    voltage: Medium
+  - type: PowerProvider
+    voltage: Apc
+  - type: Apc
+    voltage: Apc
+  - type: ExtensionCableProvider
+  # Capacity, charge, output and charge rate come from the energy block every tick (ST14EnergyBoxSystem)
+  - type: PowerNetworkBattery
+    maxSupply: 0
+    maxChargeRate: 0
+    supplyRampTolerance: 100000
+    supplyRampRate: 100000
+  - type: ST14EnergyBox
+  - type: Anchorable
+  - type: Pullable
+  - type: Damageable
+    damageModifierSet: SteelMod
+  - type: Injurable
+    damageContainer: StructuralInorganic
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 150
+      behaviors:
+      - !type:PlaySoundBehavior
+        sound:
+          collection: MetalBreak
+      - !type:SpawnEntitiesBehavior
+        spawn:
+          EffectSparks:
+            min: 1
+            max: 1
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
 
-# Что строит инженер мультитулом
+# The energy block: the energy box's storage. Heavy, carried in both hands
+- type: entity
+  parent: BaseItem
+  id: ST14EnergyBlock
+  name: energy block
+  description: A heavy sealed charge cell of the Mobile Infantry, carried in both hands. In an energy box it stores the generators' surplus and keeps the fence alive when they fall short. The light on its face shows how much charge is left.
+  components:
+  - type: Sprite
+    sprite: _ST14/Objects/Power/energy_block.rsi
+    layers:
+    - state: base
+    - state: green
+      map: [ "charge" ]
+      shader: unshaded
+  - type: Item
+    size: Huge
+    sprite: _ST14/Objects/Power/energy_block.rsi
+  - type: MultiHandedItem
+  - type: HeldSpeedModifier
+    walkModifier: 0.8
+    sprintModifier: 0.8
+  - type: Tag
+    tags:
+    - ST14EnergyBlock
+  - type: Battery
+    maxCharge: 2400000
+    startingCharge: 2400000
+  - type: ExaminableBattery
+  - type: ST14EnergyBlock
+    maxOutput: 20000
+    maxChargeRate: 8000
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.ST14EnergyBlockVisuals.Level:
+        charge:
+          0: { visible: false }
+          1: { state: red, visible: true }
+          2: { state: orange, visible: true }
+          3: { state: yellow, visible: true }
+          4: { state: green, visible: true }
+
+# Portable field generator: feeds MV cable
+- type: entity
+  id: ST14FieldGenerator
+  name: field generator
+  description: A portable generator of the Mobile Infantry. Feeds the MV cable of a fence. Switched on and off by hand; unbolt it to drag it somewhere else.
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: true
+  - type: Clickable
+  - type: InteractionOutline
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.4,-0.45,0.4,0.3"
+        density: 250
+        mask:
+        - MachineMask
+        layer:
+        - MachineLayer
+  - type: Sprite
+    sprite: _ST14/Structures/Power/field_generator.rsi
+    noRot: true
+    layers:
+    - state: base
+      map: [ "base" ]
+    - state: on
+      map: [ "lights" ]
+      shader: unshaded
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.ST14FieldGeneratorVisuals.State:
+        base:
+          Unanchored: { state: unanchored }
+          Off: { state: base }
+          On: { state: base }
+        lights:
+          Unanchored: { visible: false }
+          Off: { state: off, visible: true }
+          On: { state: on, visible: true }
+  - type: AmbientSound
+    enabled: false
+    range: 5
+    volume: -5
+    sound:
+      path: /Audio/Ambience/Objects/engine_hum.ogg
+  - type: NodeContainer
+    examinable: true
+    nodes:
+      output:
+        !type:CableDeviceNode
+        nodeGroupID: MVPower
+  - type: PowerSupplier
+    supplyRate: 20000
+    supplyRampTolerance: 100000
+    supplyRampRate: 100000
+    voltage: Medium
+  - type: ST14FieldGenerator
+  - type: Anchorable
+  - type: Pullable
+  - type: Damageable
+    damageModifierSet: SteelMod
+  - type: Injurable
+    damageContainer: StructuralInorganic
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 200
+      behaviors:
+      - !type:PlaySoundBehavior
+        sound:
+          collection: MetalBreak
+      - !type:SpawnEntitiesBehavior
+        spawn:
+          EffectSparks:
+            min: 1
+            max: 1
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+
+# Cables lie in small trenches: dig, lay the cable, fill the trench back in
+- type: soundCollection
+  id: ST14TrenchDig
+  files:
+  - /Audio/Items/shovel_dig.ogg
+
+- type: entity
+  parent: BaseItem
+  id: ST14EntrenchingTool
+  name: entrenching tool
+  description: A folding field spade. Digs a small trench in the sand to lay a cable in and fills it back in. Buried cables can only be seen with a T-ray scanner.
+  components:
+  - type: Sprite
+    sprite: Objects/Tools/shovel.rsi
+    state: icon
+  - type: Item
+    size: Normal
+    sprite: Objects/Tools/shovel.rsi
+  - type: MeleeWeapon
+    wideAnimationRotation: 45
+    damage:
+      types:
+        Blunt: 10
+    soundHit:
+      collection: MetalThud
+  - type: ST14TrenchTool
+    trenches:
+      ST14FloorDunes: ST14FloorDunesTrench
+    digSound:
+      collection: ST14TrenchDig
+
+# What the engineer builds with the multitool
 - type: ST14EngineerBuildable
   id: EnergyPylon
   result: ST14EnergyPylon
@@ -171,6 +422,14 @@
   id: EnergyBox
   result: ST14EnergyBox
   cost: 200
+  buildTime: 10
+  conditions:
+  - !type:TileNotBlocked
+
+- type: ST14EngineerBuildable
+  id: FieldGenerator
+  result: ST14FieldGenerator
+  cost: 250
   buildTime: 10
   conditions:
   - !type:TileNotBlocked

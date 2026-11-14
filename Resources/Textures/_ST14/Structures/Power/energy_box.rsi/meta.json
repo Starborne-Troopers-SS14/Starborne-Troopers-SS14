@@ -22,6 +22,45 @@
     {
       "name": "folded",
       "directions": 4
+    },
+    {
+      "name": "breaker_on"
+    },
+    {
+      "name": "breaker_off"
+    },
+    {
+      "name": "block_0"
+    },
+    {
+      "name": "block_1"
+    },
+    {
+      "name": "block_2"
+    },
+    {
+      "name": "block_3"
+    },
+    {
+      "name": "block_4"
+    },
+    {
+      "name": "slot_empty",
+      "delays": [
+        [
+          0.6,
+          0.6
+        ]
+      ]
+    },
+    {
+      "name": "discharging",
+      "delays": [
+        [
+          0.4,
+          0.4
+        ]
+      ]
     }
   ]
 }
