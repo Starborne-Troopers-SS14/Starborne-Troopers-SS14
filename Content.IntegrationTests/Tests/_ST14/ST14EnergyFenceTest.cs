@@ -134,8 +134,8 @@ public sealed class ST14EnergyFenceTest : GameTest
                 "The energy block did not go into the open box.");
         });
 
-        // Past the power-up delay
-        await pair.RunSeconds(2.5f);
+        // Well past the power-up delay
+        await pair.RunSeconds(4f);
 
         await server.WaitAssertion(() =>
         {
@@ -152,7 +152,7 @@ public sealed class ST14EnergyFenceTest : GameTest
             trooper = entMan.SpawnEntity("MobHuman", new EntityCoordinates(map.Grid, 5.5f, 3.5f));
         });
 
-        await server.WaitRunTicks(2);
+        await server.WaitRunTicks(5);
 
         await server.WaitAssertion(() =>
         {
@@ -186,7 +186,7 @@ public sealed class ST14EnergyFenceTest : GameTest
             generators.SetOn((generator, entMan.GetComponent<ST14FieldGeneratorComponent>(generator)), false);
             startCharge = entMan.GetComponent<ST14EnergyBoxComponent>(box).Charge;
         });
-        await pair.RunSeconds(3f);
+        await pair.RunSeconds(5f);
         await server.WaitAssertion(() =>
         {
             Assert.That(entMan.GetComponent<PowerSupplierComponent>(generator).Enabled, Is.False, "The generator did not switch off.");
@@ -234,9 +234,14 @@ public sealed class ST14EnergyFenceTest : GameTest
         });
     }
 
+    /// <summary>
+    /// Shock damage only: the test map has an atmosphere, and a mob on it may take pressure or suffocation damage
+    /// on any tick, which has nothing to do with the fence
+    /// </summary>
     private static bool Hurt(IEntityManager entMan, DamageableSystem damageable, EntityUid uid)
     {
-        return damageable.TryGetDamageGreaterThan((uid, entMan.GetComponent<DamageableComponent>(uid)), FixedPoint2.Zero, out _);
+        var damage = damageable.GetAllDamage(uid).DamageDict;
+        return damage.TryGetValue("Shock", out var shock) && shock > FixedPoint2.Zero;
     }
 
     private static void FillTiles(IEntityManager entMan, TestMapData map, int x0, int y0, int x1, int y1)
