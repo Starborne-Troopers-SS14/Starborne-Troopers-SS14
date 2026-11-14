@@ -1,0 +1,368 @@
+using Content.Server.Power.Components;
+using Content.Server.Power.EntitySystems;
+using Content.Shared._ST14.EnergyFence;
+using Content.Shared.Containers.ItemSlots;
+using Content.Shared.Examine;
+using Content.Shared.Interaction;
+using Content.Shared.Mind;
+using Content.Shared.Popups;
+using Content.Shared.Power;
+using Content.Shared.Power.Components;
+using Content.Shared.Power.EntitySystems;
+using Content.Shared.Roles.Jobs;
+using Content.Shared.Verbs;
+using Robust.Shared.Audio.Systems;
+using Robust.Shared.Containers;
+using Robust.Shared.Timing;
+
+namespace Content.Server._ST14.EnergyFence;
+
+/// <summary>
+/// Power panel. In the power net it is an APC: <c>BatteryCharger</c> on MV takes power from field generators,
+/// <c>Apc</c> + <c>PowerProvider</c> on LV feed the pylons. The panel's <c>PowerNetworkBattery</c> has no storage of its
+/// own: before every power tick it takes the capacity and charge of the energy block in its slot, after the tick the
+/// charge goes back. No block, no current at all; breaker off, nothing goes out.
+/// The power solver passes the generators' power straight through, puts the surplus into the block and takes from the
+/// block what the generators lack
+/// </summary>
+public sealed partial class ST14EnergyBoxSystem : EntitySystem
+{
+    [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private ItemSlotsSystem _slots = default!;
+    [Dependency] private SharedBatterySystem _battery = default!;
+    [Dependency] private SharedAppearanceSystem _appearance = default!;
+    [Dependency] private SharedAudioSystem _audio = default!;
+    [Dependency] private SharedPopupSystem _popup = default!;
+    [Dependency] private SharedMindSystem _mind = default!;
+    [Dependency] private SharedJobSystem _jobs = default!;
+
+    /// <summary>
+    /// How often the block's own battery is told its charge while it sits in a panel
+    /// </summary>
+    private static readonly TimeSpan FlushDelay = TimeSpan.FromSeconds(1);
+
+    private static readonly TimeSpan VisualsDelay = TimeSpan.FromSeconds(0.5);
+
+    public const int ChargeLevels = 5;
+
+    public override void Initialize()
+    {
+        base.Initialize();
+
+        SubscribeLocalEvent<NetworkBatteryPreSync>(OnPreSync);
+        SubscribeLocalEvent<NetworkBatteryPostSync>(OnPostSync);
+
+        SubscribeLocalEvent<ST14EnergyBoxComponent, MapInitEvent>(OnBoxMapInit);
+        SubscribeLocalEvent<ST14EnergyBoxComponent, EntInsertedIntoContainerMessage>(OnBlockInserted);
+        SubscribeLocalEvent<ST14EnergyBoxComponent, EntRemovedFromContainerMessage>(OnBlockRemoved);
+        SubscribeLocalEvent<ST14EnergyBoxComponent, ActivateInWorldEvent>(OnBoxActivate);
+        SubscribeLocalEvent<ST14EnergyBoxComponent, GetVerbsEvent<AlternativeVerb>>(OnBoxVerbs);
+        SubscribeLocalEvent<ST14EnergyBoxComponent, ExaminedEvent>(OnBoxExamined);
+
+        SubscribeLocalEvent<ST14EnergyBlockComponent, ChargeChangedEvent>(OnBlockChargeChanged);
+        SubscribeLocalEvent<ST14EnergyBlockComponent, MapInitEvent>(OnBlockMapInit);
+    }
+
+    /// <summary>
+    /// Energy block in the panel, if any
+    /// </summary>
+    public EntityUid? GetBlock(Entity<ST14EnergyBoxComponent> box)
+    {
+        return _slots.GetItemOrNull(box.Owner, box.Comp.BlockSlot);
+    }
+
+    public void SetBreaker(Entity<ST14EnergyBoxComponent> box, bool on, EntityUid? user = null)
+    {
+        if (box.Comp.Breaker == on)
+            return;
+
+        box.Comp.Breaker = on;
+        _audio.PlayPvs(box.Comp.BreakerSound, box);
+        UpdateVisuals(box);
+    }
+
+    private void OnBoxMapInit(Entity<ST14EnergyBoxComponent> ent, ref MapInitEvent args)
+    {
+        LockSlot(ent, ent.Comp.Door != ST14EnergyBoxDoor.Open);
+        TakeBlock(ent);
+        UpdateVisuals(ent);
+    }
+
+    /// <summary>
+    /// Locks the block slot. A panel without ItemSlots (a bare entity in tests) has nothing to lock
+    /// </summary>
+    private void LockSlot(Entity<ST14EnergyBoxComponent> ent, bool locked)
+    {
+        if (!TryComp<ItemSlotsComponent>(ent, out var slots))
+            return;
+
+        _slots.SetLock((ent.Owner, slots), ent.Comp.BlockSlot, locked);
+    }
+
+    private void OnBlockInserted(Entity<ST14EnergyBoxComponent> ent, ref EntInsertedIntoContainerMessage args)
+    {
+        if (args.Container.ID != ent.Comp.BlockSlot)
+            return;
+
+        TakeBlock(ent);
+        UpdateVisuals(ent);
+    }
+
+    private void OnBlockRemoved(Entity<ST14EnergyBoxComponent> ent, ref EntRemovedFromContainerMessage args)
+    {
+        if (args.Container.ID != ent.Comp.BlockSlot)
+            return;
+
+        if (ent.Comp.Block == args.Entity)
+            Flush(ent);
+
+        ent.Comp.Block = null;
+        ent.Comp.Charge = 0f;
+        UpdateVisuals(ent);
+    }
+
+    private void TakeBlock(Entity<ST14EnergyBoxComponent> ent)
+    {
+        ent.Comp.Block = GetBlock(ent);
+        ent.Comp.Charge = ent.Comp.Block is { } block ? _battery.GetCharge(block).Charge : 0f;
+    }
+
+    /// <summary>
+    /// Writes the panel's copy of the charge back into the block
+    /// </summary>
+    private void Flush(Entity<ST14EnergyBoxComponent> ent)
+    {
+        if (ent.Comp.Block is not { } block || TerminatingOrDeleted(block))
+            return;
+
+        var (charge, max) = _battery.GetCharge(block);
+        var value = Math.Clamp(ent.Comp.Charge, 0f, max);
+        if (!MathHelper.CloseTo(charge, value))
+            _battery.SetCharge(block, value);
+    }
+
+    private void OnBoxActivate(Entity<ST14EnergyBoxComponent> ent, ref ActivateInWorldEvent args)
+    {
+        if (args.Handled || !args.Complex)
+            return;
+
+        args.Handled = true;
+        TryToggleDoor(ent, args.User);
+    }
+
+    /// <summary>
+    /// Whether the user's job lets them into the box
+    /// </summary>
+    public bool CanOpen(Entity<ST14EnergyBoxComponent> ent, EntityUid user)
+    {
+        if (ent.Comp.RequiredJob is not { } job)
+            return true;
+
+        return _mind.TryGetMind(user, out var mindId, out _) && _jobs.MindHasJobWithId(mindId, job);
+    }
+
+    /// <summary>
+    /// Opens a closed door or closes an open one. A door already moving is left alone
+    /// </summary>
+    public bool TryToggleDoor(Entity<ST14EnergyBoxComponent> ent, EntityUid? user)
+    {
+        if (ent.Comp.Door is ST14EnergyBoxDoor.Opening or ST14EnergyBoxDoor.Closing)
+            return false;
+
+        if (user != null && !CanOpen(ent, user.Value))
+        {
+            _popup.PopupEntity(Loc.GetString("st14-energy-box-engineer-only"), ent, user.Value);
+            return false;
+        }
+
+        SetDoor(ent, ent.Comp.Door == ST14EnergyBoxDoor.Closed ? ST14EnergyBoxDoor.Opening : ST14EnergyBoxDoor.Closing);
+        return true;
+    }
+
+    private void SetDoor(Entity<ST14EnergyBoxComponent> ent, ST14EnergyBoxDoor door)
+    {
+        ent.Comp.Door = door;
+
+        switch (door)
+        {
+            case ST14EnergyBoxDoor.Opening:
+                ent.Comp.DoorDone = _timing.CurTime + ent.Comp.DoorTime;
+                _audio.PlayPvs(ent.Comp.OpenSound, ent);
+                break;
+            case ST14EnergyBoxDoor.Closing:
+                ent.Comp.DoorDone = _timing.CurTime + ent.Comp.DoorTime;
+                _audio.PlayPvs(ent.Comp.CloseSound, ent);
+                break;
+        }
+
+        // The block can only be put in or taken out with the door all the way open
+        LockSlot(ent, door != ST14EnergyBoxDoor.Open);
+        UpdateVisuals(ent);
+    }
+
+    public override void Update(float frameTime)
+    {
+        base.Update(frameTime);
+
+        var now = _timing.CurTime;
+        var query = EntityQueryEnumerator<ST14EnergyBoxComponent>();
+        while (query.MoveNext(out var uid, out var box))
+        {
+            if (now < box.DoorDone || Paused(uid))
+                continue;
+
+            if (box.Door == ST14EnergyBoxDoor.Opening)
+                SetDoor((uid, box), ST14EnergyBoxDoor.Open);
+            else if (box.Door == ST14EnergyBoxDoor.Closing)
+                SetDoor((uid, box), ST14EnergyBoxDoor.Closed);
+        }
+    }
+
+    private void OnBoxVerbs(Entity<ST14EnergyBoxComponent> ent, ref GetVerbsEvent<AlternativeVerb> args)
+    {
+        if (!args.CanAccess || !args.CanInteract || !args.CanComplexInteract)
+            return;
+
+        // The breaker sits inside, behind the door
+        if (ent.Comp.Door != ST14EnergyBoxDoor.Open || !CanOpen(ent, args.User))
+            return;
+
+        var user = args.User;
+        args.Verbs.Add(new AlternativeVerb
+        {
+            Text = Loc.GetString(ent.Comp.Breaker ? "st14-energy-box-verb-breaker-off" : "st14-energy-box-verb-breaker-on"),
+            Priority = 2,
+            Act = () => SetBreaker(ent, !ent.Comp.Breaker, user),
+        });
+    }
+
+    private void OnBoxExamined(Entity<ST14EnergyBoxComponent> ent, ref ExaminedEvent args)
+    {
+        if (!args.IsInDetailsRange)
+            return;
+
+        args.PushMarkup(Loc.GetString(ent.Comp.Breaker ? "st14-energy-box-examine-breaker-on" : "st14-energy-box-examine-breaker-off"));
+
+        if (ent.Comp.Block is not { } block || !TryComp<BatteryComponent>(block, out var battery) || battery.MaxCharge <= 0f)
+        {
+            args.PushMarkup(Loc.GetString("st14-energy-box-examine-empty"));
+            return;
+        }
+
+        var percent = (int) MathF.Round(ent.Comp.Charge / battery.MaxCharge * 100f);
+        args.PushMarkup(Loc.GetString("st14-energy-box-examine-charge", ("percent", percent)));
+    }
+
+    private void OnBlockChargeChanged(Entity<ST14EnergyBlockComponent> ent, ref ChargeChangedEvent args)
+    {
+        SetBlockLevel(ent, args.MaxCharge > 0f ? args.CurrentCharge / args.MaxCharge : 0f);
+    }
+
+    private void OnBlockMapInit(Entity<ST14EnergyBlockComponent> ent, ref MapInitEvent args)
+    {
+        SetBlockLevel(ent, _battery.GetChargeLevel(ent.Owner));
+    }
+
+    private void SetBlockLevel(EntityUid block, float fraction)
+    {
+        _appearance.SetData(block, ST14EnergyBlockVisuals.Level, GetLevel(fraction));
+    }
+
+    /// <summary>
+    /// 0 for an empty block, 4 for a full one; any charge at all shows at least 1
+    /// </summary>
+    public static int GetLevel(float fraction)
+    {
+        if (fraction <= 0.001f)
+            return 0;
+
+        return Math.Clamp((int) MathF.Ceiling(fraction * (ChargeLevels - 1)), 1, ChargeLevels - 1);
+    }
+
+    private void OnPreSync(NetworkBatteryPreSync ev)
+    {
+        var query = EntityQueryEnumerator<ST14EnergyBoxComponent, PowerNetworkBatteryComponent, TransformComponent>();
+        while (query.MoveNext(out _, out var box, out var netBattery, out var xform))
+        {
+            var battery = netBattery.NetworkBattery;
+            if (box.Block is not { } block
+                || !xform.Anchored
+                || !TryComp<BatteryComponent>(block, out var blockBattery)
+                || !TryComp<ST14EnergyBlockComponent>(block, out var blockComp))
+            {
+                // Without a block the panel is a gap in the wire
+                battery.Enabled = false;
+                battery.Capacity = 0f;
+                battery.CurrentStorage = 0f;
+                continue;
+            }
+
+            battery.Enabled = true;
+            battery.CanCharge = true;
+            battery.CanDischarge = box.Breaker;
+            battery.MaxSupply = blockComp.MaxOutput;
+            battery.MaxChargeRate = blockComp.MaxChargeRate;
+            battery.Capacity = blockBattery.MaxCharge;
+            battery.CurrentStorage = Math.Clamp(box.Charge, 0f, blockBattery.MaxCharge);
+        }
+    }
+
+    private void OnPostSync(NetworkBatteryPostSync ev)
+    {
+        var now = _timing.CurTime;
+        var query = EntityQueryEnumerator<ST14EnergyBoxComponent, PowerNetworkBatteryComponent>();
+        while (query.MoveNext(out var uid, out var box, out var netBattery))
+        {
+            if (Paused(uid))
+                continue;
+
+            var battery = netBattery.NetworkBattery;
+            if (box.Block == null || !battery.Enabled)
+            {
+                if (now >= box.NextVisuals)
+                    UpdateVisuals((uid, box));
+                continue;
+            }
+
+            box.Charge = battery.CurrentStorage;
+
+            if (now >= box.NextFlush)
+            {
+                box.NextFlush = now + FlushDelay;
+                Flush((uid, box));
+            }
+
+            if (now >= box.NextVisuals)
+                UpdateVisuals((uid, box));
+        }
+    }
+
+    private void UpdateVisuals(Entity<ST14EnergyBoxComponent> ent)
+    {
+        ent.Comp.NextVisuals = _timing.CurTime + VisualsDelay;
+
+        var hasBlock = ent.Comp.Block != null;
+        var level = 0;
+        var discharging = false;
+
+        if (ent.Comp.Block is { } block && TryComp<BatteryComponent>(block, out var blockBattery) && blockBattery.MaxCharge > 0f)
+            level = GetLevel(ent.Comp.Charge / blockBattery.MaxCharge);
+
+        if (hasBlock && TryComp<PowerNetworkBatteryComponent>(ent, out var netBattery))
+        {
+            var battery = netBattery.NetworkBattery;
+            discharging = battery.Enabled && battery.CurrentSupply > battery.CurrentReceiving * battery.Efficiency + 1f;
+        }
+
+        // The lights are on the screen of the door: they go away with it
+        var closed = ent.Comp.Door == ST14EnergyBoxDoor.Closed;
+
+        _appearance.SetData(ent, ST14EnergyBoxVisuals.Door, ent.Comp.Door);
+        _appearance.SetData(ent, ST14EnergyBoxVisuals.HasBlock, hasBlock);
+        _appearance.SetData(ent, ST14EnergyBoxVisuals.Breaker,
+            !closed ? ST14EnergyBoxLight.Hidden : ent.Comp.Breaker ? ST14EnergyBoxLight.On : ST14EnergyBoxLight.Off);
+        _appearance.SetData(ent, ST14EnergyBoxVisuals.ChargeLevel, closed && hasBlock ? level : -1);
+        _appearance.SetData(ent, ST14EnergyBoxVisuals.SlotEmpty, closed && !hasBlock);
+        _appearance.SetData(ent, ST14EnergyBoxVisuals.Discharging, closed && discharging);
+    }
+}

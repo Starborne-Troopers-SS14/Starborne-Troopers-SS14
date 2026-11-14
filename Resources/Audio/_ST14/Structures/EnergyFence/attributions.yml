@@ -1,0 +1,8 @@
+- files: ["zap1.wav", "zap2.wav", "zap3.wav"]
+  license: "Custom"
+  copyright: "© BOOM Library. All rights reserved. Used under licence by Starborne Troopers; cut from Armageddon (THUN_LIGHTNING Zeus Zap)"
+  source: "https://www.boomlibrary.com"
+- files: ["crackle_loop.wav"]
+  license: "Custom"
+  copyright: "© BOOM Library. All rights reserved. Used under licence by Starborne Troopers; looped from Urban Explosions Construction Kit (SWEETENER DISTORTION Crackler)"
+  source: "https://www.boomlibrary.com"

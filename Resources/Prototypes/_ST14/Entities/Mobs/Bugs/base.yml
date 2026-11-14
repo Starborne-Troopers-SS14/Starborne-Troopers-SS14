@@ -25,6 +25,7 @@
     allowed:
     - Electrocution
     - Flashed
+    - Jitter # the electric fence
   - type: StandingState
   - type: Blindable
   - type: Climbing

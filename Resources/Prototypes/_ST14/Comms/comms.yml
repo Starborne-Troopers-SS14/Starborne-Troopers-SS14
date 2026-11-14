@@ -1,5 +1,5 @@
 # Radio of the Mobile Infantry: the signaller's radio pack, the comms tower to the Rodger Young.
-# The energy block and the energy box are plain things for now.
+# The energy block and the energy box moved to Entities/Structures/Power/energy_fence.yml.
 
 # The radio pack: carries the squad radio of the squad of whoever wears it, in a circle around them
 - type: entity
@@ -96,69 +96,6 @@
       - !type:DoActsBehavior
         acts: [ "Destruction" ]
   - type: ST14CommsTower
-
-# The energy block and the energy box: for now only things to place and carry, without a mechanic of their own
-- type: entity
-  parent: BaseItem
-  id: ST14EnergyBlock
-  name: energy block
-  description: A sealed charge cell of the Mobile Infantry. The light on its face shows it is charged.
-  components:
-  - type: Sprite
-    sprite: _ST14/Objects/Power/energy_block.rsi
-    layers:
-    - state: base
-    - state: green
-  - type: Item
-    size: Small
-    sprite: _ST14/Objects/Power/energy_block.rsi
-
-- type: entity
-  id: ST14EnergyBox
-  name: energy box
-  description: A field power box of the Mobile Infantry.
-  placement:
-    mode: SnapgridCenter
-  components:
-  - type: Transform
-    anchored: true
-  - type: Clickable
-  - type: InteractionOutline
-  - type: Physics
-    bodyType: Static
-  - type: Fixtures
-    fixtures:
-      fix1:
-        shape:
-          !type:PhysShapeAabb
-          bounds: "-0.4,-0.4,0.4,0.4"
-        density: 150
-        mask:
-        - MachineMask
-        layer:
-        - MachineLayer
-  - type: Sprite
-    sprite: _ST14/Structures/Power/energy_box.rsi
-    layers:
-    - state: base
-    - state: door
-  - type: Anchorable
-  - type: Pullable
-  - type: Damageable
-    damageModifierSet: SteelMod
-  - type: Injurable
-    damageContainer: StructuralInorganic
-  - type: Destructible
-    thresholds:
-    - trigger:
-        !type:DamageTrigger
-        damage: 150
-      behaviors:
-      - !type:PlaySoundBehavior
-        sound:
-          collection: MetalBreak
-      - !type:DoActsBehavior
-        acts: [ "Destruction" ]
 
 # What the engineer builds with the multitool
 - type: ST14EngineerBuildable

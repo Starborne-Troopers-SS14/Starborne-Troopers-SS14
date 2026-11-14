@@ -1,2 +1,5 @@
 - type: Tag
   id: ST14Sandstorm
+
+- type: Tag
+  id: ST14EnergyBlock
