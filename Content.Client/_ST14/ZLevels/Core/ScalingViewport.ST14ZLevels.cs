@@ -46,27 +46,17 @@ public sealed partial class ScalingViewport
         var drawBox = GetDrawBox();
         var mapId = xform.MapID;
 
-        // ST14: stackalloc instead of a heap array, this runs for every rendered level every frame.
-        Span<Vector2> corners = stackalloc Vector2[4];
-        corners[0] = _eyeManager.ScreenToMap(drawBox.BottomLeft).Position;
-        corners[1] = _eyeManager.ScreenToMap(drawBox.BottomRight).Position;
-        corners[2] = _eyeManager.ScreenToMap(drawBox.TopLeft).Position;
-        corners[3] = _eyeManager.ScreenToMap(drawBox.TopRight).Position;
+        // ST14: four locals instead of a heap array, this runs for every rendered level every frame.
+        // No stackalloc: the client sandbox cannot verify it.
+        var bl = _eyeManager.ScreenToMap(drawBox.BottomLeft).Position;
+        var br = _eyeManager.ScreenToMap(drawBox.BottomRight).Position;
+        var tl = _eyeManager.ScreenToMap(drawBox.TopLeft).Position;
+        var tr = _eyeManager.ScreenToMap(drawBox.TopRight).Position;
 
-        float minX = float.MaxValue, minY = float.MaxValue;
-        float maxX = float.MinValue, maxY = float.MinValue;
-
-        foreach (var c in corners)
-        {
-            if (c.X < minX)
-                minX = c.X;
-            if (c.Y < minY)
-                minY = c.Y;
-            if (c.X > maxX)
-                maxX = c.X;
-            if (c.Y > maxY)
-                maxY = c.Y;
-        }
+        var minX = MathF.Min(MathF.Min(bl.X, br.X), MathF.Min(tl.X, tr.X));
+        var minY = MathF.Min(MathF.Min(bl.Y, br.Y), MathF.Min(tl.Y, tr.Y));
+        var maxX = MathF.Max(MathF.Max(bl.X, br.X), MathF.Max(tl.X, tr.X));
+        var maxY = MathF.Max(MathF.Max(bl.Y, br.Y), MathF.Max(tl.Y, tr.Y));
 
         // ST14: the tile scan moved to the z-level system, which caches it until the view crosses a tile
         // border or a tile changes. Standing on solid floor it used to read every tile on screen every frame.
