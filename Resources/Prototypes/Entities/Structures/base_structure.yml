@@ -56,7 +56,7 @@
         - MidImpassable
         - LowImpassable
   - type: Anchorable
-  - type: CEZPhysics # ST14
+  - type: ST14ZPhysics # ST14
 
 # For use with yaml composition, so that all wheeled structures can easily be changed.
 - type: entity

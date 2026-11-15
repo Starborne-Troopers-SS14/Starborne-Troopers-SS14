@@ -184,7 +184,10 @@ public sealed class ST14SectorTest : GameTest
         {
             Assert.That(war.TryGetWar(planet, out var state, out _));
             Assert.That(state.Cells[first].Initialized, "The sector was not marked as saved.");
-            Assert.That(resources.UserData.Exists(new ResPath($"/st14_sectors/{planet}_{first}.yml")), "The sector has no save.");
+            // ST14: a sector is saved with all its z-levels, one folder per sector
+            Assert.That(resources.UserData.Exists(new ResPath($"/st14_sectors/{planet}_{first}/network.txt")), "The sector has no save.");
+            for (var depth = -2; depth <= 2; depth++)
+                Assert.That(resources.UserData.Exists(new ResPath($"/st14_sectors/{planet}_{first}/z{depth}.yml")), $"Level {depth} of the sector was not saved.");
             ticker.RestartRound();
         });
 
@@ -201,6 +204,10 @@ public sealed class ST14SectorTest : GameTest
 
             var map = sectors.LoadedMaps[first];
             var mapId = entMan.GetComponent<TransformComponent>(map).MapID;
+
+            // ST14: the sector came back with all five z-levels
+            var levels = server.System<Content.Server._ST14.ZLevels.Layers.ST14ZLayerSystem>().GetLevels(map);
+            Assert.That(levels.Keys.OrderBy(d => d), Is.EqualTo(new[] { -2, -1, 0, 1, 2 }), "The sector did not come back with its z-levels.");
             var walls = entMan.AllEntityQueryEnumerator<Robust.Shared.Physics.Components.PhysicsComponent, MetaDataComponent, TransformComponent>();
             var wall = false;
             while (walls.MoveNext(out _, out var meta, out var xform))
@@ -241,7 +248,7 @@ public sealed class ST14SectorTest : GameTest
             Assert.That(message, Is.Not.Null);
 
             war.Reset(planet);
-            Assert.That(resources.UserData.Exists(new ResPath($"/st14_sectors/{planet}_{first}.yml")), Is.False, "Resetting the war left the save.");
+            Assert.That(resources.UserData.Exists(new ResPath($"/st14_sectors/{planet}_{first}")), Is.False, "Resetting the war left the save.");
 
             server.CfgMan.SetCVar(ST14CVars.SectorRounds, false);
             server.CfgMan.SetCVar(CCVars.GameMap, "Empty");

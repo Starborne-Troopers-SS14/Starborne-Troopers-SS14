@@ -1,0 +1,52 @@
+# The five levels of a planet sector of the galaxy war (see docs/ST14-ZLevels-Layers.md):
+#  +2  sky            - open air, nothing stands there; flyers and drop pods pass through
+#  +1  roofs          - open air over the ground; roof tiles built here cover the building below
+#   0  main level     - the sector map itself: the surface the battle is fought on
+#  -1  trenches       - dirt under the whole surface; dig through the floor of level 0 and you stand in a trench
+#  -2  bug tunnels    - rock under the trenches, the hive's level
+# The underground levels are tiles only (no wall entities), with a ring of solid rock where the sandstorm of the
+# sector is, so nobody walks off them.
+
+- type: st14ZLayerSet
+  id: ST14PlanetSector
+  boundaryComponent: ST14SandstormWall
+  layers:
+  - depth: -2
+    name: st14-zlayer-tunnels
+    fill: FloorCave
+    edge: ST14ZLayerEdge
+  - depth: -1
+    name: st14-zlayer-trenches
+    fill: FloorDirt
+    edge: ST14ZLayerEdge
+  - depth: 1
+    name: st14-zlayer-roofs
+  - depth: 2
+    name: st14-zlayer-sky
+
+# Solid rock at the edge of an underground level: no sprite (it sits under the sandstorm of the level above), a full
+# wall hitbox and an occluder.
+- type: entity
+  id: ST14ZLayerEdge
+  name: solid rock
+  description: The ground of the sector ends here.
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: true
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,-0.5,0.5,0.5"
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+        density: 1000
+        hard: true
+  - type: Occluder

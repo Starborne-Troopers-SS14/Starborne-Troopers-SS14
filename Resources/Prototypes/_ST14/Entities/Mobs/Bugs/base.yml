@@ -16,7 +16,7 @@
     bodyType: KinematicController
   - type: MovementSpeedModifier
   - type: LagCompensation
-  - type: CEZPhysics
+  - type: ST14ZPhysics
   - type: Reactive
     groups:
       Flammable: [Touch]

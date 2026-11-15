@@ -1,0 +1,47 @@
+- type: entity
+  id: ST14ZLevelsLadderStoneBase
+  abstract: true
+  name: stone ladder
+  components:
+  - type: Sprite
+    sprite: _ST14/ZLevels/Structures/Architecture/Ladders/stone.rsi
+  - type: Damageable
+    damageModifierSet: Rock
+  - type: Injurable
+    damageContainer: StructuralInorganic
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 30
+      behaviors:
+      - !type:PlaySoundBehavior
+        sound:
+          path: /Audio/Effects/break_stone.ogg
+          params:
+            volume: -6
+      - !type:DoActsBehavior
+        acts: ["Destruction"]
+
+- type: entity
+  parent:
+  - ST14ZLevelLadderBase
+  - ST14ZLevelsLadderStoneBase
+  id: ST14ZLevelLadderStone
+  name: stone ladder
+
+- type: entity
+  parent:
+  - ST14ZLevelLadderCornerBase
+  - ST14ZLevelsLadderStoneBase
+  id: ST14ZLevelLadderStoneCorner
+  name: stone ladder
+  suffix: Corner
+
+- type: entity
+  parent:
+  - ST14ZLevelLadderCornerInnerBase
+  - ST14ZLevelsLadderStoneBase
+  id: ST14ZLevelLadderStoneCornerInner
+  name: stone ladder
+  suffix: Inner Corner
