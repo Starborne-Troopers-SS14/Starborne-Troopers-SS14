@@ -31,6 +31,7 @@ namespace Content.Server._ST14.ZLevels.Fortifications;
 public sealed partial class ST14TrenchSystem : EntitySystem
 {
     public static readonly EntProtoId TrenchWall = "ST14TrenchWall";
+    public static readonly EntProtoId TrenchSteps = "ST14TrenchSteps";
     public static readonly ProtoId<ContentTileDefinition> TrenchFloor = "FloorDirt";
 
     [Dependency] private ITileDefinitionManager _tiles = default!;
@@ -76,7 +77,7 @@ public sealed partial class ST14TrenchSystem : EntitySystem
             return;
         }
 
-        DigTrench(map, worldTile);
+        DigTrench(map, worldTile, Transform(args.User).Coordinates);
         _popup.PopupEntity(Loc.GetString("st14-trench-dug"), args.User, args.User);
     }
 
@@ -110,7 +111,11 @@ public sealed partial class ST14TrenchSystem : EntitySystem
     /// Opens a world tile of a level into the level below and makes it a trench there. Untouched neighbours of the
     /// trench get earth walls on the level below; a wall in the way of the trench goes
     /// </summary>
-    public bool DigTrench(EntityUid map, Vector2i worldTile)
+    /// <param name="from">
+    /// Where the digger stands. A new trench gets steps on its first tile leading up to the digger, and digging the
+    /// tile the steps lead to moves them on along the trench, so a trench always has a way in and out.
+    /// </param>
+    public bool DigTrench(EntityUid map, Vector2i worldTile, EntityCoordinates? from = null)
     {
         if (!TryComp<ST14ZMapComponent>(map, out var zMap) ||
             !_zLevels.TryMapDown((map, zMap), out var below) ||
@@ -119,6 +124,18 @@ public sealed partial class ST14TrenchSystem : EntitySystem
         {
             return false;
         }
+
+        // a new trench: none of its four sides is dug yet
+        var fresh = true;
+        foreach (var side in Cardinals)
+        {
+            var groundSide = TileOf(ground.Value, worldTile + side);
+            if (!_map.TryGetTileRef(ground.Value, ground.Value.Comp, groundSide, out var sideRef) || sideRef.Tile.IsEmpty)
+                fresh = false;
+        }
+
+        // steps that led up onto this tile now lead into the hole: they move here and lead on the same way
+        var movedSteps = TakeStepsLeadingTo(floor.Value, worldTile);
 
         // down there first, so whoever falls through lands on the floor of the trench
         var floorTile = new Tile(_tiles[TrenchFloor].TileId);
@@ -153,7 +170,72 @@ public sealed partial class ST14TrenchSystem : EntitySystem
 
         // the opening last: the tile change wakes and drops whoever stands on it
         _map.SetTile(ground.Value, ground.Value.Comp, TileOf(ground.Value, worldTile), Tile.Empty);
+
+        if (movedSteps is { } dir)
+            PlaceSteps(ground.Value, floor.Value, worldTile, dir);
+        else if (fresh && from is { } digger && StepsDirection(worldTile, digger) is { } toDigger)
+            PlaceSteps(ground.Value, floor.Value, worldTile, toDigger);
+
         return true;
+    }
+
+    private static readonly Vector2i[] Cardinals = [new(0, 1), new(0, -1), new(1, 0), new(-1, 0)];
+
+    /// <summary>
+    /// The side of <paramref name="worldTile"/> the digger stands on, along the longer axis
+    /// </summary>
+    private Vector2i? StepsDirection(Vector2i worldTile, EntityCoordinates digger)
+    {
+        var delta = _transform.ToMapCoordinates(digger).Position - (worldTile + new Vector2(0.5f));
+        if (delta.LengthSquared() < 0.01f)
+            return null;
+
+        return MathF.Abs(delta.X) >= MathF.Abs(delta.Y)
+            ? new Vector2i(MathF.Sign(delta.X), 0)
+            : new Vector2i(0, MathF.Sign(delta.Y));
+    }
+
+    /// <summary>
+    /// Steps on <paramref name="worldTile"/> of the trench floor climbing towards <paramref name="dir"/>, if the
+    /// ground they lead up to is still there
+    /// </summary>
+    private void PlaceSteps(Entity<MapGridComponent> ground, Entity<MapGridComponent> floor, Vector2i worldTile, Vector2i dir)
+    {
+        var exit = TileOf(ground, worldTile + dir);
+        if (!_map.TryGetTileRef(ground, ground.Comp, exit, out var exitRef) || exitRef.Tile.IsEmpty)
+            return;
+
+        // a ladder rotated to face south climbs north: it faces away from where it leads
+        var facing = (-new Vector2(dir.X, dir.Y)).GetDir();
+        var steps = Spawn(TrenchSteps, _map.GridTileToLocal(floor, floor.Comp, TileOf(floor, worldTile)));
+        _transform.SetLocalRotation(steps, facing.ToAngle());
+    }
+
+    /// <summary>
+    /// Removes the steps of the trench next to <paramref name="worldTile"/> that lead up onto it and says which way
+    /// they climbed
+    /// </summary>
+    private Vector2i? TakeStepsLeadingTo(Entity<MapGridComponent> floor, Vector2i worldTile)
+    {
+        foreach (var side in Cardinals)
+        {
+            var anchored = _map.GetAnchoredEntitiesEnumerator(floor, floor.Comp, TileOf(floor, worldTile - side));
+            while (anchored.MoveNext(out var uid))
+            {
+                if (MetaData(uid.Value).EntityPrototype?.ID != TrenchSteps.Id)
+                    continue;
+
+                // the way these steps climb, see PlaceSteps
+                var climbs = Transform(uid.Value).LocalRotation.GetCardinalDir().GetOpposite().ToIntVec();
+                if (climbs != side)
+                    continue;
+
+                Del(uid.Value);
+                return side;
+            }
+        }
+
+        return null;
     }
 
     private Vector2i TileOf(Entity<MapGridComponent> grid, Vector2i worldTile)

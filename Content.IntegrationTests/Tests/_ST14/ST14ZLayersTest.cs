@@ -218,6 +218,100 @@ public sealed class ST14ZLayersTest : GameTest
         });
     }
 
+    /// <summary>
+    /// A new trench gets steps on its first tile climbing up to the digger; digging the tile they lead to moves them on
+    /// </summary>
+    [Test]
+    public async Task TrenchStepsTest()
+    {
+        await Server.WaitAssertion(() =>
+        {
+            var layers = SEntMan.System<ST14ZLayerSystem>();
+            var trench = SEntMan.System<Content.Server._ST14.ZLevels.Fortifications.ST14TrenchSystem>();
+            var maps = SEntMan.System<SharedMapSystem>();
+
+            var levels = layers.EnsureLayers(MakeSector(out _), "ST14PlanetSector");
+            var grid = SComp<MapGridComponent>(levels[-1]);
+
+            List<(Vector2i Tile, Direction Facing)> Steps()
+            {
+                var found = new List<(Vector2i, Direction)>();
+                var query = SEntMan.AllEntityQueryEnumerator<MetaDataComponent, TransformComponent>();
+                while (query.MoveNext(out _, out var meta, out var xform))
+                {
+                    if (xform.MapUid == levels[-1] && meta.EntityPrototype?.ID == "ST14TrenchSteps")
+                        found.Add((maps.TileIndicesFor(levels[-1], grid, xform.Coordinates), xform.LocalRotation.GetCardinalDir()));
+                }
+
+                return found;
+            }
+
+            // the digger stands north of the tile: the steps climb north (a ladder facing south)
+            Assert.That(trench.DigTrench(levels[0], new Vector2i(5, 5), new EntityCoordinates(levels[0], new Vector2(5.5f, 6.5f))));
+            Assert.That(Steps(), Is.EquivalentTo(new[] { (new Vector2i(5, 5), Direction.South) }), "a new trench has no steps up to the digger");
+
+            // going on east along the trench: no new steps
+            Assert.That(trench.DigTrench(levels[0], new Vector2i(6, 5), new EntityCoordinates(levels[0], new Vector2(7.5f, 5.5f))));
+            Assert.That(Steps(), Has.Count.EqualTo(1), "a trench dug on got a second set of steps");
+
+            // digging where the steps lead moves them there
+            Assert.That(trench.DigTrench(levels[0], new Vector2i(5, 6), new EntityCoordinates(levels[0], new Vector2(5.5f, 7.5f))));
+            Assert.That(Steps(), Is.EquivalentTo(new[] { (new Vector2i(5, 6), Direction.South) }), "the steps did not move on to the new tile");
+        });
+    }
+
+    /// <summary>
+    /// A soldier in a new trench walks up its steps and out onto the ground
+    /// </summary>
+    [Test]
+    public async Task ClimbOutOfTrenchTest()
+    {
+        Dictionary<int, EntityUid> levels = default!;
+        EntityUid trooper = default;
+
+        await Server.WaitPost(() =>
+        {
+            var layers = SEntMan.System<ST14ZLayerSystem>();
+            levels = layers.EnsureLayers(MakeSector(out _), "ST14PlanetSector");
+            var trench = SEntMan.System<Content.Server._ST14.ZLevels.Fortifications.ST14TrenchSystem>();
+            Assert.That(trench.DigTrench(levels[0], new Vector2i(5, 5), new EntityCoordinates(levels[0], new Vector2(5.5f, 6.5f))));
+            // the low end of the steps, at the trench side
+            trooper = SEntMan.SpawnEntity("ST14ZLayersDummy", new EntityCoordinates(levels[-1], 5.5f, 5.05f));
+        });
+        await RunTicksSync(10);
+
+        // a step onto the low end wakes the body: it stays down in the trench
+        await Server.WaitPost(() => SEntMan.System<SharedTransformSystem>().SetWorldPosition(trooper, new Vector2(5.5f, 5.1f)));
+        await RunTicksSync(30);
+
+        await Server.WaitAssertion(() =>
+            Assert.That(SEntMan.GetComponent<TransformComponent>(trooper).MapUid, Is.EqualTo(levels[-1]), "the steps climb the wrong way"));
+
+        // walk north up the steps
+        foreach (var y in new[] { 5.4f, 5.6f, 5.8f, 5.95f })
+        {
+            await Server.WaitPost(() =>
+            {
+                if (SEntMan.GetComponent<TransformComponent>(trooper).MapUid == levels[-1])
+                    SEntMan.System<SharedTransformSystem>().SetWorldPosition(trooper, new Vector2(5.5f, y));
+            });
+            await RunTicksSync(15);
+        }
+
+        await Server.WaitPost(() =>
+        {
+            Assert.That(SEntMan.GetComponent<TransformComponent>(trooper).MapUid, Is.EqualTo(levels[0]), "the steps did not lift the soldier to the ground");
+            SEntMan.System<SharedTransformSystem>().SetWorldPosition(trooper, new Vector2(5.5f, 6.5f));
+        });
+        await RunTicksSync(60);
+
+        await Server.WaitAssertion(() =>
+        {
+            Assert.That(SEntMan.GetComponent<TransformComponent>(trooper).MapUid, Is.EqualTo(levels[0]), "fell back into the trench");
+            Assert.That(SComp<ST14ZPhysicsComponent>(trooper).CurrentZLevel, Is.EqualTo(0));
+        });
+    }
+
     [Test]
     public async Task SaveAndLoadAllLevelsTest()
     {
