@@ -44,7 +44,8 @@ public sealed partial class ST14TrenchSystem : EntitySystem
     [SubscribeLocalEvent]
     private void OnAfterInteract(Entity<ST14TrenchDiggerComponent> ent, ref AfterInteractEvent args)
     {
-        if (args.Handled || !args.CanReach || args.Target != null)
+        // in cable mode the cable trench system digs (Content.Server/_ST14/EnergyFence/ST14TrenchSystem.cs)
+        if (args.Handled || !args.CanReach || args.Target != null || ent.Comp.CableMode)
             return;
 
         if (!TryGetDigSpot(args.ClickLocation, out _, out var worldTile, out var reason))

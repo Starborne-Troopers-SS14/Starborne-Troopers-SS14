@@ -1,4 +1,5 @@
 using Content.Shared._ST14.EnergyFence;
+using Content.Shared._ST14.ZLevels.Fortifications;
 using Content.Shared.DoAfter;
 using Content.Shared.Interaction;
 using Content.Shared.Maps;
@@ -37,6 +38,10 @@ public sealed partial class ST14TrenchSystem : EntitySystem
     private void OnAfterInteract(Entity<ST14TrenchToolComponent> ent, ref AfterInteractEvent args)
     {
         if (args.Handled || !args.CanReach || args.Target != null && !HasComp<MapGridComponent>(args.Target))
+            return;
+
+        // ST14: the same tool digs trenches into the level below unless switched to cables
+        if (TryComp<ST14TrenchDiggerComponent>(ent, out var digger) && !digger.CableMode)
             return;
 
         if (!TryGetTile(args.ClickLocation, out var grid, out var tileRef))

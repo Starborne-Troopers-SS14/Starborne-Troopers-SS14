@@ -15,12 +15,19 @@ namespace Content.Shared._ST14.ZLevels.Fortifications;
 /// <summary>
 /// A tool that digs a trench: used on the ground of a level, it opens the tile into the level below and turns the
 /// tile under it into the floor of a trench walled with earth.
+/// The entrenching tool also digs small cable trenches (<c>ST14TrenchTool</c>): using it in hand switches between the two.
 /// </summary>
-[RegisterComponent, NetworkedComponent]
+[RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
 public sealed partial class ST14TrenchDiggerComponent : Component
 {
     [DataField]
     public TimeSpan DigTime = TimeSpan.FromSeconds(3);
+
+    /// <summary>
+    /// Digs cable trenches instead of trenches into the level below
+    /// </summary>
+    [DataField, AutoNetworkedField]
+    public bool CableMode;
 }
 
 /// <summary>

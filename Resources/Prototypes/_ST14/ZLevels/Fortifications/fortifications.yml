@@ -1,23 +1,9 @@
 # Trenches and bunkers on the five levels of a sector (see docs/ST14-ZLevels-Layers.md).
-#  - The entrenching tool digs a tile of the surface: it opens into level -1, which becomes the floor of a trench with
+#  - The entrenching tool (ST14EntrenchingTool, energy_fence.yml) digs a tile of the surface: it opens into level -1, which becomes the floor of a trench with
 #    earth walls along it. A new trench gets steps up to the digger on its first tile; they move on as it is dug.
 #  - Bunkers are concrete walls and firing slits built by engineers; a roof frame lays a concrete roof on the level
 #    above, which keeps out the sky, the light and the weather.
 # All sprites here are made for Starborne Troopers (meta.json: All rights reserved).
-
-- type: entity
-  parent: BaseItem
-  id: ST14TrenchSpade
-  name: trench spade
-  description: A folding spade. Dig the ground in front of you to cut a trench into the level below.
-  components:
-  - type: Sprite
-    sprite: _ST14/ZLevels/Fortifications/entrenching_tool.rsi
-    state: icon
-  - type: Item
-    size: Normal
-  - type: ST14TrenchDigger
-    digTime: 3
 
 - type: entity
   parent: BaseStructure
