@@ -1,0 +1,93 @@
+# Shared unfinished frame stage for the whole ladder/roof family.
+#
+# NOTE: the frame deliberately has NO ST14ZLevelHighGround - it is scaffolding, not a climbable ramp.
+
+- type: entity
+  id: ST14ZLevelLadderFrameBase
+  abstract: true
+  parent: BaseStructure
+  name: ladder frame
+  description: An unfinished wooden support frame. It needs to be covered before it's safe to climb.
+  placement:
+      mode: SnapgridCenter
+      snap:
+      - Wall
+  components:
+  - type: Sprite
+    sprite: _ST14/ZLevels/Structures/Architecture/Ladders/frame.rsi
+    state: straight
+    drawdepth: Mobs
+  - type: PlacementReplacement
+    key: walls
+  - type: Transform
+    anchored: true
+  - type: Clickable
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      hard:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,0.5,0.5,0.6"
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+        density: 1000
+        hard: true
+  - type: Damageable
+    damageModifierSet: Wood
+  - type: Injurable
+    damageContainer: StructuralInorganic
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 20
+      behaviors:
+      - !type:SpawnEntitiesBehavior
+        spawn:
+          MaterialWoodPlank1:
+            min: 1
+            max: 2
+      - !type:PlaySoundBehavior
+        sound:
+          collection: WoodDestroy
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+
+- type: entity
+  parent: ST14ZLevelLadderFrameBase
+  id: ST14ZLevelLadderFrame
+  name: ladder frame
+
+- type: entity
+  parent: ST14ZLevelLadderFrameBase
+  id: ST14ZLevelLadderFrameCorner
+  name: ladder frame
+  suffix: Corner
+  components:
+  - type: Sprite
+    state: corner
+  - type: Fixtures
+    fixtures:
+      hard:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "0.5,0.5,0.6,0.6"
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+        density: 1000
+        hard: true
+
+- type: entity
+  parent: ST14ZLevelLadderFrameCorner
+  id: ST14ZLevelLadderFrameCornerInner
+  name: ladder frame
+  suffix: Inner Corner
+  components:
+  - type: Sprite
+    state: internal_corner

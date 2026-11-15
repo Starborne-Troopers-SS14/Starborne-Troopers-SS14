@@ -1,9 +1,0 @@
-- type: shader
-  id: CEZBlur
-  kind: source
-  path: "/Textures/_CE/Shaders/zblur.swsl"
-
-- type: shader
-  id: CEZFog
-  kind: source
-  path: "/Textures/_CE/Shaders/zfog.swsl"

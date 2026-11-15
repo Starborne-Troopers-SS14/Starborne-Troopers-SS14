@@ -44,7 +44,7 @@
     noRot: false
   - type: Pullable
   - type: DamageExaminable
-  - type: CEZPhysics # ST14
+  - type: ST14ZPhysics # ST14
   - type: Rotatable
     increment: 30
 

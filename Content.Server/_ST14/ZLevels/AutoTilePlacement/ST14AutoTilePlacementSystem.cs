@@ -1,0 +1,50 @@
+/*
+ * Based on CrystallEdge z-levels (MIT License), see LICENSE.TXT in the ZLevels folder.
+ */
+
+using Content.Shared.Maps;
+using Robust.Shared.Analyzers;
+using Robust.Shared.Map;
+using Robust.Shared.Map.Components;
+
+namespace Content.Server._ST14.ZLevels.AutoTilePlacement;
+
+public sealed partial class ST14AutoTilePlacementSystem : EntitySystem
+{
+    [Dependency] private TileSystem _tile = default!;
+    [Dependency] private ITileDefinitionManager _tiledef = default!;
+    [Dependency] private SharedMapSystem _maps = default!;
+
+    [SubscribeLocalEvent]
+    private void OnInit(Entity<ST14AutoTilePlacementComponent> ent, ref ComponentInit args)
+    {
+        var xform = Transform(ent);
+        var coord = xform.Coordinates;
+        var gridUid = xform.GridUid;
+        var proto = MetaData(ent).EntityPrototype;
+
+        if (gridUid is null)
+            return;
+
+        if (proto is null)
+            return;
+
+        if (!TryComp<MapGridComponent>(gridUid.Value, out var grid))
+            return;
+
+        var tileRef = _maps.GetTileRef(gridUid.Value, grid, coord);
+
+        if (!tileRef.Tile.IsEmpty)
+            return;
+
+        // Resolve the tile definition and replace the empty tile with the configured one.
+        if (!_tiledef.TryGetDefinition(ent.Comp.Tile, out var def))
+            return;
+
+        _tile.ReplaceTile(tileRef, (ContentTileDefinition) def);
+
+        //Recreate this entity
+        Spawn(proto.ID, xform.Coordinates);
+        QueueDel(ent);
+    }
+}

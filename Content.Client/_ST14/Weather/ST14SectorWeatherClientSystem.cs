@@ -27,6 +27,14 @@ public sealed partial class ST14SectorWeatherClientSystem : EntitySystem
     [Dependency] private IResourceCache _resources = default!;
     [Dependency] private SharedAudioSystem _audio = default!;
     [Dependency] private IConfigurationManager _cfg = default!;
+    [Dependency] private Content.Shared.Light.EntitySystems.SharedRoofSystem _roof = default!; // ST14
+    [Dependency] private SharedMapSystem _map = default!; // ST14
+
+    /// <summary>
+    /// ST14: 1 under the open sky, 0 under a roof (the ground over a tunnel, a roof built on the level above),
+    /// eased so stepping under a roof fades the weather out instead of cutting it
+    /// </summary>
+    private float _exposure = 1f;
 
     private ST14WeatherOverlay _overlay = default!;
 
@@ -89,6 +97,11 @@ public sealed partial class ST14SectorWeatherClientSystem : EntitySystem
                 brightness = Math.Clamp(MathF.Max(c.R, MathF.Max(c.G, c.B)) * 1.1f, 0.14f, 1f);
             }
         }
+
+        // ST14: the same weather is on every z-level of a sector, but only what is under the open sky sees it
+        var exposed = _player.LocalEntity is { } local && UnderRoof(local) ? 0f : 1f;
+        _exposure += (exposed - _exposure) * MathF.Min(1f, frameTime * 3f);
+        strength *= _exposure;
 
         _overlay.Set(proto?.ID, proto?.Visual, strength, wind, brightness, frameTime);
         UpdateSound(proto, strength, frameTime);
@@ -176,5 +189,21 @@ public sealed partial class ST14SectorWeatherClientSystem : EntitySystem
         _fading.Clear();
         _stream = null;
         _playing = null;
+    }
+
+    /// <summary>
+    /// ST14: whether the tile the entity stands on is rooved, i.e. something opaque lies over it on a z-level above
+    /// </summary>
+    private bool UnderRoof(EntityUid uid)
+    {
+        var xform = Transform(uid);
+        if (xform.GridUid is not { } gridUid || !TryComp<MapGridComponent>(gridUid, out var grid) ||
+            !TryComp<Content.Shared.Light.Components.RoofComponent>(gridUid, out var roof))
+        {
+            return false;
+        }
+
+        var index = _map.TileIndicesFor(gridUid, grid, xform.Coordinates);
+        return _roof.IsRooved((gridUid, grid, roof), index);
     }
 }

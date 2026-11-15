@@ -1,7 +1,7 @@
 using System.Numerics;
 using Content.Client.Parallax.Managers;
 using Content.Client.Viewport; // ST14
-using Content.Shared._CE.ZLevels.Core.EntitySystems; // ST14
+using Content.Shared._ST14.ZLevels.Core.EntitySystems; // ST14
 using Content.Shared.CCVar;
 using Content.Shared.Parallax.Biomes;
 using Robust.Client.GameObjects;
@@ -23,7 +23,7 @@ public sealed partial class ParallaxOverlay : Overlay
     [Dependency] private IParallaxManager _manager = default!;
     private readonly SharedMapSystem _mapSystem;
     private readonly ParallaxSystem _parallax;
-    private readonly CESharedZLevelsSystem _zLevel; // ST14
+    private readonly ST14SharedZLevelsSystem _zLevel; // ST14
 
     public override OverlaySpace Space => OverlaySpace.WorldSpaceBelowWorld;
 
@@ -33,7 +33,7 @@ public sealed partial class ParallaxOverlay : Overlay
         IoCManager.InjectDependencies(this);
         _mapSystem = _entManager.System<SharedMapSystem>();
         _parallax = _entManager.System<ParallaxSystem>();
-        _zLevel = _entManager.System<CESharedZLevelsSystem>(); // ST14
+        _zLevel = _entManager.System<ST14SharedZLevelsSystem>(); // ST14
     }
 
     protected override bool BeforeDraw(in OverlayDrawArgs args)

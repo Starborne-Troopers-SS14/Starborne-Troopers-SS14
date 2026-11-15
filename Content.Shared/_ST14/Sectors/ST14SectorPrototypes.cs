@@ -88,4 +88,10 @@ public sealed partial class ST14SectorSettingsPrototype : IPrototype
     /// </summary>
     [DataField]
     public List<string> TrashDecalTags = new();
+
+    /// <summary>
+    /// The z-levels every sector gets around its map (see ST14ZLayerSetPrototype), null for a flat sector
+    /// </summary>
+    [DataField]
+    public ProtoId<Content.Shared._ST14.ZLevels.Layers.ST14ZLayerSetPrototype>? Layers;
 }

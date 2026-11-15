@@ -399,7 +399,7 @@
   parent: BaseItem
   id: ST14EntrenchingTool
   name: entrenching tool
-  description: A folding field spade. Digs a small trench in the sand to lay a cable in and fills it back in. Buried cables can only be seen with a T-ray scanner.
+  description: A folding field spade. Digs a trench into the ground to fight from, or, switched over in hand, a small trench in the sand to lay a cable in and fill it back in. Buried cables can only be seen with a T-ray scanner.
   components:
   - type: Sprite
     sprite: Objects/Tools/shovel.rsi
@@ -419,6 +419,9 @@
       ST14FloorDunes: ST14FloorDunesTrench
     digSound:
       collection: ST14TrenchDig
+  # ST14: trenches into the level below (z-levels), switched with the cable trenches by using it in hand
+  - type: ST14TrenchDigger
+    digTime: 3
 
 # What the engineer builds with the multitool
 - type: ST14EngineerBuildable

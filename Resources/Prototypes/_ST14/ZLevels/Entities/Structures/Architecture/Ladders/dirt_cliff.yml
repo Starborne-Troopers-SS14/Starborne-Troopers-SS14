@@ -1,0 +1,45 @@
+- type: entity
+  id: ST14ZLevelsLadderDirtCliffBase
+  abstract: true
+  name: dirt cliff
+  description: A steep dirt slope you can scramble up to reach the level above.
+  components:
+  - type: Sprite
+    sprite: _ST14/ZLevels/Structures/Architecture/Ladders/dirt_cliff.rsi
+  - type: Damageable
+    damageModifierSet: Rock
+  - type: Injurable
+    damageContainer: StructuralInorganic
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 30
+      behaviors:
+      - !type:PlaySoundBehavior
+        sound:
+          path: /Audio/Effects/break_stone.ogg
+          params:
+            volume: -6
+      - !type:DoActsBehavior
+        acts: ["Destruction"]
+
+- type: entity
+  parent:
+  - ST14ZLevelLadderBase
+  - ST14ZLevelsLadderDirtCliffBase
+  id: ST14ZLevelLadderDirtCliff
+
+- type: entity
+  parent:
+  - ST14ZLevelLadderCornerBase
+  - ST14ZLevelsLadderDirtCliffBase
+  id: ST14ZLevelLadderDirtCliffCorner
+  suffix: Corner
+
+- type: entity
+  parent:
+  - ST14ZLevelLadderCornerInnerBase
+  - ST14ZLevelsLadderDirtCliffBase
+  id: ST14ZLevelLadderDirtCliffCornerInner
+  suffix: Inner Corner
