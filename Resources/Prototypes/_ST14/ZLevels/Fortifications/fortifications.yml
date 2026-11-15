@@ -7,8 +7,8 @@
 
 - type: entity
   parent: BaseItem
-  id: ST14EntrenchingTool
-  name: entrenching tool
+  id: ST14TrenchSpade
+  name: trench spade
   description: A folding spade. Dig the ground in front of you to cut a trench into the level below.
   components:
   - type: Sprite
