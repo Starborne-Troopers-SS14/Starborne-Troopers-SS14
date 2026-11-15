@@ -171,6 +171,51 @@ public sealed class ST14ZLayersTest : GameTest
         });
     }
 
+    /// <summary>
+    /// Two dug tiles make a trench on -1 walled with earth all around, and a roof frame in it lays concrete back over it
+    /// </summary>
+    [Test]
+    public async Task TrenchAndRoofTest()
+    {
+        await Server.WaitAssertion(() =>
+        {
+            var layers = SEntMan.System<ST14ZLayerSystem>();
+            var trench = SEntMan.System<Content.Server._ST14.ZLevels.Fortifications.ST14TrenchSystem>();
+            var zLevels = SEntMan.System<Content.Server._ST14.ZLevels.Core.ST14ZLevelsSystem>();
+            var maps = SEntMan.System<SharedMapSystem>();
+            var tileMan = Server.ResolveDependency<ITileDefinitionManager>();
+
+            var levels = layers.EnsureLayers(MakeSector(out _), "ST14PlanetSector");
+            Assert.That(trench.DigTrench(levels[0], new Vector2i(5, 5)));
+            Assert.That(trench.DigTrench(levels[0], new Vector2i(6, 5)));
+
+            Assert.That(zLevels.TryGetLayerGrid(levels[0], out var ground));
+            Assert.That(maps.GetTileRef(ground!.Value.Owner, ground.Value.Comp, new Vector2i(5, 5)).Tile.IsEmpty, "the trench is not open to the level above");
+
+            var walls = new HashSet<Vector2i>();
+            var query = SEntMan.AllEntityQueryEnumerator<MetaDataComponent, TransformComponent>();
+            while (query.MoveNext(out _, out var meta, out var xform))
+            {
+                if (xform.MapUid == levels[-1] && meta.EntityPrototype?.ID == "ST14TrenchWall")
+                    walls.Add(maps.TileIndicesFor(levels[-1], SComp<MapGridComponent>(levels[-1]), xform.Coordinates));
+            }
+
+            var expected = new HashSet<Vector2i>();
+            for (var x = 4; x <= 7; x++)
+            for (var y = 4; y <= 6; y++)
+            {
+                if (y != 5 || x is 4 or 7)
+                    expected.Add(new Vector2i(x, y));
+            }
+
+            Assert.That(walls, Is.EquivalentTo(expected), "the trench is not walled all around and open along its length");
+
+            SEntMan.SpawnEntity("ST14BunkerRoofFrame", new EntityCoordinates(levels[-1], new Vector2(5.5f, 5.5f)));
+            var roof = maps.GetTileRef(ground.Value.Owner, ground.Value.Comp, new Vector2i(5, 5)).Tile;
+            Assert.That(roof.TypeId, Is.EqualTo(tileMan["FloorReinforced"].TileId), "the roof frame did not cover the dug-out");
+        });
+    }
+
     [Test]
     public async Task SaveAndLoadAllLevelsTest()
     {
@@ -299,4 +344,3 @@ public sealed class ST14ZLayersTest : GameTest
         });
     }
 }
-

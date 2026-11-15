@@ -1,0 +1,176 @@
+# Trenches and bunkers on the five levels of a sector (see docs/ST14-ZLevels-Layers.md).
+#  - The entrenching tool digs a tile of the surface: it opens into level -1, which becomes the floor of a trench with
+#    earth walls along it. Trench steps lead back up.
+#  - Bunkers are concrete walls and firing slits built by engineers; a roof frame lays a concrete roof on the level
+#    above, which keeps out the sky, the light and the weather.
+# All sprites here are made for Starborne Troopers (meta.json: All rights reserved).
+
+- type: entity
+  parent: BaseItem
+  id: ST14EntrenchingTool
+  name: entrenching tool
+  description: A folding spade. Dig the ground in front of you to cut a trench into the level below.
+  components:
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/entrenching_tool.rsi
+    state: icon
+  - type: Item
+    size: Normal
+  - type: ST14TrenchDigger
+    digTime: 3
+
+- type: entity
+  parent: BaseStructure
+  id: ST14TrenchWall
+  name: trench wall
+  description: Packed earth topped with sandbags, the side of a trench.
+  components:
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/trench_wall.rsi
+    state: wall
+    drawdepth: Walls
+  - type: Icon
+    sprite: _ST14/ZLevels/Fortifications/trench_wall.rsi
+    state: wall
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,-0.5,0.5,0.5"
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+        density: 1000
+  - type: Damageable
+    damageModifierSet: RockMod
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 800
+      behaviors:
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+
+- type: entity
+  parent: BaseStructure
+  id: ST14BunkerWall
+  name: bunker wall
+  description: Poured concrete, thick enough to stop a shell.
+  components:
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/bunker_wall.rsi
+    state: wall
+    drawdepth: Walls
+  - type: Icon
+    sprite: _ST14/ZLevels/Fortifications/bunker_wall.rsi
+    state: wall
+  - type: Occluder
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,-0.5,0.5,0.5"
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+        density: 1000
+  - type: Damageable
+    damageModifierSet: SteelStaticMod
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 2500
+      behaviors:
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+
+# A slit to fire from: nobody gets through it, bullets and sight do.
+- type: entity
+  parent: ST14BunkerWall
+  id: ST14BunkerSlit
+  name: firing slit
+  description: A narrow embrasure in the concrete. Wide enough for a muzzle, not for a body.
+  components:
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/bunker_slit.rsi
+    state: wall
+    drawdepth: Walls
+  - type: Icon
+    sprite: _ST14/ZLevels/Fortifications/bunker_slit.rsi
+    state: wall
+  - type: Occluder
+    enabled: false
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,-0.5,0.5,0.5"
+        mask:
+        - FullTileMask
+        layer:
+        - MidImpassable
+        - LowImpassable
+        density: 1000
+
+# Lays a 3x3 concrete roof on the level above itself and goes away.
+- type: entity
+  id: ST14BunkerRoofFrame
+  name: bunker roof frame
+  description: Concrete slabs for the roof of a bunker or a dug-out, laid on the level above.
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: true
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/roof_kit.rsi
+    state: icon
+  - type: ST14RoofPlacer
+    tile: FloorReinforced
+    radius: 1
+
+# Earth steps out of a trench: the trench must run on past them so the soldier walks up onto the ground.
+- type: entity
+  parent: ST14ZLevelLadderDirtCliff
+  id: ST14TrenchSteps
+  name: trench steps
+  description: Steps cut into the side of the trench. Walk along them to climb out.
+
+- type: ST14EngineerBuildable
+  id: BunkerWall
+  result: ST14BunkerWall
+  cost: 60
+  buildTime: 6
+  conditions:
+  - !type:TileNotBlocked
+
+- type: ST14EngineerBuildable
+  id: BunkerSlit
+  result: ST14BunkerSlit
+  cost: 60
+  buildTime: 6
+  conditions:
+  - !type:TileNotBlocked
+
+- type: ST14EngineerBuildable
+  id: BunkerRoofFrame
+  result: ST14BunkerRoofFrame
+  cost: 120
+  buildTime: 8
+  conditions:
+  - !type:TileNotBlocked
+
+- type: ST14EngineerBuildable
+  id: TrenchSteps
+  result: ST14TrenchSteps
+  cost: 20
+  buildTime: 4
+  conditions:
+  - !type:TileNotBlocked
