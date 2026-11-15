@@ -196,6 +196,8 @@ public sealed partial class ST14SectorWeatherSystem : EntitySystem
     /// </summary>
     public bool Start(EntityUid map, ST14WeatherEventPrototype proto, TimeSpan? duration = null, bool full = false)
     {
+        map = _sectors.MainLevelOf(map); // ST14: a sector has one sky, kept on its main level
+
         if (!_maps.TryGetValue(map, out var weather))
         {
             weather = new MapWeather();
@@ -225,12 +227,7 @@ public sealed partial class ST14SectorWeatherSystem : EntitySystem
 
         weather.Active = active;
 
-        var sky = EnsureComp<ST14SectorWeatherComponent>(map);
-        sky.Event = proto.ID;
-        sky.Start = active.Started;
-        sky.End = active.Ends;
-        sky.Wind = active.Wind;
-        Dirty(map, sky);
+        ApplySky(map, active); // ST14: the same sky on every z-level of the sector
 
         if (proto.StartSound != null)
             _audio.PlayGlobal(proto.StartSound, MapFilter(map), true);
@@ -250,7 +247,7 @@ public sealed partial class ST14SectorWeatherSystem : EntitySystem
 
         // a new event takes the sky over itself, the clients cross over from one to the other
         if (!now)
-            RemComp<ST14SectorWeatherComponent>(map);
+            ClearSky(map); // ST14: every z-level
 
         Slow(map, 1f);
 
@@ -263,6 +260,8 @@ public sealed partial class ST14SectorWeatherSystem : EntitySystem
     /// </summary>
     public bool Stop(EntityUid map)
     {
+        map = _sectors.MainLevelOf(map); // ST14
+
         if (!_maps.TryGetValue(map, out var weather) || weather.Active is not { } active)
             return false;
 
@@ -272,12 +271,8 @@ public sealed partial class ST14SectorWeatherSystem : EntitySystem
         if (active.Ends > now + fade)
         {
             active.Ends = now + fade;
-            if (TryComp<ST14SectorWeatherComponent>(map, out var sky))
-            {
-                // the clients fade it out over the same seconds
-                sky.End = active.Ends;
-                Dirty(map, sky);
-            }
+            // the clients fade it out over the same seconds, on every z-level (ST14)
+            ApplySky(map, active);
         }
 
         return true;
@@ -285,6 +280,7 @@ public sealed partial class ST14SectorWeatherSystem : EntitySystem
 
     public ST14WeatherEventPrototype? Current(EntityUid map)
     {
+        map = _sectors.MainLevelOf(map); // ST14
         return _maps.TryGetValue(map, out var weather) ? weather.Active?.Proto : null;
     }
 
@@ -302,7 +298,7 @@ public sealed partial class ST14SectorWeatherSystem : EntitySystem
             if (TerminatingOrDeleted(map))
                 continue;
 
-            RemComp<ST14SectorWeatherComponent>(map);
+            ClearSky(map); // ST14: every z-level
             Slow(map, 1f);
         }
 
@@ -325,6 +321,9 @@ public sealed partial class ST14SectorWeatherSystem : EntitySystem
 
     private void Run(EntityUid map, MapWeather weather, ActiveEvent active, TimeSpan now)
     {
+        // ST14: a z-level added while the event goes on (or loaded late) gets the same sky
+        ApplySky(map, active);
+
         active.Strength = active.Proto.Strength(now, active.Started, active.Ends);
         var strength = active.Strength;
         Slow(map, 1f + (active.Proto.Speed - 1f) * strength);
@@ -452,12 +451,14 @@ public sealed partial class ST14SectorWeatherSystem : EntitySystem
     /// </summary>
     private List<(EntityUid Uid, bool Outside)> Mobs(EntityUid map)
     {
-        var mapId = Transform(map).MapID;
+        // ST14: the weather is the same on every z-level of the sector; who is out in it is decided by the roofs
+        // (the ground over the tunnels and trenches, a roof built on +1 over a building), see Outside
+        var mapIds = LevelMapIds(map);
         var mobs = new List<(EntityUid, bool)>();
         var query = EntityQueryEnumerator<MobStateComponent, TransformComponent>();
         while (query.MoveNext(out var uid, out _, out var xform))
         {
-            if (xform.MapID != mapId || _mobState.IsDead(uid))
+            if (!mapIds.Contains(xform.MapID) || _mobState.IsDead(uid))
                 continue;
 
             mobs.Add((uid, Outside(xform)));
@@ -481,7 +482,60 @@ public sealed partial class ST14SectorWeatherSystem : EntitySystem
 
     private Filter MapFilter(EntityUid map)
     {
-        return Filter.BroadcastMap(Transform(map).MapID);
+        // ST14: every z-level of the sector
+        var filter = Filter.Empty();
+        foreach (var mapId in LevelMapIds(map))
+        {
+            filter.AddInMap(mapId);
+        }
+
+        return filter;
+    }
+
+    /// <summary>
+    /// ST14: the map ids of every z-level of the sector of <paramref name="map"/>
+    /// </summary>
+    private HashSet<MapId> LevelMapIds(EntityUid map)
+    {
+        var ids = new HashSet<MapId>();
+        foreach (var level in _sectors.LevelsOf(map))
+        {
+            if (!TerminatingOrDeleted(level))
+                ids.Add(Transform(level).MapID);
+        }
+
+        return ids;
+    }
+
+    /// <summary>
+    /// ST14: puts the event on every z-level of the sector, the clients of each level draw the same sky
+    /// </summary>
+    private void ApplySky(EntityUid map, ActiveEvent active)
+    {
+        foreach (var level in _sectors.LevelsOf(map))
+        {
+            if (TerminatingOrDeleted(level))
+                continue;
+
+            var sky = EnsureComp<ST14SectorWeatherComponent>(level);
+            if (sky.Event == active.Proto.ID && sky.Start == active.Started && sky.End == active.Ends && sky.Wind == active.Wind)
+                continue;
+
+            sky.Event = active.Proto.ID;
+            sky.Start = active.Started;
+            sky.End = active.Ends;
+            sky.Wind = active.Wind;
+            Dirty(level, sky);
+        }
+    }
+
+    private void ClearSky(EntityUid map)
+    {
+        foreach (var level in _sectors.LevelsOf(map))
+        {
+            if (!TerminatingOrDeleted(level))
+                RemComp<ST14SectorWeatherComponent>(level);
+        }
     }
 
     /// <summary>
@@ -557,11 +611,11 @@ public sealed partial class ST14SectorWeatherSystem : EntitySystem
     /// </summary>
     private void Tell(EntityUid map, string message, PopupType popup, Color color)
     {
-        var mapId = Transform(map).MapID;
+        var mapIds = LevelMapIds(map); // ST14: everyone on any z-level of the sector hears it
         var actors = EntityQueryEnumerator<ActorComponent, TransformComponent>();
         while (actors.MoveNext(out var uid, out var actor, out var xform))
         {
-            if (xform.MapID != mapId)
+            if (!mapIds.Contains(xform.MapID))
                 continue;
 
             _popup.PopupEntity(message, uid, uid, popup);

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using Content.IntegrationTests.Fixtures;
+using Content.Server._ST14.Weather;
 using Content.Server._ST14.ZLevels.Layers;
+using Content.Shared._ST14.Weather;
 using Content.Shared._ST14.ZLevels.Core.Components;
 using Content.Shared.Light.Components;
 using Content.Shared.Light.EntitySystems;
@@ -19,7 +21,7 @@ namespace Content.IntegrationTests.Tests._ST14;
 
 /// <summary>
 /// The five z-levels of a planet sector: building them around a sector-like map, saving and loading the whole
-/// network.
+/// network, and one weather on all of them.
 /// </summary>
 [TestOf(typeof(ST14ZLayerSystem))]
 public sealed class ST14ZLayersTest : GameTest
@@ -341,6 +343,34 @@ public sealed class ST14ZLayersTest : GameTest
 
             TestContext.Out.WriteLine($"ZLAYERS save all: {sw.Elapsed.TotalMilliseconds:F1} ms, {total} bytes");
             resources.UserData.Delete(folder);
+        });
+    }
+
+    [Test]
+    public async Task SameWeatherOnAllLevelsTest()
+    {
+        await Server.WaitAssertion(() =>
+        {
+            var layers = SEntMan.System<ST14ZLayerSystem>();
+            var weather = SEntMan.System<ST14SectorWeatherSystem>();
+            var proto = SProtoMan.EnumeratePrototypes<ST14WeatherEventPrototype>().First();
+
+            var levels = layers.EnsureLayers(MakeSector(out _), "ST14PlanetSector");
+
+            // started from a level that is not the main one: the sector has one sky
+            Assert.That(weather.Start(levels[1], proto), Is.True);
+
+            var main = SComp<ST14SectorWeatherComponent>(levels[0]);
+            foreach (var (depth, level) in levels)
+            {
+                Assert.That(STryComp<ST14SectorWeatherComponent>(level, out var sky), $"no weather on level {depth}");
+                Assert.That(sky!.Event, Is.EqualTo(main.Event));
+                Assert.That(sky.Start, Is.EqualTo(main.Start));
+                Assert.That(sky.End, Is.EqualTo(main.End));
+                Assert.That(sky.Wind, Is.EqualTo(main.Wind));
+            }
+
+            Assert.That(weather.Current(levels[-2])?.ID, Is.EqualTo(proto.ID));
         });
     }
 }
