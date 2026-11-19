@@ -131,6 +131,11 @@ public abstract partial class CESharedZLevelsSystem
                 if (!_zHighGroundQuery.TryComp(uid, out var heightComp))
                     continue;
 
+                // ST14-start
+                if (heightComp.Underpass && floor == 0)
+                    continue;
+                // ST14-end
+
                 var dir = Transform(uid.Value).LocalRotation.GetCardinalDir();
 
                 var gridLocal = _map.WorldToLocal(gridUid, grid, worldPos);

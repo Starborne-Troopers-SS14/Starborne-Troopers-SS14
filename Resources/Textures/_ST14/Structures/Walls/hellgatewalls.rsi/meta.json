@@ -1,0 +1,1355 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-3.0",
+  "copyright": "Sprited by VilllL, cut into smoothing tiles",
+  "size": {
+    "x": 38,
+    "y": 94
+  },
+  "states": [
+    {
+      "name": "gatea0-00-sl"
+    },
+    {
+      "name": "gateb0-00-sl"
+    },
+    {
+      "name": "gatea0-00-sr"
+    },
+    {
+      "name": "gateb0-00-sr"
+    },
+    {
+      "name": "gatea0-00-sb"
+    },
+    {
+      "name": "gateb0-00-sb"
+    },
+    {
+      "name": "gatea0-01-sl"
+    },
+    {
+      "name": "gateb0-01-sl"
+    },
+    {
+      "name": "gatea0-01-sr"
+    },
+    {
+      "name": "gateb0-01-sr"
+    },
+    {
+      "name": "gatea0-01-sb"
+    },
+    {
+      "name": "gateb0-01-sb"
+    },
+    {
+      "name": "gatea1-00-sl"
+    },
+    {
+      "name": "gateb1-00-sl"
+    },
+    {
+      "name": "gatea1-00-sr"
+    },
+    {
+      "name": "gateb1-00-sr"
+    },
+    {
+      "name": "gatea1-00-sb"
+    },
+    {
+      "name": "gateb1-00-sb"
+    },
+    {
+      "name": "gatea1-01-sl"
+    },
+    {
+      "name": "gateb1-01-sl"
+    },
+    {
+      "name": "gatea1-01-sr"
+    },
+    {
+      "name": "gateb1-01-sr"
+    },
+    {
+      "name": "gatea1-01-sb"
+    },
+    {
+      "name": "gateb1-01-sb"
+    },
+    {
+      "name": "gatea2-00-sl"
+    },
+    {
+      "name": "gateb2-00-sl"
+    },
+    {
+      "name": "gatea2-00-sr"
+    },
+    {
+      "name": "gateb2-00-sr"
+    },
+    {
+      "name": "gatea2-00-sb"
+    },
+    {
+      "name": "gateb2-00-sb"
+    },
+    {
+      "name": "gatea2-01-sl"
+    },
+    {
+      "name": "gateb2-01-sl"
+    },
+    {
+      "name": "gatea2-01-sr"
+    },
+    {
+      "name": "gateb2-01-sr"
+    },
+    {
+      "name": "gatea2-01-sb"
+    },
+    {
+      "name": "gateb2-01-sb"
+    },
+    {
+      "name": "gatea3-00-sl"
+    },
+    {
+      "name": "gateb3-00-sl"
+    },
+    {
+      "name": "gatea3-00-sr"
+    },
+    {
+      "name": "gateb3-00-sr"
+    },
+    {
+      "name": "gatea3-00-sb"
+    },
+    {
+      "name": "gateb3-00-sb"
+    },
+    {
+      "name": "gatea3-01-sl"
+    },
+    {
+      "name": "gateb3-01-sl"
+    },
+    {
+      "name": "gatea3-01-sr"
+    },
+    {
+      "name": "gateb3-01-sr"
+    },
+    {
+      "name": "gatea3-01-sb"
+    },
+    {
+      "name": "gateb3-01-sb"
+    },
+    {
+      "name": "gatea4-00-nb"
+    },
+    {
+      "name": "gateb4-00-nb"
+    },
+    {
+      "name": "gatea4-00-sb"
+    },
+    {
+      "name": "gateb4-00-sb"
+    },
+    {
+      "name": "gatea4-00-bb"
+    },
+    {
+      "name": "gateb4-00-bb"
+    },
+    {
+      "name": "gatea4-10-nb"
+    },
+    {
+      "name": "gateb4-10-nb"
+    },
+    {
+      "name": "gatea4-10-sb"
+    },
+    {
+      "name": "gateb4-10-sb"
+    },
+    {
+      "name": "gatea4-10-bb"
+    },
+    {
+      "name": "gateb4-10-bb"
+    },
+    {
+      "name": "gatea5-00-nl"
+    },
+    {
+      "name": "gateb5-00-nl"
+    },
+    {
+      "name": "gatea5-00-nb"
+    },
+    {
+      "name": "gateb5-00-nb"
+    },
+    {
+      "name": "gatea5-00-sl"
+    },
+    {
+      "name": "gateb5-00-sl"
+    },
+    {
+      "name": "gatea5-00-sb"
+    },
+    {
+      "name": "gateb5-00-sb"
+    },
+    {
+      "name": "gatea5-00-bl"
+    },
+    {
+      "name": "gateb5-00-bl"
+    },
+    {
+      "name": "gatea5-00-bb"
+    },
+    {
+      "name": "gateb5-00-bb"
+    },
+    {
+      "name": "gatea5-01-nl"
+    },
+    {
+      "name": "gateb5-01-nl"
+    },
+    {
+      "name": "gatea5-01-nb"
+    },
+    {
+      "name": "gateb5-01-nb"
+    },
+    {
+      "name": "gatea5-01-sl"
+    },
+    {
+      "name": "gateb5-01-sl"
+    },
+    {
+      "name": "gatea5-01-sb"
+    },
+    {
+      "name": "gateb5-01-sb"
+    },
+    {
+      "name": "gatea5-01-bl"
+    },
+    {
+      "name": "gateb5-01-bl"
+    },
+    {
+      "name": "gatea5-01-bb"
+    },
+    {
+      "name": "gateb5-01-bb"
+    },
+    {
+      "name": "gatea5-10-nl"
+    },
+    {
+      "name": "gateb5-10-nl"
+    },
+    {
+      "name": "gatea5-10-nb"
+    },
+    {
+      "name": "gateb5-10-nb"
+    },
+    {
+      "name": "gatea5-10-sl"
+    },
+    {
+      "name": "gateb5-10-sl"
+    },
+    {
+      "name": "gatea5-10-sb"
+    },
+    {
+      "name": "gateb5-10-sb"
+    },
+    {
+      "name": "gatea5-10-bl"
+    },
+    {
+      "name": "gateb5-10-bl"
+    },
+    {
+      "name": "gatea5-10-bb"
+    },
+    {
+      "name": "gateb5-10-bb"
+    },
+    {
+      "name": "gatea5-11-nl"
+    },
+    {
+      "name": "gateb5-11-nl"
+    },
+    {
+      "name": "gatea5-11-nb"
+    },
+    {
+      "name": "gateb5-11-nb"
+    },
+    {
+      "name": "gatea5-11-sl"
+    },
+    {
+      "name": "gateb5-11-sl"
+    },
+    {
+      "name": "gatea5-11-sb"
+    },
+    {
+      "name": "gateb5-11-sb"
+    },
+    {
+      "name": "gatea5-11-bl"
+    },
+    {
+      "name": "gateb5-11-bl"
+    },
+    {
+      "name": "gatea5-11-bb"
+    },
+    {
+      "name": "gateb5-11-bb"
+    },
+    {
+      "name": "gatea6-00-nl"
+    },
+    {
+      "name": "gateb6-00-nl"
+    },
+    {
+      "name": "gatea6-00-nb"
+    },
+    {
+      "name": "gateb6-00-nb"
+    },
+    {
+      "name": "gatea6-00-sl"
+    },
+    {
+      "name": "gateb6-00-sl"
+    },
+    {
+      "name": "gatea6-00-sb"
+    },
+    {
+      "name": "gateb6-00-sb"
+    },
+    {
+      "name": "gatea6-00-bl"
+    },
+    {
+      "name": "gateb6-00-bl"
+    },
+    {
+      "name": "gatea6-00-bb"
+    },
+    {
+      "name": "gateb6-00-bb"
+    },
+    {
+      "name": "gatea6-01-nl"
+    },
+    {
+      "name": "gateb6-01-nl"
+    },
+    {
+      "name": "gatea6-01-nb"
+    },
+    {
+      "name": "gateb6-01-nb"
+    },
+    {
+      "name": "gatea6-01-sl"
+    },
+    {
+      "name": "gateb6-01-sl"
+    },
+    {
+      "name": "gatea6-01-sb"
+    },
+    {
+      "name": "gateb6-01-sb"
+    },
+    {
+      "name": "gatea6-01-bl"
+    },
+    {
+      "name": "gateb6-01-bl"
+    },
+    {
+      "name": "gatea6-01-bb"
+    },
+    {
+      "name": "gateb6-01-bb"
+    },
+    {
+      "name": "gatea6-10-nl"
+    },
+    {
+      "name": "gateb6-10-nl"
+    },
+    {
+      "name": "gatea6-10-nb"
+    },
+    {
+      "name": "gateb6-10-nb"
+    },
+    {
+      "name": "gatea6-10-sl"
+    },
+    {
+      "name": "gateb6-10-sl"
+    },
+    {
+      "name": "gatea6-10-sb"
+    },
+    {
+      "name": "gateb6-10-sb"
+    },
+    {
+      "name": "gatea6-10-bl"
+    },
+    {
+      "name": "gateb6-10-bl"
+    },
+    {
+      "name": "gatea6-10-bb"
+    },
+    {
+      "name": "gateb6-10-bb"
+    },
+    {
+      "name": "gatea6-11-nl"
+    },
+    {
+      "name": "gateb6-11-nl"
+    },
+    {
+      "name": "gatea6-11-nb"
+    },
+    {
+      "name": "gateb6-11-nb"
+    },
+    {
+      "name": "gatea6-11-sl"
+    },
+    {
+      "name": "gateb6-11-sl"
+    },
+    {
+      "name": "gatea6-11-sb"
+    },
+    {
+      "name": "gateb6-11-sb"
+    },
+    {
+      "name": "gatea6-11-bl"
+    },
+    {
+      "name": "gateb6-11-bl"
+    },
+    {
+      "name": "gatea6-11-bb"
+    },
+    {
+      "name": "gateb6-11-bb"
+    },
+    {
+      "name": "gatea7-00-nl"
+    },
+    {
+      "name": "gateb7-00-nl"
+    },
+    {
+      "name": "gatea7-00-nb"
+    },
+    {
+      "name": "gateb7-00-nb"
+    },
+    {
+      "name": "gatea7-00-sl"
+    },
+    {
+      "name": "gateb7-00-sl"
+    },
+    {
+      "name": "gatea7-00-sb"
+    },
+    {
+      "name": "gateb7-00-sb"
+    },
+    {
+      "name": "gatea7-00-bl"
+    },
+    {
+      "name": "gateb7-00-bl"
+    },
+    {
+      "name": "gatea7-00-bb"
+    },
+    {
+      "name": "gateb7-00-bb"
+    },
+    {
+      "name": "gatea7-01-nl"
+    },
+    {
+      "name": "gateb7-01-nl"
+    },
+    {
+      "name": "gatea7-01-nb"
+    },
+    {
+      "name": "gateb7-01-nb"
+    },
+    {
+      "name": "gatea7-01-sl"
+    },
+    {
+      "name": "gateb7-01-sl"
+    },
+    {
+      "name": "gatea7-01-sb"
+    },
+    {
+      "name": "gateb7-01-sb"
+    },
+    {
+      "name": "gatea7-01-bl"
+    },
+    {
+      "name": "gateb7-01-bl"
+    },
+    {
+      "name": "gatea7-01-bb"
+    },
+    {
+      "name": "gateb7-01-bb"
+    },
+    {
+      "name": "gatea7-10-nl"
+    },
+    {
+      "name": "gateb7-10-nl"
+    },
+    {
+      "name": "gatea7-10-nb"
+    },
+    {
+      "name": "gateb7-10-nb"
+    },
+    {
+      "name": "gatea7-10-sl"
+    },
+    {
+      "name": "gateb7-10-sl"
+    },
+    {
+      "name": "gatea7-10-sb"
+    },
+    {
+      "name": "gateb7-10-sb"
+    },
+    {
+      "name": "gatea7-10-bl"
+    },
+    {
+      "name": "gateb7-10-bl"
+    },
+    {
+      "name": "gatea7-10-bb"
+    },
+    {
+      "name": "gateb7-10-bb"
+    },
+    {
+      "name": "gatea7-11-nl"
+    },
+    {
+      "name": "gateb7-11-nl"
+    },
+    {
+      "name": "gatea7-11-nb"
+    },
+    {
+      "name": "gateb7-11-nb"
+    },
+    {
+      "name": "gatea7-11-sl"
+    },
+    {
+      "name": "gateb7-11-sl"
+    },
+    {
+      "name": "gatea7-11-sb"
+    },
+    {
+      "name": "gateb7-11-sb"
+    },
+    {
+      "name": "gatea7-11-bl"
+    },
+    {
+      "name": "gateb7-11-bl"
+    },
+    {
+      "name": "gatea7-11-bb"
+    },
+    {
+      "name": "gateb7-11-bb"
+    },
+    {
+      "name": "gatea8-00-nb"
+    },
+    {
+      "name": "gateb8-00-nb"
+    },
+    {
+      "name": "gatea8-00-sb"
+    },
+    {
+      "name": "gateb8-00-sb"
+    },
+    {
+      "name": "gatea8-00-bb"
+    },
+    {
+      "name": "gateb8-00-bb"
+    },
+    {
+      "name": "gatea8-10-nb"
+    },
+    {
+      "name": "gateb8-10-nb"
+    },
+    {
+      "name": "gatea8-10-sb"
+    },
+    {
+      "name": "gateb8-10-sb"
+    },
+    {
+      "name": "gatea8-10-bb"
+    },
+    {
+      "name": "gateb8-10-bb"
+    },
+    {
+      "name": "gatea9-00-nb"
+    },
+    {
+      "name": "gateb9-00-nb"
+    },
+    {
+      "name": "gatea9-00-nr"
+    },
+    {
+      "name": "gateb9-00-nr"
+    },
+    {
+      "name": "gatea9-00-sb"
+    },
+    {
+      "name": "gateb9-00-sb"
+    },
+    {
+      "name": "gatea9-00-sr"
+    },
+    {
+      "name": "gateb9-00-sr"
+    },
+    {
+      "name": "gatea9-00-bb"
+    },
+    {
+      "name": "gateb9-00-bb"
+    },
+    {
+      "name": "gatea9-00-br"
+    },
+    {
+      "name": "gateb9-00-br"
+    },
+    {
+      "name": "gatea9-01-nb"
+    },
+    {
+      "name": "gateb9-01-nb"
+    },
+    {
+      "name": "gatea9-01-nr"
+    },
+    {
+      "name": "gateb9-01-nr"
+    },
+    {
+      "name": "gatea9-01-sb"
+    },
+    {
+      "name": "gateb9-01-sb"
+    },
+    {
+      "name": "gatea9-01-sr"
+    },
+    {
+      "name": "gateb9-01-sr"
+    },
+    {
+      "name": "gatea9-01-bb"
+    },
+    {
+      "name": "gateb9-01-bb"
+    },
+    {
+      "name": "gatea9-01-br"
+    },
+    {
+      "name": "gateb9-01-br"
+    },
+    {
+      "name": "gatea9-10-nb"
+    },
+    {
+      "name": "gateb9-10-nb"
+    },
+    {
+      "name": "gatea9-10-nr"
+    },
+    {
+      "name": "gateb9-10-nr"
+    },
+    {
+      "name": "gatea9-10-sb"
+    },
+    {
+      "name": "gateb9-10-sb"
+    },
+    {
+      "name": "gatea9-10-sr"
+    },
+    {
+      "name": "gateb9-10-sr"
+    },
+    {
+      "name": "gatea9-10-bb"
+    },
+    {
+      "name": "gateb9-10-bb"
+    },
+    {
+      "name": "gatea9-10-br"
+    },
+    {
+      "name": "gateb9-10-br"
+    },
+    {
+      "name": "gatea9-11-nb"
+    },
+    {
+      "name": "gateb9-11-nb"
+    },
+    {
+      "name": "gatea9-11-nr"
+    },
+    {
+      "name": "gateb9-11-nr"
+    },
+    {
+      "name": "gatea9-11-sb"
+    },
+    {
+      "name": "gateb9-11-sb"
+    },
+    {
+      "name": "gatea9-11-sr"
+    },
+    {
+      "name": "gateb9-11-sr"
+    },
+    {
+      "name": "gatea9-11-bb"
+    },
+    {
+      "name": "gateb9-11-bb"
+    },
+    {
+      "name": "gatea9-11-br"
+    },
+    {
+      "name": "gateb9-11-br"
+    },
+    {
+      "name": "gatea10-00-nb"
+    },
+    {
+      "name": "gateb10-00-nb"
+    },
+    {
+      "name": "gatea10-00-nr"
+    },
+    {
+      "name": "gateb10-00-nr"
+    },
+    {
+      "name": "gatea10-00-sb"
+    },
+    {
+      "name": "gateb10-00-sb"
+    },
+    {
+      "name": "gatea10-00-sr"
+    },
+    {
+      "name": "gateb10-00-sr"
+    },
+    {
+      "name": "gatea10-00-bb"
+    },
+    {
+      "name": "gateb10-00-bb"
+    },
+    {
+      "name": "gatea10-00-br"
+    },
+    {
+      "name": "gateb10-00-br"
+    },
+    {
+      "name": "gatea10-01-nb"
+    },
+    {
+      "name": "gateb10-01-nb"
+    },
+    {
+      "name": "gatea10-01-nr"
+    },
+    {
+      "name": "gateb10-01-nr"
+    },
+    {
+      "name": "gatea10-01-sb"
+    },
+    {
+      "name": "gateb10-01-sb"
+    },
+    {
+      "name": "gatea10-01-sr"
+    },
+    {
+      "name": "gateb10-01-sr"
+    },
+    {
+      "name": "gatea10-01-bb"
+    },
+    {
+      "name": "gateb10-01-bb"
+    },
+    {
+      "name": "gatea10-01-br"
+    },
+    {
+      "name": "gateb10-01-br"
+    },
+    {
+      "name": "gatea10-10-nb"
+    },
+    {
+      "name": "gateb10-10-nb"
+    },
+    {
+      "name": "gatea10-10-nr"
+    },
+    {
+      "name": "gateb10-10-nr"
+    },
+    {
+      "name": "gatea10-10-sb"
+    },
+    {
+      "name": "gateb10-10-sb"
+    },
+    {
+      "name": "gatea10-10-sr"
+    },
+    {
+      "name": "gateb10-10-sr"
+    },
+    {
+      "name": "gatea10-10-bb"
+    },
+    {
+      "name": "gateb10-10-bb"
+    },
+    {
+      "name": "gatea10-10-br"
+    },
+    {
+      "name": "gateb10-10-br"
+    },
+    {
+      "name": "gatea10-11-nb"
+    },
+    {
+      "name": "gateb10-11-nb"
+    },
+    {
+      "name": "gatea10-11-nr"
+    },
+    {
+      "name": "gateb10-11-nr"
+    },
+    {
+      "name": "gatea10-11-sb"
+    },
+    {
+      "name": "gateb10-11-sb"
+    },
+    {
+      "name": "gatea10-11-sr"
+    },
+    {
+      "name": "gateb10-11-sr"
+    },
+    {
+      "name": "gatea10-11-bb"
+    },
+    {
+      "name": "gateb10-11-bb"
+    },
+    {
+      "name": "gatea10-11-br"
+    },
+    {
+      "name": "gateb10-11-br"
+    },
+    {
+      "name": "gatea11-00-nb"
+    },
+    {
+      "name": "gateb11-00-nb"
+    },
+    {
+      "name": "gatea11-00-nr"
+    },
+    {
+      "name": "gateb11-00-nr"
+    },
+    {
+      "name": "gatea11-00-sb"
+    },
+    {
+      "name": "gateb11-00-sb"
+    },
+    {
+      "name": "gatea11-00-sr"
+    },
+    {
+      "name": "gateb11-00-sr"
+    },
+    {
+      "name": "gatea11-00-bb"
+    },
+    {
+      "name": "gateb11-00-bb"
+    },
+    {
+      "name": "gatea11-00-br"
+    },
+    {
+      "name": "gateb11-00-br"
+    },
+    {
+      "name": "gatea11-01-nb"
+    },
+    {
+      "name": "gateb11-01-nb"
+    },
+    {
+      "name": "gatea11-01-nr"
+    },
+    {
+      "name": "gateb11-01-nr"
+    },
+    {
+      "name": "gatea11-01-sb"
+    },
+    {
+      "name": "gateb11-01-sb"
+    },
+    {
+      "name": "gatea11-01-sr"
+    },
+    {
+      "name": "gateb11-01-sr"
+    },
+    {
+      "name": "gatea11-01-bb"
+    },
+    {
+      "name": "gateb11-01-bb"
+    },
+    {
+      "name": "gatea11-01-br"
+    },
+    {
+      "name": "gateb11-01-br"
+    },
+    {
+      "name": "gatea11-10-nb"
+    },
+    {
+      "name": "gateb11-10-nb"
+    },
+    {
+      "name": "gatea11-10-nr"
+    },
+    {
+      "name": "gateb11-10-nr"
+    },
+    {
+      "name": "gatea11-10-sb"
+    },
+    {
+      "name": "gateb11-10-sb"
+    },
+    {
+      "name": "gatea11-10-sr"
+    },
+    {
+      "name": "gateb11-10-sr"
+    },
+    {
+      "name": "gatea11-10-bb"
+    },
+    {
+      "name": "gateb11-10-bb"
+    },
+    {
+      "name": "gatea11-10-br"
+    },
+    {
+      "name": "gateb11-10-br"
+    },
+    {
+      "name": "gatea11-11-nb"
+    },
+    {
+      "name": "gateb11-11-nb"
+    },
+    {
+      "name": "gatea11-11-nr"
+    },
+    {
+      "name": "gateb11-11-nr"
+    },
+    {
+      "name": "gatea11-11-sb"
+    },
+    {
+      "name": "gateb11-11-sb"
+    },
+    {
+      "name": "gatea11-11-sr"
+    },
+    {
+      "name": "gateb11-11-sr"
+    },
+    {
+      "name": "gatea11-11-bb"
+    },
+    {
+      "name": "gateb11-11-bb"
+    },
+    {
+      "name": "gatea11-11-br"
+    },
+    {
+      "name": "gateb11-11-br"
+    },
+    {
+      "name": "gatea12-00-nb",
+      "directions": 4
+    },
+    {
+      "name": "gateb12-00-nb",
+      "directions": 4
+    },
+    {
+      "name": "gatea12-00-sb",
+      "directions": 4
+    },
+    {
+      "name": "gateb12-00-sb",
+      "directions": 4
+    },
+    {
+      "name": "gatea12-00-bb",
+      "directions": 4
+    },
+    {
+      "name": "gateb12-00-bb",
+      "directions": 4
+    },
+    {
+      "name": "gatea12-10-nb",
+      "directions": 4
+    },
+    {
+      "name": "gateb12-10-nb",
+      "directions": 4
+    },
+    {
+      "name": "gatea12-10-sb",
+      "directions": 4
+    },
+    {
+      "name": "gateb12-10-sb",
+      "directions": 4
+    },
+    {
+      "name": "gatea12-10-bb",
+      "directions": 4
+    },
+    {
+      "name": "gateb12-10-bb",
+      "directions": 4
+    },
+    {
+      "name": "gatea13-00-nb"
+    },
+    {
+      "name": "gateb13-00-nb"
+    },
+    {
+      "name": "gatea13-00-sb"
+    },
+    {
+      "name": "gateb13-00-sb"
+    },
+    {
+      "name": "gatea13-00-bb"
+    },
+    {
+      "name": "gateb13-00-bb"
+    },
+    {
+      "name": "gatea13-01-nb"
+    },
+    {
+      "name": "gateb13-01-nb"
+    },
+    {
+      "name": "gatea13-01-sb"
+    },
+    {
+      "name": "gateb13-01-sb"
+    },
+    {
+      "name": "gatea13-01-bb"
+    },
+    {
+      "name": "gateb13-01-bb"
+    },
+    {
+      "name": "gatea13-10-nb"
+    },
+    {
+      "name": "gateb13-10-nb"
+    },
+    {
+      "name": "gatea13-10-sb"
+    },
+    {
+      "name": "gateb13-10-sb"
+    },
+    {
+      "name": "gatea13-10-bb"
+    },
+    {
+      "name": "gateb13-10-bb"
+    },
+    {
+      "name": "gatea13-11-nb"
+    },
+    {
+      "name": "gateb13-11-nb"
+    },
+    {
+      "name": "gatea13-11-sb"
+    },
+    {
+      "name": "gateb13-11-sb"
+    },
+    {
+      "name": "gatea13-11-bb"
+    },
+    {
+      "name": "gateb13-11-bb"
+    },
+    {
+      "name": "gatea14-00-nb"
+    },
+    {
+      "name": "gateb14-00-nb"
+    },
+    {
+      "name": "gatea14-00-sb"
+    },
+    {
+      "name": "gateb14-00-sb"
+    },
+    {
+      "name": "gatea14-00-bb"
+    },
+    {
+      "name": "gateb14-00-bb"
+    },
+    {
+      "name": "gatea14-01-nb"
+    },
+    {
+      "name": "gateb14-01-nb"
+    },
+    {
+      "name": "gatea14-01-sb"
+    },
+    {
+      "name": "gateb14-01-sb"
+    },
+    {
+      "name": "gatea14-01-bb"
+    },
+    {
+      "name": "gateb14-01-bb"
+    },
+    {
+      "name": "gatea14-10-nb"
+    },
+    {
+      "name": "gateb14-10-nb"
+    },
+    {
+      "name": "gatea14-10-sb"
+    },
+    {
+      "name": "gateb14-10-sb"
+    },
+    {
+      "name": "gatea14-10-bb"
+    },
+    {
+      "name": "gateb14-10-bb"
+    },
+    {
+      "name": "gatea14-11-nb"
+    },
+    {
+      "name": "gateb14-11-nb"
+    },
+    {
+      "name": "gatea14-11-sb"
+    },
+    {
+      "name": "gateb14-11-sb"
+    },
+    {
+      "name": "gatea14-11-bb"
+    },
+    {
+      "name": "gateb14-11-bb"
+    },
+    {
+      "name": "gatea15-00-nb"
+    },
+    {
+      "name": "gateb15-00-nb"
+    },
+    {
+      "name": "gatea15-00-sb"
+    },
+    {
+      "name": "gateb15-00-sb"
+    },
+    {
+      "name": "gatea15-00-bb"
+    },
+    {
+      "name": "gateb15-00-bb"
+    },
+    {
+      "name": "gatea15-01-nb"
+    },
+    {
+      "name": "gateb15-01-nb"
+    },
+    {
+      "name": "gatea15-01-sb"
+    },
+    {
+      "name": "gateb15-01-sb"
+    },
+    {
+      "name": "gatea15-01-bb"
+    },
+    {
+      "name": "gateb15-01-bb"
+    },
+    {
+      "name": "gatea15-10-nb"
+    },
+    {
+      "name": "gateb15-10-nb"
+    },
+    {
+      "name": "gatea15-10-sb"
+    },
+    {
+      "name": "gateb15-10-sb"
+    },
+    {
+      "name": "gatea15-10-bb"
+    },
+    {
+      "name": "gateb15-10-bb"
+    },
+    {
+      "name": "gatea15-11-nb"
+    },
+    {
+      "name": "gateb15-11-nb"
+    },
+    {
+      "name": "gatea15-11-sb"
+    },
+    {
+      "name": "gateb15-11-sb"
+    },
+    {
+      "name": "gatea15-11-bb"
+    },
+    {
+      "name": "gateb15-11-bb"
+    }
+  ]
+}

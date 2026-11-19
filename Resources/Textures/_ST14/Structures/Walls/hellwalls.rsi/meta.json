@@ -1,0 +1,677 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-3.0",
+  "copyright": "Sprited by VilllL, cut into smoothing tiles",
+  "size": {
+    "x": 38,
+    "y": 94
+  },
+  "states": [
+    {
+      "name": "wall0-00-sl"
+    },
+    {
+      "name": "wall0-00-sr"
+    },
+    {
+      "name": "wall0-00-sb"
+    },
+    {
+      "name": "wall0-01-sl"
+    },
+    {
+      "name": "wall0-01-sr"
+    },
+    {
+      "name": "wall0-01-sb"
+    },
+    {
+      "name": "wall1-00-sl"
+    },
+    {
+      "name": "wall1-00-sr"
+    },
+    {
+      "name": "wall1-00-sb"
+    },
+    {
+      "name": "wall1-01-sl"
+    },
+    {
+      "name": "wall1-01-sr"
+    },
+    {
+      "name": "wall1-01-sb"
+    },
+    {
+      "name": "wall2-00-sl"
+    },
+    {
+      "name": "wall2-00-sr"
+    },
+    {
+      "name": "wall2-00-sb"
+    },
+    {
+      "name": "wall2-01-sl"
+    },
+    {
+      "name": "wall2-01-sr"
+    },
+    {
+      "name": "wall2-01-sb"
+    },
+    {
+      "name": "wall3-00-sl"
+    },
+    {
+      "name": "wall3-00-sr"
+    },
+    {
+      "name": "wall3-00-sb"
+    },
+    {
+      "name": "wall3-01-sl"
+    },
+    {
+      "name": "wall3-01-sr"
+    },
+    {
+      "name": "wall3-01-sb"
+    },
+    {
+      "name": "wall4-00-nb"
+    },
+    {
+      "name": "wall4-00-sb"
+    },
+    {
+      "name": "wall4-00-bb"
+    },
+    {
+      "name": "wall4-10-nb"
+    },
+    {
+      "name": "wall4-10-sb"
+    },
+    {
+      "name": "wall4-10-bb"
+    },
+    {
+      "name": "wall5-00-nl"
+    },
+    {
+      "name": "wall5-00-nb"
+    },
+    {
+      "name": "wall5-00-sl"
+    },
+    {
+      "name": "wall5-00-sb"
+    },
+    {
+      "name": "wall5-00-bl"
+    },
+    {
+      "name": "wall5-00-bb"
+    },
+    {
+      "name": "wall5-01-nl"
+    },
+    {
+      "name": "wall5-01-nb"
+    },
+    {
+      "name": "wall5-01-sl"
+    },
+    {
+      "name": "wall5-01-sb"
+    },
+    {
+      "name": "wall5-01-bl"
+    },
+    {
+      "name": "wall5-01-bb"
+    },
+    {
+      "name": "wall5-10-nl"
+    },
+    {
+      "name": "wall5-10-nb"
+    },
+    {
+      "name": "wall5-10-sl"
+    },
+    {
+      "name": "wall5-10-sb"
+    },
+    {
+      "name": "wall5-10-bl"
+    },
+    {
+      "name": "wall5-10-bb"
+    },
+    {
+      "name": "wall5-11-nl"
+    },
+    {
+      "name": "wall5-11-nb"
+    },
+    {
+      "name": "wall5-11-sl"
+    },
+    {
+      "name": "wall5-11-sb"
+    },
+    {
+      "name": "wall5-11-bl"
+    },
+    {
+      "name": "wall5-11-bb"
+    },
+    {
+      "name": "wall6-00-nl"
+    },
+    {
+      "name": "wall6-00-nb"
+    },
+    {
+      "name": "wall6-00-sl"
+    },
+    {
+      "name": "wall6-00-sb"
+    },
+    {
+      "name": "wall6-00-bl"
+    },
+    {
+      "name": "wall6-00-bb"
+    },
+    {
+      "name": "wall6-01-nl"
+    },
+    {
+      "name": "wall6-01-nb"
+    },
+    {
+      "name": "wall6-01-sl"
+    },
+    {
+      "name": "wall6-01-sb"
+    },
+    {
+      "name": "wall6-01-bl"
+    },
+    {
+      "name": "wall6-01-bb"
+    },
+    {
+      "name": "wall6-10-nl"
+    },
+    {
+      "name": "wall6-10-nb"
+    },
+    {
+      "name": "wall6-10-sl"
+    },
+    {
+      "name": "wall6-10-sb"
+    },
+    {
+      "name": "wall6-10-bl"
+    },
+    {
+      "name": "wall6-10-bb"
+    },
+    {
+      "name": "wall6-11-nl"
+    },
+    {
+      "name": "wall6-11-nb"
+    },
+    {
+      "name": "wall6-11-sl"
+    },
+    {
+      "name": "wall6-11-sb"
+    },
+    {
+      "name": "wall6-11-bl"
+    },
+    {
+      "name": "wall6-11-bb"
+    },
+    {
+      "name": "wall7-00-nl"
+    },
+    {
+      "name": "wall7-00-nb"
+    },
+    {
+      "name": "wall7-00-sl"
+    },
+    {
+      "name": "wall7-00-sb"
+    },
+    {
+      "name": "wall7-00-bl"
+    },
+    {
+      "name": "wall7-00-bb"
+    },
+    {
+      "name": "wall7-01-nl"
+    },
+    {
+      "name": "wall7-01-nb"
+    },
+    {
+      "name": "wall7-01-sl"
+    },
+    {
+      "name": "wall7-01-sb"
+    },
+    {
+      "name": "wall7-01-bl"
+    },
+    {
+      "name": "wall7-01-bb"
+    },
+    {
+      "name": "wall7-10-nl"
+    },
+    {
+      "name": "wall7-10-nb"
+    },
+    {
+      "name": "wall7-10-sl"
+    },
+    {
+      "name": "wall7-10-sb"
+    },
+    {
+      "name": "wall7-10-bl"
+    },
+    {
+      "name": "wall7-10-bb"
+    },
+    {
+      "name": "wall7-11-nl"
+    },
+    {
+      "name": "wall7-11-nb"
+    },
+    {
+      "name": "wall7-11-sl"
+    },
+    {
+      "name": "wall7-11-sb"
+    },
+    {
+      "name": "wall7-11-bl"
+    },
+    {
+      "name": "wall7-11-bb"
+    },
+    {
+      "name": "wall8-00-nb"
+    },
+    {
+      "name": "wall8-00-sb"
+    },
+    {
+      "name": "wall8-00-bb"
+    },
+    {
+      "name": "wall8-10-nb"
+    },
+    {
+      "name": "wall8-10-sb"
+    },
+    {
+      "name": "wall8-10-bb"
+    },
+    {
+      "name": "wall9-00-nb"
+    },
+    {
+      "name": "wall9-00-nr"
+    },
+    {
+      "name": "wall9-00-sb"
+    },
+    {
+      "name": "wall9-00-sr"
+    },
+    {
+      "name": "wall9-00-bb"
+    },
+    {
+      "name": "wall9-00-br"
+    },
+    {
+      "name": "wall9-01-nb"
+    },
+    {
+      "name": "wall9-01-nr"
+    },
+    {
+      "name": "wall9-01-sb"
+    },
+    {
+      "name": "wall9-01-sr"
+    },
+    {
+      "name": "wall9-01-bb"
+    },
+    {
+      "name": "wall9-01-br"
+    },
+    {
+      "name": "wall9-10-nb"
+    },
+    {
+      "name": "wall9-10-nr"
+    },
+    {
+      "name": "wall9-10-sb"
+    },
+    {
+      "name": "wall9-10-sr"
+    },
+    {
+      "name": "wall9-10-bb"
+    },
+    {
+      "name": "wall9-10-br"
+    },
+    {
+      "name": "wall9-11-nb"
+    },
+    {
+      "name": "wall9-11-nr"
+    },
+    {
+      "name": "wall9-11-sb"
+    },
+    {
+      "name": "wall9-11-sr"
+    },
+    {
+      "name": "wall9-11-bb"
+    },
+    {
+      "name": "wall9-11-br"
+    },
+    {
+      "name": "wall10-00-nb"
+    },
+    {
+      "name": "wall10-00-nr"
+    },
+    {
+      "name": "wall10-00-sb"
+    },
+    {
+      "name": "wall10-00-sr"
+    },
+    {
+      "name": "wall10-00-bb"
+    },
+    {
+      "name": "wall10-00-br"
+    },
+    {
+      "name": "wall10-01-nb"
+    },
+    {
+      "name": "wall10-01-nr"
+    },
+    {
+      "name": "wall10-01-sb"
+    },
+    {
+      "name": "wall10-01-sr"
+    },
+    {
+      "name": "wall10-01-bb"
+    },
+    {
+      "name": "wall10-01-br"
+    },
+    {
+      "name": "wall10-10-nb"
+    },
+    {
+      "name": "wall10-10-nr"
+    },
+    {
+      "name": "wall10-10-sb"
+    },
+    {
+      "name": "wall10-10-sr"
+    },
+    {
+      "name": "wall10-10-bb"
+    },
+    {
+      "name": "wall10-10-br"
+    },
+    {
+      "name": "wall10-11-nb"
+    },
+    {
+      "name": "wall10-11-nr"
+    },
+    {
+      "name": "wall10-11-sb"
+    },
+    {
+      "name": "wall10-11-sr"
+    },
+    {
+      "name": "wall10-11-bb"
+    },
+    {
+      "name": "wall10-11-br"
+    },
+    {
+      "name": "wall11-00-nb"
+    },
+    {
+      "name": "wall11-00-nr"
+    },
+    {
+      "name": "wall11-00-sb"
+    },
+    {
+      "name": "wall11-00-sr"
+    },
+    {
+      "name": "wall11-00-bb"
+    },
+    {
+      "name": "wall11-00-br"
+    },
+    {
+      "name": "wall11-01-nb"
+    },
+    {
+      "name": "wall11-01-nr"
+    },
+    {
+      "name": "wall11-01-sb"
+    },
+    {
+      "name": "wall11-01-sr"
+    },
+    {
+      "name": "wall11-01-bb"
+    },
+    {
+      "name": "wall11-01-br"
+    },
+    {
+      "name": "wall11-10-nb"
+    },
+    {
+      "name": "wall11-10-nr"
+    },
+    {
+      "name": "wall11-10-sb"
+    },
+    {
+      "name": "wall11-10-sr"
+    },
+    {
+      "name": "wall11-10-bb"
+    },
+    {
+      "name": "wall11-10-br"
+    },
+    {
+      "name": "wall11-11-nb"
+    },
+    {
+      "name": "wall11-11-nr"
+    },
+    {
+      "name": "wall11-11-sb"
+    },
+    {
+      "name": "wall11-11-sr"
+    },
+    {
+      "name": "wall11-11-bb"
+    },
+    {
+      "name": "wall11-11-br"
+    },
+    {
+      "name": "wall12-00-nb"
+    },
+    {
+      "name": "wall12-00-sb"
+    },
+    {
+      "name": "wall12-00-bb"
+    },
+    {
+      "name": "wall12-10-nb"
+    },
+    {
+      "name": "wall12-10-sb"
+    },
+    {
+      "name": "wall12-10-bb"
+    },
+    {
+      "name": "wall13-00-nb"
+    },
+    {
+      "name": "wall13-00-sb"
+    },
+    {
+      "name": "wall13-00-bb"
+    },
+    {
+      "name": "wall13-01-nb"
+    },
+    {
+      "name": "wall13-01-sb"
+    },
+    {
+      "name": "wall13-01-bb"
+    },
+    {
+      "name": "wall13-10-nb"
+    },
+    {
+      "name": "wall13-10-sb"
+    },
+    {
+      "name": "wall13-10-bb"
+    },
+    {
+      "name": "wall13-11-nb"
+    },
+    {
+      "name": "wall13-11-sb"
+    },
+    {
+      "name": "wall13-11-bb"
+    },
+    {
+      "name": "wall14-00-nb"
+    },
+    {
+      "name": "wall14-00-sb"
+    },
+    {
+      "name": "wall14-00-bb"
+    },
+    {
+      "name": "wall14-01-nb"
+    },
+    {
+      "name": "wall14-01-sb"
+    },
+    {
+      "name": "wall14-01-bb"
+    },
+    {
+      "name": "wall14-10-nb"
+    },
+    {
+      "name": "wall14-10-sb"
+    },
+    {
+      "name": "wall14-10-bb"
+    },
+    {
+      "name": "wall14-11-nb"
+    },
+    {
+      "name": "wall14-11-sb"
+    },
+    {
+      "name": "wall14-11-bb"
+    },
+    {
+      "name": "wall15-00-nb"
+    },
+    {
+      "name": "wall15-00-sb"
+    },
+    {
+      "name": "wall15-00-bb"
+    },
+    {
+      "name": "wall15-01-nb"
+    },
+    {
+      "name": "wall15-01-sb"
+    },
+    {
+      "name": "wall15-01-bb"
+    },
+    {
+      "name": "wall15-10-nb"
+    },
+    {
+      "name": "wall15-10-sb"
+    },
+    {
+      "name": "wall15-10-bb"
+    },
+    {
+      "name": "wall15-11-nb"
+    },
+    {
+      "name": "wall15-11-sb"
+    },
+    {
+      "name": "wall15-11-bb"
+    }
+  ]
+}

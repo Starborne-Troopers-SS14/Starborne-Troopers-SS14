@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-3.0",
+  "copyright": "Sprited by VilllL",
+  "size": {
+    "x": 128,
+    "y": 128
+  },
+  "states": [
+    {
+      "name": "down-stair"
+    },
+    {
+      "name": "left-stair"
+    },
+    {
+      "name": "right-stair"
+    },
+    {
+      "name": "up-stair"
+    }
+  ]
+}

@@ -35,6 +35,7 @@ using Robust.Shared.Prototypes;
 using Robust.Shared.Utility;
 using SharedGunSystem = Content.Shared.Weapons.Ranged.Systems.SharedGunSystem;
 using TimedDespawnComponent = Robust.Shared.Spawners.TimedDespawnComponent;
+using Content.Client._ST14.ZLevelShooting;  //ST14
 
 namespace Content.Client.Weapons.Ranged.Systems;
 
@@ -54,6 +55,7 @@ public sealed partial class GunSystem : SharedGunSystem
     [Dependency] private SharedTransformSystem _xform = default!;
     [Dependency] private SpriteSystem _sprite = default!;
     [Dependency] private SpriteTreeSystem _spriteTree = default!;
+    [Dependency] private ST14ZTargetingSystem _zTargeting = default!; //ST14
 
     public static readonly EntProtoId HitscanProto = "HitscanEffect";
     private GunTargetEntityComparer _comparer = default!;
@@ -210,7 +212,13 @@ public sealed partial class GunSystem : SharedGunSystem
         }
 
         // Define target coordinates relative to gun entity, so that network latency on moving grids doesn't fuck up the target location.
-        var target = GetBestTarget(_eyeManager.CurrentEye, mousePos);
+
+        // ST14-start
+        /* var target = GetBestTarget(_eyeManager.CurrentEye, mousePos); */ //
+        var target = _zTargeting.GetTarget(entity, _eyeManager.CurrentEye, mousePos) is { } zTarget
+            ? GetNetEntity(zTarget)
+            : GetBestTarget(_eyeManager.CurrentEye, mousePos);
+        // ST14-end
 
         var coordinates = TransformSystem.ToCoordinates(entity, mousePos);
 

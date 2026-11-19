@@ -37,4 +37,11 @@ public sealed partial class CEZLevelHighGroundComponent : Component
     /// </summary>
     [DataField, AutoNetworkedField]
     public bool Corner;
+
+    // ST14-start
+    /// <summary>
+    /// Only check entities that are already above it
+    /// </summary>
+    [DataField, AutoNetworkedField]
+    public bool Underpass;
 }
