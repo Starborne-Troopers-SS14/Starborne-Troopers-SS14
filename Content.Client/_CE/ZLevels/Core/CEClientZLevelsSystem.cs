@@ -29,8 +29,11 @@ public sealed partial class CEClientZLevelsSystem : CESharedZLevelsSystem
     public override void Initialize()
     {
         base.Initialize();
+
+        /* ST14-start (turned off fog on another levels) by Sh1ntra
         _overlay.AddOverlay(new CEZLevelBlurOverlay());
         _overlay.AddOverlay(new CEZLevelFogOverlay());
+        */
     }
 
     [SubscribeLocalEvent]

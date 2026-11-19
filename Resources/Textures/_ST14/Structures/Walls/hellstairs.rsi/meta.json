@@ -1,0 +1,67 @@
+{
+  "version": 1,
+  "license": "CC-BY-SA-3.0",
+  "copyright": "Sprited by VilllL, redrawn as a landing and a three cell flight for ST14",
+  "size": {
+    "x": 256,
+    "y": 256
+  },
+  "states": [
+    {
+      "name": "flight",
+      "directions": 4
+    },
+    {
+      "name": "landing0"
+    },
+    {
+      "name": "landing1"
+    },
+    {
+      "name": "landing2"
+    },
+    {
+      "name": "landing3"
+    },
+    {
+      "name": "landing4"
+    },
+    {
+      "name": "landing5"
+    },
+    {
+      "name": "landing6"
+    },
+    {
+      "name": "landing7"
+    },
+    {
+      "name": "landing8"
+    },
+    {
+      "name": "landing9"
+    },
+    {
+      "name": "landing10"
+    },
+    {
+      "name": "landing11"
+    },
+    {
+      "name": "landing12"
+    },
+    {
+      "name": "landing13"
+    },
+    {
+      "name": "landing14"
+    },
+    {
+      "name": "landing15"
+    },
+    {
+      "name": "preview",
+      "directions": 4
+    }
+  ]
+}

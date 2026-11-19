@@ -1,0 +1,230 @@
+- type: entity
+  id: ST14HellWall
+  name: wall
+  description: A thick wall. Defenders can climb on top of it.
+  placement:
+    mode: SnapgridCenter
+    snap:
+    - Wall
+  components:
+  - type: Transform
+    anchored: true
+    noRot: true
+  - type: Clickable
+  - type: Sprite
+    sprite: _ST14/Structures/Walls/hellwalls.rsi
+    state: wall0-00-sb
+    drawdepth: Mobs
+    noRot: true
+    offset: 0,0.96875
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,-0.5,0.5,0.5"
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+        density: 1000
+  - type: Occluder
+  - type: CEZLevelHighGround
+    heightCurve:
+    - 1.9
+    - 1.9
+  - type: ST14HellWall
+  - type: ST14RailingSpawner
+  - type: ST14DepthSort
+
+- type: entity
+  parent: ST14HellWall
+  id: ST14HellStairs
+  name: stairs
+  description: Stairs leading to the top of the wall.
+  components:
+  - type: Transform
+    anchored: true
+    noRot: false
+  - type: Sprite
+    sprite: _ST14/Structures/Walls/hellstairs.rsi
+    offset: 0,0
+    layers:
+    - state: landing0
+    - state: preview
+      map: [ "preview" ]
+  - type: ST14HellWall
+    prefix: landing
+    landing: true
+    preview: preview
+  - type: ST14HellStairs
+  - type: ST14DepthSort
+    offset: 0.01
+
+- type: entity
+  id: ST14HellStairsStep
+  name: stairs
+  categories: [ HideSpawnMenu ]
+  save: false
+  components:
+  - type: Transform
+    anchored: true
+  - type: CEZLevelHighGround
+    stick: true
+  - type: ST14RailingSpawner
+
+- type: entity
+  parent: ST14HellStairsStep
+  id: ST14HellStairsFlight
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    sprite: _ST14/Structures/Walls/hellstairs.rsi
+    state: flight
+    drawdepth: Mobs
+    noRot: true
+  - type: ST14DepthSort
+    offset: -0.5
+    extents:
+    - 0,-1
+    - 0,-2
+
+- type: entity
+  id: ST14WallRailing
+  name: wall railing
+  categories: [ HideSpawnMenu ]
+  save: false
+  components:
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,-0.5,0.5,0.5"
+        layer:
+        - MidImpassable
+        - LowImpassable
+        density: 1000
+  - type: ST14Railing
+
+- type: entity
+  id: ST14HellGate
+  name: gate
+  description: A gate in the wall. The walkway runs over it.
+  placement:
+    mode: SnapgridCenter
+    snap:
+    - Wall
+  components:
+  - type: Transform
+    anchored: true
+  - type: Clickable
+  - type: InteractionOutline
+  - type: Sprite
+    sprite: _ST14/Structures/Walls/hellgate.rsi
+    drawdepth: Mobs
+    noRot: true
+    offset: 0,0.96875
+    layers:
+    - state: closed
+      map: [ "enum.DoorVisualLayers.Base" ]
+  - type: Appearance
+  - type: AnimationPlayer
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-1.17,-0.49,0.17,0.49"
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+        density: 1000
+  - type: Occluder
+    polygon:
+    - "-1.5,0.5"
+    - "0.5,0.5"
+    - "0.5,-0.5"
+    - "-1.5,-0.5"
+  - type: Door
+    openDrawDepth: Mobs
+    closedDrawDepth: Mobs
+    openTimeOne: 0.6
+    openTimeTwo: 0.6
+    closeTimeOne: 0.6
+    closeTimeTwo: 0.6
+    openingAnimationTime: 1.2
+    closingAnimationTime: 1.2
+    openSound:
+      path: /Audio/Machines/blastdoor.ogg
+    closeSound:
+      path: /Audio/Machines/blastdoor.ogg
+  - type: ST14HellGate
+  - type: ST14DepthSort
+    offset: -0.5
+
+- type: entity
+  id: ST14HellGatePartNear
+  name: gate
+  categories: [ HideSpawnMenu ]
+  save: false
+  components:
+  - type: Transform
+    anchored: true
+  - type: Sprite
+    sprite: _ST14/Structures/Walls/hellgatewalls.rsi
+    state: gatea0-00-sb
+    drawdepth: Mobs
+    noRot: true
+    offset: 0,0.96875
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "0.17,-0.5,0.5,0.5"
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+        density: 1000
+  - type: CEZLevelHighGround
+    heightCurve:
+    - 1.9
+    - 1.9
+    underpass: true
+  - type: ST14HellWall
+    prefix: gatea
+  - type: ST14RailingSpawner
+  - type: ST14DepthSort
+    offset: 0.5
+
+- type: entity
+  parent: ST14HellGatePartNear
+  id: ST14HellGatePartFar
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Sprite
+    state: gateb0-00-sb
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,-0.5,-0.17,0.5"
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+        density: 1000
+  - type: ST14HellWall
+    prefix: gateb
