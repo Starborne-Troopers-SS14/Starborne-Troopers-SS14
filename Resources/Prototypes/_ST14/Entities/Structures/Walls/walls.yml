@@ -169,7 +169,10 @@
   - type: ST14HellGate
   - type: ST14DepthSort
     offset: -0.5
-
+  - type: Door
+    checkFixtureCollision: true
+    openDrawDepth: Mobs
+    
 - type: entity
   id: ST14HellGatePartNear
   name: gate
@@ -192,8 +195,6 @@
         shape:
           !type:PhysShapeAabb
           bounds: "0.17,-0.5,0.5,0.5"
-        mask:
-        - FullTileMask
         layer:
         - WallLayer
         density: 1000
@@ -221,8 +222,6 @@
         shape:
           !type:PhysShapeAabb
           bounds: "-0.5,-0.5,-0.17,0.5"
-        mask:
-        - FullTileMask
         layer:
         - WallLayer
         density: 1000
