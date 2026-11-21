@@ -42,3 +42,4 @@ st14-weather-command-hour = The star has moved: it is now {$hour} h in this sect
 st14-weather-command-status = Height of the star: {$height}, event: {$event}
 st14-weather-command-unknown = There is no event {$id}.
 st14-weather-command-started = Started: {$name}.
+st14-weather-light-sand = Light sand

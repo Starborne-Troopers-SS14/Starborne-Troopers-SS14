@@ -42,3 +42,4 @@ st14-weather-command-hour = Звезда сдвинута: в этом сект�
 st14-weather-command-status = Высота звезды: {$height}, событие: {$event}
 st14-weather-command-unknown = Нет события {$id}.
 st14-weather-command-started = Началось: {$name}.
+st14-weather-light-sand = Лёгкий песок

@@ -120,12 +120,18 @@ public sealed partial class ST14BattleMapSystem : EntitySystem
         if (session.AttachedEntity is { } body && CompOrNull<ST14SectorMapComponent>(Transform(body).MapUid) is { } sector)
             here = sector.Cell;
 
-        // the loaded sectors with all they lead to
+        // the region the battle is fought in, its seven sectors as the planet map shows them, and the loaded sectors
+        // should one lie outside it. Without a region, the loaded sectors with all they lead to
         var loaded = _sectors.LoadedMaps.Keys.ToHashSet();
-        var cells = loaded.SelectMany(cell => war.Grid.Edges[cell].Append(cell)).Distinct();
+        var region = target >= 0 && target < war.Cells.Length ? war.Cells[target].Region
+            : here >= 0 && here < war.Cells.Length ? war.Cells[here].Region
+            : war.ActiveRegion;
+        var cells = region >= 0
+            ? Enumerable.Range(0, war.Cells.Length).Where(cell => war.Cells[cell].Region == region).Union(loaded)
+            : loaded.SelectMany(cell => war.Grid.Edges[cell].Append(cell)).Distinct();
         var sectors = cells
             .Select(cell => new ST14BattleSector(cell, war.Cells[cell].Code, war.Cells[cell].Faction, loaded.Contains(cell),
-                loaded.Contains(cell) ? war.Grid.Edges[cell] : Array.Empty<int>()))
+                war.Grid.Edges[cell]))
             .ToArray();
 
         RaiseNetworkEvent(new ST14BattleMapStateEvent(true, _ticker.RoundId, planet, side, commands, here, target, _war.StagingOf(planet),

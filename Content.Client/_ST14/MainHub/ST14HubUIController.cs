@@ -59,6 +59,20 @@ public sealed partial class ST14HubUIController : UIController, IOnStateEntered<
         _stateManager.RequestStateChange<ST14HubState>();
     }
 
+    /// <summary>
+    /// Esc in the main menu or the lobby: closes the full screen menu that is open there, one step at a time.
+    /// False when none is open, then Esc does what it always did
+    /// </summary>
+    public bool TryEscape()
+    {
+        return _stateManager.CurrentState switch
+        {
+            ST14HubState { Screen: { } hub } => hub.TryEscape(),
+            LobbyState { Lobby: { } lobby } => lobby.Children.OfType<ST14LobbyScreen>().FirstOrDefault()?.TryEscape() == true,
+            _ => false,
+        };
+    }
+
     public LobbyState EnterLobby()
     {
         _leftHub = true;

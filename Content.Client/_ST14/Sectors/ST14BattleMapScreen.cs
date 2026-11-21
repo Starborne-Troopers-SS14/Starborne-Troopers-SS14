@@ -19,7 +19,8 @@ namespace Content.Client._ST14.Sectors;
 public sealed class ST14BattleMapScreen : ST14WarScreenBase
 {
     private const float WindowY = 124;
-    private const float WindowHeight = 846;
+    // the windows end above the bottom bar, which is as tall as the one of the main menu
+    private const float WindowHeight = 814;
     private const float LeftX = 62;
     private const float RightX = 1462;
     private const float InnerWidth = 396;
@@ -82,7 +83,7 @@ public sealed class ST14BattleMapScreen : ST14WarScreenBase
         _globe.OnRightClicked += () => SetTool(null, false);
         _globe.OnMarkPlaced += mark => _war.AddMark(_system.State?.Side ?? ST14GalaxyFaction.Federation, mark);
         _globe.OnMarkErased += (side, index) => _war.RemoveMark(side, index);
-        Canvas.AddAt(_globe, Vector2.Zero, new Vector2(480, 96), new Vector2(960, 892), Vector2.Zero);
+        Canvas.AddAt(_globe, Vector2.Zero, new Vector2(480, 96), new Vector2(960, 842), Vector2.Zero);
 
         // in a round only the region of the battle is shown: the planet is for the High Command in the hub
         _globe.Visible = false;
@@ -100,7 +101,7 @@ public sealed class ST14BattleMapScreen : ST14WarScreenBase
             if (_system.State is { } state)
                 _system.RemoveMark(state.Side, index);
         };
-        Canvas.AddAt(_flat, Vector2.Zero, new Vector2(488, 104), new Vector2(944, 876), Vector2.Zero);
+        Canvas.AddAt(_flat, Vector2.Zero, new Vector2(488, 104), new Vector2(944, 834), Vector2.Zero);
 
         var box = ST14HubStyle.Window(ResCache);
         Canvas.AddAt(new PanelContainer { PanelOverride = box, MouseFilter = MouseFilterMode.Pass }, Vector2.Zero, new Vector2(40, WindowY), new Vector2(440, WindowHeight), Vector2.Zero);
@@ -110,10 +111,7 @@ public sealed class ST14BattleMapScreen : ST14WarScreenBase
         Canvas.AddFull(_right);
 
         AddBottomBar();
-        _hint = ST14HubStyle.Label(ResCache, string.Empty, ST14HubFont.Regular, 19, ST14HubStyle.Gold, shadow: true);
-        _hint.Align = Label.AlignMode.Center;
-        _hint.VAlign = Label.VAlignMode.Center;
-        Canvas.AddAt(_hint, new Vector2(0.5f, 1), new Vector2(0, -46.5f), new Vector2(1300, 50));
+        _hint = AddBarHint();
 
         _system.Changed += Refresh;
         _system.SquadsChanged += Refresh;
@@ -359,7 +357,7 @@ public sealed class ST14BattleMapScreen : ST14WarScreenBase
             ? TimeSpan.FromSeconds(MathF.Max(0, warState.BattleSecondsLeft - (float) (DateTime.UtcNow - _clockFrom).TotalSeconds))
             : (TimeSpan?) null;
         _clock.Text = (left is { } time
-            ? Loc.GetString("st14-battle-map-path", ("planet", planet), ("code", code), ("time", $"{(int) time.TotalHours:00}:{time.Minutes:00}:{time.Seconds:00}"))
+            ? Loc.GetString("st14-battle-map-path", ("planet", planet), ("code", code), ("time", time.TotalHours >= 1 ? $"{(int) time.TotalHours}:{time.Minutes:00}:{time.Seconds:00}" : $"{time.Minutes:00}:{time.Seconds:00}"))
             : Loc.GetString("st14-battle-map-path-idle", ("planet", planet), ("code", code))).ToUpperInvariant();
     }
 
@@ -387,7 +385,8 @@ public sealed class ST14BattleMapScreen : ST14WarScreenBase
         var emblem = new ST14HqPortrait { Portrait = ST14HqArt.Tex(ResCache, side == ST14GalaxyFaction.Arachnid ? "emblem_hive.png" : "emblem_federation.png") };
         _header.AddAt(emblem, Vector2.Zero, new Vector2(40, 16), new Vector2(96, 96), Vector2.Zero);
         AddLabel(_header, Loc.GetString("st14-battle-map-title").ToUpperInvariant(), ST14HubFont.Black, 40, ST14HubStyle.GoldLight, 148, 18, 620, 58);
-        _clock = AddLabel(_header, string.Empty, ST14HubFont.Regular, 19, ST14HubStyle.Gold, 150, 74, 620, 30);
+        // the line runs under the score, wide enough for the longest time left
+        _clock = AddLabel(_header, string.Empty, ST14HubFont.Regular, 19, ST14HubStyle.Gold, 150, 74, 1100, 30);
         UpdateHeaderClock();
 
         if (war != null)
@@ -401,11 +400,6 @@ public sealed class ST14BattleMapScreen : ST14WarScreenBase
             };
             _header.AddAt(score, Vector2.Zero, new Vector2(780, 20), new Vector2(620, 42), Vector2.Zero);
         }
-
-        if (state is not { Active: true })
-            return;
-
-        AddPlate(_header, Loc.GetString("st14-battle-map-mode-battle"), ST14HubStyle.Blue, 1664, 26, 216, 62, 18);
     }
 
     private void AddFact(string key, string value, Color color, ref float y)

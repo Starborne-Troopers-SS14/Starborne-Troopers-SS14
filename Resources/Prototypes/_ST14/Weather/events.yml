@@ -283,3 +283,18 @@
     damage:
       types:
         Cold: 1
+
+# Light sand that always drifts over the sectors when no event is going on. Weight 0: the server never picks it,
+# the clients draw it under every quiet sky, see ST14SectorWeatherClientSystem
+- type: st14WeatherEvent
+  id: ST14WeatherLightSand
+  name: st14-weather-light-sand
+  warning: st14-weather-light-sand
+  weight: 0
+  visual:
+    particles: Sand
+    count: 240
+    color: '#FFF0D266'
+    speed: 9
+    length: 1.1
+    width: 0.05

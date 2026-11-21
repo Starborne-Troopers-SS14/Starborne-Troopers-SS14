@@ -25,7 +25,7 @@ public sealed partial class ST14HubLoadingScreen : Control
     private const float MinTime = 1.2f;
 
     private readonly ST14HubProgressBar _bar;
-    private readonly Label _tip;
+    private readonly ST14HubWrappedText _tip;
     private Action? _then;
     private float _elapsed;
     private bool _done;
@@ -72,8 +72,8 @@ public sealed partial class ST14HubLoadingScreen : Control
         var title = ST14HubStyle.Label(_resCache, Loc.GetString("st14-hub-loading-tip-title"), ST14HubFont.Medium, 15, Color.White.WithAlpha(0.83f));
         tipBox.AddAt(title, new Vector2(1, 0), new Vector2(-10, 0), new Vector2(830, 24), new Vector2(1, 0));
 
-        _tip = ST14HubStyle.Label(_resCache, string.Empty, ST14HubFont.Regular, 16, Color.FromHex("#B3B3B3D4"));
-        _tip.VAlign = Label.VAlignMode.Top;
+        // a long tip breaks into lines inside the block instead of running off to the right
+        _tip = new ST14HubWrappedText(_resCache, ST14HubFont.Regular, 16, 830) { Color = Color.FromHex("#B3B3B3D4") };
         tipBox.AddAt(_tip, new Vector2(1, 0), new Vector2(-10, 30), new Vector2(830, 115), new Vector2(1, 0));
         canvas.AddAt(tipBox, new Vector2(0.5f, 1), new Vector2(0, -170.5f), new Vector2(1000, 150), new Vector2(0.5f, 1));
 

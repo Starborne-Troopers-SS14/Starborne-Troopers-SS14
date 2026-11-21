@@ -69,7 +69,7 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
 
     // cards of the tier row, relative to the screen centre in canvas units
     private const float CardStep = 440f;
-    private const float CardY = -45f;
+    private const float CardY = -60f;
     private static readonly Vector2 CardSize = new(410, 600);
 
     private static readonly Color[] Swatches =
@@ -165,7 +165,8 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
         {
             Orientation = BoxContainer.LayoutOrientation.Vertical,
             SeparationOverride = 4,
-            Margin = new Thickness(20, 8),
+            Margin = new Thickness(20, 6),
+            VerticalAlignment = VAlignment.Center,
         };
         how.AddChild(howColumn);
         var steps = new BoxContainer
@@ -194,13 +195,14 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
         var fair = ST14HubStyle.Label(ResCache, Loc.GetString("st14-support-fair"), ST14HubFont.Italic, 14, ST14HubStyle.Widget);
         fair.Align = Label.AlignMode.Center;
         howColumn.AddChild(fair);
-        Canvas.AddAt(how, new Vector2(0.5f, 1), new Vector2(0, -158), new Vector2(1700, 108));
+        // between the plates of the cards and the bottom bar, tall enough for all three lines at any window size
+        Canvas.AddAt(how, new Vector2(0.5f, 1), new Vector2(0, -200), new Vector2(1700, 116));
         _rowParts.Add(how);
 
         // perks of one tier, opened from a card
         _perks = new ST14LobbyFrame(ResCache, string.Empty) { Visible = false };
         // under the gold line of the header, above the bottom bar
-        Canvas.AddAt(_perks, new Vector2(0.5f, 0.5f), new Vector2(0, 40), new Vector2(1640, 730));
+        Canvas.AddAt(_perks, new Vector2(0.5f, 0.5f), new Vector2(0, 30), new Vector2(1640, 710));
 
         var perkRow = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Horizontal, SeparationOverride = 16, VerticalExpand = true };
         _perks.Body.AddChild(perkRow);
@@ -237,12 +239,12 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
             ToolTip = BoostyUrl,
         };
         boosty.OnPressed += _ => _uriOpener.OpenUri(BoostyUrl);
-        Canvas.AddAt(boosty, new Vector2(1, 1), new Vector2(-30, -54), new Vector2(440, 70), new Vector2(1, 0.5f));
+        Canvas.AddAt(boosty, new Vector2(1, 1), new Vector2(-30, -ST14HubStyle.HubBarCenter), new Vector2(440, 70), new Vector2(1, 0.5f));
 
         var note = ST14HubStyle.Label(ResCache, Loc.GetString("st14-support-boosty-link"), ST14HubFont.Regular, 14, ST14HubStyle.Widget);
         note.Align = Label.AlignMode.Right;
         note.VAlign = Label.VAlignMode.Center;
-        Canvas.AddAt(note, new Vector2(1, 1), new Vector2(-490, -54), new Vector2(600, 30), new Vector2(1, 0.5f));
+        Canvas.AddAt(note, new Vector2(1, 1), new Vector2(-490, -ST14HubStyle.HubBarCenter), new Vector2(600, 30), new Vector2(1, 0.5f));
 
         SelectWeapon(_weapon);
         UpdateStatus();
@@ -838,14 +840,15 @@ public sealed class ST14SponsorCard : ContainerButton
         _glow = cache.GetResource<TextureResource>("/Textures/_ST14/Interface/Lobby/soft_glow.png").Texture;
 
         var accent = ST14SupporterStatus.TierColors[tier];
-        var column = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 4, Margin = new Thickness(16, 10, 16, 40) };
+        var column = _column = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 4, Margin = new Thickness(16, 10, 16, 40) };
         AddChild(column);
 
         _badge = ST14HubStyle.Label(cache, string.Empty, ST14HubFont.SemiBold, 13, ST14HubStyle.Gold, shadow: true);
         _badge.Align = Label.AlignMode.Right;
         column.AddChild(_badge);
 
-        column.AddChild(new ST14SponsorInsignia(cache) { Tier = tier, Banner = true, SetHeight = 270, MouseFilter = MouseFilterMode.Ignore });
+        _insignia = new ST14SponsorInsignia(cache) { Tier = tier, Banner = true, SetHeight = InsigniaHeight, MouseFilter = MouseFilterMode.Ignore };
+        column.AddChild(_insignia);
 
         var priceLabel = ST14HubStyle.Label(cache, $"{price} ₽", ST14HubFont.Black, 34, Color.White, shadow: true);
         priceLabel.Align = Label.AlignMode.Center;
@@ -877,6 +880,30 @@ public sealed class ST14SponsorCard : ContainerButton
     // wrap width of the perk lines in canvas units, inside the card margins
     private const float PerksWidth = 370;
 
+    // the card is 600 canvas units tall, its parts are laid out for that height
+    private const float DesignHeight = 600;
+    private const float InsigniaHeight = 235;
+
+    private readonly BoxContainer _column;
+    private readonly ST14SponsorInsignia _insignia;
+    private float _laidOutFor;
+
+    protected override Vector2 MeasureOverride(Vector2 availableSize)
+    {
+        // the insignia and the margins shrink with the card like its text does, so the perks never run out of the
+        // bottom of a card on a smaller window
+        if (float.IsFinite(availableSize.Y) && availableSize.Y > 0 && MathF.Abs(availableSize.Y - _laidOutFor) > 0.5f)
+        {
+            _laidOutFor = availableSize.Y;
+            var k = availableSize.Y / DesignHeight;
+            _insignia.SetHeight = InsigniaHeight * k;
+            _column.Margin = new Thickness(16 * k, 10 * k, 16 * k, 44 * k);
+            _column.SeparationOverride = Math.Max(1, (int) MathF.Round(4 * k));
+        }
+
+        return base.MeasureOverride(availableSize);
+    }
+
     public void SetWrapScale(float scale)
     {
         _perks.MaxWidth = PerksWidth * scale;
@@ -900,7 +927,7 @@ public sealed class ST14SponsorCard : ContainerButton
         var open = Tier <= current;
         _badge.Text = Loc.GetString(Tier == current ? "st14-support-tier-current" : open
             ? "st14-support-tier-included"
-            : Tier == 4 ? "st14-support-tier-max" : "st14-support-tier-locked").ToUpperInvariant();
+            : "st14-support-tier-locked").ToUpperInvariant();
         _badge.FontColorOverride = Tier == current ? ST14HubStyle.GoldLight : open ? Color.FromHex("#9CE07C") : Color.FromHex("#8A8478");
         _perks.SetMessage(FormattedMessage.FromMarkupOrThrow(PerkMarkup(Tier, _perkCount, open)));
     }

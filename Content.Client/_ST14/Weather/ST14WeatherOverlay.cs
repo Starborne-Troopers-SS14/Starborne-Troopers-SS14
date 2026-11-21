@@ -113,6 +113,13 @@ public sealed class ST14WeatherOverlay : Overlay
         ZIndex = 50;
     }
 
+    /// <summary>
+    /// The weather drawn now and how strong it is, the one dying down included
+    /// </summary>
+    public string? Event => _event;
+
+    public float Strength => _strength;
+
     public void Flash(Vector2 position)
     {
         _flash = 0f;

@@ -100,7 +100,8 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         };
         _surface.OnCellSelected += cell => BuildSurfacePanel(cell);
         _surface.OnRightClicked += GoBack;
-        Canvas.AddAt(_surface, new Vector2(0.5f, 0.5f), new Vector2(-270, -25), new Vector2(900, 900));
+        // clear of the header and of the bottom bar
+        Canvas.AddAt(_surface, new Vector2(0.5f, 0.5f), new Vector2(-270, -45), new Vector2(860, 860));
 
         // header: title, where the map is, and the state of the war on the right
         var title = ST14HubStyle.Label(ResCache, Loc.GetString("st14-galaxy-title").ToUpperInvariant(), ST14HubFont.Black, 38,
@@ -170,10 +171,7 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
 
         AddBottomBar();
 
-        _hint = ST14HubStyle.Label(ResCache, string.Empty, ST14HubFont.Regular, 19, ST14HubStyle.Gold, shadow: true);
-        _hint.Align = Label.AlignMode.Center;
-        _hint.VAlign = Label.VAlignMode.Center;
-        Canvas.AddAt(_hint, new Vector2(0.5f, 1), new Vector2(0, -46.5f), new Vector2(1300, 50));
+        _hint = AddBarHint();
 
         UpdateStats();
         ShowGalaxy();
@@ -279,6 +277,13 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
 
     protected override void GoBack()
     {
+        // Esc over the table of the High Command steps back in the table first
+        if (_menu is { Visible: true } menu)
+        {
+            menu.Back();
+            return;
+        }
+
         switch (_level)
         {
             case ST14GalaxyLevel.Dive:

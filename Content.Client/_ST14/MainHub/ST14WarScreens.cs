@@ -41,7 +41,8 @@ public abstract partial class ST14WarScreenBase : Control
     }
 
     /// <summary>
-    /// Bottom bar of the original, added after the screen content so it covers it
+    /// Bottom bar of the main menu, added after the screen content so it covers it. Every screen has the same bar as
+    /// the hub: what stands in it is centred on <see cref="ST14HubStyle.HubBarCenter"/>, inside the grey band
     /// </summary>
     protected void AddBottomBar()
     {
@@ -50,10 +51,9 @@ public abstract partial class ST14WarScreenBase : Control
             Texture = ST14HubStyle.Tex(ResCache, "mask_top.png"),
             Stretch = TextureRect.StretchMode.Scale,
             ModulateSelfOverride = Color.Black,
-        }, new Vector2(0, 1), new Vector2(1, 1), Vector2.Zero, new Vector2(0, 110.6f), new Vector2(0.5f, 1));
+        }, new Vector2(0, 1), new Vector2(1, 1), Vector2.Zero, new Vector2(0, ST14HubStyle.HubBarHeight + 18), new Vector2(0.5f, 1));
 
-        Canvas.Add(new PanelContainer { PanelOverride = ST14HubStyle.MainBar(ResCache) },
-            new Vector2(0, 1), new Vector2(1, 1), Vector2.Zero, new Vector2(0, 93), new Vector2(0.5f, 1));
+        AddBar(Canvas, ResCache);
 
         var back = new ST14HubIconButton(ST14HubStyle.Tex(ResCache, "exit.png"), new Color(0.15f, 0.35f, 0.47f))
         {
@@ -61,7 +61,28 @@ public abstract partial class ST14WarScreenBase : Control
             ToolTip = Loc.GetString("st14-hub-war-back"),
         };
         back.OnPressed += _ => GoBack();
-        Canvas.AddAt(back, new Vector2(0, 1), new Vector2(62.5f, -18.2f), new Vector2(70.2f, 70.2f), new Vector2(0, 1));
+        Canvas.AddAt(back, new Vector2(0, 1), new Vector2(62.5f, -ST14HubStyle.HubBarCenter), new Vector2(64, 64), new Vector2(0, 0.5f));
+    }
+
+    /// <summary>
+    /// The bar of the hub on a canvas, the same in every menu
+    /// </summary>
+    public static void AddBar(ST14CanvasLayout canvas, IResourceCache cache)
+    {
+        canvas.Add(new PanelContainer { PanelOverride = ST14HubStyle.HubBar(cache) },
+            new Vector2(0, 1), new Vector2(1, 1), Vector2.Zero, new Vector2(0, ST14HubStyle.HubBarHeight), new Vector2(0.5f, 1));
+    }
+
+    /// <summary>
+    /// A line of text in the middle of the bar
+    /// </summary>
+    protected Label AddBarHint()
+    {
+        var hint = ST14HubStyle.Label(ResCache, string.Empty, ST14HubFont.Regular, 19, ST14HubStyle.Gold, shadow: true);
+        hint.Align = Label.AlignMode.Center;
+        hint.VAlign = Label.VAlignMode.Center;
+        Canvas.AddAt(hint, new Vector2(0.5f, 1), new Vector2(0, -ST14HubStyle.HubBarCenter), new Vector2(1300, 50));
+        return hint;
     }
 
     /// <summary>
@@ -70,6 +91,14 @@ public abstract partial class ST14WarScreenBase : Control
     protected virtual void GoBack()
     {
         OnBack?.Invoke();
+    }
+
+    /// <summary>
+    /// Esc: the same step back as the exit icon
+    /// </summary>
+    public void Back()
+    {
+        GoBack();
     }
 }
 

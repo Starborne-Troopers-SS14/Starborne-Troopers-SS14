@@ -30,12 +30,13 @@ public sealed partial class ST14CommandMenu : ST14WarScreenBase
     private const int PresetCount = 6;
     private const float TypeSpeed = 90f;
     private const float WindowY = 124;
-    private const float WindowHeight = 846;
+    // the windows end above the bottom bar, which is as tall as the one of the main menu
+    private const float WindowHeight = 814;
     private const float LeftX = 62;
     private const float RightX = 1462;
     private const float InnerWidth = 396;
     private const float BodyTop = 184;
-    private const float NextY = 896;
+    private const float NextY = 866;
 
     private static readonly Vector2 WindowSize = new(440, WindowHeight);
 
@@ -110,7 +111,7 @@ public sealed partial class ST14CommandMenu : ST14WarScreenBase
         _globe.OnRightClicked += GoBack;
         _globe.OnMarkPlaced += mark => System?.AddMark(_side, mark);
         _globe.OnMarkErased += (side, index) => System?.RemoveMark(side, index);
-        Canvas.AddAt(_globe, Vector2.Zero, new Vector2(480, 96), new Vector2(960, 892), Vector2.Zero);
+        Canvas.AddAt(_globe, Vector2.Zero, new Vector2(480, 96), new Vector2(960, 842), Vector2.Zero);
 
         // the room of the hive is lit red
         _tint = new PanelContainer { PanelOverride = ST14HubStyle.Flat(Color.FromHex("#5A0F00").WithAlpha(0.32f)), Visible = false };
@@ -134,10 +135,7 @@ public sealed partial class ST14CommandMenu : ST14WarScreenBase
 
         AddBottomBar();
 
-        _hint = ST14HubStyle.Label(ResCache, string.Empty, ST14HubFont.Regular, 19, ST14HubStyle.Gold, shadow: true);
-        _hint.Align = Label.AlignMode.Center;
-        _hint.VAlign = Label.VAlignMode.Center;
-        Canvas.AddAt(_hint, new Vector2(0.5f, 1), new Vector2(0, -46.5f), new Vector2(1300, 50));
+        _hint = AddBarHint();
 
         _modal = new ST14CanvasLayout { Visible = false };
         Canvas.AddFull(_modal);
@@ -858,7 +856,7 @@ public sealed partial class ST14CommandMenu : ST14WarScreenBase
             _galaxy.OnMarkErased += (side, index) => System?.RemoveMark(side, index);
             _galaxy.OnToolCancelled += () => SetTool(null, false);
             _galaxy.OnBackClicked += GoBack;
-            Canvas.AddAt(_galaxy, Vector2.Zero, new Vector2(490, 150), new Vector2(940, 810), Vector2.Zero);
+            Canvas.AddAt(_galaxy, Vector2.Zero, new Vector2(490, 150), new Vector2(940, 780), Vector2.Zero);
             _galaxy.SetPositionInParent(_globe.GetPositionInParent() + 1);
         }
 

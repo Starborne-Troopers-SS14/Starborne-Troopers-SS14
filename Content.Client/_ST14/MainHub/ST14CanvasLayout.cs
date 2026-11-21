@@ -27,7 +27,11 @@ public sealed class ST14CanvasLayout : Control
     /// <summary>
     /// Scale from canvas units to this control, the canvas always fits inside
     /// </summary>
-    public float CanvasScale => MathF.Min(Size.X / CanvasSize.X, Size.Y / CanvasSize.Y);
+    public float CanvasScale => _scale > 0 ? _scale : MathF.Min(Size.X / CanvasSize.X, Size.Y / CanvasSize.Y);
+
+    // the scale of the last layout pass; set while measuring too, so layouts inside this one measure with it before
+    // this one was ever arranged
+    private float _scale;
 
     public T Add<T>(T control, Vector2 anchorMin, Vector2 anchorMax, Vector2 position, Vector2 size, Vector2? pivot = null)
         where T : Control
@@ -73,9 +77,25 @@ public sealed class ST14CanvasLayout : Control
 
     protected override Vector2 MeasureOverride(Vector2 availableSize)
     {
+        // every child is measured in the very box it will get: text that wraps (rich text, the chat) wraps to that
+        // width, not to the width of the whole screen, and so never runs out of its frame at any window size
+        var finite = float.IsFinite(availableSize.X) && float.IsFinite(availableSize.Y);
+        var scale = finite ? ScaleFor(availableSize) : 0;
+        if (scale > 0)
+            _scale = scale;
+
+        if (ScaleLabels && scale > 0)
+            ST14HubStyle.ScaleLabels(this, scale);
+
         foreach (var child in Children)
         {
-            child.Measure(availableSize);
+            if (!finite || !_slots.TryGetValue(child, out var slot))
+            {
+                child.Measure(availableSize);
+                continue;
+            }
+
+            child.Measure(SlotBox(slot, availableSize, scale).Size);
         }
 
         return Vector2.Zero;
@@ -83,17 +103,9 @@ public sealed class ST14CanvasLayout : Control
 
     protected override Vector2 ArrangeOverride(Vector2 finalSize)
     {
-        var scale = MathF.Min(finalSize.X / CanvasSize.X, finalSize.Y / CanvasSize.Y);
-
-        // A layout inside another one, like the content of a card, uses the scale of the screen canvas
-        for (var parent = Parent; parent != null; parent = parent.Parent)
-        {
-            if (parent is ST14CanvasLayout outer)
-            {
-                scale = outer.CanvasScale;
-                break;
-            }
-        }
+        var scale = ScaleFor(finalSize);
+        if (scale > 0)
+            _scale = scale;
 
         if (ScaleLabels && scale > 0)
             ST14HubStyle.ScaleLabels(this, scale);
@@ -106,14 +118,31 @@ public sealed class ST14CanvasLayout : Control
                 continue;
             }
 
-            var min = finalSize * slot.AnchorMin;
-            var max = finalSize * slot.AnchorMax;
-            var size = Vector2.Max(Vector2.Zero, max - min + slot.Size * scale);
-            var pivotPos = Vector2.Lerp(min, max, slot.Pivot) + slot.Position * scale;
-            child.Arrange(UIBox2.FromDimensions(pivotPos - size * slot.Pivot, size));
+            child.Arrange(SlotBox(slot, finalSize, scale));
         }
 
         return finalSize;
+    }
+
+    private float ScaleFor(Vector2 size)
+    {
+        // A layout inside another one, like the content of a card, uses the scale of the screen canvas
+        for (var parent = Parent; parent != null; parent = parent.Parent)
+        {
+            if (parent is ST14CanvasLayout outer)
+                return outer.CanvasScale;
+        }
+
+        return MathF.Min(size.X / CanvasSize.X, size.Y / CanvasSize.Y);
+    }
+
+    private static UIBox2 SlotBox(Slot slot, Vector2 area, float scale)
+    {
+        var min = area * slot.AnchorMin;
+        var max = area * slot.AnchorMax;
+        var size = Vector2.Max(Vector2.Zero, max - min + slot.Size * scale);
+        var pivotPos = Vector2.Lerp(min, max, slot.Pivot) + slot.Position * scale;
+        return UIBox2.FromDimensions(pivotPos - size * slot.Pivot, size);
     }
 
     private readonly record struct Slot(Vector2 AnchorMin, Vector2 AnchorMax, Vector2 Position, Vector2 Size, Vector2 Pivot);

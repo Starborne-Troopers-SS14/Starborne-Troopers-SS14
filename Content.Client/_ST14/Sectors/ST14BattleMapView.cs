@@ -91,7 +91,7 @@ public sealed partial class ST14BattleMapView : Control
     private void UpdateLayout(ST14BattleMapStateEvent state)
     {
         var anchor = state.Here >= 0 ? state.Here : state.Target >= 0 ? state.Target : state.Sectors.FirstOrDefault(s => s.Loaded).Cell;
-        var key = $"{anchor}:{string.Join(',', state.Sectors.Where(s => s.Loaded).Select(s => s.Cell))}";
+        var key = $"{anchor}:{string.Join(',', state.Sectors.Select(s => s.Loaded ? $"{s.Cell}*" : $"{s.Cell}"))}";
         if (key == _layoutKey)
             return;
 
@@ -103,14 +103,15 @@ public sealed partial class ST14BattleMapView : Control
         queue.Enqueue(anchor);
         while (queue.TryDequeue(out var cell))
         {
-            if (Sector(cell) is not { Loaded: true } sector)
+            // the map lays out the sectors the server sent: the region of the battle, not every neighbour around it
+            if (Sector(cell) is not { } sector)
                 continue;
 
             var (position, turn) = _layout[cell];
             for (var edge = 0; edge < sector.Edges.Length; edge++)
             {
                 var next = sector.Edges[edge];
-                if (_layout.ContainsKey(next))
+                if (_layout.ContainsKey(next) || Sector(next) == null)
                     continue;
 
                 var direction = (edge + turn) % 6;
@@ -122,7 +123,7 @@ public sealed partial class ST14BattleMapView : Control
 
                 // the neighbour turns until its passage back faces this sector
                 var nextTurn = 0;
-                if (Sector(next) is { Loaded: true } neighbour && Array.IndexOf(neighbour.Edges, cell) is var back and >= 0)
+                if (Sector(next) is { } neighbour && Array.IndexOf(neighbour.Edges, cell) is var back and >= 0)
                     nextTurn = ((direction + 3 - back) % 6 + 6) % 6;
 
                 _layout[next] = (at, nextTurn);
@@ -232,11 +233,11 @@ public sealed partial class ST14BattleMapView : Control
     }
 
     /// <summary>
-    /// The whole battle in view: every loaded sector and a little of what lies around
+    /// The whole region of the battle in view
     /// </summary>
     private void FrameBattle()
     {
-        var loaded = _layout.Where(p => Sector(p.Key) is { Loaded: true }).Select(p => p.Value.Position).ToList();
+        var loaded = _layout.Select(p => p.Value.Position).ToList();
         if (loaded.Count == 0)
             return;
 
