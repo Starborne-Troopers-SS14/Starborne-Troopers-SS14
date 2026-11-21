@@ -1,0 +1,495 @@
+# Trenches and bunkers on the five levels of a sector (see docs/ST14-ZLevels-Layers.md).
+#  - The entrenching tool (ST14EntrenchingTool, energy_fence.yml) lays out a segment (a 1x3 trench or a 2x2 dug-out) and digs it: it opens into level -1, which becomes the floor of a trench with
+#    earth walls along it. A dug-out is roofed by itself, a trench stays open. Steps are cut with the tool; without them a soldier climbs out over the side.
+#  - Bunkers are concrete walls and firing slits built by engineers; a roof frame lays a concrete roof on the level
+#    above, which keeps out the sky, the light and the weather.
+# All sprites here are made for Starborne Troopers (meta.json: All rights reserved).
+
+- type: entity
+  parent: BaseStructure
+  id: ST14TrenchWall
+  name: trench wall
+  description: Packed earth topped with sandbags, the side of a trench. Alt+click to climb out over it, slowly.
+  components:
+  # The wall itself is under the ground and never seen. Its faces hang over the four tiles around it: where one of
+  # them is a trench, that face shows through the opening above - the far wall in planks, the sides and the near lip -
+  # so the trench has depth without shifting the levels (a soldier in it is seen whole). Elsewhere they are under ground.
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/trench_wall.rsi
+    drawdepth: Walls
+    noRot: true
+    layers:
+    - state: wall
+    - state: face_south
+      offset: 0,-1
+    - state: face_north
+      offset: 0,1
+    - state: face_east
+      offset: 1,0
+    - state: face_west
+      offset: -1,0
+  - type: Icon
+    sprite: _ST14/ZLevels/Fortifications/trench_wall.rsi
+    state: wall
+  # in the trench nobody sees round a corner: the sides block the view, the vanilla field of view (only on its level,
+  # the surface is seen). Its shadow cannot be made lighter from content: the engine shader draws it solid.
+  - type: Occluder
+  # under the ground and never seen: not offered in the right-click menu
+  - type: Tag
+    tags:
+    - Structure
+    - HideContextMenu
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,-0.5,0.5,0.5"
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+        density: 1000
+  - type: ST14ClimbUp
+  - type: Damageable
+    damageModifierSet: RockMod
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 800
+      behaviors:
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+
+- type: entity
+  parent: BaseStructure
+  id: ST14BunkerWall
+  name: bunker wall
+  description: Poured concrete, thick enough to stop a shell. Alt+click to climb onto the roof.
+  components:
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/bunker_wall.rsi
+    state: wall
+    drawdepth: Walls
+  - type: Icon
+    sprite: _ST14/ZLevels/Fortifications/bunker_wall.rsi
+    state: wall
+  - type: Occluder
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,-0.5,0.5,0.5"
+        mask:
+        - FullTileMask
+        layer:
+        - WallLayer
+        density: 1000
+  # climbed onto with Alt+click; up there the wall top is ground, so the soldier walks onto the roof
+  - type: ST14ClimbUp
+    climbTime: 3
+    verb: st14-climb-onto-bunker
+  - type: ST14ZLevelHighGround
+  - type: Damageable
+    damageModifierSet: SteelStaticMod
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 2500
+      behaviors:
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+
+# A slit to fire from: nobody gets through it, bullets and sight do.
+- type: entity
+  parent: ST14BunkerWall
+  id: ST14BunkerSlit
+  name: firing slit
+  description: A narrow embrasure in the concrete. Wide enough for a muzzle, not for a body.
+  components:
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/bunker_slit.rsi
+    state: wall
+    drawdepth: Walls
+  - type: Icon
+    sprite: _ST14/ZLevels/Fortifications/bunker_slit.rsi
+    state: wall
+  - type: Occluder
+    enabled: false
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,-0.5,0.5,0.5"
+        mask:
+        - FullTileMask
+        layer:
+        - MidImpassable
+        - LowImpassable
+        density: 1000
+
+# Roofs a 3x3 square on the level above itself and goes away (ST14RoofPlacer puts ST14BunkerRoof on the open tiles).
+- type: entity
+  id: ST14BunkerRoofFrame
+  name: bunker roof frame
+  description: Logs, earth and a camouflage net for the roof of a bunker or a dug-out, laid on the level above.
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: true
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/roof_kit.rsi
+    state: icon
+  - type: ST14RoofPlacer
+    radius: 1
+
+# The roof of a bunker or a dug-out: earth over logs under a camouflage net, on the level above it. From outside it
+# hides the bunker; whoever goes in sees through it (the client hides every roof joined to the one over them).
+# It is ground to walk on (whoever climbs a bunker wall walks over the roof), and bullets on its level stop in it.
+- type: entity
+  id: ST14BunkerRoof
+  name: bunker roof
+  description: Logs, earth and a camouflage net over a bunker.
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: false
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/bunker_roof.rsi
+    state: roof
+    drawdepth: WallTops
+  - type: Icon
+    sprite: _ST14/ZLevels/Fortifications/bunker_roof.rsi
+    state: roof
+  - type: Clickable
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,-0.5,0.5,0.5"
+        layer:
+        - BulletImpassable
+        density: 1000
+  - type: Damageable
+    damageModifierSet: RockMod
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 1500
+      behaviors:
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+  - type: ST14BunkerRoof
+
+# Earth steps out of a trench: the trench must run on past them so the soldier walks up onto the ground.
+- type: entity
+  parent: ST14ZLevelLadderDirtCliff
+  id: ST14TrenchSteps
+  name: trench steps
+  description: Steps cut into the side of the trench. Walk along them to climb out.
+  components:
+  # plank treads cut into the earth, drawn over the faces of the trench sides (WallTops) and under the soldiers; a ladder
+  # faces away from where it leads (the south frame climbs north)
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/trench_steps.rsi
+    state: steps
+    drawdepth: WallTops
+  - type: Icon
+    sprite: _ST14/ZLevels/Fortifications/trench_steps.rsi
+    state: steps
+  - type: Tag
+    tags:
+    - Structure
+    - HideContextMenu
+
+- type: ST14EngineerBuildable
+  id: BunkerWall
+  category: ST14BuildWalls
+  result: ST14BunkerWall
+  cost: 60
+  buildTime: 6
+  conditions:
+  - !type:TileNotBlocked
+
+- type: ST14EngineerBuildable
+  id: BunkerSlit
+  category: ST14BuildWalls
+  result: ST14BunkerSlit
+  cost: 60
+  buildTime: 6
+  conditions:
+  - !type:TileNotBlocked
+
+- type: ST14EngineerBuildable
+  id: BunkerRoofFrame
+  category: ST14BuildWalls
+  result: ST14BunkerRoofFrame
+  cost: 120
+  buildTime: 8
+  conditions:
+  - !type:TileNotBlocked
+
+- type: ST14EngineerBuildable
+  id: TrenchSteps
+  category: ST14BuildTrenches
+  result: ST14TrenchSteps
+  cost: 20
+  buildTime: 4
+  conditions:
+  - !type:TileNotBlocked
+
+# A trench segment laid out with the entrenching tool and being dug (ST14TrenchSystem.Digging.cs). It has no sprite:
+# every tile of it gets a ST14TrenchBlueprintMarker.
+- type: entity
+  id: ST14TrenchBlueprint
+  name: trench layout
+  description: Stakes and string. Somebody is going to dig here.
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Transform
+    anchored: false
+  - type: ST14TrenchBlueprint
+
+- type: entity
+  id: ST14TrenchBlueprintMarker
+  name: trench layout
+  description: Stakes and string. Somebody is going to dig here.
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Tag
+    tags:
+    - HideContextMenu
+  - type: Transform
+    anchored: false
+  # one tile of the string: only the sides and corners on the edge of the layout show (ST14OutlineVisuals), so the
+  # tiles of a segment join into one frame
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/trench_blueprint.rsi
+    drawdepth: FloorObjects
+    layers:
+    - state: rope_north
+      map: [ "north" ]
+    - state: rope_south
+      map: [ "south" ]
+    - state: rope_east
+      map: [ "east" ]
+    - state: rope_west
+      map: [ "west" ]
+    - state: stake_north_east
+      map: [ "northEast" ]
+    - state: stake_north_west
+      map: [ "northWest" ]
+    - state: stake_south_east
+      map: [ "southEast" ]
+    - state: stake_south_west
+      map: [ "southWest" ]
+    - state: inner_north_east
+      map: [ "innerNorthEast" ]
+    - state: inner_north_west
+      map: [ "innerNorthWest" ]
+    - state: inner_south_east
+      map: [ "innerSouthEast" ]
+    - state: inner_south_west
+      map: [ "innerSouthWest" ]
+  - type: Icon
+    sprite: _ST14/ZLevels/Fortifications/trench_blueprint.rsi
+    state: icon
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.ST14OutlineVisuals.North:
+        north: { True: { visible: true }, False: { visible: false } }
+      enum.ST14OutlineVisuals.South:
+        south: { True: { visible: true }, False: { visible: false } }
+      enum.ST14OutlineVisuals.East:
+        east: { True: { visible: true }, False: { visible: false } }
+      enum.ST14OutlineVisuals.West:
+        west: { True: { visible: true }, False: { visible: false } }
+      enum.ST14OutlineVisuals.NorthEast:
+        northEast: { True: { visible: true }, False: { visible: false } }
+      enum.ST14OutlineVisuals.NorthWest:
+        northWest: { True: { visible: true }, False: { visible: false } }
+      enum.ST14OutlineVisuals.SouthEast:
+        southEast: { True: { visible: true }, False: { visible: false } }
+      enum.ST14OutlineVisuals.SouthWest:
+        southWest: { True: { visible: true }, False: { visible: false } }
+      enum.ST14OutlineVisuals.InnerNorthEast:
+        innerNorthEast: { True: { visible: true }, False: { visible: false } }
+      enum.ST14OutlineVisuals.InnerNorthWest:
+        innerNorthWest: { True: { visible: true }, False: { visible: false } }
+      enum.ST14OutlineVisuals.InnerSouthEast:
+        innerSouthEast: { True: { visible: true }, False: { visible: false } }
+      enum.ST14OutlineVisuals.InnerSouthWest:
+        innerSouthWest: { True: { visible: true }, False: { visible: false } }
+
+# The roof of a dug-out on the surface: logs and earth half out of the ground. Nobody walks onto it, it is climbed onto
+# with Alt+click; up there it is ground (ST14SharedZLevelsSystem.SetSolidSpot) and the soldier walks over it a level up.
+# Bullets on the surface stop in it.
+- type: entity
+  parent: ST14BunkerRoof
+  id: ST14DugoutRoof
+  name: earth bunker roof
+  description: Logs and earth half out of the ground over a bunker. Alt+click to climb onto it.
+  components:
+  # a raised block: rims along the edges of the whole dug-out (ST14OutlineVisuals) and a short ladder leaning on the
+  # middle of its south side (ST14DugoutVisuals.Ladder), so it reads as something to climb
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/dugout_roof.rsi
+    drawdepth: WallTops
+    noRot: true
+    layers:
+    - state: roof
+    - state: edge_north
+      map: [ "north" ]
+    - state: edge_east
+      map: [ "east" ]
+    - state: edge_west
+      map: [ "west" ]
+    - state: edge_south
+      map: [ "south" ]
+    - state: ladder
+      offset: 0,-1
+      map: [ "ladder" ]
+      visible: false
+  - type: Icon
+    sprite: _ST14/ZLevels/Fortifications/dugout_roof.rsi
+    state: roof
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.ST14OutlineVisuals.North:
+        north: { True: { visible: true }, False: { visible: false } }
+      enum.ST14OutlineVisuals.East:
+        east: { True: { visible: true }, False: { visible: false } }
+      enum.ST14OutlineVisuals.West:
+        west: { True: { visible: true }, False: { visible: false } }
+      enum.ST14OutlineVisuals.South:
+        south: { True: { visible: true }, False: { visible: false } }
+      enum.ST14DugoutVisuals.Ladder:
+        ladder: { True: { visible: true }, False: { visible: false } }
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,-0.5,0.5,0.5"
+        layer:
+        - MidImpassable
+        - LowImpassable
+        - BulletImpassable
+        density: 1000
+  - type: ST14ClimbUp
+    climbTime: 2
+    verb: st14-climb-onto-dugout
+
+# The wooden frame on the ground round a trench, one per dug tile of the surface (ST14TrenchSystem.UpdateRims): a plank
+# lies along each side that borders the ground and a post at each outer corner, in the tiles around the hole - outside
+# it, so it hides nobody in the trench - and the planks of neighbouring tiles join into one frame.
+- type: entity
+  id: ST14TrenchRim
+  name: trench rim
+  description: Planks along the edge of a trench.
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Tag
+    tags:
+    - HideContextMenu
+  - type: Transform
+    anchored: false
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/trench_rim.rsi
+    drawdepth: FloorObjects
+    noRot: true
+    layers:
+    - state: rim_north
+      offset: 0,1
+      map: [ "north" ]
+    - state: rim_south
+      offset: 0,-1
+      map: [ "south" ]
+    - state: rim_east
+      offset: 1,0
+      map: [ "east" ]
+    - state: rim_west
+      offset: -1,0
+      map: [ "west" ]
+    - state: post_north_east
+      offset: 1,1
+      map: [ "northEast" ]
+    - state: post_north_west
+      offset: -1,1
+      map: [ "northWest" ]
+    - state: post_south_east
+      offset: 1,-1
+      map: [ "southEast" ]
+    - state: post_south_west
+      offset: -1,-1
+      map: [ "southWest" ]
+  - type: ST14TrenchRim
+  - type: Appearance
+  - type: GenericVisualizer
+    visuals:
+      enum.ST14OutlineVisuals.North:
+        north: { True: { visible: true }, False: { visible: false } }
+      enum.ST14OutlineVisuals.South:
+        south: { True: { visible: true }, False: { visible: false } }
+      enum.ST14OutlineVisuals.East:
+        east: { True: { visible: true }, False: { visible: false } }
+      enum.ST14OutlineVisuals.West:
+        west: { True: { visible: true }, False: { visible: false } }
+      enum.ST14OutlineVisuals.NorthEast:
+        northEast: { True: { visible: true }, False: { visible: false } }
+      enum.ST14OutlineVisuals.NorthWest:
+        northWest: { True: { visible: true }, False: { visible: false } }
+      enum.ST14OutlineVisuals.SouthEast:
+        southEast: { True: { visible: true }, False: { visible: false } }
+      enum.ST14OutlineVisuals.SouthWest:
+        southWest: { True: { visible: true }, False: { visible: false } }
+
+# A plank partition between two dug-outs side by side (ST14TrenchSystem.PlaceSeam), on the floor of one of them along
+# the edge they share. Built along the south edge and turned to face the edge it stands on. Nobody, no bullet and no
+# look get through; a door cut in the middle of the shared side takes it down there.
+- type: entity
+  id: ST14DugoutSeam
+  name: bunker partition
+  description: Planks between a bunker and a trench.
+  categories: [ HideSpawnMenu ]
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: true
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/dugout_seam.rsi
+    state: seam
+    drawdepth: WallTops
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,-0.5,0.5,-0.38"
+        layer:
+        - WallLayer
+        density: 1000
+  - type: Occluder
+    polygon:
+    - "-0.5,-0.5"
+    - "-0.5,-0.38"
+    - "0.5,-0.38"
+    - "0.5,-0.5"
+  - type: Tag
+    tags:
+    - HideContextMenu

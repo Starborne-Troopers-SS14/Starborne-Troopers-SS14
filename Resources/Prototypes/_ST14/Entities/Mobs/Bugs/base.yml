@@ -16,7 +16,7 @@
     bodyType: KinematicController
   - type: MovementSpeedModifier
   - type: LagCompensation
-  - type: CEZPhysics
+  - type: ST14ZPhysics
   - type: Reactive
     groups:
       Flammable: [Touch]
@@ -238,17 +238,23 @@
       gore:
         collection: ST14BugTigerRunGore
 
-# Collision sizes for bugs bigger than one tile: 96 px and 128 px sprites.
+# Collision sizes for bugs bigger than one tile, simple shapes round the body (not the tips of the legs).
+# A bug wider than a trench does not drop into it (ST14SharedZLevelsSystem.FitsThrough): only the larva falls into a
+# trench one tile wide, the others into a dug-out.
+# Medium: the 64 px warrior and tiger, a square 1.2 x 1.2 tiles round the body and the inner legs. A square, so it is
+# wider than a trench whichever way the bug faces (the body turns with it).
 - type: entity
   abstract: true
   id: ST14MobBugSizeMedium
   components:
+  # worth the heavy gun of a bunker garrison
+  - type: ST14BigBug
   - type: Fixtures
     fixtures:
       fix1:
         shape:
-          !type:PhysShapeCircle
-          radius: 0.45
+          !type:PhysShapeAabb
+          bounds: "-0.6,-0.6,0.6,0.6"
         density: 400
         mask:
         - MobMask
@@ -259,12 +265,19 @@
   abstract: true
   id: ST14MobBugSizeLarge
   components:
+  - type: ST14BigBug
+  # Large: the 96 px brain bug and queen, a dome 1.7 x 1.45 tiles: wide at the base, narrowing to the top
   - type: Fixtures
     fixtures:
       fix1:
-        shape:
-          !type:PhysShapeCircle
-          radius: 0.6
+        shape: !type:PolygonShape
+          vertices:
+            - -0.80,-0.70
+            - 0.80,-0.70
+            - 0.85,0.15
+            - 0.50,0.75
+            - -0.50,0.75
+            - -0.85,0.15
         density: 600
         mask:
         - MobMask
@@ -355,7 +368,7 @@
 
 # The brain bug: the mind of the hive. Slow and fat, it sucks the brains of troopers the others drag to it.
 - type: entity
-  parent: [ ST14MobBugBase, ST14MobBugSizeLarge ]
+  parent: [ ST14MobBugSizeLarge, ST14MobBugBase ] # the size first: the first parent wins a clash
   id: ST14MobBrainBug
   name: brain bug
   description: A bloated, pulsing mass with a long proboscis. The hive thinks with it.
@@ -434,7 +447,7 @@
 
 # Placeholder queen: a swollen brain bug that never moves and only lays larvae.
 - type: entity
-  parent: [ ST14MobBugCoreBase, ST14MobBugSizeLarge ]
+  parent: [ ST14MobBugSizeLarge, ST14MobBugCoreBase ] # the size first: the first parent wins a clash
   id: ST14MobBugQueen
   name: hive queen
   description: The heart of the hive, swollen with eggs. Kill it and the hive will never grow back.

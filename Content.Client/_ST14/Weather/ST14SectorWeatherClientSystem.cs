@@ -27,12 +27,30 @@ public sealed partial class ST14SectorWeatherClientSystem : EntitySystem
     [Dependency] private IResourceCache _resources = default!;
     [Dependency] private SharedAudioSystem _audio = default!;
     [Dependency] private IConfigurationManager _cfg = default!;
+    [Dependency] private Content.Shared.Light.EntitySystems.SharedRoofSystem _roof = default!; // ST14
+    [Dependency] private SharedMapSystem _map = default!; // ST14
+    [Dependency] private SharedTransformSystem _transform = default!; // ST14
+    [Dependency] private Content.Client._ST14.ZLevels.Core.ST14ClientZLevelsSystem _zLevels = default!; // ST14
+    [Dependency] private Content.Client._ST14.ZLevels.Roof.ST14ClientZLevelsRoofSystem _zRoofs = default!; // ST14
 
     /// <summary>
-    /// Light sand over every sector with a quiet sky, and below what strength an event gives way to it
+    /// ST14: 1 under the open sky, 0 under a roof (the ground over a tunnel, a roof built on the level above),
+    /// eased so stepping under a roof fades the weather out instead of cutting it
+    /// </summary>
+    private float _exposure = 1f;
+
+    /// <summary>
+    /// Light sand over every sector with a quiet sky (its colour and pace come from this prototype), and how strong an
+    /// event has to be to hide it entirely. It is a layer of its own under the weather (a shader), so an event never
+    /// has to give way to it
     /// </summary>
     private static readonly ProtoId<ST14WeatherEventPrototype> LightSand = "ST14WeatherLightSand";
-    private const float LightSandBelow = 0.15f;
+    private const float LightSandHiddenAt = 0.5f;
+
+    /// <summary>
+    /// The light sand is off for now: the shader stays, nothing is drawn until this is turned back on
+    /// </summary>
+    private const bool LightSandOn = false;
 
     private ST14WeatherOverlay _overlay = default!;
 
@@ -99,31 +117,34 @@ public sealed partial class ST14SectorWeatherClientSystem : EntitySystem
             }
         }
 
-        SetOverlay(proto, strength, sector, wind, brightness, frameTime);
+        // ST14: the same weather is on every z-level of a sector, but only what is under the open sky sees it
+        // under any roof (a tunnel, a bunker, a dug-out) none of it; down in an open trench a little less of it
+        var exposed = _player.LocalEntity is not { } local ? 1f : Exposure(local);
+        _exposure += (exposed - _exposure) * MathF.Min(1f, frameTime * 3f);
+        strength *= _exposure;
+
+        // the event as it is, an ended one dies down by itself
+        _overlay.Set(proto?.ID, proto?.Visual, strength, wind, brightness, frameTime);
+        // the light sand is off for now (the user asked): the shader stays, nothing is drawn
+        SetLightSand(sector && LightSandOn, frameTime);
         UpdateSound(proto, strength, frameTime);
     }
 
     /// <summary>
-    /// The event while it is strong enough to be seen; under a quiet sky, and while an event only builds up or has
-    /// nearly died down, the light sand that always drifts over a sector. An event that ended dies down first
+    /// The light sand that always drifts over a sector: only under the open sky, and fading as an event (or the one
+    /// still dying down) takes the sky over
     /// </summary>
-    private void SetOverlay(ST14WeatherEventPrototype? proto, float strength, bool sector, System.Numerics.Vector2 wind, float brightness,
-        float frameTime)
+    private void SetLightSand(bool sector, float frameTime)
     {
-        if (proto != null && strength >= LightSandBelow)
+        if (!sector || !_prototype.TryIndex(LightSand, out var sand))
         {
-            _overlay.Set(proto.ID, proto.Visual, strength, wind, brightness, frameTime);
+            _overlay.SetLightSand(0f, Color.Transparent, 0f, frameTime);
             return;
         }
 
-        var dying = _overlay.Event is { } shown && shown != LightSand.Id && _overlay.Strength > LightSandBelow;
-        if (sector && !dying && _prototype.TryIndex(LightSand, out var sand))
-        {
-            _overlay.Set(sand.ID, sand.Visual, 1f, wind, brightness, frameTime);
-            return;
-        }
-
-        _overlay.Set(null, null, 0f, wind, brightness, frameTime);
+        var weather = _overlay.Event == null ? 0f : _overlay.Strength;
+        var left = Math.Clamp(1f - weather / LightSandHiddenAt, 0f, 1f);
+        _overlay.SetLightSand(_exposure * left, sand.Visual.Color, sand.Visual.Speed, frameTime);
     }
 
     private void UpdateSound(ST14WeatherEventPrototype? proto, float strength, float frameTime)
@@ -208,5 +229,63 @@ public sealed partial class ST14SectorWeatherClientSystem : EntitySystem
         _fading.Clear();
         _stream = null;
         _playing = null;
+    }
+
+    /// <summary>
+    /// ST14: how much of the weather reaches down into an open trench
+    /// </summary>
+    private const float TrenchExposure = 0.6f;
+
+    /// <summary>
+    /// ST14: how much of it is seen from inside a dug-out or a bunker: a light rain outside, to show it is coming down
+    /// </summary>
+    private const float DugoutExposure = 0.25f;
+
+    /// <summary>
+    /// ST14: how much of the weather the entity sees where it stands: all of it under the open sky, less down in an open
+    /// trench, a little in a dug-out or a bunker, none under solid ground (a tunnel)
+    /// </summary>
+    private float Exposure(EntityUid uid)
+    {
+        var xform = Transform(uid);
+
+        // a dug-out or a bunker roof over the tile (it roofs the tile the vanilla way too, so it is checked first)
+        var world = _transform.GetWorldPosition(xform);
+        var tile = new Vector2i((int) MathF.Floor(world.X), (int) MathF.Floor(world.Y));
+        if (xform.MapUid is { } map && _zLevels.TryMapUp(map, out var above) &&
+            _zRoofs.TryGetRoofEntity(above.Owner, tile, out _))
+        {
+            return DugoutExposure;
+        }
+
+        if (UnderRoof(uid))
+            return 0f;
+
+        return InTrench(uid) ? TrenchExposure : 1f;
+    }
+
+    /// <summary>
+    /// ST14: whether the tile the entity stands on is rooved, i.e. something opaque lies over it on a z-level above
+    /// </summary>
+    private bool UnderRoof(EntityUid uid)
+    {
+        var xform = Transform(uid);
+        if (xform.GridUid is not { } gridUid || !TryComp<MapGridComponent>(gridUid, out var grid) ||
+            !TryComp<Content.Shared.Light.Components.RoofComponent>(gridUid, out var roof))
+        {
+            return false;
+        }
+
+        var index = _map.TileIndicesFor(gridUid, grid, xform.Coordinates);
+        return _roof.IsRooved((gridUid, grid, roof), index);
+    }
+
+    /// <summary>
+    /// ST14: the entity is below the ground, in a trench open to the sky
+    /// </summary>
+    private bool InTrench(EntityUid uid)
+    {
+        return Transform(uid).MapUid is { } map &&
+               TryComp<Content.Shared._ST14.ZLevels.Core.Components.ST14ZMapComponent>(map, out var zMap) && zMap.Depth < 0;
     }
 }

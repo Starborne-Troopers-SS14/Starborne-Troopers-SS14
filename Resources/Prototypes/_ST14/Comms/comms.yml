@@ -100,6 +100,7 @@
 # What the engineer builds with the multitool
 - type: ST14EngineerBuildable
   id: CommsTower
+  category: ST14BuildComms
   result: ST14CommsTower
   cost: 400
   buildTime: 15

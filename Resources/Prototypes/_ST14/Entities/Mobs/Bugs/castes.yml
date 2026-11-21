@@ -4,7 +4,7 @@
 
 # Warrior: the line bug. Survives a short burst, bites hard and leaps at the gunners.
 - type: entity
-  parent: [ ST14MobBugBase, ST14MobBugWarriorLook ]
+  parent: [ ST14MobBugSizeMedium, ST14MobBugBase, ST14MobBugWarriorLook ] # the size first: the first parent wins a clash
   id: ST14MobBugWarrior
   name: warrior bug
   description: "The common soldier of the hive: four legs, a pair of claws and no fear."
@@ -42,7 +42,7 @@
 
 # Tiger: the killer. Fast, armoured against bullets, and spins through a whole squad.
 - type: entity
-  parent: [ ST14MobBugBase, ST14MobBugTigerLook, ST14MobBugSizeMedium ]
+  parent: [ ST14MobBugSizeMedium, ST14MobBugBase, ST14MobBugTigerLook ] # the size first: the first parent wins a clash
   id: ST14MobBugTiger
   name: tiger bug
   description: "A striped killer, fast and terribly sharp."

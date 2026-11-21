@@ -1,0 +1,37 @@
+# The walls, stairs and gate of Sh1ntra (walls.yml) in the engineer's build menu, tab "walls". The stairs come down three
+# tiles the way they face, the gate takes a second tile clockwise of it: those must be free too.
+
+- type: ST14EngineerBuildable
+  id: HellWall
+  result: ST14HellWall
+  category: ST14BuildWalls
+  cost: 60
+  buildTime: 6
+  conditions:
+  - !type:TileNotBlocked
+
+- type: ST14EngineerBuildable
+  id: HellStairs
+  result: ST14HellStairs
+  category: ST14BuildWalls
+  cost: 90
+  buildTime: 8
+  canRotate: true
+  conditions:
+  - !type:ST14TilesFreeCondition
+    offsets:
+    - 0,-1
+    - 0,-2
+    - 0,-3
+
+- type: ST14EngineerBuildable
+  id: HellGate
+  result: ST14HellGate
+  category: ST14BuildWalls
+  cost: 120
+  buildTime: 10
+  canRotate: true
+  conditions:
+  - !type:ST14TilesFreeCondition
+    offsets:
+    - -1,0

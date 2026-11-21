@@ -1,5 +1,5 @@
-using Content.Server._CE.ZLevels.Core;
-using Content.Shared._CE.ZLevels.Core.Components;
+using Content.Server._ST14.ZLevels.Core;
+using Content.Shared._ST14.ZLevels.Core.Components;
 using Content.Shared._ST14.Hellwalls;
 using Robust.Shared.Map;
 using Robust.Shared.Map.Components;
@@ -10,7 +10,7 @@ namespace Content.Server._ST14.Hellwalls;
 
 public sealed partial class ST14RailingSpawnerSystem : EntitySystem
 {
-    [Dependency] private CEZLevelsSystem _zLevels = default!;
+    [Dependency] private ST14ZLevelsSystem _zLevels = default!;
     [Dependency] private SharedMapSystem _map = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private EntityLookupSystem _lookup = default!;
@@ -34,7 +34,7 @@ public sealed partial class ST14RailingSpawnerSystem : EntitySystem
         SubscribeLocalEvent<ST14RailingSpawnerComponent, AnchorStateChangedEvent>(OnAnchorChanged);
         SubscribeLocalEvent<ST14RailingSpawnerComponent, EntityTerminatingEvent>(OnTerminating);
         SubscribeLocalEvent<ST14RailingSpawnerComponent, ComponentShutdown>(OnShutdown);
-        SubscribeLocalEvent<CEZLevelMapNetworkUpdatedEvent>(OnNetworkUpdated);
+        SubscribeLocalEvent<ST14ZLevelMapNetworkUpdatedEvent>(OnNetworkUpdated);
     }
 
     private void OnTerminating(Entity<ST14RailingSpawnerComponent> ent, ref EntityTerminatingEvent args)
@@ -66,7 +66,7 @@ public sealed partial class ST14RailingSpawnerSystem : EntitySystem
         RefreshWithout(ent);
     }
 
-    private void OnNetworkUpdated(CEZLevelMapNetworkUpdatedEvent args)
+    private void OnNetworkUpdated(ST14ZLevelMapNetworkUpdatedEvent args)
     {
         var query = EntityQueryEnumerator<ST14RailingSpawnerComponent>();
         while (query.MoveNext(out var uid, out var spawner))
@@ -156,7 +156,7 @@ public sealed partial class ST14RailingSpawnerSystem : EntitySystem
         var anchored = _map.GetAnchoredEntitiesEnumerator(grid.Owner, grid.Comp, tile);
         while (anchored.MoveNext(out var uid))
         {
-            if (uid != _removed && HasComp<CEZLevelHighGroundComponent>(uid))
+            if (uid != _removed && HasComp<ST14ZLevelHighGroundComponent>(uid))
                 return true;
         }
 

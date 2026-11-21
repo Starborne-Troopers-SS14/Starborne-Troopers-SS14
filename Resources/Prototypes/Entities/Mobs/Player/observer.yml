@@ -5,10 +5,10 @@
   description: Mobs without physical bodies
   components:
   # ST14-START
-  - type: CEZPhysics
+  - type: ST14ZPhysics
     autoStep: false
     velocityGravity: false
-  - type: CEZLevelGhostMover
+  - type: ST14ZLevelGhostMover
   # ST14-STOP
   - type: Sprite
     noRot: true

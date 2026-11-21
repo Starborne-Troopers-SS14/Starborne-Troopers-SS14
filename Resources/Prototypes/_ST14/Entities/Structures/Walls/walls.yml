@@ -30,7 +30,7 @@
         layer:
         - WallLayer
         density: 1000
-  - type: CEZLevelHighGround
+  - type: ST14ZLevelHighGround
     heightCurve:
     - 1.9
     - 1.9
@@ -70,7 +70,7 @@
   components:
   - type: Transform
     anchored: true
-  - type: CEZLevelHighGround
+  - type: ST14ZLevelHighGround
     stick: true
   - type: ST14RailingSpawner
 
@@ -189,7 +189,7 @@
         layer:
         - WallLayer
         density: 1000
-  - type: CEZLevelHighGround
+  - type: ST14ZLevelHighGround
     heightCurve:
     - 1.9
     - 1.9

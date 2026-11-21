@@ -1,0 +1,9 @@
+- type: shader
+  id: ST14ZBlur
+  kind: source
+  path: "/Textures/_ST14/ZLevels/Shaders/zblur.swsl"
+
+- type: shader
+  id: ST14ZFog
+  kind: source
+  path: "/Textures/_ST14/ZLevels/Shaders/zfog.swsl"

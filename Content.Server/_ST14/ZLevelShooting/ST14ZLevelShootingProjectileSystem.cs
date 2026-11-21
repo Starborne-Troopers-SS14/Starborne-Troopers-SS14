@@ -1,7 +1,7 @@
 using System.Numerics;
-using Content.Server._CE.ZLevels.Core;
-using Content.Shared._CE.ZLevels.Core.Components;
-using Content.Shared._CE.ZLevels.Core.EntitySystems;
+using Content.Server._ST14.ZLevels.Core;
+using Content.Shared._ST14.ZLevels.Core.Components;
+using Content.Shared._ST14.ZLevels.Core.EntitySystems;
 using Content.Shared._ST14.ZLevelShooting;
 using Content.Shared.Projectiles;
 using Content.Shared.Weapons.Ranged.Components;
@@ -12,10 +12,10 @@ namespace Content.Server._ST14.ZLevelShooting;
 
 public sealed partial class ST14ZProjectileSystem : EntitySystem
 {
-    [Dependency] private CEZLevelsSystem _zLevels = default!;
+    [Dependency] private ST14ZLevelsSystem _zLevels = default!;
     [Dependency] private SharedPhysicsSystem _physics = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
-    [Dependency] private EntityQuery<CEZPhysicsComponent> _zPhysQuery = default!;
+    [Dependency] private EntityQuery<ST14ZPhysicsComponent> _zPhysQuery = default!;
 
     private const float SameHeight = 0.05f;
     private const float AimTolerance = 1.5f;
@@ -98,7 +98,7 @@ public sealed partial class ST14ZProjectileSystem : EntitySystem
             return false;
 
         var aim = _transform.ToMapCoordinates(coordinates).Position;
-        return Vector2.Distance(aim, target) <= height * CESharedZLevelsSystem.ZLevelOffset + AimTolerance;
+        return Vector2.Distance(aim, target) <= height * ST14SharedZLevelsSystem.ZLevelOffset + AimTolerance;
     }
 
     private float GetHeight(EntityUid uid)

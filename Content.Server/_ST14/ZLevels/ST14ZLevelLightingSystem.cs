@@ -1,5 +1,5 @@
-using Content.Server._CE.ZLevels.Core;
-using Content.Shared._CE.ZLevels.Core.Components;
+using Content.Server._ST14.ZLevels.Core;
+using Content.Shared._ST14.ZLevels.Core.Components;
 using Content.Shared.Light.Components;
 using Robust.Shared.Map.Components;
 
@@ -11,12 +11,12 @@ public sealed partial class ST14ZLevelLightingSystem : EntitySystem
     {
         base.Initialize();
 
-        SubscribeLocalEvent<CEZLevelMapNetworkUpdatedEvent>(OnNetworkUpdated);
+        SubscribeLocalEvent<ST14ZLevelMapNetworkUpdatedEvent>(OnNetworkUpdated);
     }
 
-    private void OnNetworkUpdated(CEZLevelMapNetworkUpdatedEvent args)
+    private void OnNetworkUpdated(ST14ZLevelMapNetworkUpdatedEvent args)
     {
-        if (!TryComp<CEZMapNetworkComponent>(args.Network, out var network) ||
+        if (!TryComp<ST14ZMapNetworkComponent>(args.Network, out var network) ||
             !network.ZLevels.TryGetValue(0, out var ground) ||
             ground is not { } source)
             return;

@@ -34,32 +34,25 @@
         layer:
         - MachineLayer
   - type: Sprite
+    # sprites by VilllL: icon-1 the pylon unpowered, icon-2 lit up. frames 32x128, the base plate on the bottom edge of the tile
     sprite: _ST14/Structures/Power/energy_pylon.rsi
     noRot: true
-    offset: 0,1
+    offset: 0,1.375
     layers:
-    - state: base
+    - state: icon-1
       map: [ "base" ]
-    - state: nopower
-      map: [ "lights" ]
-      shader: unshaded
   - type: Icon
     sprite: _ST14/Structures/Power/energy_pylon.rsi
-    state: icon
+    state: icon-1
   - type: Appearance
   - type: GenericVisualizer
     visuals:
       enum.ST14EnergyPylonVisuals.State:
         base:
-          Unanchored: { state: unanchored }
-          NoPower: { state: base }
-          Idle: { state: base }
-          Active: { state: base }
-        lights:
-          Unanchored: { visible: false }
-          NoPower: { state: nopower, visible: true }
-          Idle: { state: idle, visible: true }
-          Active: { state: active, visible: true }
+          Unanchored: { state: icon-1 }
+          NoPower: { state: icon-1 }
+          Idle: { state: icon-2 }
+          Active: { state: icon-2 }
   - type: PointLight
     enabled: false
     radius: 2.5
@@ -399,7 +392,7 @@
   parent: BaseItem
   id: ST14EntrenchingTool
   name: entrenching tool
-  description: A folding field spade. Digs a small trench in the sand to lay a cable in and fills it back in. Buried cables can only be seen with a T-ray scanner.
+  description: A folding field spade. Lays out and digs a trench or a dug-out (a dug-out is roofed as soon as it is dug), cuts steps into a trench and digs a small trench in the sand for a cable. Switch what it does in hand. Buried cables can only be seen with a T-ray scanner.
   components:
   - type: Sprite
     sprite: Objects/Tools/shovel.rsi
@@ -419,10 +412,14 @@
       ST14FloorDunes: ST14FloorDunesTrench
     digSound:
       collection: ST14TrenchDig
+  # ST14: trench segments, dug-outs and steps on the z-levels, switched with the cable trenches by using it in hand
+  - type: ST14TrenchDigger
+    digTime: 3
 
 # What the engineer builds with the multitool
 - type: ST14EngineerBuildable
   id: EnergyPylon
+  category: ST14BuildPower
   result: ST14EnergyPylon
   cost: 150
   buildTime: 8
@@ -431,6 +428,7 @@
 
 - type: ST14EngineerBuildable
   id: EnergyBox
+  category: ST14BuildPower
   result: ST14EnergyBox
   cost: 200
   buildTime: 10
@@ -439,6 +437,7 @@
 
 - type: ST14EngineerBuildable
   id: FieldGenerator
+  category: ST14BuildPower
   result: ST14FieldGenerator
   cost: 250
   buildTime: 10

@@ -25,3 +25,11 @@ st14-build-menu-not-enough = Недостаточно армиума в капс
 
 ent-ST14Blueprint = голограмма постройки
     .desc = Голограмма сооружения. Зажмите ЛКМ инженерным мультитулом, чтобы строить.
+st14-build-category-walls = Стены
+st14-build-category-bunkers = Бункеры
+st14-build-category-trenches = Траншеи
+st14-build-category-power = Энергия
+st14-build-category-resources = Добыча
+st14-build-category-comms = Связь
+st14-build-category-other = Прочее
+st14-construction-condition-tiles-free = Нужны свободные клетки пола под всю постройку.

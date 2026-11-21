@@ -70,6 +70,13 @@ public sealed partial class ST14SectorSpawnSystem : EntitySystem
         var start = _sectors.StartOf(SideOfJob(args.Job.Value));
         var map = start >= 0 && _sectors.LoadedMaps.TryGetValue(start, out var uid) ? uid : (EntityUid?) null;
 
+        // ST14: troopers come back to life in a forward base built in a bunker of their sector, if there is one
+        if (SideOfJob(args.Job.Value) == ST14GalaxyFaction.Federation && FindBases(map))
+        {
+            args.SpawnResult = _stationSpawning.SpawnPlayerMob(_random.Pick(_points), args.Job, args.HumanoidCharacterProfile, args.Station);
+            return;
+        }
+
         // only maps that lay out spawn points for the job take part, every other map keeps the stock rule
         // a job no map lays out points for, like the medic, starts with the others of its side
         if (!FindPoints(args, map, false) && !FindPoints(args, map, true) &&
@@ -79,6 +86,34 @@ public sealed partial class ST14SectorSpawnSystem : EntitySystem
         }
 
         args.SpawnResult = _stationSpawning.SpawnPlayerMob(_random.Pick(_points), args.Job, args.HumanoidCharacterProfile, args.Station);
+    }
+
+    /// <summary>
+    /// ST14: the forward bases (bunker upgrades) standing on the levels of the sector <paramref name="map"/>, or of any
+    /// loaded sector when it is not known
+    /// </summary>
+    private bool FindBases(EntityUid? map)
+    {
+        _points.Clear();
+        var zLevels = EntityManager.System<Content.Shared._ST14.ZLevels.Core.EntitySystems.ST14SharedZLevelsSystem>();
+        var query = EntityQueryEnumerator<Content.Shared._ST14.ZLevels.Fortifications.ST14BunkerBaseComponent, TransformComponent>();
+        while (query.MoveNext(out _, out _, out var xform))
+        {
+            if (xform.MapUid is not { } level)
+                continue;
+
+            // the base stands under the surface: the sector is the surface over it
+            var sector = zLevels.TryMapOffset(level, 1, out var above) ? above.Owner : level;
+            if (map != null ? sector != map : !_sectors.LoadedMaps.Values.Contains(sector))
+                continue;
+
+            // the middle of the bunker the base is on: its supply crate stands in a corner
+            _points.Add(Content.Shared._ST14.ZLevels.Fortifications.ST14Dugouts.TryGetAt(EntityManager, xform.Coordinates, out _, out var center, out _)
+                ? new EntityCoordinates(level, center + new System.Numerics.Vector2(0.5f))
+                : xform.Coordinates);
+        }
+
+        return _points.Count > 0;
     }
 
     private bool FindPoints(PlayerSpawningEvent args, EntityUid? map, bool anyOfSide)
