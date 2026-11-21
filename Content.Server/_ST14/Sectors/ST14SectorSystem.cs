@@ -1,5 +1,6 @@
 using Content.Server._ST14.Tiles;
 using Content.Shared.Gravity;
+using Content.Server._ST14.ZLevels.Layers; // ST14: z-levels of the sectors
 using System.Linq;
 using Content.Server._ST14.MainHub;
 using Content.Server.Decals;
@@ -68,6 +69,18 @@ public sealed partial class ST14SectorSystem : EntitySystem
     [Dependency] private ST14GalaxyWarSystem _war = default!;
     [Dependency] private ST14SubsectorSystem _subsectors = default!;
     [Dependency] private ServerStationSystem _station = default!;
+    [Dependency] private ST14ZLayerSystem _layers = default!;
+    [Dependency] private ST14ZNetworkSaveSystem _zSave = default!;
+
+    /// <summary>
+    /// The z-levels of every loaded sector by cell, then by depth; depth 0 is the sector map itself
+    /// </summary>
+    private readonly Dictionary<int, Dictionary<int, EntityUid>> _levels = new();
+
+    /// <summary>
+    /// The sector map (depth 0) of every level of a loaded sector, itself included
+    /// </summary>
+    private readonly Dictionary<EntityUid, EntityUid> _mainOf = new();
 
     /// <summary>
     /// The anchor grid of this round, null when the round is not a sector round
@@ -104,6 +117,28 @@ public sealed partial class ST14SectorSystem : EntitySystem
     private ST14SectorSettingsPrototype Settings => _prototype.Index<ST14SectorSettingsPrototype>(SettingsId);
 
     public IReadOnlyDictionary<int, EntityUid> LoadedMaps => _maps;
+
+    /// <summary>
+    /// Every level of every loaded sector: the sector maps and the z-levels around them
+    /// </summary>
+    public IEnumerable<EntityUid> AllLevels => _mainOf.Keys;
+
+    /// <summary>
+    /// The levels of the sector a map belongs to (the map itself when it is no sector level)
+    /// </summary>
+    public IEnumerable<EntityUid> LevelsOf(EntityUid map)
+    {
+        // read from the z-network, so any map with levels (a sector or one an admin gave levels) works the same
+        return _layers.GetLevels(map).Values;
+    }
+
+    /// <summary>
+    /// The main map (depth 0) of the z-network a map is in, the map itself when it has no levels
+    /// </summary>
+    public EntityUid MainLevelOf(EntityUid map)
+    {
+        return _layers.GetLevels(map).GetValueOrDefault(0, map);
+    }
 
     public string? Planet => _planet;
 
@@ -196,16 +231,37 @@ public sealed partial class ST14SectorSystem : EntitySystem
     private void LoadCell(string planet, int cell, int terrain, EntityUid station, bool hiveHeld)
     {
         var save = SavePath(planet, cell);
-        var saved = _resources.UserData.Exists(save);
+        var saved = false;
 
         Entity<MapComponent>? map = null;
         HashSet<Entity<MapGridComponent>>? grids = null;
+        Dictionary<int, EntityUid>? savedLevels = null;
 
-        // the references a save dropped to things outside its map are expected, the save is whole otherwise
-        if (saved && !_mapLoader.TryLoadMap(save, out map, out grids, new DeserializationOptions { LogInvalidEntities = false }))
+        // ST14: a sector is saved with all its z-levels, one folder per sector
+        var folder = LevelsFolder(planet, cell);
+        if (_zSave.HasSave(folder))
         {
-            Log.Error($"The save of sector {cell} of {planet} does not load, the sector starts from a fresh map");
-            saved = false;
+            if (_zSave.TryLoadNetwork(folder, out var loaded, new DeserializationOptions { LogInvalidEntities = false }))
+            {
+                map = loaded[0];
+                grids = GridsOn(loaded[0]);
+                savedLevels = loaded.ToDictionary(kv => kv.Key, kv => kv.Value.Owner);
+                saved = true;
+            }
+            else
+            {
+                Log.Error($"The levels of sector {cell} of {planet} do not load, trying the old save");
+            }
+        }
+
+        // a save from before the z-levels: one file with the sector map only, the levels around it are built fresh
+        // the references a save dropped to things outside its map are expected, the save is whole otherwise
+        if (!saved && _resources.UserData.Exists(save))
+        {
+            if (_mapLoader.TryLoadMap(save, out map, out grids, new DeserializationOptions { LogInvalidEntities = false }))
+                saved = true;
+            else
+                Log.Error($"The save of sector {cell} of {planet} does not load, the sector starts from a fresh map");
         }
 
         if (!saved)
@@ -239,10 +295,29 @@ public sealed partial class ST14SectorSystem : EntitySystem
             _multiTile.FixGrid(grid);
         }
 
+        // ST14: the z-levels of the sector, from its save or built fresh: -2 bug tunnels, -1 trenches, +1 roofs, +2 sky
+        // (ST14ZLayerSystem gives every level the gravity of the sector map)
+        var levels = Settings.Layers is { } layerSet
+            ? _layers.EnsureLayers(map.Value, layerSet, savedLevels)
+            : new Dictionary<int, EntityUid> { [0] = map.Value };
+
+        _levels[cell] = levels;
+        foreach (var level in levels.Values)
+        {
+            _mainOf[level] = map.Value;
+        }
+
         if (saved)
-            ClearTrash(map.Value);
+        {
+            foreach (var level in levels.Values)
+            {
+                ClearTrash(level);
+            }
+        }
         else
+        {
             PlaceQueens(grids!);
+        }
 
         _subsectors.PreparePoints(map.Value, grids!, cell, hiveHeld, !saved);
     }
@@ -258,6 +333,22 @@ public sealed partial class ST14SectorSystem : EntitySystem
         var ev = new GravityChangedEvent(uid, true);
         RaiseLocalEvent(uid, ref ev, true);
         Dirty(uid, gravity);
+    }
+
+    /// <summary>
+    /// The grids standing on a map (the map itself too when it is a planet map)
+    /// </summary>
+    private HashSet<Entity<MapGridComponent>> GridsOn(EntityUid map)
+    {
+        var grids = new HashSet<Entity<MapGridComponent>>();
+        var query = AllEntityQuery<MapGridComponent, TransformComponent>(); // paused maps too
+        while (query.MoveNext(out var uid, out var grid, out var xform))
+        {
+            if (xform.MapUid == map)
+                grids.Add((uid, grid));
+        }
+
+        return grids;
     }
 
     /// <summary>
@@ -403,6 +494,8 @@ public sealed partial class ST14SectorSystem : EntitySystem
         _target = -1;
         _staging = -1;
         _maps.Clear();
+        _levels.Clear();
+        _mainOf.Clear();
     }
 
     public override void Update(float frameTime)
@@ -449,7 +542,7 @@ public sealed partial class ST14SectorSystem : EntitySystem
         troopers = 0;
         hive = 0;
         var faction = Settings.HiveFaction;
-        var maps = _maps.Values.ToHashSet();
+        var maps = _mainOf.Keys.ToHashSet(); // ST14: every z-level of every sector
 
         var mobs = EntityQueryEnumerator<MobStateComponent, TransformComponent>();
         while (mobs.MoveNext(out var uid, out _, out var xform))
@@ -468,9 +561,20 @@ public sealed partial class ST14SectorSystem : EntitySystem
 
     #region Saves
 
+    /// <summary>
+    /// The save of a sector from before the z-levels: the sector map alone. Read once and replaced by the folder
+    /// </summary>
     private static ResPath SavePath(string planet, int cell)
     {
         return SaveRoot / $"{planet}_{cell}.yml";
+    }
+
+    /// <summary>
+    /// ST14: the save of a sector with all its z-levels, see ST14ZNetworkSaveSystem
+    /// </summary>
+    private static ResPath LevelsFolder(string planet, int cell)
+    {
+        return SaveRoot / $"{planet}_{cell}";
     }
 
     /// <summary>
@@ -501,10 +605,20 @@ public sealed partial class ST14SectorSystem : EntitySystem
 
                 try
                 {
-                    if (_mapLoader.TrySaveMap(map, SavePath(planet, cell), options))
+                    // ST14: the sector map and every z-level around it, into the folder of the sector
+                    if (_zSave.TrySaveNetwork(map, LevelsFolder(planet, cell), options))
+                    {
                         _war.MarkInitialized(planet, cell);
+
+                        // the old one-file save is superseded by the folder
+                        var legacy = SavePath(planet, cell);
+                        if (_resources.UserData.Exists(legacy))
+                            _resources.UserData.Delete(legacy);
+                    }
                     else
+                    {
                         Log.Error($"Could not save sector {cell} of {planet}");
+                    }
                 }
                 catch (Exception e)
                 {
@@ -529,7 +643,7 @@ public sealed partial class ST14SectorSystem : EntitySystem
     private HashSet<EntityPrototype> AllowLivingMobs()
     {
         var unsaved = new HashSet<EntityPrototype>();
-        var maps = _maps.Values.ToHashSet();
+        var maps = _mainOf.Keys.ToHashSet(); // ST14: every z-level of every sector
         var strip = Settings.UnsaveableComponents.Select(name => Factory.GetRegistration(name).Type).ToList();
 
         void Allow(EntityUid uid, TransformComponent xform)
@@ -566,7 +680,7 @@ public sealed partial class ST14SectorSystem : EntitySystem
     /// </summary>
     private void MarkOwners()
     {
-        var maps = _maps.Values.ToHashSet();
+        var maps = _mainOf.Keys.ToHashSet(); // ST14: every z-level of every sector
         var query = EntityQueryEnumerator<MindContainerComponent, TransformComponent>();
         while (query.MoveNext(out var uid, out var container, out var xform))
         {

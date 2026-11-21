@@ -156,7 +156,9 @@ public sealed partial class MeleeWeaponSystem : SharedMeleeWeaponSystem
         var targetCoordinates = xform.Coordinates;
         var targetLocalAngle = xform.LocalRotation;
 
-        return Interaction.InRangeUnobstructed(user, target, targetCoordinates, targetLocalAngle, range, overlapCheck: false);
+        return Interaction.InRangeUnobstructed(user, target, targetCoordinates, targetLocalAngle, range, overlapCheck: false) ||
+               // ST14: a blow from the edge of a trench down into it, or up out of it
+               EntityManager.System<Content.Shared._ST14.ZLevels.Core.EntitySystems.ST14SharedZLevelsSystem>().InReachAcrossLevels(user, target, range);
     }
 
     protected override void DoDamageEffect(List<EntityUid> targets, EntityUid? user, TransformComponent targetXform)
@@ -214,6 +216,9 @@ public sealed partial class MeleeWeaponSystem : SharedMeleeWeaponSystem
 
         if (_stateManager.CurrentState is GameplayStateBase screen)
             target = screen.GetClickedEntity(mousePos);
+
+        // ST14: nobody up here under the cursor - whoever is down in the trench under it, seen through the opening
+        target ??= EntityManager.System<Content.Shared._ST14.ZLevels.Core.EntitySystems.ST14SharedZLevelsSystem>().EntityBelowThrough(mousePos);
 
         // Don't light-attack if interaction will be handling this instead
         if (Interaction.CombatModeCanHandInteract(attacker, target))

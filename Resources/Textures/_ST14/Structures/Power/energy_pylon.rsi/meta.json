@@ -1,50 +1,19 @@
 {
-    "version": 1,
-    "license": "All-Rights-Reserved",
-    "copyright": "Made for Starborne Troopers. All rights reserved.",
-    "size": {
-        "x": 32,
-        "y": 96
+  "version": 1,
+  "license": "CC-BY-SA-3.0",
+  "copyright": "Sprited by VilllL, frames lined up on a 32x128 grid for Starborne Troopers",
+  "size": {
+    "x": 32,
+    "y": 128
+  },
+  "states": [
+    {
+      "name": "icon-1",
+      "directions": 4
     },
-    "states": [
-        {
-            "name": "base"
-        },
-        {
-            "name": "icon"
-        },
-        {
-            "name": "unanchored"
-        },
-        {
-            "name": "idle",
-            "delays": [
-                [
-                    0.5,
-                    0.35,
-                    0.45
-                ]
-            ]
-        },
-        {
-            "name": "active",
-            "delays": [
-                [
-                    0.12,
-                    0.12,
-                    0.12,
-                    0.12
-                ]
-            ]
-        },
-        {
-            "name": "nopower",
-            "delays": [
-                [
-                    0.5,
-                    0.5
-                ]
-            ]
-        }
-    ]
+    {
+      "name": "icon-2",
+      "directions": 4
+    }
+  ]
 }

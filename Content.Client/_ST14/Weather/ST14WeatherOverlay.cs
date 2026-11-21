@@ -120,6 +120,23 @@ public sealed class ST14WeatherOverlay : Overlay
 
     public float Strength => _strength;
 
+    // the light sand: a shader over the view under the weather, apart from the particles of an event
+    private static readonly Robust.Shared.Prototypes.ProtoId<ShaderPrototype> LightSandShader = "ST14LightSand";
+    private ShaderInstance? _sandShader;
+    private float _sand;
+    private Color _sandColor = Color.FromHex("#FFF0D266");
+    private float _sandSpeed = 9f;
+
+    /// <summary>
+    /// The light sand to show this frame, 0 - 1, and how it looks; it eases in and out
+    /// </summary>
+    public void SetLightSand(float strength, Color color, float speed, float frameTime)
+    {
+        _sand += (strength - _sand) * MathF.Min(1f, frameTime * 2f);
+        _sandColor = color;
+        _sandSpeed = speed;
+    }
+
     public void Flash(Vector2 position)
     {
         _flash = 0f;
@@ -342,8 +359,33 @@ public sealed class ST14WeatherOverlay : Overlay
 
     protected override bool BeforeDraw(in OverlayDrawArgs args)
     {
+        // ST14: every z-level is a render of its own; the weather goes over them once, on the top one
+        if (!Content.Client.Viewport.ScalingViewport.IsTopLevel(args.Viewport.Eye))
+            return false;
+
         _view = args.WorldAABB;
-        return _visual != null && _strength > 0.001f || _flash < 1f;
+        return _visual != null && _strength > 0.001f || _flash < 1f || _sand > 0.002f;
+    }
+
+    private void DrawLightSand(DrawingHandleWorld handle, Box2 view)
+    {
+        if (_sand <= 0.002f)
+            return;
+
+        _sandShader ??= IoCManager.Resolve<Robust.Shared.Prototypes.IPrototypeManager>()
+            .Index(LightSandShader).InstanceUnique();
+
+        _sandShader.SetParameter("viewMin", view.BottomLeft);
+        _sandShader.SetParameter("viewSize", view.Size);
+        _sandShader.SetParameter("windDir", _wind);
+        _sandShader.SetParameter("speed", _sandSpeed);
+        _sandShader.SetParameter("strength", _sand);
+        _sandShader.SetParameter("sandColor", _sandColor);
+        _sandShader.SetParameter("brightness", MathF.Max(_brightness, 0.3f));
+
+        handle.UseShader(_sandShader);
+        handle.DrawTextureRect(Texture.White, view);
+        handle.UseShader(null);
     }
 
     protected override void Draw(in OverlayDrawArgs args)
@@ -353,6 +395,9 @@ public sealed class ST14WeatherOverlay : Overlay
         var handle = args.WorldHandle;
         handle.SetTransform(Matrix3x2.Identity);
         var view = args.WorldAABB;
+
+        // the light sand lies under whatever the sky does
+        DrawLightSand(handle, view);
 
         if (_visual is { } v && _strength > 0.001f)
         {

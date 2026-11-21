@@ -1,0 +1,612 @@
+# Upgrades of a bunker (one 3x3 dug-out) and modifications of bunkers and trenches, built by the engineer with the
+# multitool (ST14EngineerBuildable below). As in Foxhole an upgrade stands on top of its bunker, over the middle, and is
+# what the bunker looks like from outside; the inside stays free to walk through. One upgrade a bunker
+# (ST14DugoutUpgradeCondition). See ST14BunkerUpgradeSystem, ST14BunkerGarrisonGunSystem and docs/ST14-ZLevels-Layers.md.
+# All sprites here are made for Starborne Troopers (meta.json: All rights reserved).
+
+# A blueprint that is not fixed to its tile: an upgrade's goes over the opening of a bunker, a trench modification's over
+# the opening of a trench, where there is no ground to fix it to
+- type: entity
+  parent: ST14Blueprint
+  id: ST14BlueprintLoose
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Transform
+    anchored: false
+
+# ---- bunker upgrades: on the roof ----
+
+- type: entity
+  abstract: true
+  id: ST14BunkerUpgradeBase
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: false
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/bunker_tops.rsi
+    drawdepth: Objects
+    noRot: true
+  - type: Clickable
+  - type: InteractionOutline
+  # fades and goes with the roof under it (ST14BunkerRoofVisualsSystem)
+  - type: ST14BunkerTop
+
+# The core of a bunker base: troopers come back to life in the bunker under it (ST14SectorSpawnSystem), and keep their
+# things in its supply crate inside.
+- type: entity
+  parent: ST14BunkerUpgradeBase
+  id: ST14BunkerBase
+  name: bunker base
+  description: A big timber blockhouse on top of the bunker. Troopers come back to life here, and keep their things in the supply crate inside.
+  components:
+  - type: Sprite
+    state: base
+  - type: Icon
+    sprite: _ST14/ZLevels/Fortifications/bunker_tops.rsi
+    state: base
+  - type: ST14BunkerUpgrade
+    kind: Base
+    inside: ST14BunkerBaseCrate
+
+# The supply crate of a bunker base, in a corner inside: whatever is put in it stays for the sector.
+- type: entity
+  id: ST14BunkerBaseCrate
+  name: bunker base supply crate
+  description: Supplies of the bunker base. Troopers come back to life next to it.
+  categories: [ HideSpawnMenu ]
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: true
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/bunker_upgrades.rsi
+    state: base
+    drawdepth: Objects
+    noRot: true
+  - type: Clickable
+  - type: InteractionOutline
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.4,-0.4,0.4,0.4"
+        density: 200
+        mask:
+        - MachineMask
+        layer:
+        - MidImpassable
+        - LowImpassable
+  - type: ST14BunkerBase
+  - type: Storage
+    maxItemSize: Huge
+    grid:
+    - 0,0,11,7
+  - type: ContainerContainer
+    containers:
+      storagebase: !type:Container
+  - type: UserInterface
+    interfaces:
+      enum.StorageUiKey.Key:
+        type: StorageBoundUserInterface
+
+# A rifle post: fires at the bugs round the bunker by itself, every way.
+- type: entity
+  parent: ST14BunkerUpgradeBase
+  id: ST14BunkerRifleGarrison
+  name: rifle garrison
+  description: A timber post on top of the bunker with rifle slots in every side. Its squad fires at the bugs round the bunker by itself, every way.
+  components:
+  - type: Sprite
+    state: rifle
+  - type: Icon
+    sprite: _ST14/ZLevels/Fortifications/bunker_tops.rsi
+    state: rifle
+  - type: ST14BunkerUpgrade
+    kind: RifleGarrison
+  - type: ST14BunkerGarrison
+    turret: ST14BunkerRifleGarrisonGun
+
+# A machine gun nest: further and faster than the rifles, but only within its arc, the way it was built facing.
+- type: entity
+  parent: ST14BunkerUpgradeBase
+  id: ST14BunkerMachineGunGarrison
+  name: machine gun garrison
+  description: A sandbagged nest on top of the bunker. Its machine gun fires at the bugs within its arc by itself, further and faster than rifles.
+  components:
+  - type: Sprite
+    state: machinegun
+    noRot: false
+  - type: Icon
+    sprite: _ST14/ZLevels/Fortifications/bunker_tops.rsi
+    state: machinegun
+  - type: ST14BunkerUpgrade
+    kind: MachineGunGarrison
+  - type: ST14BunkerGarrison
+    turret: ST14BunkerMachineGunGarrisonGun
+
+# A heavy gun: here not against tanks but against the big bugs. Slow and hard, within its arc.
+- type: entity
+  parent: ST14BunkerUpgradeBase
+  id: ST14BunkerAntiLargeGarrison
+  name: heavy gun garrison
+  description: A log casemate on top of the bunker with a heavy gun. It fires only at the big bugs, slow and hard, within its arc.
+  components:
+  - type: Sprite
+    state: heavy
+    noRot: false
+  - type: Icon
+    sprite: _ST14/ZLevels/Fortifications/bunker_tops.rsi
+    state: heavy
+  - type: ST14BunkerUpgrade
+    kind: AntiLargeGarrison
+  - type: ST14BunkerGarrison
+    turret: ST14BunkerAntiLargeGarrisonGun
+
+# A radio tower: whoever is inside the bunker sees further. Only looks, does not shoot.
+- type: entity
+  parent: ST14BunkerUpgradeBase
+  id: ST14BunkerObservation
+  name: observation bunker
+  description: A timber tower on top of the bunker with a periscope and a radio mast. Whoever is inside the bunker sees further.
+  components:
+  - type: Sprite
+    state: observation
+  - type: Icon
+    sprite: _ST14/ZLevels/Fortifications/bunker_tops.rsi
+    state: observation
+  - type: ST14BunkerUpgrade
+    kind: Observation
+  - type: ST14BunkerObservation
+
+# A ramp down into the bunker over the side it faces: Alt+click on its foot outside or its top inside.
+- type: entity
+  parent: ST14BunkerUpgradeBase
+  id: ST14BunkerRamp
+  name: bunker ramp
+  description: A plank ramp down into the bunker over one side.
+  components:
+  - type: Sprite
+    state: ramp
+    noRot: false
+  - type: Icon
+    sprite: _ST14/ZLevels/Fortifications/bunker_tops.rsi
+    state: ramp
+  - type: ST14BunkerUpgrade
+    kind: Ramp
+  - type: ST14BunkerRamp
+
+- type: entity
+  abstract: true
+  id: ST14BunkerPassageBase
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Transform
+    anchored: false
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/bunker_passages.rsi
+    drawdepth: WallTops
+  - type: Clickable
+  - type: InteractionOutline
+
+# The foot of a ramp, on the ground just past the side of the bunker
+- type: entity
+  parent: ST14BunkerPassageBase
+  id: ST14BunkerRampOutside
+  name: bunker ramp
+  description: The foot of a plank ramp down into the bunker. Alt+click to go down.
+  components:
+  - type: Sprite
+    state: ramp_outside
+  - type: ST14BunkerPassage
+    verb: st14-bunker-ramp-down
+    time: 0.7
+
+# The top of a ramp, on the floor just inside the side of the bunker
+- type: entity
+  parent: ST14BunkerPassageBase
+  id: ST14BunkerRampInside
+  name: bunker ramp
+  description: Planks up out of the bunker. Alt+click to go up.
+  components:
+  - type: Sprite
+    state: ramp_inside
+  - type: ST14BunkerPassage
+    verb: st14-bunker-ramp-up
+    time: 0.7
+
+# A ladder up through the roof of a bunker: a modification, not an upgrade. Its top is a hatch on the roof.
+- type: entity
+  id: ST14BunkerLadder
+  name: bunker ladder
+  description: A ladder up to a hatch in the roof of the bunker. Alt+click to climb up.
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: true
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/bunker_passages.rsi
+    state: ladder
+    drawdepth: WallTops
+  - type: Icon
+    sprite: _ST14/ZLevels/Fortifications/bunker_passages.rsi
+    state: ladder
+  - type: Clickable
+  - type: InteractionOutline
+  - type: ST14BunkerLadder
+  - type: ST14BunkerPassage
+    verb: st14-bunker-ladder-up
+    time: 1.5
+
+- type: entity
+  parent: ST14BunkerPassageBase
+  id: ST14BunkerLadderTop
+  name: bunker hatch
+  description: A hatch in the roof of the bunker with a ladder down. Alt+click to climb down.
+  components:
+  - type: Sprite
+    state: hatch
+    drawdepth: Objects
+  # fades and goes with the roof under it
+  - type: ST14BunkerTop
+  - type: ST14BunkerPassage
+    verb: st14-bunker-ladder-down
+    time: 1.5
+
+# ---- the guns of the garrisons, in the middle of the roof ----
+
+# A gun of a garrison: fires at the bugs (whoever NanoTrasen is hostile to) round its bunker by itself
+# (ST14BunkerGarrisonGunSystem). Its bullets go out through the roofs. Not a structure: nothing to walk into or shoot.
+- type: entity
+  abstract: true
+  id: ST14BunkerGarrisonGunBase
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Transform
+    anchored: false
+  - type: Physics
+    bodyType: Static
+    canCollide: false
+  - type: CombatMode
+  - type: NpcFactionMember
+    factions:
+    - NanoTrasen
+  - type: ST14BunkerTop
+  - type: Tag
+    tags:
+    - HideContextMenu
+
+- type: entity
+  parent: ST14BunkerGarrisonGunBase
+  id: ST14BunkerRifleGarrisonGun
+  name: rifle garrison
+  components:
+  - type: BasicEntityAmmoProvider
+    proto: BulletLightRifle
+  - type: Gun
+    fireRate: 1.5
+    selectedMode: FullAuto
+    availableModes:
+    - FullAuto
+    soundGunshot:
+      path: /Audio/Weapons/Guns/Gunshots/rifle2.ogg
+  - type: ST14BunkerGarrisonGun
+    range: 10
+
+- type: entity
+  parent: ST14BunkerGarrisonGunBase
+  id: ST14BunkerMachineGunGarrisonGun
+  name: machine gun garrison
+  components:
+  # the gun turns to its target in the nest
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/bunker_gun.rsi
+    state: mg_gun
+    drawdepth: SmallObjects
+  - type: BasicEntityAmmoProvider
+    proto: BulletLightRifle
+  - type: Gun
+    fireRate: 6
+    selectedMode: FullAuto
+    availableModes:
+    - FullAuto
+    soundGunshot:
+      path: /Audio/Weapons/Guns/Gunshots/gun_sentry.ogg
+  - type: ST14BunkerGarrisonGun
+    range: 14
+    arc: 100
+
+- type: entity
+  parent: ST14BunkerGarrisonGunBase
+  id: ST14BunkerAntiLargeGarrisonGun
+  name: heavy gun garrison
+  components:
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/bunker_gun.rsi
+    state: heavy_gun
+    drawdepth: SmallObjects
+  - type: BasicEntityAmmoProvider
+    proto: BulletAntiMateriel
+  - type: Gun
+    fireRate: 0.5
+    selectedMode: FullAuto
+    availableModes:
+    - FullAuto
+    soundGunshot:
+      path: /Audio/Weapons/Guns/Gunshots/sniper.ogg
+  - type: ST14BunkerGarrisonGun
+    range: 16
+    arc: 100
+    targets:
+      components:
+      - ST14BigBug
+
+# ---- bunker modifications: in its walls and on its floor ----
+
+# A firing slit in the middle of a side of a bunker, in place of its earth wall: nobody gets through, a bullet fired out
+# through it comes up over the ground. Its faces show from inside like the trench wall's, with a dark slot.
+- type: entity
+  parent: BaseStructure
+  id: ST14BunkerFiringSlit
+  name: firing slit
+  description: A slot in the side of the bunker to fire out of. Nobody gets through it.
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/bunker_slit_wall.rsi
+    drawdepth: Walls
+    noRot: true
+    layers:
+    - state: face_south
+      offset: 0,-1
+    - state: slot_south
+      offset: 0,-1
+    - state: face_north
+      offset: 0,1
+    - state: slot_north
+      offset: 0,1
+    - state: face_east
+      offset: 1,0
+    - state: slot_east
+      offset: 1,0
+    - state: face_west
+      offset: -1,0
+    - state: slot_west
+      offset: -1,0
+  - type: Icon
+    sprite: _ST14/ZLevels/Fortifications/bunker_slit_wall.rsi
+    state: icon
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,-0.5,0.5,0.5"
+        mask:
+        - FullTileMask
+        layer:
+        - MidImpassable
+        - LowImpassable
+        - HighImpassable
+        density: 1000
+      # bullets pass the slot and come up over the ground (ST14BunkerUpgradeSystem)
+      slot:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.45,-0.45,0.45,0.45"
+        hard: false
+        layer:
+        - BulletImpassable
+  - type: ST14BunkerSlit
+  - type: Tag
+    tags:
+    - Structure
+    - HideContextMenu
+
+# ---- trench modifications: on the floor of a trench tile ----
+
+# Barbed wire across a trench: the bugs trying to get through it are slowed and cut. Troopers step through it.
+- type: entity
+  id: ST14TrenchBarbedWire
+  name: barbed wire
+  description: Coils of barbed wire across the trench. Slows and cuts the bugs trying to get through; troopers know where to step.
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: true
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/trench_mods.rsi
+    state: wire
+    drawdepth: OverMobs
+  - type: Icon
+    sprite: _ST14/ZLevels/Fortifications/trench_mods.rsi
+    state: wire
+  - type: Clickable
+  - type: InteractionOutline
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        hard: false
+        density: 7
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.45,-0.45,0.45,0.45"
+        layer:
+        - MidImpassable
+  - type: SpeedModifierContacts
+    walkSpeedModifier: 0.35
+    sprintSpeedModifier: 0.35
+    ignoreWhitelist:
+      components:
+      - HumanoidProfile
+  - type: DamageContacts
+    damage:
+      types:
+        Slash: 3
+    ignoreWhitelist:
+      components:
+      - HumanoidProfile
+  - type: ST14TrenchMod
+
+# A sandbag barricade across a trench along one edge of its tile (R turns it): the view along the trench stops at it,
+# and getting over it is slow. Makes a trench taken by the bugs less use to them.
+- type: entity
+  id: ST14TrenchBarricade
+  name: trench barricade
+  description: Sandbags piled across the trench. The view along the trench stops at it, and getting over it is slow.
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: true
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/trench_mods.rsi
+    state: barricade
+    drawdepth: WallTops
+  - type: Icon
+    sprite: _ST14/ZLevels/Fortifications/trench_mods.rsi
+    state: barricade
+  - type: Clickable
+  - type: InteractionOutline
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        hard: false
+        density: 7
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.5,-0.5,0.5,-0.2"
+        layer:
+        - MidImpassable
+  # drawn and blocking along the south edge; turned, along the edge it faces
+  - type: Occluder
+    polygon:
+    - "-0.5,-0.5"
+    - "-0.5,-0.25"
+    - "0.5,-0.25"
+    - "0.5,-0.5"
+  - type: SpeedModifierContacts
+    walkSpeedModifier: 0.4
+    sprintSpeedModifier: 0.4
+  - type: ST14TrenchMod
+
+# ---- what the engineer builds ----
+
+- type: ST14EngineerBuildable
+  id: BunkerBase
+  category: ST14BuildBunkers
+  result: ST14BunkerBase
+  blueprint: ST14BlueprintLoose
+  cost: 300
+  buildTime: 15
+  conditions:
+  - !type:ST14DugoutUpgradeCondition
+    base: true
+    apart: true
+
+- type: ST14EngineerBuildable
+  id: BunkerRifleGarrison
+  category: ST14BuildBunkers
+  result: ST14BunkerRifleGarrison
+  blueprint: ST14BlueprintLoose
+  cost: 150
+  buildTime: 10
+  conditions:
+  - !type:ST14DugoutUpgradeCondition
+
+- type: ST14EngineerBuildable
+  id: BunkerMachineGunGarrison
+  category: ST14BuildBunkers
+  result: ST14BunkerMachineGunGarrison
+  blueprint: ST14BlueprintLoose
+  cost: 220
+  buildTime: 12
+  canRotate: true
+  conditions:
+  - !type:ST14DugoutUpgradeCondition
+
+- type: ST14EngineerBuildable
+  id: BunkerAntiLargeGarrison
+  category: ST14BuildBunkers
+  result: ST14BunkerAntiLargeGarrison
+  blueprint: ST14BlueprintLoose
+  cost: 350
+  buildTime: 15
+  canRotate: true
+  conditions:
+  - !type:ST14DugoutUpgradeCondition
+
+- type: ST14EngineerBuildable
+  id: BunkerObservation
+  category: ST14BuildBunkers
+  result: ST14BunkerObservation
+  blueprint: ST14BlueprintLoose
+  cost: 120
+  buildTime: 8
+  conditions:
+  - !type:ST14DugoutUpgradeCondition
+    apart: true
+
+- type: ST14EngineerBuildable
+  id: BunkerRamp
+  category: ST14BuildBunkers
+  result: ST14BunkerRamp
+  blueprint: ST14BlueprintLoose
+  cost: 150
+  buildTime: 8
+  canRotate: true
+  conditions:
+  - !type:ST14DugoutUpgradeCondition
+    ramp: true
+
+- type: ST14EngineerBuildable
+  id: BunkerLadder
+  category: ST14BuildBunkers
+  result: ST14BunkerLadder
+  cost: 60
+  buildTime: 4
+  conditions:
+  - !type:ST14DugoutLadderCondition
+
+- type: ST14EngineerBuildable
+  id: BunkerFiringSlit
+  category: ST14BuildBunkers
+  result: ST14BunkerFiringSlit
+  cost: 40
+  buildTime: 5
+  conditions:
+  - !type:ST14DugoutSlitCondition
+
+- type: ST14EngineerBuildable
+  id: TrenchBarbedWire
+  category: ST14BuildTrenches
+  result: ST14TrenchBarbedWire
+  blueprint: ST14BlueprintLoose
+  cost: 30
+  buildTime: 4
+  canRotate: true
+  conditions:
+  - !type:ST14TrenchModCondition
+
+- type: ST14EngineerBuildable
+  id: TrenchBarricade
+  category: ST14BuildTrenches
+  result: ST14TrenchBarricade
+  blueprint: ST14BlueprintLoose
+  cost: 40
+  buildTime: 5
+  canRotate: true
+  conditions:
+  - !type:ST14TrenchModCondition

@@ -1,0 +1,63 @@
+// ST14: the light sand that always drifts over a sector under a quiet sky. Drawn as one quad over the view: thin soft
+// streaks of sand stretched along the wind, racing with it in gusts. Worked out in world coordinates, so the streaks stay
+// where they are in the world when the camera moves. No particles: nothing to break up into specks.
+light_mode unshaded;
+
+// the view in the world: the bottom-left corner and the size, in tiles
+uniform highp vec2 viewMin;
+uniform highp vec2 viewSize;
+// the way the wind blows (normalised) and how fast the sand goes, tiles a second
+uniform highp vec2 windDir;
+uniform highp float speed;
+// 0 - none, 1 - full light sand
+uniform highp float strength;
+// the colour of the sand and the light of the sky (dims it at night)
+uniform highp vec4 sandColor;
+uniform highp float brightness;
+
+highp float hash(highp vec2 p) {
+    p = fract(p * vec2(123.34, 456.21));
+    p += dot(p, p + 45.32);
+    return fract(p.x * p.y);
+}
+
+highp float noise(highp vec2 p) {
+    highp vec2 i = floor(p);
+    highp vec2 f = fract(p);
+    f = f * f * (3.0 - 2.0 * f);
+    highp float a = hash(i);
+    highp float b = hash(i + vec2(1.0, 0.0));
+    highp float c = hash(i + vec2(0.0, 1.0));
+    highp float d = hash(i + vec2(1.0, 1.0));
+    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+
+// one layer of streaks: long along the wind, thin across it, moving with it
+highp float streaks(highp float along, highp float across, highp float scaleAlong, highp float scaleAcross,
+    highp float pace, highp float seed) {
+    highp float n = noise(vec2(along * scaleAlong - TIME * speed * pace * scaleAlong, across * scaleAcross + seed));
+    // only the crests of the noise: thin bright lines with soft edges
+    return smoothstep(0.62, 0.9, n);
+}
+
+void fragment() {
+    // the quad's texture coordinates run down from its top-left corner
+    highp vec2 world = vec2(viewMin.x + UV.x * viewSize.x, viewMin.y + (1.0 - UV.y) * viewSize.y);
+    highp vec2 perp = vec2(-windDir.y, windDir.x);
+    highp float along = dot(world, windDir);
+    highp float across = dot(world, perp);
+
+    // gusts: broad fronts that pass along the wind, the sand thickens in them and thins in the lulls
+    highp float gust = noise(vec2(along * 0.06 - TIME * speed * 0.06, across * 0.08 + 7.0));
+    gust = 0.35 + 0.65 * smoothstep(0.25, 0.85, gust);
+
+    highp float s = streaks(along, across, 0.22, 2.6, 1.0, 0.0) * 0.7
+        + streaks(along, across, 0.35, 4.1, 1.35, 31.0) * 0.45
+        + streaks(along, across, 0.15, 1.7, 0.8, 77.0) * 0.35;
+
+    // a faint even haze of dust under the streaks
+    highp float haze = 0.12 * noise(vec2(along * 0.04 - TIME * speed * 0.03, across * 0.05 + 13.0));
+
+    highp float alpha = clamp((s * gust + haze) * sandColor.a * strength, 0.0, 1.0);
+    COLOR = vec4(sandColor.rgb * brightness, alpha);
+}

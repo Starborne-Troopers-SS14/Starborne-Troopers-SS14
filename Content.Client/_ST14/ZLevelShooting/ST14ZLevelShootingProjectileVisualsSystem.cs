@@ -1,5 +1,5 @@
 using System.Numerics;
-using Content.Shared._CE.ZLevels.Core.EntitySystems;
+using Content.Shared._ST14.ZLevels.Core.EntitySystems;
 using Content.Shared._ST14.ZLevelShooting;
 using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
@@ -23,7 +23,7 @@ public sealed partial class ST14ZProjectileVisualsSystem : EntitySystem
         while (query.MoveNext(out var uid, out var flight, out var sprite, out var xform))
         {
             var (position, rotation) = _transform.GetWorldPositionRotation(xform);
-            var lift = ST14ZProjectileCollisionSystem.GetHeight(flight, position) * CESharedZLevelsSystem.ZLevelOffset;
+            var lift = ST14ZProjectileCollisionSystem.GetHeight(flight, position) * ST14SharedZLevelsSystem.ZLevelOffset;
             var offset = sprite.NoRotation
                 ? new Vector2(0, lift)
                 : (-rotation).RotateVec(up * lift);

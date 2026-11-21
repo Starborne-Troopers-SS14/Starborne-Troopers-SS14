@@ -1,4 +1,4 @@
-using Content.Shared._CE.ZLevels.Core.Components;
+using Content.Shared._ST14.ZLevels.Core.Components;
 using Content.Shared._ST14.Hellwalls;
 using Robust.Shared.Map.Components;
 
@@ -64,7 +64,7 @@ public sealed partial class ST14HellStairsSystem : EntitySystem
             var coords = _map.GridTileToLocal(gridUid, grid, origin + dir.ToIntVec() * i);
             var step = SpawnAttachedTo(i == 1 ? ent.Comp.Flight : ent.Comp.Step, coords, rotation: rotation);
 
-            var ground = EnsureComp<CEZLevelHighGroundComponent>(step);
+            var ground = EnsureComp<ST14ZLevelHighGroundComponent>(step);
             ground.HeightCurve = new List<float>
             {
                 ent.Comp.Height * (count - i + 1) / count,

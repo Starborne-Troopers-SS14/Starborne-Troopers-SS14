@@ -61,11 +61,16 @@ public sealed partial class ST14DayNightSystem : EntitySystem
     /// </summary>
     public void Flash(EntityUid map, TimeSpan length)
     {
+        // ST14: the flash lights every z-level of the sector, the sky is one
+        map = _sectors.MainLevelOf(map);
         _flashes[map] = _timing.CurTime + length;
-        if (TryComp<MapLightComponent>(map, out var light))
+        foreach (var level in _sectors.LevelsOf(map))
         {
-            light.AmbientLightColor = Color.FromHex("#F4F6FF");
-            Dirty(map, light);
+            if (TryComp<MapLightComponent>(level, out var light))
+            {
+                light.AmbientLightColor = Color.FromHex("#F4F6FF");
+                Dirty(level, light);
+            }
         }
     }
 
@@ -85,6 +90,7 @@ public sealed partial class ST14DayNightSystem : EntitySystem
     public bool TryGetPoint(EntityUid map, out Vector3 point)
     {
         point = default;
+        map = _sectors.MainLevelOf(map); // ST14: a z-level lies where its sector does
         if (!TryComp<ST14SectorMapComponent>(map, out var sector) ||
             !_war.TryGetWar(sector.Planet, out var war, out _) ||
             sector.Cell < 0 || sector.Cell >= war.Grid.Count)
@@ -128,15 +134,21 @@ public sealed partial class ST14DayNightSystem : EntitySystem
             if (TerminatingOrDeleted(map) || _flashes.ContainsKey(map) || !TryGetPoint(map, out var point))
                 continue;
 
-            var light = EnsureComp<MapLightComponent>(map);
             var color = ST14PlanetDay.SkyLight(ST14PlanetDay.StarHeight(point, star));
-            if (!Close(light.AmbientLightColor, color))
-            {
-                light.AmbientLightColor = color;
-                Dirty(map, light);
-            }
 
-            OpenSky(map);
+            // ST14: one sky over every z-level of the sector; what is covered (tunnels, trenches under the ground,
+            // rooms under a roof on +1) is kept dark by the roofs, not by the light of the level
+            foreach (var level in _sectors.LevelsOf(map))
+            {
+                var light = EnsureComp<MapLightComponent>(level);
+                if (!Close(light.AmbientLightColor, color))
+                {
+                    light.AmbientLightColor = color;
+                    Dirty(level, light);
+                }
+
+                OpenSky(level);
+            }
         }
     }
 

@@ -22,6 +22,7 @@ public abstract partial class SharedST14MultitoolSystem : EntitySystem
     [Dependency] private SharedHandsSystem _hands = default!;
     [Dependency] private SharedMapSystem _map = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
+    [Dependency] private Content.Shared._ST14.ZLevels.Core.EntitySystems.ST14SharedZLevelsSystem _zLevels = default!;
 
     public override void Initialize()
     {
@@ -132,6 +133,13 @@ public abstract partial class SharedST14MultitoolSystem : EntitySystem
                 return condition.GenerateGuideEntry()?.Localization.Id ?? "st14-blueprint-cant-place";
         }
 
+        // ST14: some things go where their condition says (a bunker upgrade: the middle of its bunker)
+        if (TrySnap(buildable, coords, direction, out var snapped))
+        {
+            spot = snapped;
+            return null;
+        }
+
         if (_transform.GetGrid(coords) is not { } gridUid || !TryComp<MapGridComponent>(gridUid, out var grid))
             return "st14-blueprint-cant-place";
 
@@ -199,9 +207,34 @@ public abstract partial class SharedST14MultitoolSystem : EntitySystem
         return mode == ST14MultitoolMode.Build && Capsules.IsEmpty(capsule) ? "st14-multitool-not-enough" : null;
     }
 
+    /// <summary>
+    /// ST14: where a buildable with a snapping condition goes, see <see cref="IST14SnapCondition"/>
+    /// </summary>
+    public bool TrySnap(ST14EngineerBuildablePrototype buildable, EntityCoordinates coords, Direction direction, out EntityCoordinates spot)
+    {
+        spot = coords;
+        foreach (var condition in buildable.Conditions)
+        {
+            if (condition is IST14SnapCondition snap && snap.TrySnap(coords, direction, out spot))
+                return true;
+        }
+
+        return false;
+    }
+
     protected bool InReach(EntityUid user, EntityUid target, float range)
     {
-        return _transform.InRange(Transform(user).Coordinates, Transform(target).Coordinates, range);
+        var userXform = Transform(user);
+        var targetXform = Transform(target);
+        if (_transform.InRange(userXform.Coordinates, targetXform.Coordinates, range))
+            return true;
+
+        // ST14: a blueprint on the roof of a bunker is worked on from inside it and the other way round: neighbouring
+        // z-levels, the same spot of the world
+        return userXform.MapUid is { } userMap && targetXform.MapUid is { } targetMap && userMap != targetMap &&
+               (_zLevels.TryMapOffset(userMap, 1, out var above) && above.Owner == targetMap ||
+                _zLevels.TryMapOffset(userMap, -1, out var below) && below.Owner == targetMap) &&
+               (_transform.GetWorldPosition(userXform) - _transform.GetWorldPosition(targetXform)).Length() <= range;
     }
 
     protected void Stop(Entity<ST14MultitoolComponent> tool, string? reason = null, bool settle = true)

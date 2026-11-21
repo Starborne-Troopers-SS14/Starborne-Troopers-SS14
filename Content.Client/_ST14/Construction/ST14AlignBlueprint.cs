@@ -30,6 +30,18 @@ public sealed partial class ST14AlignBlueprint : SnapgridCenter
         InvalidPlaceColor = Color.FromHex("#ff3b3b");
     }
 
+    public override void AlignPlacementMode(ScreenCoordinates mouseScreen)
+    {
+        base.AlignPlacementMode(mouseScreen);
+
+        // ST14: a bunker upgrade shows where it really goes, in the middle of the bunker
+        if (pManager.Hijack is ST14BlueprintPlacementHijack hijack &&
+            _multitool.TrySnap(hijack.Buildable, MouseCoords, pManager.Direction, out var snapped))
+        {
+            MouseCoords = snapped;
+        }
+    }
+
     public override bool IsValidPosition(EntityCoordinates position)
     {
         if (position == _lastCoords && pManager.Direction == _lastDirection && _timing.RealTime < _nextCheck)

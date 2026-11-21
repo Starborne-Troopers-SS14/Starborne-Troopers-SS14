@@ -1,0 +1,36 @@
+# The tabs of the engineer's build menu (ST14BuildMenuWindow), in this order. A buildable names its tab with category:.
+
+- type: st14BuildCategory
+  id: ST14BuildWalls
+  name: st14-build-category-walls
+  order: 0
+
+- type: st14BuildCategory
+  id: ST14BuildBunkers
+  name: st14-build-category-bunkers
+  order: 1
+
+- type: st14BuildCategory
+  id: ST14BuildTrenches
+  name: st14-build-category-trenches
+  order: 2
+
+- type: st14BuildCategory
+  id: ST14BuildPower
+  name: st14-build-category-power
+  order: 3
+
+- type: st14BuildCategory
+  id: ST14BuildResources
+  name: st14-build-category-resources
+  order: 4
+
+- type: st14BuildCategory
+  id: ST14BuildComms
+  name: st14-build-category-comms
+  order: 5
+
+- type: st14BuildCategory
+  id: ST14BuildOther
+  name: st14-build-category-other
+  order: 9
