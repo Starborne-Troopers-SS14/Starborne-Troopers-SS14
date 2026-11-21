@@ -13,6 +13,8 @@ public sealed partial class ST14HubState : State
 
     private ST14HubScreen? _screen;
 
+    public ST14HubScreen? Screen => _screen;
+
     protected override void Startup()
     {
         _screen = new ST14HubScreen();

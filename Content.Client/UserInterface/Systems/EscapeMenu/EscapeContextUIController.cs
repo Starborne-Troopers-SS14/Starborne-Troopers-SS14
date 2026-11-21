@@ -33,6 +33,10 @@ public sealed partial class EscapeContextUIController : UIController
         {
             _closeRecentWindowUIController.CloseMostRecentWindow();
         }
+        // ST14: then the full screen menus of the main menu and the lobby, a step back at a time
+        else if (UIManager.GetUIController<Content.Client._ST14.MainHub.ST14HubUIController>().TryEscape())
+        {
+        }
         else
         {
             _escapeUIController.ToggleWindow();

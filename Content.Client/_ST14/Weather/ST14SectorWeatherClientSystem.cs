@@ -28,6 +28,12 @@ public sealed partial class ST14SectorWeatherClientSystem : EntitySystem
     [Dependency] private SharedAudioSystem _audio = default!;
     [Dependency] private IConfigurationManager _cfg = default!;
 
+    /// <summary>
+    /// Light sand over every sector with a quiet sky, and below what strength an event gives way to it
+    /// </summary>
+    private static readonly ProtoId<ST14WeatherEventPrototype> LightSand = "ST14WeatherLightSand";
+    private const float LightSandBelow = 0.15f;
+
     private ST14WeatherOverlay _overlay = default!;
 
     private string? _playing;
@@ -72,14 +78,17 @@ public sealed partial class ST14SectorWeatherClientSystem : EntitySystem
         var strength = 0f;
         var wind = new System.Numerics.Vector2(1, 0);
         var brightness = 1f;
+        var sector = false;
 
         if (_player.LocalEntity is { } ent && Transform(ent).MapUid is { } map)
         {
-            if (TryComp<ST14SectorWeatherComponent>(map, out var sky) && sky.Event is { } id &&
-                _prototype.TryIndex(id, out proto))
+            if (TryComp<ST14SectorWeatherComponent>(map, out var sky))
             {
-                strength = proto.Strength(_timing.CurTime, sky.Start, sky.End);
+                // every sector map has a sky, with or without an event in it
+                sector = true;
                 wind = sky.Wind;
+                if (sky.Event is { } id && _prototype.TryIndex(id, out proto))
+                    strength = proto.Strength(_timing.CurTime, sky.Start, sky.End);
             }
 
             // the weather is lit by the same sky as the ground under it
@@ -90,8 +99,31 @@ public sealed partial class ST14SectorWeatherClientSystem : EntitySystem
             }
         }
 
-        _overlay.Set(proto?.ID, proto?.Visual, strength, wind, brightness, frameTime);
+        SetOverlay(proto, strength, sector, wind, brightness, frameTime);
         UpdateSound(proto, strength, frameTime);
+    }
+
+    /// <summary>
+    /// The event while it is strong enough to be seen; under a quiet sky, and while an event only builds up or has
+    /// nearly died down, the light sand that always drifts over a sector. An event that ended dies down first
+    /// </summary>
+    private void SetOverlay(ST14WeatherEventPrototype? proto, float strength, bool sector, System.Numerics.Vector2 wind, float brightness,
+        float frameTime)
+    {
+        if (proto != null && strength >= LightSandBelow)
+        {
+            _overlay.Set(proto.ID, proto.Visual, strength, wind, brightness, frameTime);
+            return;
+        }
+
+        var dying = _overlay.Event is { } shown && shown != LightSand.Id && _overlay.Strength > LightSandBelow;
+        if (sector && !dying && _prototype.TryIndex(LightSand, out var sand))
+        {
+            _overlay.Set(sand.ID, sand.Visual, 1f, wind, brightness, frameTime);
+            return;
+        }
+
+        _overlay.Set(null, null, 0f, wind, brightness, frameTime);
     }
 
     private void UpdateSound(ST14WeatherEventPrototype? proto, float strength, float frameTime)

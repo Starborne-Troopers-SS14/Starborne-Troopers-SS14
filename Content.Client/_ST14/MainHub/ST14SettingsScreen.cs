@@ -49,12 +49,12 @@ public sealed partial class ST14SettingsScreen : Control
         _canvas = new ST14CanvasLayout { ScaleLabels = true };
         AddChild(_canvas);
 
-        _canvas.Add(new PanelContainer { PanelOverride = ST14HubStyle.MainBar(_resCache) },
-            new Vector2(0, 1), new Vector2(1, 1), Vector2.Zero, new Vector2(0, 93), new Vector2(0.5f, 1));
+        // the bar of the main menu, the categories and the exit icon stand in its grey band
+        ST14WarScreenBase.AddBar(_canvas, _resCache);
 
         // Window rects of the original options menu, the audio one is taller since there are more sliders here
         AddTab(0, "preferences", "options_preferences.png", "ST14HubSettingsPreferences",
-            new Vector2(431, -49.4f), new Vector2(800, 715), () => new MiscTab(), t => ((MiscTab) t).Control.ReloadValues());
+            new Vector2(400, -49.4f), new Vector2(900, 715), () => new MiscTab(), t => ((MiscTab) t).Control.ReloadValues());
         AddTab(1, "controls", "options_graphics.png", "ST14HubSettingsControls",
             new Vector2(220.75f, 1), new Vector2(1264.5f, 698), () => new KeyRebindTab(), null);
         AddTab(2, "graphics", "options_controls.png", "ST14HubSettingsGraphics",
@@ -62,7 +62,7 @@ public sealed partial class ST14SettingsScreen : Control
         AddTab(3, "audio", "options_audio.png", "ST14HubSettingsAudio",
             new Vector2(390.5f, 0), new Vector2(850.6f, 650), () => new AudioTab(), t => ((AudioTab) t).Control.ReloadValues());
         AddTab(4, "accessibility", "options_preferences.png", "ST14HubSettingsPreferences",
-            new Vector2(431, -49.4f), new Vector2(800, 715), () => new AccessibilityTab(), t => ((AccessibilityTab) t).Control.ReloadValues());
+            new Vector2(400, -49.4f), new Vector2(900, 715), () => new AccessibilityTab(), t => ((AccessibilityTab) t).Control.ReloadValues());
         _adminTab = AddTab(5, "admin", "options_controls.png", "ST14HubSettingsGraphics",
             new Vector2(-505, -18.6f), new Vector2(800, 767), () => new AdminOptionsTab(), t => ((AdminOptionsTab) t).Control.ReloadValues());
 
@@ -71,7 +71,7 @@ public sealed partial class ST14SettingsScreen : Control
             PressSound = ST14HubSound.Back,
         };
         close.OnPressed += _ => Close();
-        _canvas.AddAt(close, new Vector2(1, 1), new Vector2(-125.6f, -13.8f), new Vector2(54.4f, 57), new Vector2(1, 1));
+        _canvas.AddAt(close, new Vector2(1, 1), new Vector2(-37.5f, -ST14HubStyle.HubBarCenter), new Vector2(60, 60), new Vector2(1, 0.5f));
     }
 
     public void Show()
@@ -98,7 +98,7 @@ public sealed partial class ST14SettingsScreen : Control
     {
         var button = new ST14HubCategoryButton(_resCache, Loc.GetString($"st14-hub-settings-tab-{id}"), ST14HubStyle.Tex(_resCache, icon));
         // six categories along the bottom bar, the exit icon keeps the right corner
-        _canvas.AddAt(button, new Vector2(0, 1), new Vector2(160 + 285 * index, -42.3f), new Vector2(270, 57));
+        _canvas.AddAt(button, new Vector2(0, 1), new Vector2(160 + 285 * index, -ST14HubStyle.HubBarCenter), new Vector2(270, 60));
 
         var tab = new SettingsTab(id, scene, position, size, button, factory, reload);
         button.OnPressed += _ => Select(tab);
@@ -427,6 +427,15 @@ public sealed class ST14HubCategoryButton : ContainerButton
     }
 
     private ST14HubSoundController Sounds => UserInterfaceManager.GetUIController<ST14HubSoundController>();
+
+    protected override Vector2 MeasureOverride(Vector2 availableSize)
+    {
+        // the icon plate is a square as tall as the button, so it shrinks with the window like the rest of the bar
+        if (float.IsFinite(availableSize.Y) && availableSize.Y > 0 && MathF.Abs(_plate.SetHeight - availableSize.Y) > 0.01f)
+            _plate.SetSize = new Vector2(availableSize.Y, availableSize.Y);
+
+        return base.MeasureOverride(availableSize);
+    }
 
     protected override void MouseEntered()
     {

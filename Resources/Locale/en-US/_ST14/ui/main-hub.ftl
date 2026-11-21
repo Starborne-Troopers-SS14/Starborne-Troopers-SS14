@@ -145,7 +145,6 @@ st14-support-figurine-title = Figurine of your character
 st14-support-soon = Coming soon
 st14-support-cosmetics-text = Cosmetics sets for Sponsorship III and Sponsorship IV are in development and will arrive in one of the next updates.
 st14-support-tier-includes = Includes everything from tier { $tier }
-st14-support-tier-max = Maximum
 st14-support-ooc-other-1 = OOC: Rico: Who's going to Klendathu?
 st14-support-ooc-other-2 = OOC: Dizzy: Service guarantees citizenship!
 st14-support-pick-colour = Pick a colour

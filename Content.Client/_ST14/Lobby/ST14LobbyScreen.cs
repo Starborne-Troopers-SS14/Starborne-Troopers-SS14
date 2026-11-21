@@ -146,6 +146,26 @@ public sealed partial class ST14LobbyScreen : Control
     }
 
     /// <summary>
+    /// Esc: closes the settings or steps back in the support screen when one of them is open
+    /// </summary>
+    public bool TryEscape()
+    {
+        if (_settings.Visible)
+        {
+            _settings.Close();
+            return true;
+        }
+
+        if (_support.Visible)
+        {
+            _support.Back();
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// Puts the screen over the stock lobby once and hides everything else of it
     /// </summary>
     public static void Apply(LobbyGui lobby, IResourceCache cache, Stylesheet mainSheet)
@@ -382,8 +402,9 @@ public sealed partial class ST14LobbyScreen : Control
         _job.ClipText = true;
         text.AddChild(_job);
 
+        // the button runs under the whole file: in the narrow column next to the pedestal its long caption did not fit
         var setup = preview.CharacterSetupButton;
-        Move(setup, text);
+        Move(setup, dossier.Body);
         setup.StyleClasses.Add("ButtonBig");
         setup.HorizontalAlignment = HAlignment.Stretch;
         setup.MinHeight = 44;
@@ -414,6 +435,8 @@ public sealed partial class ST14LobbyScreen : Control
         Move(chat, comms.Body);
         chat.VerticalExpand = true;
         chat.Margin = new Thickness(0);
+        // the stock chat asks for 465 wide, more than the column has on a small window: it would stick out of the frame
+        chat.MinSize = new Vector2(0, 50);
 
         var infoScroll = new ScrollContainer { VerticalExpand = true, HScrollEnabled = false, Visible = false };
         comms.Body.AddChild(infoScroll);
@@ -472,9 +495,16 @@ public sealed partial class ST14LobbyScreen : Control
 
     protected override Vector2 MeasureOverride(Vector2 availableSize)
     {
+        // every panel is measured in the very box it gets, so wrapping text (chat, the playtime line, server info)
+        // wraps to the width of its column and not to the width of the whole window
+        var finite = float.IsFinite(availableSize.X) && float.IsFinite(availableSize.Y);
+        var boxes = finite ? Boxes(availableSize) : null;
         foreach (var child in Children)
         {
-            child.Measure(availableSize);
+            if (boxes != null && boxes.TryGetValue(child, out var box))
+                child.Measure(box.Size);
+            else
+                child.Measure(availableSize);
         }
 
         return Vector2.Zero;
@@ -482,8 +512,21 @@ public sealed partial class ST14LobbyScreen : Control
 
     protected override Vector2 ArrangeOverride(Vector2 finalSize)
     {
-        var w = finalSize.X;
-        var h = finalSize.Y;
+        foreach (var (child, box) in Boxes(finalSize))
+        {
+            child.Arrange(box);
+        }
+
+        return finalSize;
+    }
+
+    /// <summary>
+    /// The rectangle of every part of the screen for a window size
+    /// </summary>
+    private Dictionary<Control, UIBox2> Boxes(Vector2 size)
+    {
+        var w = size.X;
+        var h = size.Y;
         var bodyTop = TopHeight + Gap;
         var bodyHeight = MathF.Max(0, h - TopHeight - BottomHeight - Gap * 2);
 
@@ -493,22 +536,29 @@ public sealed partial class ST14LobbyScreen : Control
         var spare = w - leftWidth - rightWidth - Gap * 3;
         if (spare < 0)
         {
-            var k = (w - Gap * 3) / (leftWidth + rightWidth);
+            var k = MathF.Max(0, w - Gap * 3) / (leftWidth + rightWidth);
             leftWidth *= k;
             rightWidth *= k;
         }
 
-        _lobbyScene.Arrange(UIBox2.FromDimensions(Vector2.Zero, finalSize));
-        _editorScene.Arrange(UIBox2.FromDimensions(Vector2.Zero, finalSize));
-        _top.Arrange(UIBox2.FromDimensions(Vector2.Zero, new Vector2(w, TopHeight)));
-        _bottom.Arrange(UIBox2.FromDimensions(new Vector2(0, h - BottomHeight), new Vector2(w, BottomHeight)));
-        _left.Arrange(UIBox2.FromDimensions(new Vector2(Gap, bodyTop), new Vector2(leftWidth, bodyHeight)));
-        _right.Arrange(UIBox2.FromDimensions(new Vector2(w - Gap - rightWidth, bodyTop), new Vector2(rightWidth, bodyHeight)));
-        _editorSlide.Arrange(UIBox2.FromDimensions(new Vector2(Gap, bodyTop), new Vector2(w - Gap * 2, bodyHeight)));
-        _settings.Arrange(UIBox2.FromDimensions(Vector2.Zero, finalSize));
-        _support.Arrange(UIBox2.FromDimensions(Vector2.Zero, finalSize));
-        _sideChoice?.Arrange(UIBox2.FromDimensions(Vector2.Zero, finalSize));
-        return finalSize;
+        var full = UIBox2.FromDimensions(Vector2.Zero, size);
+        var boxes = new Dictionary<Control, UIBox2>
+        {
+            [_lobbyScene] = full,
+            [_editorScene] = full,
+            [_top] = UIBox2.FromDimensions(Vector2.Zero, new Vector2(w, TopHeight)),
+            [_bottom] = UIBox2.FromDimensions(new Vector2(0, h - BottomHeight), new Vector2(w, BottomHeight)),
+            [_left] = UIBox2.FromDimensions(new Vector2(Gap, bodyTop), new Vector2(leftWidth, bodyHeight)),
+            [_right] = UIBox2.FromDimensions(new Vector2(w - Gap - rightWidth, bodyTop), new Vector2(rightWidth, bodyHeight)),
+            [_editorSlide] = UIBox2.FromDimensions(new Vector2(Gap, bodyTop), new Vector2(MathF.Max(0, w - Gap * 2), bodyHeight)),
+            [_settings] = full,
+            [_support] = full,
+        };
+
+        if (_sideChoice != null)
+            boxes[_sideChoice] = full;
+
+        return boxes;
     }
 
     #endregion

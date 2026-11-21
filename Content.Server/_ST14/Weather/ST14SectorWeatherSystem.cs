@@ -140,6 +140,14 @@ public sealed partial class ST14SectorWeatherSystem : EntitySystem
             {
                 weather = new MapWeather { Next = now + settings.FirstDelay + Gap(settings) * _random.NextFloat() };
                 _maps[map] = weather;
+
+                // every sector map carries the sky component from the start: under a quiet sky the clients draw light sand
+                if (!HasComp<ST14SectorWeatherComponent>(map))
+                {
+                    var sky = AddComp<ST14SectorWeatherComponent>(map);
+                    sky.Wind = new Angle(_random.NextDouble() * Math.Tau).ToVec();
+                    Dirty(map, sky);
+                }
             }
 
             if (weather.Active is { } active)
@@ -248,9 +256,13 @@ public sealed partial class ST14SectorWeatherSystem : EntitySystem
         weather.Active = null;
         weather.Next = _timing.CurTime + Gap(Settings);
 
-        // a new event takes the sky over itself, the clients cross over from one to the other
-        if (!now)
-            RemComp<ST14SectorWeatherComponent>(map);
+        // a new event takes the sky over itself, the clients cross over from one to the other. The sky stays: under it
+        // the clients go back to the light sand
+        if (!now && TryComp<ST14SectorWeatherComponent>(map, out var sky))
+        {
+            sky.Event = null;
+            Dirty(map, sky);
+        }
 
         Slow(map, 1f);
 
@@ -295,15 +307,15 @@ public sealed partial class ST14SectorWeatherSystem : EntitySystem
     {
         foreach (var (map, weather) in _maps)
         {
-            if (weather.Active is not { } active)
-                continue;
-
+            var active = weather.Active != null;
             weather.Active = null;
             if (TerminatingOrDeleted(map))
                 continue;
 
+            // the quiet sky of the light sand is not saved with the sector either
             RemComp<ST14SectorWeatherComponent>(map);
-            Slow(map, 1f);
+            if (active)
+                Slow(map, 1f);
         }
 
         var deleted = new List<EntityUid>();

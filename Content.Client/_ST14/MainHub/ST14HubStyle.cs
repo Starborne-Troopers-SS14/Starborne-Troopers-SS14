@@ -110,6 +110,17 @@ public static class ST14HubStyle
     public const float HubBarTop = 34f;
 
     /// <summary>
+    /// Height over the bottom of the screen of the middle of the grey band: plates, icons and hints of the bar are
+    /// centred on it in every menu, so nothing sticks out of the band
+    /// </summary>
+    public const float HubBarCenter = HubBarBottom + (HubBarHeight - HubBarTop - HubBarBottom) / 2;
+
+    /// <summary>
+    /// Top edge of the bar over the bottom of the screen: screen content ends above it
+    /// </summary>
+    public const float HubBarClear = HubBarHeight + 6f;
+
+    /// <summary>
     /// Bottom bar of the main menu: the grey band of the texture stretches, so the plates sit inside it with the same
     /// margin above and below. The band runs from <see cref="HubBarTop"/> under the top of the bar to
     /// <see cref="HubBarBottom"/> over its bottom

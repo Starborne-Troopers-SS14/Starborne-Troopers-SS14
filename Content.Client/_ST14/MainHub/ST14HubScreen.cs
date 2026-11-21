@@ -55,7 +55,7 @@ public sealed partial class ST14HubScreen : Control
     private static readonly Vector2 PlateSize = new(187.68f, 70f);
 
     // middle of the grey band of the bottom bar, where the plates and the icons stand
-    private const float PlateCenter = ST14HubStyle.HubBarBottom + (ST14HubStyle.HubBarHeight - ST14HubStyle.HubBarTop - ST14HubStyle.HubBarBottom) / 2;
+    private const float PlateCenter = ST14HubStyle.HubBarCenter;
 
     private readonly ST14AnimatedScene _scene;
     private readonly ST14NewsTicker _newsTicker;
@@ -132,9 +132,10 @@ public sealed partial class ST14HubScreen : Control
         newsRow.AddChild(_newsTicker);
         canvas.Add(newsRow, Vector2.Zero, new Vector2(1, 0), new Vector2(-176.5f, 60), new Vector2(-537, 50), new Vector2(0.5f, 0.5f));
 
-        var moreButton = new ST14HubButton(_resCache, Loc.GetString("st14-hub-news-more"), 25, ST14HubStyle.Orange, ST14HubStyle.News);
+        // as tall as the news banner, so the plate stays inside its lines
+        var moreButton = new ST14HubButton(_resCache, Loc.GetString("st14-hub-news-more"), 21, ST14HubStyle.Orange, ST14HubStyle.News);
         moreButton.OnPressed += _ => _uiManager.GetUIController<ChangelogUIController>().ToggleWindow();
-        canvas.AddAt(moreButton, new Vector2(1, 0), new Vector2(-25, 60), new Vector2(400, 70), new Vector2(1, 0.5f));
+        canvas.AddAt(moreButton, new Vector2(1, 0), new Vector2(-25, 60), new Vector2(360, 50), new Vector2(1, 0.5f));
 
         // Weather and clock widgets under the banner, every part sits where the original puts it relative to the widget center
         var weather = new ST14CanvasLayout();
@@ -227,7 +228,7 @@ public sealed partial class ST14HubScreen : Control
 
     private ST14HubButton AddPlate(ST14CanvasLayout canvas, int index, string loc, Color? tint = null, Color? textColor = null)
     {
-        var button = new ST14HubButton(_resCache, Loc.GetString(loc), 21, tint, textColor);
+        var button = new ST14HubButton(_resCache, Loc.GetString(loc), 19, tint, textColor);
         // the original starts the row with a big "Continue" card, here the plates take its place
         var x = RowLeft + PlateSize.X / 2 + RowStep * index;
         canvas.AddAt(button, new Vector2(0, 1), new Vector2(x, -PlateCenter), PlateSize);
@@ -257,6 +258,33 @@ public sealed partial class ST14HubScreen : Control
         _galaxy.Visible = overlay == _galaxy;
         _support.Visible = overlay == _support;
         _scene.Visible = overlay == null;
+    }
+
+    /// <summary>
+    /// Esc: the open menu steps back like its exit icon. False when only the hub itself is on the screen
+    /// </summary>
+    public bool TryEscape()
+    {
+        // the switch to the lobby is already running
+        if (_loading.Visible)
+            return true;
+
+        if (_settings.Visible)
+        {
+            _settings.Close();
+            return true;
+        }
+
+        foreach (var screen in new ST14WarScreenBase[] { _support, _galaxy, _modes })
+        {
+            if (!screen.Visible)
+                continue;
+
+            screen.Back();
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>
