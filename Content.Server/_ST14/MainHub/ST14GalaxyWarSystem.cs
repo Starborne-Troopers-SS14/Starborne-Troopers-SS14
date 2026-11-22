@@ -63,9 +63,10 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
     private readonly HashSet<string> _picked = new();
 
     /// <summary>
-    /// Planets a round is being fought on right now and when its time runs out
+    /// Planets a round is being fought on right now, and when the sector being held to be taken falls (null while no
+    /// sector is)
     /// </summary>
-    private readonly Dictionary<string, TimeSpan> _fights = new();
+    private readonly Dictionary<string, TimeSpan?> _fights = new();
 
     /// <summary>
     /// The log keeps this many battles, a long war drops the oldest
@@ -90,7 +91,7 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
     /// <summary>
     /// NPC factions counted as bugs when they die, everything humanoid is counted as a trooper
     /// </summary>
-    private static readonly ProtoId<NpcFactionPrototype>[] BugFactions = { "Xeno" };
+    private static readonly ProtoId<NpcFactionPrototype>[] BugFactions = { "Hive" };
     private ISawmill _sawmill = default!;
 
     public override void Initialize()
@@ -175,11 +176,32 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
     /// Result of the round fought over the target sector of the planet. A null winner is a battle that ran out of time.
     /// The initiative goes to the other side and its command picks the next battle
     /// </summary>
-    public bool ApplyResult(string planet, ST14GalaxyFaction? winner, IReadOnlyDictionary<int, ST14GalaxyFaction?>? points = null)
+    public bool ApplyResult(string planet, ST14GalaxyFaction? winner)
     {
         var target = _targets.GetValueOrDefault(planet, -1);
         if (!_wars.TryGetValue(planet, out var war) || target < 0)
             return false;
+
+        // a winner who did not hold the target takes it, a defender who won keeps what it held
+        var captures = new Dictionary<int, ST14GalaxyFaction>();
+        if (winner is { } side && war.Cells[target].Faction != side)
+            captures[target] = side;
+
+        return ApplyCaptures(planet, captures, winner);
+    }
+
+    /// <summary>
+    /// Result of the round fought over the target sector of the planet: the sectors taken on the field change hands.
+    /// The initiative goes to the other side and its command picks the next battle
+    /// </summary>
+    public bool ApplyCaptures(string planet, IReadOnlyDictionary<int, ST14GalaxyFaction> captures, ST14GalaxyFaction? winner = null)
+    {
+        var target = _targets.GetValueOrDefault(planet, -1);
+        if (!_wars.TryGetValue(planet, out var war) || target < 0)
+            return false;
+
+        // the side that took the sector the battle was decided by: the target, or else the staging sector
+        winner ??= captures.TryGetValue(target, out var taker) ? taker : captures.Count > 0 ? captures.Values.First() : null;
 
         var log = _logs.GetOrNew(planet);
         log.Add(new ST14WarLogEntry(_ticker.RoundId, target, ST14PlanetWar.Enemy(war.Cells[target].Faction), winner));
@@ -187,7 +209,7 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
             log.RemoveAt(0);
 
         // the region is taken whole: the war moves on and every player picks a side again
-        if (war.ApplyResult(target, StagingOf(planet), winner, points))
+        if (war.ApplyResult(target, captures))
             ClearSides();
 
         _fights.Remove(planet);
@@ -202,7 +224,7 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
     /// <summary>
     /// A round started on the target of the planet: until it ends the battle stays what it is, the result goes to it
     /// </summary>
-    public void BeginBattle(string planet, TimeSpan endsAt)
+    public void BeginBattle(string planet)
     {
         if (_wars.TryGetValue(planet, out var war))
         {
@@ -210,7 +232,20 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
             war.RefreshFront();
         }
 
-        _fights[planet] = endsAt;
+        _fights[planet] = null;
+        Changed();
+    }
+
+    /// <summary>
+    /// A sector of the battle is being held to be taken and falls at <paramref name="takenAt"/>, or no sector is (null).
+    /// A battle has no time limit of its own: this is the only clock the players see
+    /// </summary>
+    public void SetCaptureClock(string planet, TimeSpan? takenAt)
+    {
+        if (!_fights.TryGetValue(planet, out var current) || current == takenAt)
+            return;
+
+        _fights[planet] = takenAt;
         Changed();
     }
 
@@ -571,7 +606,8 @@ public sealed partial class ST14GalaxyWarSystem : EntitySystem
             RaiseNetworkEvent(new ST14GalaxyWarStateEvent(planet, war.ExportState(), _targets.GetValueOrDefault(planet, -1), StagingOf(planet),
                 war.Turn, CanCommand(session, war.Turn), _logs.GetValueOrDefault(planet)?.ToArray() ?? Array.Empty<ST14WarLogEntry>(),
                 _picked.Contains(planet), _fights.ContainsKey(planet),
-                _fights.TryGetValue(planet, out var ends) ? (float) (ends - _timing.CurTime).TotalSeconds : 0f, war.ActiveRegion), session);
+                _fights.TryGetValue(planet, out var ends) && ends is { } taken ? MathF.Max(0f, (float) (taken - _timing.CurTime).TotalSeconds) : -1f,
+                war.ActiveRegion), session);
         }
     }
 

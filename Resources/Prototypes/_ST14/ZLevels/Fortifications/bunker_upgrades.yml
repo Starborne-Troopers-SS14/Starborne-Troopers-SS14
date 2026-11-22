@@ -83,6 +83,9 @@
         - MidImpassable
         - LowImpassable
   - type: ST14BunkerBase
+  # keeps the buildings round the bunker from rotting, out of the maintenance supplies put in the crate (ST14DecaySystem)
+  - type: ST14MaintenanceProvider
+    radius: 15
   - type: Storage
     maxItemSize: Huge
     grid:

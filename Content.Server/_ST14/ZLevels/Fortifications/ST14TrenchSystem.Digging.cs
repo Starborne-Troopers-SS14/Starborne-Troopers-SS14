@@ -55,6 +55,21 @@ public sealed partial class ST14TrenchSystem
     }
 
     /// <summary>
+    /// A soldier in a trench at the edge of a sector digs on into the next one: one tile of trench laid out on
+    /// <paramref name="worldTile"/> of the surface <paramref name="ground"/> over there, and dug from where they stand.
+    /// False when it cannot be laid out there (a wall stands on it, say)
+    /// </summary>
+    public bool TryDigAcross(Entity<ST14TrenchDiggerComponent> digger, EntityUid user, EntityUid ground, Vector2i worldTile)
+    {
+        var blueprint = BlueprintAt(ground, worldTile) ?? TryLayOut(ground, [worldTile], false, (float) digger.Comp.DigTime.TotalSeconds);
+        if (blueprint is not { } segment)
+            return false;
+
+        StartSwing(digger, user, segment);
+        return true;
+    }
+
+    /// <summary>
     /// How far from the soldier a segment can be laid out: they walk up to it to dig
     /// </summary>
     private const float PlaceRange = 6f;

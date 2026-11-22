@@ -51,7 +51,7 @@ public sealed partial class ST14SectorSettingsPrototype : IPrototype
     /// Mobs of this faction are the hive: the round goes on while one of them lives
     /// </summary>
     [DataField]
-    public string HiveFaction = "Xeno";
+    public string HiveFaction = "Hive";
 
     /// <summary>
     /// No side loses before this much of the round has passed, so a round does not end before everyone has spawned
@@ -66,10 +66,18 @@ public sealed partial class ST14SectorSettingsPrototype : IPrototype
     public TimeSpan CheckInterval = TimeSpan.FromSeconds(5);
 
     /// <summary>
-    /// A battle not decided by this time is an attack that failed
+    /// How long a side must hold every resource point of a sector of the battle, with the enemy driven out of it, for
+    /// the sector to be taken. A battle has no time limit otherwise: it lasts until one is taken
     /// </summary>
     [DataField]
-    public TimeSpan RoundLimit = TimeSpan.FromHours(4);
+    public TimeSpan HoldTime = TimeSpan.FromMinutes(15);
+
+    /// <summary>
+    /// A side with fewer live fighters than this in a sector (all its z-levels) counts as driven out of it: a forgotten
+    /// bug or two stragglers do not hold a sector
+    /// </summary>
+    [DataField]
+    public int DrivenOutBelow = 3;
 
     /// <summary>
     /// Components of the things a saved sector does not keep. Corpses, ghosts and spent casings go anyway

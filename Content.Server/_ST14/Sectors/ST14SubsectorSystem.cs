@@ -146,6 +146,10 @@ public sealed partial class ST14SubsectorSystem : EntitySystem
                 fields.Add(Spawn(FallbackFields[i], _map.GridTileToLocal(grid, grid.Comp, tile)));
             }
 
+            // a sector always has a point to take: with no free ground anywhere near, the middle of the map holds one
+            if (fields.Count == 0)
+                fields.Add(Spawn(FallbackFields[0], _map.GridTileToLocal(grid, grid.Comp, (Vector2i) ST14SectorGeometry.Center.Floored())));
+
             made = fields.Count > 0;
         }
 

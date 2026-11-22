@@ -30,7 +30,7 @@ namespace Content.Server._ST14.Medicine;
 /// </summary>
 public sealed partial class ST14DismembermentSystem : EntitySystem
 {
-    private static readonly ProtoId<NpcFactionPrototype> Hive = "Xeno";
+    private static readonly ProtoId<NpcFactionPrototype> Hive = "Hive";
 
     /// <summary>
     /// The limbs that come off, each with the key of its name

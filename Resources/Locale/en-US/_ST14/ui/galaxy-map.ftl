@@ -173,6 +173,7 @@ st14-galaxy-hint-drawing = Drag to draw arrows, click to place marks  ·  RMB: p
 
 st14-galaxy-kills-bugs = Bugs killed: { $count }
 st14-galaxy-kills-troopers = Troopers lost: { $count }
+st14-galaxy-kills-wider = Region: bugs { $regionBugs } · troopers { $regionTroopers }   Planet: bugs { $planetBugs } · troopers { $planetTroopers }
 
 st14-command-role-description = Gives or takes the High Command of the Federation or of the bugs.
 st14-command-role-help = st14_command give|take <player> federation|bugs
@@ -208,7 +209,8 @@ st14-hq-speaker-federation = HQ signals
 st14-hq-speaker-bugs = Brain bug
 st14-hq-banner-ours = Your turn
 st14-hq-banner-enemy = Turn: { $side }
-st14-hq-banner-battle = Battle  { $time }
+st14-hq-banner-battle = Battle: taken in { $time }
+st14-hq-banner-battle-open = Battle under way
 st14-hq-step-target = Target
 st14-hq-step-staging = Staging
 st14-hq-step-plan = Plan
@@ -320,6 +322,8 @@ st14-hq-fact-terrain = Terrain
 st14-hq-fact-region = Region
 st14-hq-fact-fights = Battles
 st14-hq-fact-losses = Region losses
+st14-hq-fact-losses-sector = Sector losses
+st14-hq-fact-losses-planet = Planet losses
 st14-hq-losses = Bugs { $bugs }  ·  troopers { $troopers }
 st14-hq-options-enemy = The enemy picks from: { $count }
 st14-hq-staging-target = Target of the attack

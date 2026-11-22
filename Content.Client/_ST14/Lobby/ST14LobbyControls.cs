@@ -131,8 +131,9 @@ public sealed class ST14Pedestal : Control
         // slow breathing light, a few percent so it never draws attention away from the character
         var pulse = 0.85f + 0.15f * MathF.Sin(_time * MathF.Tau / 4f);
 
-        var glowSize = new Vector2(size.X * 1.1f, size.Y * 1.05f);
-        var glowPos = new Vector2((size.X - glowSize.X) / 2, size.Y * -0.05f);
+        // the glow stays inside the stand and centred on the soldier: a frame around the stand would cut it off
+        var glowSize = new Vector2(size.X, size.Y);
+        var glowPos = Vector2.Zero;
         handle.DrawTextureRect(_glow, UIBox2.FromDimensions(glowPos, glowSize), GlowColor.WithAlpha(0.22f * pulse));
 
         var discSize = new Vector2(size.X * 0.82f, size.X * 0.82f * 0.25f);

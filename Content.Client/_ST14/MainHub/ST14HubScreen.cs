@@ -52,7 +52,7 @@ public sealed partial class ST14HubScreen : Control
     // Bottom row of the original: the big card on the left, then plates every 212.68 px
     private const float RowLeft = 30.76f;
     private const float RowStep = 212.68f;
-    private static readonly Vector2 PlateSize = new(187.68f, 70f);
+    private static readonly Vector2 PlateSize = new(187.68f, 66f);
 
     // middle of the grey band of the bottom bar, where the plates and the icons stand
     private const float PlateCenter = ST14HubStyle.HubBarCenter;

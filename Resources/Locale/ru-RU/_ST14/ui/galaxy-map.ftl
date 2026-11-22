@@ -173,6 +173,7 @@ st14-galaxy-hint-drawing = Стрелки тянутся мышью, метки 
 
 st14-galaxy-kills-bugs = Убито жуков: { $count }
 st14-galaxy-kills-troopers = Погибло десанта: { $count }
+st14-galaxy-kills-wider = Регион: жуки { $regionBugs } · десант { $regionTroopers }   Планета: жуки { $planetBugs } · десант { $planetTroopers }
 
 st14-command-role-description = Выдаёт или снимает высшее командование Федерации или жуков.
 st14-command-role-help = st14_command give|take <ник> federation|bugs
@@ -208,7 +209,8 @@ st14-hq-speaker-federation = Связь штаба
 st14-hq-speaker-bugs = Мозговой жук
 st14-hq-banner-ours = Ваш ход
 st14-hq-banner-enemy = Ход: { $side }
-st14-hq-banner-battle = Идёт бой  { $time }
+st14-hq-banner-battle = Идёт бой: захват через { $time }
+st14-hq-banner-battle-open = Идёт бой
 st14-hq-step-target = Цель
 st14-hq-step-staging = Плацдарм
 st14-hq-step-plan = План
@@ -320,6 +322,8 @@ st14-hq-fact-terrain = Местность
 st14-hq-fact-region = Регион
 st14-hq-fact-fights = Бои
 st14-hq-fact-losses = Потери региона
+st14-hq-fact-losses-sector = Потери сектора
+st14-hq-fact-losses-planet = Потери планеты
 st14-hq-losses = Жуки { $bugs }  ·  десант { $troopers }
 st14-hq-options-enemy = Противник выбирает из: { $count }
 st14-hq-staging-target = Цель атаки

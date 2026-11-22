@@ -98,7 +98,7 @@ public sealed class ST14GalaxyMapTest
             Assert.That(state.StartOf(ST14GalaxyFaction.Arachnid, target, from), Is.EqualTo(from));
             Assert.That(state.StartOf(ST14GalaxyFaction.Federation, target, from), Is.EqualTo(target));
             Assert.That(war.ApplyResult(planet, ST14GalaxyFaction.Federation));
-            Assert.That(state.Cells[from].Faction, Is.EqualTo(ST14GalaxyFaction.Federation), "The sector the bugs gathered in did not fall.");
+            Assert.That(state.Cells[from].Faction, Is.EqualTo(ST14GalaxyFaction.Arachnid), "A staging sector fell without being taken on the field.");
 
             // the region goes on from what is held, only inside the region
             state.Turn = ST14GalaxyFaction.Federation;

@@ -1,0 +1,65 @@
+# A maintenance tunnel: a small store of maintenance supplies dug into the ground. It keeps the buildings round it from
+# rotting, like a bunker base does round its bunker (ST14DecaySystem). Built with the multitool, tab "other".
+- type: entity
+  id: ST14MaintenanceTunnel
+  name: maintenance tunnel
+  description: A store of timber, nails and sandbags dug into the ground. Put maintenance supplies in it, and the buildings round it will not fall apart.
+  placement:
+    mode: SnapgridCenter
+  components:
+  - type: Transform
+    anchored: true
+  - type: Clickable
+  - type: InteractionOutline
+  - type: Sprite
+    sprite: _ST14/ZLevels/Fortifications/bunker_upgrades.rsi
+    state: base
+    color: "#b89a74"
+    drawdepth: Objects
+    noRot: true
+  - type: Physics
+    bodyType: Static
+  - type: Fixtures
+    fixtures:
+      fix1:
+        shape:
+          !type:PhysShapeAabb
+          bounds: "-0.4,-0.4,0.4,0.4"
+        density: 200
+        mask:
+        - MachineMask
+        layer:
+        - MidImpassable
+        - LowImpassable
+  - type: Damageable
+    damageContainer: StructuralInorganic
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 300
+      behaviors:
+      - !type:DoActsBehavior
+        acts: [ "Destruction" ]
+  - type: ST14MaintenanceProvider
+    radius: 12
+  - type: Storage
+    maxItemSize: Huge
+    grid:
+    - 0,0,7,3
+  - type: ContainerContainer
+    containers:
+      storagebase: !type:Container
+  - type: UserInterface
+    interfaces:
+      enum.StorageUiKey.Key:
+        type: StorageBoundUserInterface
+
+- type: ST14EngineerBuildable
+  id: MaintenanceTunnel
+  category: ST14BuildOther
+  result: ST14MaintenanceTunnel
+  cost: 150
+  buildTime: 10
+  conditions:
+  - !type:TileNotBlocked

@@ -105,7 +105,7 @@ public static class ST14HubStyle
     /// <summary>
     /// Height of the main menu bar in canvas units and the gap its plates keep above and below inside the grey band
     /// </summary>
-    public const float HubBarHeight = 136f;
+    public const float HubBarHeight = 126f;
     public const float HubBarBottom = 16f;
     public const float HubBarTop = 34f;
 

@@ -353,7 +353,8 @@ public sealed class ST14BattleMapScreen : ST14WarScreenBase
 
         var code = _planetWar.Cells[state.Target].Code;
         var planet = Loc.GetString(_planet.Name);
-        var left = _war.TryGetState(_planet.ID, out var warState) && warState.Battle
+        // the clock only shows while a sector is being held to be taken: a battle itself has no time limit
+        var left = _war.TryGetState(_planet.ID, out var warState) && warState.Battle && warState.BattleSecondsLeft >= 0
             ? TimeSpan.FromSeconds(MathF.Max(0, warState.BattleSecondsLeft - (float) (DateTime.UtcNow - _clockFrom).TotalSeconds))
             : (TimeSpan?) null;
         _clock.Text = (left is { } time
@@ -434,7 +435,11 @@ public sealed class ST14BattleMapScreen : ST14WarScreenBase
             AddFact("st14-hq-fact-terrain", Loc.GetString($"st14-galaxy-terrain-{hex.Terrain}"), Color.White, ref y);
             AddFact("st14-hq-fact-region", war.Cells[war.RegionCenters[hex.Region]].Code, Color.White, ref y);
             AddFact("st14-hq-fact-fights", Loc.GetString(hex.Initialized ? "st14-hq-fought" : "st14-hq-not-fought"), Color.White, ref y);
-            AddFact("st14-battle-map-fact-losses", Loc.GetString("st14-hq-losses", ("bugs", hex.BugsKilled), ("troopers", hex.TroopersKilled)), Color.White, ref y);
+            // the dead three ways: in this sector, in its region, on the whole planet
+            var regionKills = war.RegionKills(cell);
+            AddFact("st14-hq-fact-losses-sector", Loc.GetString("st14-hq-losses", ("bugs", hex.BugsKilled), ("troopers", hex.TroopersKilled)), Color.White, ref y);
+            AddFact("st14-hq-fact-losses", Loc.GetString("st14-hq-losses", ("bugs", regionKills.Bugs), ("troopers", regionKills.Troopers)), Color.White, ref y);
+            AddFact("st14-hq-fact-losses-planet", Loc.GetString("st14-hq-losses", ("bugs", war.BugsKilled), ("troopers", war.TroopersKilled)), Color.White, ref y);
 
             // the subsectors: whoever holds every point when the round ends takes the sector
             if (points.Count > 0)

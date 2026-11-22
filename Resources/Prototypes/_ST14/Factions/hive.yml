@@ -1,0 +1,14 @@
+# ST14: the arachnids of Klendathu. Every bug, its buildings and every system that tells the hive apart use this faction
+- type: npcFaction
+  id: Hive
+  hostile:
+  - NanoTrasen
+  - Syndicate
+  - Passive
+  - PetsNT
+  - Zombie
+  - Revolutionary
+  - AllHostile
+  - Wizard
+  - Dragon
+  - Xenoborg

@@ -32,7 +32,7 @@
   - type: Insulated
   - type: NpcFactionMember
     factions:
-    - Xeno
+    - Hive
   - type: Sprite
     drawdepth: Mobs
   # bugs sense the troopers through rock and walls
