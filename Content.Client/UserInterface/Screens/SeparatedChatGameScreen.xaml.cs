@@ -1,3 +1,4 @@
+using Content.Client._ST14.Hud;
 using System.Numerics;
 using Content.Client.Stylesheets;
 using Content.Client.UserInterface.Systems.Chat.Widgets;
@@ -23,6 +24,7 @@ public sealed partial class SeparatedChatGameScreen : InGameScreen
         SetAnchorPreset(ViewportContainer, LayoutPreset.Wide);
         SetAnchorPreset(MainViewport, LayoutPreset.Wide);
         SetAnchorAndMarginPreset(Inventory, LayoutPreset.BottomLeft, margin: 5);
+        ST14HudLayout.Apply(Inventory, Hotbar); // ST14: clothing fan over the hands
         SetAnchorAndMarginPreset(TopLeftContainer, LayoutPreset.TopLeft, margin: 10);
         SetAnchorAndMarginPreset(Ghost, LayoutPreset.BottomWide, margin: 80);
         SetAnchorAndMarginPreset(Hotbar, LayoutPreset.BottomWide, margin: 5);

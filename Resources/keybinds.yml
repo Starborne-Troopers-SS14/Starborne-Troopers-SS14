@@ -268,7 +268,7 @@ binds:
   key: F1
 - function: OpenInventoryMenu
   type: State
-  key: I
+  key: Tab # ST14: the clothing fan opens on Tab
 - function: SmartEquipBackpack
   type: State
   key: B

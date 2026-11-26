@@ -2,7 +2,9 @@ using Content.Client.UserInterface.Controls;
 
 namespace Content.Client.UserInterface.Systems.Inventory.Controls;
 
-public sealed class ItemSlotButtonContainer : ItemSlotUIContainer<SlotControl>
+// ST14: not sealed, the clothing fan derives from it
+[Virtual]
+public class ItemSlotButtonContainer : ItemSlotUIContainer<SlotControl>
 {
     private readonly InventoryUIController _inventoryController;
     private string _slotGroup = "";

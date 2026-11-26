@@ -16,9 +16,10 @@ public sealed partial class MenuButton : ContainerButton
     // public const string StyleClassRedTopButton = "topButtonLabel";
 
     // TODO: KIIIIIILLLLLLLLLLLLLLLLLLLLLLLLLLL --kaylie.
-    private static readonly Color ColorNormal = Color.FromHex("#99a7b3"); // primary color[0] + 0.24 L
-    private static readonly Color ColorHovered = Color.FromHex("#acbac6"); // primary color[0] + 0.30 L
-    private static readonly Color ColorPressed = Color.FromHex("#75838e"); // primary color[0] + 0.12 L
+    // ST14: gold icons on the brass plates instead of the Nano blue-grey
+    private static readonly Color ColorNormal = Color.FromHex("#e6d29a");
+    private static readonly Color ColorHovered = Color.FromHex("#fff0c0");
+    private static readonly Color ColorPressed = Color.FromHex("#b89a55");
 
     private const float VertPad = 4f;
 

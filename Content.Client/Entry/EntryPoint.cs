@@ -165,7 +165,7 @@ namespace Content.Client.Entry
             _clientPreferencesManager.Initialize();
             _euiManager.Initialize();
             _voteManager.Initialize();
-            _userInterfaceManager.SetDefaultTheme("SS14DefaultTheme");
+            _userInterfaceManager.SetDefaultTheme("ST14Theme"); // ST14: official HUD with even bar slots
             _userInterfaceManager.SetActiveTheme(_configManager.GetCVar(CVars.InterfaceTheme));
             _documentParsingManager.Initialize();
             _titleWindowManager.Initialize();
