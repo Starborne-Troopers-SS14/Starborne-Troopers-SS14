@@ -25,7 +25,7 @@ public sealed class ST14FanSlotContainer : ItemSlotButtonContainer
     private static readonly string[] InnerOrder = new[] { "head", "outerClothing", "jumpsuit", "shoes", "gloves" };
 
     private static readonly string[] OuterOrder =
-        new[] { "mask", "eyes", "ears", "neck", "id", "capsule" };
+        new[] { "mask", "eyes", "ears", "neck", "id" };
 
     private bool _open;
     private float _time;
@@ -99,10 +99,18 @@ public sealed class ST14FanSlotContainer : ItemSlotButtonContainer
         }
 
         var size = SlotControl.DefaultButtonSize;
-        var edge = (Math.Max(inner.Count, outer.Count) - 1) / 2f;
 
-        Place(inner, 0, edge);
-        Place(outer, 1, edge);
+        // every row is as wide as the lower one, so each slot stands right over a slot of the row below;
+        // what does not fit goes one row higher
+        var width = Math.Max(1, inner.Count);
+        var edge = (width - 1) / 2f;
+        Place(inner, 0, width, edge);
+        for (var row = 1; outer.Count > 0; row++)
+        {
+            var chunk = outer.Take(width).ToList();
+            outer.RemoveRange(0, chunk.Count);
+            Place(chunk, row, width, edge);
+        }
 
         if (_layout.Count == 0)
         {
@@ -126,14 +134,17 @@ public sealed class ST14FanSlotContainer : ItemSlotButtonContainer
     }
 
     /// <summary>
-    /// Lays the slots left to right in one row, columns one slot and a gap apart, the middle raised into an arch
+    /// Lays the slots left to right in one row on the columns of the lower row, one slot and a gap apart,
+    /// the middle raised into an arch
     /// </summary>
-    private void Place(List<SlotControl> slots, int row, float edge)
+    private void Place(List<SlotControl> slots, int row, int width, float edge)
     {
         var size = SlotControl.DefaultButtonSize;
+        // a shorter row keeps to the columns of the lower one, as close to the middle as it gets
+        var start = (width - slots.Count) / 2;
         for (var i = 0; i < slots.Count; i++)
         {
-            var column = i - (slots.Count - 1) / 2f;
+            var column = start + i - edge;
             var lift = (edge * edge - column * column) * Arch;
             var x = column * (size + Gap);
             // the lowest slots stand one gap over the hands, the middle of the hands is (0, 0)

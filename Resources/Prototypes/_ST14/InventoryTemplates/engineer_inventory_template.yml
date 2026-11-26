@@ -96,7 +96,7 @@
   - name: capsule
     slotTexture: suit_storage
     slotFlags: NONE
-    slotGroup: Default # ST14: worn gear lives in the clothing fan, the bar keeps pockets and hands
+    slotGroup: SecondHotbar # ST14: capsule in the bar next to the backpack
     stripTime: 3
     uiWindowPos: 3,3
     strippingWindowPos: 2,3

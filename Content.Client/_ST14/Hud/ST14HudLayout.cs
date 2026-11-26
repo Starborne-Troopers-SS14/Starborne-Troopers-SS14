@@ -9,7 +9,7 @@ using Robust.Client.UserInterface.Controls;
 namespace Content.Client._ST14.Hud;
 
 /// <summary>
-/// ST14 bottom bar: armour mount and backpack left of the hands, belt and both pockets right of them, all one step apart.
+/// ST14 bottom bar: armour mount, backpack (and the engineer's capsule) left of the hands, belt and both pockets right of them, all one step apart.
 /// The bar and the clothing fan over it are centred on the screen; the fan opens on Tab, the stock clothing button is taken off the screen.
 /// </summary>
 public static class ST14HudLayout
@@ -19,7 +19,7 @@ public static class ST14HudLayout
     /// </summary>
     private const float HandsTop = 5 + 64 + 2;
 
-    private static readonly string[] LeftOrder = { "suitstorage", "back" };
+    private static readonly string[] LeftOrder = { "suitstorage", "back", "capsule" };
     private static readonly string[] RightOrder = { "belt", "pocket1", "pocket2" };
 
     public static void Apply(InventoryGui inventory, HotbarGui hotbar)
