@@ -1,3 +1,4 @@
+using Content.Client._ST14.Hud;
 using System.Linq;
 using System.Numerics;
 using Content.Client.Gameplay;
@@ -245,6 +246,14 @@ public sealed partial class InventoryUIController : UIController, IOnStateEntere
         }
 
         UpdateInventoryHotbar(_playerInventory);
+
+        // ST14: the clothing fan slides in and out instead of popping
+        if (_inventoryHotbar is ST14FanSlotContainer fan)
+        {
+            fan.SetOpen(!fan.Open);
+            return;
+        }
+
         var shouldBeVisible = !_inventoryHotbar.Visible;
         _inventoryHotbar.Visible = shouldBeVisible;
 

@@ -223,11 +223,8 @@ public sealed partial class ChatUIController : UIController
         _input.SetInputCommand(ContentKeyFunctions.FocusConsoleChat,
             InputCmdHandler.FromDelegate(_ => FocusChannel(ChatSelectChannel.Console)));
 
-        _input.SetInputCommand(ContentKeyFunctions.CycleChatChannelForward,
-            InputCmdHandler.FromDelegate(_ => CycleChatChannel(true)));
-
-        _input.SetInputCommand(ContentKeyFunctions.CycleChatChannelBackward,
-            InputCmdHandler.FromDelegate(_ => CycleChatChannel(false)));
+        // ST14: no global channel cycling, Tab outside the chat opens the clothing fan.
+        // The chat box still cycles channels with Tab while you type in it (ChatBox.OnKeyBindDown).
 
         var gameplayStateLoad = UIManager.GetUIController<GameplayStateLoadController>();
         gameplayStateLoad.OnScreenLoad += OnScreenLoad;
@@ -392,18 +389,6 @@ public sealed partial class ChatUIController : UIController
                 continue;
 
             chat.Focus(channel);
-            break;
-        }
-    }
-
-    private void CycleChatChannel(bool forward)
-    {
-        foreach (var chat in _chats)
-        {
-            if (!chat.Main)
-                continue;
-
-            chat.CycleChatChannel(forward);
             break;
         }
     }

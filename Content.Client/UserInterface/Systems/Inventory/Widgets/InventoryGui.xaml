@@ -3,6 +3,7 @@
     xmlns:inventory="clr-namespace:Content.Client.UserInterface.Systems.Inventory.Controls"
     xmlns:widgets="clr-namespace:Content.Client.UserInterface.Systems.Inventory.Widgets"
     xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
+    xmlns:st14="clr-namespace:Content.Client._ST14.Hud"
     Name="InventoryInterface"
     VerticalExpand="True"
     VerticalAlignment="Bottom"
@@ -18,7 +19,8 @@
             HorizontalExpand="False"
             VerticalExpand="False"
             ButtonTexturePath="Slots/toggle"/>
-        <inventory:ItemSlotButtonContainer
+        <!-- ST14: clothing slots fan out over the hands, the toggle button is moved into the hotbar by the screen -->
+        <st14:ST14FanSlotContainer
             Name="InventoryHotbar"
             Access="Public"
             Visible="False"

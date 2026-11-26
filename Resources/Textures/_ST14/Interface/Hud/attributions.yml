@@ -1,0 +1,10 @@
+- files:
+  - "template_small.png"
+  - "Slots/back.png"
+  - "Slots/belt.png"
+  - "Slots/id.png"
+  - "Slots/pocket.png"
+  - "Slots/web.png"
+  license: "CC-BY-NC-SA-3.0"
+  copyright: "Taken from https://github.com/goonstation/goonstation at commit e77d85d9c1d93aa32da7702737ceeac2b56738ac via the SS14 Default HUD theme, small slots redrawn on the full size slot frame"
+  source: "https://github.com/goonstation/goonstation"

@@ -20,6 +20,9 @@ public sealed partial class ItemStatusPanel : Control
     [ViewVariables] private EntityUid? _entity;
     [ViewVariables] private Hand? _hand;
 
+    // ST14: tint of the plate of an empty hand
+    private static readonly Color EmptyModulate = new(1f, 1f, 1f, 0.45f);
+
     // Tracked so we can re-run SetSide() if the theme changes.
     private HandLocation _side;
 
@@ -27,6 +30,10 @@ public sealed partial class ItemStatusPanel : Control
     {
         RobustXamlLoader.Load(this);
         IoCManager.InjectDependencies(this);
+
+        // ST14: starts as an empty hand, Update may never run for a hand that stays empty
+        NoItemLabel.Visible = false;
+        Panel.Modulate = EmptyModulate;
     }
 
     public void SetSide(HandLocation location)
@@ -121,13 +128,16 @@ public sealed partial class ItemStatusPanel : Control
             {
                 ItemNameLabel.Visible = true;
                 NoItemLabel.Visible = false;
+                Panel.Modulate = Color.White;
 
                 ItemNameLabel.Text = Loc.GetString(label);
             }
             else
             {
                 ItemNameLabel.Visible = false;
-                NoItemLabel.Visible = true;
+                // ST14: an empty hand shows a faded plate without the "hand is empty" text
+                NoItemLabel.Visible = false;
+                Panel.Modulate = EmptyModulate;
 
                 ItemNameLabel.Text = "";
             }
@@ -137,6 +147,7 @@ public sealed partial class ItemStatusPanel : Control
 
         ItemNameLabel.Visible = true;
         NoItemLabel.Visible = false;
+        Panel.Modulate = Color.White;
 
         _entity = entity.Value;
         BuildNewEntityStatus();

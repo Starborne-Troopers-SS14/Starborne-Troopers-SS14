@@ -85,7 +85,7 @@
     - name: suitstorage
       slotTexture: suit_storage
       slotFlags:   SUITSTORAGE
-      slotGroup: MainHotbar
+      slotGroup: SecondHotbar # ST14: armour mount on the outer left of the bar
       stripTime: 3
       uiWindowPos: 2,0
       strippingWindowPos: 2,5
@@ -97,9 +97,9 @@
       slotTexture: id
       fullTextureName: template_small
       slotFlags: IDCARD
-      slotGroup: SecondHotbar
+      slotGroup: Default # ST14: the ID lives with the clothes, the bar keeps fewer cells
       stripTime: 6
-      uiWindowPos: 2,1
+      uiWindowPos: 2,0
       strippingWindowPos: 2,4
       dependsOn: jumpsuit
       displayName: ID
@@ -107,7 +107,7 @@
       slotTexture: belt
       fullTextureName: template_small
       slotFlags: BELT
-      slotGroup: SecondHotbar
+      slotGroup: MainHotbar # ST14: belt right of the hands
       stripTime: 6
       uiWindowPos: 3,1
       strippingWindowPos: 1,5
