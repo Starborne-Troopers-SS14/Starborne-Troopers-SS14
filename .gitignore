@@ -319,3 +319,4 @@ error.glsl
 
 # C# Dev Kit cache file
 *.lscache
+Resources/Prototypes/Body/Satiation/Hunger/hunger.yml
