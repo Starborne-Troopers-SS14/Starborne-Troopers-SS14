@@ -256,6 +256,7 @@
 - type: construction
   parent: BaseBed
   id: MedicalBed
+  hide: true # ST14: vanilla medicine is not ours, field medicine lives in _ST14/Medicine
   targetNode: medicalbed
 
 - type: construction

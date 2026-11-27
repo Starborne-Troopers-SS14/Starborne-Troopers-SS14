@@ -38,11 +38,10 @@
   suffix: Full
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medical.rsi
-    state: gauze
+    sprite: _ST14/Objects/Specific/Medical/bandage.rsi
+    state: base
   - type: Item
-    sprite: Objects/Specific/Medical/medical.rsi
-    heldPrefix: gauze
+    sprite: _ST14/Objects/Specific/Medical/bandage.rsi
     size: Small
   - type: Stack
     stackType: ST14Bandage
@@ -65,12 +64,10 @@
   suffix: Full
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medical.rsi
-    state: gauze
-    color: "#E6D29A"
+    sprite: _ST14/Objects/Specific/Medical/gauze.rsi
+    state: base
   - type: Item
-    sprite: Objects/Specific/Medical/medical.rsi
-    heldPrefix: gauze
+    sprite: _ST14/Objects/Specific/Medical/gauze.rsi
     size: Small
   - type: Stack
     stackType: ST14HemostaticGauze
@@ -93,10 +90,10 @@
   suffix: Full
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medical.rsi
-    state: cast
+    sprite: _ST14/Objects/Specific/Medical/splint.rsi
+    state: base
   - type: Item
-    sprite: Objects/Specific/Medical/medical.rsi
+    sprite: _ST14/Objects/Specific/Medical/splint.rsi
     size: Small
   - type: Stack
     stackType: ST14Splint
@@ -118,11 +115,10 @@
   description: Needles, clamps and thread. Sews the wounds of a part shut for good and closes a stump for a prosthesis. The patient lies down, and without ketamine or morphine it is torture.
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medical.rsi
-    state: medicated-suture
+    sprite: _ST14/Objects/Specific/Medical/suture.rsi
+    state: base
   - type: Item
-    sprite: Objects/Specific/Medical/medical.rsi
-    heldPrefix: medicated-suture
+    sprite: _ST14/Objects/Specific/Medical/suture.rsi
     size: Small
   - type: ST14Treatment
     kind: Suture
@@ -145,13 +141,10 @@
   description: Shows a patient part by part, the heart, the blood and the drugs in it, and what will kill them first. Click a patient, or use it in hand on yourself.
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/healthanalyzer.rsi
-    layers:
-    - state: icon
-    - state: analyzer
-      shader: unshaded
+    sprite: _ST14/Objects/Specific/Medical/medscanner.rsi
+    state: base
   - type: Item
-    sprite: Objects/Specific/Medical/healthanalyzer.rsi
+    sprite: _ST14/Objects/Specific/Medical/medscanner.rsi
     size: Small
   - type: ST14MedScanner
   - type: UserInterface
@@ -162,20 +155,33 @@
 # Shots: one click on the patient or in hand on yourself
 
 - type: entity
+  abstract: true
   parent: ChemicalMedipen
+  id: ST14BaseAutoinjector
+  components:
+  - type: Sprite
+    sprite: _ST14/Objects/Specific/Medical/autoinjector.rsi
+    layers:
+    - state: spent
+      map: ["enum.SolutionContainerLayers.Fill"]
+  - type: Item
+    sprite: _ST14/Objects/Specific/Medical/autoinjector.rsi
+    inhandVisuals: {}
+  - type: SolutionContainerVisuals
+    maxFillLevels: 1
+    changeColor: false
+    emptySpriteName: spent
+
+- type: entity
+  parent: ST14BaseAutoinjector
   id: ST14MorphinePen
   name: morphine autoinjector
   description: One dose of morphine. The pain goes and the screaming stops. A second dose slows the breathing, a third can stop it.
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medipen.rsi
     layers:
-    - state: morphen
+    - state: Morphine
       map: ["enum.SolutionContainerLayers.Fill"]
-  - type: SolutionContainerVisuals
-    maxFillLevels: 1
-    changeColor: false
-    emptySpriteName: morphen_empty
   - type: Solution
     solution:
       reagents:
@@ -183,20 +189,15 @@
         Quantity: 10
 
 - type: entity
-  parent: ChemicalMedipen
+  parent: ST14BaseAutoinjector
   id: ST14AdrenalinePen
   name: adrenaline autoinjector
   description: Epinephrine. Keeps a dying heart going and helps a stopped one start under chest compressions. With a stimulant it can stop a healthy one.
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medipen.rsi
     layers:
-    - state: medipen
+    - state: Adrenaline
       map: ["enum.SolutionContainerLayers.Fill"]
-  - type: SolutionContainerVisuals
-    maxFillLevels: 1
-    changeColor: false
-    emptySpriteName: medipen_empty
   - type: Solution
     solution:
       reagents:
@@ -204,20 +205,15 @@
         Quantity: 10
 
 - type: entity
-  parent: ChemicalMedipen
+  parent: ST14BaseAutoinjector
   id: ST14CombatStimPen
   name: combat stimulant autoinjector
   description: Faster legs, a steady aim, no pain slowing you down and no falling down. The heart pays for it, and when it wears off the body crashes. Never with adrenaline.
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medipen.rsi
     layers:
-    - state: stimpen
+    - state: CombatStim
       map: ["enum.SolutionContainerLayers.Fill"]
-  - type: SolutionContainerVisuals
-    maxFillLevels: 1
-    changeColor: false
-    emptySpriteName: stimpen_empty
   - type: Solution
     solution:
       reagents:
@@ -225,20 +221,15 @@
         Quantity: 8
 
 - type: entity
-  parent: ChemicalMedipen
+  parent: ST14BaseAutoinjector
   id: ST14TranexamicPen
   name: hemostatic autoinjector
   description: Tranexamic acid. The blood clots faster, small wounds close by themselves and big ones bleed less. It does not hold a torn limb, a tourniquet does.
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medipen.rsi
     layers:
-    - state: hypovolemic
+    - state: Tranexamic
       map: ["enum.SolutionContainerLayers.Fill"]
-  - type: SolutionContainerVisuals
-    maxFillLevels: 1
-    changeColor: false
-    emptySpriteName: hypovolemic_empty
   - type: Solution
     solution:
       reagents:
@@ -246,20 +237,15 @@
         Quantity: 10
 
 - type: entity
-  parent: ChemicalMedipen
+  parent: ST14BaseAutoinjector
   id: ST14NaloxonePen
   name: naloxone autoinjector
   description: The antidote to morphine. Brings back the breathing of an overdose, and all the pain with it.
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medipen.rsi
     layers:
-    - state: oxapen
+    - state: Naloxone
       map: ["enum.SolutionContainerLayers.Fill"]
-  - type: SolutionContainerVisuals
-    maxFillLevels: 1
-    changeColor: false
-    emptySpriteName: oxapen_empty
   - type: Solution
     solution:
       reagents:
@@ -267,20 +253,15 @@
         Quantity: 10
 
 - type: entity
-  parent: ChemicalMedipen
+  parent: ST14BaseAutoinjector
   id: ST14KetaminePen
   name: ketamine autoinjector
   description: Anaesthesia for the field. The patient is out for about a minute and feels nothing, time enough to sew a stump or fit a prosthesis.
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medipen.rsi
     layers:
-    - state: dexpen
+    - state: Ketamine
       map: ["enum.SolutionContainerLayers.Fill"]
-  - type: SolutionContainerVisuals
-    maxFillLevels: 1
-    changeColor: false
-    emptySpriteName: dexpen_empty
   - type: Solution
     solution:
       reagents:
@@ -296,10 +277,21 @@
   description: Two tourniquets, a field dressing, morphine and a hemostatic shot. Enough to live until a medic comes.
   components:
   - type: Sprite
-    state: blackkit
+    sprite: _ST14/Objects/Specific/Medical/fieldkit.rsi
+    layers:
+    - map: [ base ]
+      state: base
   - type: Item
-    heldPrefix: blackkit
+    sprite: _ST14/Objects/Specific/Medical/fieldkit.rsi
+    heldPrefix: null
     size: Normal
+  - type: GenericVisualizer
+    visuals:
+      enum.StorageVisuals.Open:
+        base:
+          True: { state: open }
+          False: { state: base }
+  - type: Appearance
   - type: Storage
     maxItemSize: Small
     grid:
@@ -346,26 +338,21 @@
       amount: 2
     - id: ST14BloodBag
       amount: 2
-    - id: ST14FieldProsthesisArm
-    - id: ST14FieldProsthesisLeg
+    - id: ST14SteelProsthesisArm
+    - id: ST14SteelProsthesisLeg
     - id: ST14Antiseptic
     - id: ST14MedicDrugCase
 
 - type: entity
-  parent: ChemicalMedipen
+  parent: ST14BaseAutoinjector
   id: ST14AtropinePen
   name: atropine autoinjector
   description: Atropine. Speeds a slow heart, clears the morphine fog and pulls some bug venom out. With adrenaline the heart races.
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medipen.rsi
     layers:
-    - state: atropen
+    - state: Atropine
       map: ["enum.SolutionContainerLayers.Fill"]
-  - type: SolutionContainerVisuals
-    maxFillLevels: 1
-    changeColor: false
-    emptySpriteName: atropen_empty
   - type: Solution
     solution:
       reagents:
@@ -373,20 +360,15 @@
         Quantity: 8
 
 - type: entity
-  parent: ChemicalMedipen
+  parent: ST14BaseAutoinjector
   id: ST14AmiodaronePen
   name: amiodarone autoinjector
   description: Keeps the heart in rhythm under any load and helps a shock or compressions start a stopped one. Do not mix with atropine.
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medipen.rsi
     layers:
-    - state: punctpen
+    - state: Amiodarone
       map: ["enum.SolutionContainerLayers.Fill"]
-  - type: SolutionContainerVisuals
-    maxFillLevels: 1
-    changeColor: false
-    emptySpriteName: punctpen_empty
   - type: Solution
     solution:
       reagents:
@@ -394,20 +376,15 @@
         Quantity: 10
 
 - type: entity
-  parent: ChemicalMedipen
+  parent: ST14BaseAutoinjector
   id: ST14KetorolacPen
   name: ketorolac autoinjector
   description: "A painkiller that keeps the head clear. It thins the blood: not with a hemostatic, not with alcohol."
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medipen.rsi
     layers:
-    - state: dermpen
+    - state: Ketorolac
       map: ["enum.SolutionContainerLayers.Fill"]
-  - type: SolutionContainerVisuals
-    maxFillLevels: 1
-    changeColor: false
-    emptySpriteName: dermpen_empty
   - type: Solution
     solution:
       reagents:
@@ -415,20 +392,15 @@
         Quantity: 10
 
 - type: entity
-  parent: ChemicalMedipen
+  parent: ST14BaseAutoinjector
   id: ST14AntibioticPen
   name: antibiotic autoinjector
   description: Kills the infection of the wounds over a few minutes. Wash the wound first.
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medipen.rsi
     layers:
-    - state: penacid
+    - state: Antibiotic
       map: ["enum.SolutionContainerLayers.Fill"]
-  - type: SolutionContainerVisuals
-    maxFillLevels: 1
-    changeColor: false
-    emptySpriteName: penacid_empty
   - type: Solution
     solution:
       reagents:
@@ -436,20 +408,15 @@
         Quantity: 10
 
 - type: entity
-  parent: ChemicalMedipen
+  parent: ST14BaseAutoinjector
   id: ST14AntipyreticPen
   name: fever reducer autoinjector
   description: Takes the fever away. The infection goes on underneath, only an antibiotic stops it.
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medipen.rsi
     layers:
-    - state: pyrapen
+    - state: Antipyretic
       map: ["enum.SolutionContainerLayers.Fill"]
-  - type: SolutionContainerVisuals
-    maxFillLevels: 1
-    changeColor: false
-    emptySpriteName: pyrapen_empty
   - type: Solution
     solution:
       reagents:
@@ -457,20 +424,15 @@
         Quantity: 10
 
 - type: entity
-  parent: ChemicalMedipen
+  parent: ST14BaseAutoinjector
   id: ST14OsteogenPen
   name: osteogen autoinjector
   description: Grows a broken bone back in a minute and a half. Splint it first, or it grows crooked.
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medipen.rsi
     layers:
-    - state: bicpen
+    - state: Osteogen
       map: ["enum.SolutionContainerLayers.Fill"]
-  - type: SolutionContainerVisuals
-    maxFillLevels: 1
-    changeColor: false
-    emptySpriteName: bicpen_empty
   - type: Solution
     solution:
       reagents:
@@ -478,20 +440,15 @@
         Quantity: 12
 
 - type: entity
-  parent: ChemicalMedipen
+  parent: ST14BaseAutoinjector
   id: ST14RegenerolPen
   name: regenerol autoinjector
   description: Closes wounds three times faster. A light load on the heart.
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medipen.rsi
     layers:
-    - state: salpen
+    - state: Regenerol
       map: ["enum.SolutionContainerLayers.Fill"]
-  - type: SolutionContainerVisuals
-    maxFillLevels: 1
-    changeColor: false
-    emptySpriteName: salpen_empty
   - type: Solution
     solution:
       reagents:
@@ -499,20 +456,15 @@
         Quantity: 10
 
 - type: entity
-  parent: ChemicalMedipen
+  parent: ST14BaseAutoinjector
   id: ST14AntivenomPen
   name: antivenom autoinjector
   description: Pulls tiger bug venom out of the blood.
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medipen.rsi
     layers:
-    - state: arithpen
+    - state: Antivenom
       map: ["enum.SolutionContainerLayers.Fill"]
-  - type: SolutionContainerVisuals
-    maxFillLevels: 1
-    changeColor: false
-    emptySpriteName: arithpen_empty
   - type: Solution
     solution:
       reagents:
@@ -520,20 +472,15 @@
         Quantity: 8
 
 - type: entity
-  parent: ChemicalMedipen
+  parent: ST14BaseAutoinjector
   id: ST14ModafinilPen
   name: modafinil autoinjector
   description: "Wakes the body up: the stimulant crash goes, the morphine fog lifts. Not on top of a stimulant."
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medipen.rsi
     layers:
-    - state: microstimpen
+    - state: Modafinil
       map: ["enum.SolutionContainerLayers.Fill"]
-  - type: SolutionContainerVisuals
-    maxFillLevels: 1
-    changeColor: false
-    emptySpriteName: microstimpen_empty
   - type: Solution
     solution:
       reagents:
@@ -541,20 +488,15 @@
         Quantity: 8
 
 - type: entity
-  parent: ChemicalMedipen
+  parent: ST14BaseAutoinjector
   id: ST14PlasmaPen
   name: plasma expander autoinjector
   description: Fills the vessels when there is no blood to give. It thins the blood that is left.
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medipen.rsi
     layers:
-    - state: salacid
+    - state: Plasma
       map: ["enum.SolutionContainerLayers.Fill"]
-  - type: SolutionContainerVisuals
-    maxFillLevels: 1
-    changeColor: false
-    emptySpriteName: salacid_empty
   - type: Solution
     solution:
       reagents:
@@ -570,12 +512,10 @@
   suffix: Full
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medical.rsi
-    state: ointment
-    color: "#B8E6F0"
+    sprite: _ST14/Objects/Specific/Medical/antiseptic.rsi
+    state: base
   - type: Item
-    sprite: Objects/Specific/Medical/medical.rsi
-    heldPrefix: ointment
+    sprite: _ST14/Objects/Specific/Medical/antiseptic.rsi
     size: Small
   - type: Stack
     stackType: ST14Antiseptic
@@ -598,10 +538,21 @@
   description: Shots for what comes after the first minutes of a wound - the heart, infection, bones, venom and blood.
   components:
   - type: Sprite
-    state: advkit
+    sprite: _ST14/Objects/Specific/Medical/drugcase.rsi
+    layers:
+    - map: [ base ]
+      state: base
   - type: Item
-    heldPrefix: advkit
+    sprite: _ST14/Objects/Specific/Medical/drugcase.rsi
+    heldPrefix: null
     size: Normal
+  - type: GenericVisualizer
+    visuals:
+      enum.StorageVisuals.Open:
+        base:
+          True: { state: open }
+          False: { state: base }
+  - type: Appearance
   - type: Storage
     maxItemSize: Tiny
     grid:
@@ -637,11 +588,10 @@
   description: Half a litre of donor blood with a needle. Puts back a quarter of the blood of a man who lost it. Hang it and wait.
   components:
   - type: Sprite
-    sprite: Objects/Specific/Medical/medical.rsi
-    state: bloodpack
+    sprite: _ST14/Objects/Specific/Medical/bloodbag.rsi
+    state: filled-3
   - type: Item
-    sprite: Objects/Specific/Medical/medical.rsi
-    heldPrefix: bloodpack
+    sprite: _ST14/Objects/Specific/Medical/bloodbag.rsi
     size: Small
   - type: ST14Treatment
     kind: Transfusion

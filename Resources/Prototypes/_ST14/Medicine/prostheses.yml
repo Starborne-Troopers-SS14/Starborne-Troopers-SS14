@@ -1,20 +1,5 @@
-# Prostheses: the parts that go into the body, and the items fitted to a stump. The sprites are their own,
-# drawn over the shape of the flesh limb: bare steel with seams and rivets, wood with leather straps, a hook, a peg
-
-- type: entity
-  abstract: true
-  id: ST14ProsthesisFieldPart
-  components:
-  - type: Sprite
-    sprite: _ST14/Mobs/prostheses.rsi
-  - type: VisualOrgan
-    data:
-      sprite: _ST14/Mobs/prostheses.rsi
-  - type: VisualOrganMarkings
-    markingData:
-      group: Human
-  - type: ST14Prosthesis
-    field: true
+# Prostheses: the parts that go into the body, and the items fitted to a stump. Military steel limbs,
+# the body sprites are cut from the worn sprite of the whole limb into the limb and the hand or foot
 
 - type: entity
   abstract: true
@@ -29,94 +14,6 @@
     markingData:
       group: Human
   - type: ST14Prosthesis
-
-- type: entity
-  parent: [ OrganBaseArmLeft, ST14ProsthesisFieldPart ]
-  id: ST14OrganFieldArmLeft
-  name: field prosthetic left arm
-  components:
-  - type: Sprite
-    state: field_l_arm
-  - type: VisualOrgan
-    data:
-      state: field_l_arm
-
-- type: entity
-  parent: [ OrganBaseArmRight, ST14ProsthesisFieldPart ]
-  id: ST14OrganFieldArmRight
-  name: field prosthetic right arm
-  components:
-  - type: Sprite
-    state: field_r_arm
-  - type: VisualOrgan
-    data:
-      state: field_r_arm
-
-- type: entity
-  parent: [ OrganBaseHandLeft, ST14ProsthesisFieldPart ]
-  id: ST14OrganFieldHandLeft
-  name: field prosthetic left hand
-  components:
-  - type: Sprite
-    state: field_l_hand
-  - type: VisualOrgan
-    data:
-      state: field_l_hand
-
-- type: entity
-  parent: [ OrganBaseHandRight, ST14ProsthesisFieldPart ]
-  id: ST14OrganFieldHandRight
-  name: field prosthetic right hand
-  components:
-  - type: Sprite
-    state: field_r_hand
-  - type: VisualOrgan
-    data:
-      state: field_r_hand
-
-- type: entity
-  parent: [ OrganBaseLegLeft, ST14ProsthesisFieldPart ]
-  id: ST14OrganFieldLegLeft
-  name: field prosthetic left leg
-  components:
-  - type: Sprite
-    state: field_l_leg
-  - type: VisualOrgan
-    data:
-      state: field_l_leg
-
-- type: entity
-  parent: [ OrganBaseLegRight, ST14ProsthesisFieldPart ]
-  id: ST14OrganFieldLegRight
-  name: field prosthetic right leg
-  components:
-  - type: Sprite
-    state: field_r_leg
-  - type: VisualOrgan
-    data:
-      state: field_r_leg
-
-- type: entity
-  parent: [ OrganBaseFootLeft, ST14ProsthesisFieldPart ]
-  id: ST14OrganFieldFootLeft
-  name: field prosthetic left foot
-  components:
-  - type: Sprite
-    state: field_l_foot
-  - type: VisualOrgan
-    data:
-      state: field_l_foot
-
-- type: entity
-  parent: [ OrganBaseFootRight, ST14ProsthesisFieldPart ]
-  id: ST14OrganFieldFootRight
-  name: field prosthetic right foot
-  components:
-  - type: Sprite
-    state: field_r_foot
-  - type: VisualOrgan
-    data:
-      state: field_r_foot
 
 - type: entity
   parent: [ OrganBaseArmLeft, ST14ProsthesisSteelPart ]
@@ -206,8 +103,10 @@
     data:
       state: steel_r_foot
 
-# The items. A field one goes on anywhere in 8 seconds, a steel one on a patient lying down in 20.
-# Both need the stump sewn shut first, and without anaesthesia the patient screams through it
+
+# The items. A steel one goes on a patient lying down in 20 seconds. The stump has to be sewn shut
+# first, and without anaesthesia the patient screams through it
+
 - type: entity
   parent: BaseItem
   abstract: true
@@ -216,43 +115,7 @@
   - type: Item
     size: Normal
   - type: Sprite
-    sprite: _ST14/Mobs/prostheses.rsi
-
-- type: entity
-  parent: ST14ProsthesisBase
-  id: ST14FieldProsthesisArm
-  name: field arm prosthesis
-  description: A wooden arm on leather straps with a hook for a hand. Crude, but it holds a rifle. Goes onto a sewn stump anywhere.
-  components:
-  - type: Sprite
-    state: field_l_arm
-  - type: ST14ProsthesisItem
-    limb: Arm
-    leftLimb: ST14OrganFieldArmLeft
-    leftEnd: ST14OrganFieldHandLeft
-    rightLimb: ST14OrganFieldArmRight
-    rightEnd: ST14OrganFieldHandRight
-    delay: 8
-    fitSound:
-      path: /Audio/Items/zip.ogg
-
-- type: entity
-  parent: ST14ProsthesisBase
-  id: ST14FieldProsthesisLeg
-  name: field leg prosthesis
-  description: A peg leg on leather straps. You can walk on it, slower than before. Goes onto a sewn stump anywhere.
-  components:
-  - type: Sprite
-    state: field_l_leg
-  - type: ST14ProsthesisItem
-    limb: Leg
-    leftLimb: ST14OrganFieldLegLeft
-    leftEnd: ST14OrganFieldFootLeft
-    rightLimb: ST14OrganFieldLegRight
-    rightEnd: ST14OrganFieldFootRight
-    delay: 8
-    fitSound:
-      path: /Audio/Items/zip.ogg
+    state: icon
 
 - type: entity
   parent: ST14ProsthesisBase
@@ -261,7 +124,9 @@
   description: A military steel arm with a working hand. As good as the one the bugs took. Fitted to a patient lying down, onto a sewn stump.
   components:
   - type: Sprite
-    state: steel_l_arm
+    sprite: _ST14/Objects/Specific/Medical/prosthesis_arm.rsi
+  - type: Item
+    sprite: _ST14/Objects/Specific/Medical/prosthesis_arm.rsi
   - type: ST14ProsthesisItem
     limb: Arm
     leftLimb: ST14OrganSteelArmLeft
@@ -280,7 +145,9 @@
   description: A military steel leg. You walk and run on it as before. Fitted to a patient lying down, onto a sewn stump.
   components:
   - type: Sprite
-    state: steel_l_leg
+    sprite: _ST14/Objects/Specific/Medical/prosthesis_leg.rsi
+  - type: Item
+    sprite: _ST14/Objects/Specific/Medical/prosthesis_leg.rsi
   - type: ST14ProsthesisItem
     limb: Leg
     leftLimb: ST14OrganSteelLegLeft

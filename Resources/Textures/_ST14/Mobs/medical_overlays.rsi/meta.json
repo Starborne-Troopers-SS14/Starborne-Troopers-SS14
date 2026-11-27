@@ -8,46 +8,6 @@
   },
   "states": [
     {
-      "name": "bandage_head",
-      "directions": 4
-    },
-    {
-      "name": "bandage_l_arm",
-      "directions": 4
-    },
-    {
-      "name": "bandage_l_leg",
-      "directions": 4
-    },
-    {
-      "name": "bandage_r_arm",
-      "directions": 4
-    },
-    {
-      "name": "bandage_r_leg",
-      "directions": 4
-    },
-    {
-      "name": "bandage_torso",
-      "directions": 4
-    },
-    {
-      "name": "splint_l_arm",
-      "directions": 4
-    },
-    {
-      "name": "splint_l_leg",
-      "directions": 4
-    },
-    {
-      "name": "splint_r_arm",
-      "directions": 4
-    },
-    {
-      "name": "splint_r_leg",
-      "directions": 4
-    },
-    {
       "name": "tourniquet_l_arm",
       "directions": 4
     },

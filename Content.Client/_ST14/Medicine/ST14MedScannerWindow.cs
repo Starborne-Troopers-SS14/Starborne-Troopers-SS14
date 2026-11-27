@@ -445,7 +445,8 @@ public sealed class ST14Cardiogram : Control
 public sealed class ST14BodyDoll : Control
 {
     private static readonly ResPath PartsRsi = new("/Textures/Mobs/Species/Human/parts.rsi");
-    private static readonly ResPath MarksRsi = new("/Textures/_ST14/Mobs/medical_overlays.rsi");
+    private static readonly ResPath MarksRsi = new("/Textures/_ST14/Mobs/medical_marks.rsi");
+    private static readonly ResPath TourniquetRsi = new("/Textures/_ST14/Mobs/medical_overlays.rsi");
 
     private static readonly (ST14BodyZone Zone, string[] States, string Mark)[] Layout =
     {
@@ -528,7 +529,7 @@ public sealed class ST14BodyDoll : Control
                 handle.DrawTextureRect(_sprite.Frame0(new SpriteSpecifier.Rsi(MarksRsi, $"splint_{mark}")), box);
 
             if (state.Tourniquets.ContainsKey(zone))
-                handle.DrawTextureRect(_sprite.Frame0(new SpriteSpecifier.Rsi(MarksRsi, $"tourniquet_{mark}")), box);
+                handle.DrawTextureRect(_sprite.Frame0(new SpriteSpecifier.Rsi(TourniquetRsi, $"tourniquet_{mark}")), box);
         }
     }
 }

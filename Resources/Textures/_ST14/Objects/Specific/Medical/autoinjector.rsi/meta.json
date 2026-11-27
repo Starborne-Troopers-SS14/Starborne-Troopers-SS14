@@ -1,0 +1,70 @@
+{
+    "version": 1,
+    "license": "All-Rights-Reserved",
+    "copyright": "Made by PatoGrone for Starborne Troopers",
+    "size": {
+        "x": 32,
+        "y": 32
+    },
+    "states": [
+        {
+            "name": "inhand-right",
+            "directions": 4
+        },
+        {
+            "name": "inhand-left",
+            "directions": 4
+        },
+        {
+            "name": "Adrenaline"
+        },
+        {
+            "name": "Amiodarone"
+        },
+        {
+            "name": "Antibiotic"
+        },
+        {
+            "name": "Antipyretic"
+        },
+        {
+            "name": "Antivenom"
+        },
+        {
+            "name": "Atropine"
+        },
+        {
+            "name": "CombatStim"
+        },
+        {
+            "name": "Ketamine"
+        },
+        {
+            "name": "Ketorolac"
+        },
+        {
+            "name": "Modafinil"
+        },
+        {
+            "name": "Morphine"
+        },
+        {
+            "name": "Naloxone"
+        },
+        {
+            "name": "Osteogen"
+        },
+        {
+            "name": "Plasma"
+        },
+        {
+            "name": "Regenerol"
+        },
+        {
+            "name": "Tranexamic"
+        },
+        {
+            "name": "spent"
+        }
+    ]
+}

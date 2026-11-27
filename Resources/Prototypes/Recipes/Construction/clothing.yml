@@ -64,6 +64,7 @@
 - type: construction
   parent: BaseClothing
   id: ClothingEyesHudMedSec
+  hide: true # ST14: vanilla medicine is not ours, field medicine lives in _ST14/Medicine
   graph: HudMedSec
   targetNode: medsecHud
 
