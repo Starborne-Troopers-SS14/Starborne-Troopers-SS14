@@ -1,29 +1,23 @@
 using System.Numerics;
 using Content.Client.Resources;
 using Content.Shared._ST14.Medicine;
-using Content.Shared.Input;
 using Robust.Client.Graphics;
-using Robust.Client.Input;
 using Robust.Client.Player;
 using Robust.Client.ResourceManagement;
 using Robust.Shared.Enums;
-using Robust.Shared.Input.Binding;
 using Robust.Shared.Map;
 
 namespace Content.Client._ST14.Medicine;
 
 /// <summary>
-/// The calls for a medic as the server tells them: a medic sees every call, near ones with their distance under the
-/// cross, far ones as an arrow on the edge of the screen, and answers the nearest with a key; the trooper who called
-/// sees whether a medic comes, who and how far
+/// The badly wounded as the server tells them: a medic sees every one of them, near ones with their distance under the
+/// cross, far ones as an arrow on the edge of the screen
 /// </summary>
 public sealed partial class ST14MedicCallsSystem : EntitySystem
 {
     [Dependency] private IOverlayManager _overlays = default!;
 
     public List<ST14MedicCall> Calls { get; private set; } = new();
-
-    public ST14MedicCallStatusEvent? Status { get; private set; }
 
     private ST14MedicCallsOverlay _overlay = default!;
 
@@ -32,11 +26,6 @@ public sealed partial class ST14MedicCallsSystem : EntitySystem
         base.Initialize();
 
         SubscribeNetworkEvent<ST14MedicCallsEvent>(ev => Calls = ev.Calls);
-        SubscribeNetworkEvent<ST14MedicCallStatusEvent>(ev => Status = ev.Calling ? ev : null);
-
-        CommandBinds.Builder
-            .Bind(ContentKeyFunctions.ST14MedicRespond, InputCmdHandler.FromDelegate(_ => RaiseNetworkEvent(new ST14MedicRespondEvent(null))))
-            .Register<ST14MedicCallsSystem>();
 
         _overlay = new ST14MedicCallsOverlay(this);
         _overlays.AddOverlay(_overlay);
@@ -45,7 +34,6 @@ public sealed partial class ST14MedicCallsSystem : EntitySystem
     public override void Shutdown()
     {
         base.Shutdown();
-        CommandBinds.Unregister<ST14MedicCallsSystem>();
         _overlays.RemoveOverlay(_overlay);
     }
 }
@@ -56,19 +44,15 @@ public sealed partial class ST14MedicCallsOverlay : Overlay
     private const float Edge = 46f;
 
     private static readonly Color Open = Color.FromHex("#FF4040");
-    private static readonly Color Mine = Color.FromHex("#3BD46A");
-    private static readonly Color Taken = Color.FromHex("#A8A8A8");
     private static readonly Color Shadow = Color.Black.WithAlpha(0.8f);
 
     [Dependency] private IEntityManager _entities = default!;
     [Dependency] private IEyeManager _eye = default!;
-    [Dependency] private IInputManager _input = default!;
     [Dependency] private IPlayerManager _player = default!;
     [Dependency] private IResourceCache _cache = default!;
 
     private readonly ST14MedicCallsSystem _system;
     private Font? _font;
-    private Font? _big;
 
     public override OverlaySpace Space => OverlaySpace.ScreenSpace;
 
@@ -85,22 +69,9 @@ public sealed partial class ST14MedicCallsOverlay : Overlay
             return;
 
         _font ??= _cache.GetFont(FontPath, 12);
-        _big ??= _cache.GetFont(FontPath, 15);
         var handle = args.ScreenHandle;
         var bounds = args.ViewportBounds;
         _screen = new UIBox2(bounds.Left, bounds.Top, bounds.Right, bounds.Bottom);
-
-        // the trooper who called: does anyone come
-        if (_system.Status is { } status)
-        {
-            var text = status.Responder == null ? Loc.GetString("st14-medic-status-waiting")
-                : status.Distance >= 0 ? Loc.GetString("st14-medic-status-coming", ("name", status.Responder), ("distance", (int) MathF.Round(status.Distance)))
-                : Loc.GetString("st14-medic-status-coming-far", ("name", status.Responder));
-            // above the heart monitor of a downed trooper, not over it
-            var y = _entities.HasComponent<ST14DyingComponent>(local) ? bounds.Bottom - ST14MedicineOverlay.MonitorReach - 34f : bounds.Bottom - 210f;
-            DrawCentered(handle, _big, text, new Vector2((bounds.Left + bounds.Right) / 2f, y),
-                status.Responder == null ? Open : Mine);
-        }
 
         if (!_entities.HasComponent<ST14MedicHudComponent>(local))
             return;
@@ -108,31 +79,15 @@ public sealed partial class ST14MedicCallsOverlay : Overlay
         var xform = _entities.GetComponent<TransformComponent>(local);
         var transform = _entities.System<SharedTransformSystem>();
         var here = transform.GetMapCoordinates(local, xform);
-        var key = _input.TryGetKeyBinding(ContentKeyFunctions.ST14MedicRespond, out var binding) ? binding.GetKeyString() : "N";
-
-        var open = 0;
-        ST14MedicCall? mine = null;
-        var mineDistance = 0;
         foreach (var call in _system.Calls)
         {
             var caller = _entities.GetEntity(call.Caller);
             if (caller == local || call.Map != (int) here.MapId)
                 continue;
 
-            var responder = call.Responder is { } r ? _entities.GetEntity(r) : (EntityUid?) null;
             var distance = (int) MathF.Round((call.Position - here.Position).Length());
-            var color = responder == null ? Open : responder == local ? Mine : Taken;
-            if (responder == null)
-                open++;
-            else if (responder == local)
-            {
-                mine = call;
-                mineDistance = distance;
-            }
-
-            var label = responder == null ? Loc.GetString("st14-medic-mark", ("name", call.Name), ("distance", distance))
-                : responder == local ? Loc.GetString("st14-medic-mark-mine", ("name", call.Name), ("distance", distance))
-                : Loc.GetString("st14-medic-mark-taken", ("name", call.Name), ("distance", distance), ("medic", call.ResponderName ?? string.Empty));
+            var color = Open;
+            var label = Loc.GetString("st14-medic-mark", ("name", call.Name), ("distance", distance));
 
             var screen = _eye.MapToScreen(new MapCoordinates(call.Position, here.MapId)).Position;
             var inner = new UIBox2(bounds.Left + Edge, bounds.Top + Edge, bounds.Right - Edge, bounds.Bottom - Edge);
@@ -158,16 +113,6 @@ public sealed partial class ST14MedicCallsOverlay : Overlay
             DrawCross(handle, at - direction * 26f, color);
             DrawCentered(handle, _font, label, at - direction * 26f + new Vector2(0f, 20f), color);
         }
-
-        // what the key does right now
-        string? hint = null;
-        if (mine is { } going)
-            hint = Loc.GetString("st14-medic-hint-going", ("name", going.Name), ("distance", mineDistance), ("key", key));
-        else if (open > 0)
-            hint = Loc.GetString("st14-medic-hint-open", ("count", open), ("key", key));
-
-        if (hint != null)
-            DrawCentered(handle, _big, hint, new Vector2((bounds.Left + bounds.Right) / 2f, bounds.Top + 90f), mine != null ? Mine : Open);
     }
 
     private UIBox2 _screen;

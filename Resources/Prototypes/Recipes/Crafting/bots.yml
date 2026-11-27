@@ -30,6 +30,7 @@
 - type: construction
   parent: BaseRobot
   id: medibot
+  hide: true # ST14: vanilla medicine is not ours, field medicine lives in _ST14/Medicine
   graph: MediBot
 
 - type: construction

@@ -116,6 +116,7 @@
 - type: construction
   parent: BaseTool
   id: gauze
+  hide: true # ST14: vanilla medicine is not ours, field medicine lives in _ST14/Medicine
   graph: Gauze
   targetNode: gauze
 

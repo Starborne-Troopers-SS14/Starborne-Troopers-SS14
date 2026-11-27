@@ -305,19 +305,13 @@ public sealed partial class ST14WoundsComponent : Component
 public sealed partial class ST14MedicHudComponent : Component;
 
 /// <summary>
-/// A trooper calling for a medic: the medics see a red cross over them for a while
+/// A badly wounded trooper: the medics see a red cross over them for a while
 /// </summary>
 [RegisterComponent, NetworkedComponent, AutoGenerateComponentState]
 public sealed partial class ST14CallingMedicComponent : Component
 {
     [DataField, AutoNetworkedField]
     public TimeSpan Until;
-
-    /// <summary>
-    /// The medic who said he comes: the cross turns green for him and grey for the other medics
-    /// </summary>
-    [DataField, AutoNetworkedField]
-    public EntityUid? Responder;
 }
 
 /// <summary>

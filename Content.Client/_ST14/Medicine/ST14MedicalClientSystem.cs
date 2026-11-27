@@ -22,7 +22,8 @@ public sealed partial class ST14MedicalClientSystem : EntitySystem
 
     private static readonly SoundSpecifier Heartbeat = new SoundPathSpecifier("/Audio/_ST14/Medicine/heartbeat.wav");
     private static readonly SoundSpecifier Ringing = new SoundPathSpecifier("/Audio/_ST14/Medicine/shell_shock.wav");
-    private static readonly ResPath MarksRsi = new("/Textures/_ST14/Mobs/medical_overlays.rsi");
+    private static readonly ResPath MarksRsi = new("/Textures/_ST14/Mobs/medical_marks.rsi");
+    private static readonly ResPath TourniquetRsi = new("/Textures/_ST14/Mobs/medical_overlays.rsi");
     private static readonly ResPath BruteRsi = new("/Textures/Mobs/Effects/brute_damage.rsi");
     private static readonly ResPath BurnRsi = new("/Textures/Mobs/Effects/burn_damage.rsi");
     private static readonly Color BloodColor = Color.FromHex("#B0141A");
@@ -195,7 +196,7 @@ public sealed partial class ST14MedicalClientSystem : EntitySystem
 
             var wounds = ent.Comp.Wounds.Where(w => w.Zone == zone).ToList();
             if (ent.Comp.Tourniquets.ContainsKey(zone))
-                wanted.Add(($"tourniquet_{part}", MarksRsi, $"tourniquet_{part}", Color.White));
+                wanted.Add(($"tourniquet_{part}", TourniquetRsi, $"tourniquet_{part}", Color.White));
 
             if (wounds.Any(w => w.Bandaged || w.Packed))
                 wanted.Add(($"bandage_{part}", MarksRsi, $"bandage_{part}", Color.White));

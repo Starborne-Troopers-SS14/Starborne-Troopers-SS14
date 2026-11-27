@@ -87,8 +87,6 @@ st14-pulse-weak = слабый
 st14-pulse-thready = нитевидный, едва прощупывается
 st14-pulse-erratic = сбивчивый, с перебоями
 st14-cpr-start = { CAPITALIZE($user) } давит на грудь { $target }: раз, два, три...
-st14-medic-call-shout = МЕДИК!
-st14-medic-call-self = Вы зовёте медика. Медики видят над вами красный крест.
 
 ## Осмотр
 st14-examine-tourniquet = [color=#d8b26a]Жгут затянут ({ $minutes } мин): { $zone }.[/color]
@@ -210,22 +208,10 @@ ent-ST14FieldKit = полевой набор десантника
     .desc = Два жгута, перевязочный пакет, морфий и гемостатик. Хватит, чтобы дожить до медика.
 ent-ST14MedicBag = рюкзак полевого медика
     .desc = Всё, что медик Мобильной пехоты берёт в бой.
-ent-ST14FieldProsthesisArm = полевой протез руки
-    .desc = Деревянная рука на кожаных ремнях с крюком вместо кисти. Грубо, но винтовку держит. Ставится на зашитую культю где угодно.
-ent-ST14FieldProsthesisLeg = полевой протез ноги
-    .desc = Деревяшка на кожаных ремнях. Ходить можно, но медленнее. Ставится на зашитую культю где угодно.
 ent-ST14SteelProsthesisArm = стальной протез руки
     .desc = Армейская стальная рука с рабочей кистью. Не хуже той, что забрали жуки. Ставится лежащему раненому на зашитую культю.
 ent-ST14SteelProsthesisLeg = стальной протез ноги
     .desc = Армейская стальная нога. На ней ходят и бегают, как раньше. Ставится лежащему раненому на зашитую культю.
-ent-ST14OrganFieldArmLeft = деревянная левая рука
-ent-ST14OrganFieldArmRight = деревянная правая рука
-ent-ST14OrganFieldHandLeft = левый крюк
-ent-ST14OrganFieldHandRight = правый крюк
-ent-ST14OrganFieldLegLeft = деревянная левая нога
-ent-ST14OrganFieldLegRight = деревянная правая нога
-ent-ST14OrganFieldFootLeft = левая культяпка
-ent-ST14OrganFieldFootRight = правая культяпка
 ent-ST14OrganSteelArmLeft = стальная левая рука
 ent-ST14OrganSteelArmRight = стальная правая рука
 ent-ST14OrganSteelHandLeft = стальная левая кисть
@@ -370,20 +356,6 @@ st14-treat-done-transfusion = Кровь перелита.
 
 ## Вызов медика
 
-st14-medic-call-done = { $name } больше не нужен медик.
-st14-medic-respond-cancel = Вы больше не идёте к { $name }.
-st14-medic-respond-gone = Медик не придёт. Зовите снова.
-st14-medic-respond-none = Никто не зовёт медика.
-st14-medic-respond-self = Вы идёте к { $name }.
-st14-medic-respond-patient = Медик { $name } идёт к вам!
-st14-medic-status-waiting = Вы зовёте медика. Пока никто не ответил
-st14-medic-status-coming = Медик { $name } идёт к вам: { $distance } м
-st14-medic-status-coming-far = Медик { $name } идёт к вам
-st14-medic-hint-open = Зовут медика: { $count }  ·  { $key }: иду к ближайшему
-st14-medic-hint-going = Вы идёте к { $name }: { $distance } м  ·  { $key }: отменить
 st14-medic-mark = { $name } · { $distance } м
-st14-medic-mark-taken = { $name } · { $distance } м · идёт { $medic }
-st14-medic-mark-mine = { $name } · { $distance } м · вы идёте
-ui-options-function-st14-medic-respond = Медик: иду на вызов
 st14-heartbeat-hit = В ТАКТ!
 st14-heartbeat-miss = МИМО

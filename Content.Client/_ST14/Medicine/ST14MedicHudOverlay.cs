@@ -62,8 +62,7 @@ public sealed partial class ST14MedicHudOverlay : Overlay
                 continue;
 
             var dead = mobState.IsDead(uid);
-            _entities.TryGetComponent<ST14CallingMedicComponent>(uid, out var call);
-            var calling = call != null;
+            var calling = _entities.HasComponent<ST14CallingMedicComponent>(uid);
             var stopped = wounds.Heart == ST14HeartState.Arrest && !dead;
             var fracture = wounds.Wounds.Any(w => w.Kind == ST14WoundKind.Fracture && !w.Splinted);
             var dying = wounds.Tourniquets.Values.Any(s => s >= wounds.IschemiaTime);
@@ -90,9 +89,7 @@ public sealed partial class ST14MedicHudOverlay : Overlay
             var top = position + new Vector2(0f, 0.75f);
             if (calling && !dead)
             {
-                var crossColor = call!.Responder == null ? Color.FromHex("#E01818")
-                    : call.Responder == _player.LocalEntity ? Color.FromHex("#2FBF5A") : Color.FromHex("#8A8A8A");
-                DrawCross(handle, top + new Vector2(0f, 0.32f), 0.2f + (call.Responder == null ? 0.04f * pulse : 0f), crossColor);
+                DrawCross(handle, top + new Vector2(0f, 0.32f), 0.2f + 0.04f * pulse, Color.FromHex("#E01818"));
                 top += new Vector2(0f, 0.02f);
             }
 
