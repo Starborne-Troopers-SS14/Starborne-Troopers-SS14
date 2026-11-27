@@ -1,0 +1,53 @@
+===============================================================================
+Z-LEVELS — LICENSE NOTICE / ЛИЦЕНЗИЯ Z-УРОВНЕЙ
+===============================================================================
+
+The code in this directory and its subdirectories is based on the Z-level
+system of CrystallEdge (CE) by TheShuEd and the CrystallEdge contributors,
+imported into Starborne Troopers in commit 4008226e0f ("Z layers (#18)").
+CrystallEdge published it under the MIT License (most files carry the header
+"This file is sublicensed under MIT License"). In Starborne Troopers it was
+moved out of the "_CE" directories, renamed (CE* -> ST14*) and optimised.
+
+As an exception to section 1 of the root LICENSE.TXT, the files in this
+directory are NOT "all rights reserved". The original CrystallEdge code and
+the Starborne Troopers changes to it are licensed under the MIT License below.
+The license header at the top of each file must be kept.
+
+Art used by the z-levels (Resources/Textures/_ST14/ZLevels) keeps the license
+and authors listed in each meta.json (CC-BY-SA-3.0 / CC-BY-SA-4.0).
+
+-------------------------------------------------------------------------------
+MIT License
+
+Copyright (c) CrystallEdge contributors
+Copyright (c) 2026 Denlero and Starborne Troopers contributors (modifications)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+-------------------------------------------------------------------------------
+
+Код в этой папке основан на системе Z-уровней CrystallEdge (CE; TheShuEd и
+участники CrystallEdge), импортированной коммитом 4008226e0f, и распространялся
+CE под лицензией MIT. В Starborne Troopers он перенесён из папок "_CE",
+переименован (CE* -> ST14*) и оптимизирован. В виде исключения из раздела 1
+корневого LICENSE.TXT эти файлы НЕ являются "все права защищены": исходный код
+CE и наши изменения к нему распространяются под лицензией MIT (текст выше),
+шапку с лицензией в каждом файле нужно сохранять. Текстуры Z-уровней — по
+лицензиям и авторам из meta.json (CC-BY-SA-3.0 / CC-BY-SA-4.0).

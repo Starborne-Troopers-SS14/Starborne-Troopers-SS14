@@ -71,7 +71,9 @@ namespace Content.Client.LateJoin
             {
                 var (station, jobId) = x;
                 _sawmill.Info($"Late joining as ID: {jobId}");
-                _consoleHost.ExecuteCommand($"joingame {CommandParsing.Escape(jobId)} {station}");
+                // ST14: on a sector round the player picks where to come in first (a bunker base or the usual landing)
+                _entitySystem.GetEntitySystem<Content.Client._ST14.Sectors.ST14LandingClientSystem>().BeforeJoin(() =>
+                    _consoleHost.ExecuteCommand($"joingame {CommandParsing.Escape(jobId)} {station}"));
                 Close();
             };
 

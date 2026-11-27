@@ -28,6 +28,12 @@ public sealed partial class ST14EngineerBuildablePrototype : IPrototype
     [DataField]
     public LocId? Name { get; private set; }
 
+    /// <summary>
+    /// ST14: the tab of the build menu it is in
+    /// </summary>
+    [DataField]
+    public ProtoId<ST14BuildCategoryPrototype> Category { get; private set; } = "ST14BuildOther";
+
     [DataField]
     public List<IConstructionCondition> Conditions { get; private set; } = new();
 }

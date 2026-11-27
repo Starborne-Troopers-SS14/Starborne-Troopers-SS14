@@ -1,8 +1,8 @@
 using System.Numerics;
-using Content.Client._CE.ZLevels.Core;
+using Content.Client._ST14.ZLevels.Core;
 using Content.Client.Clickable;
-using Content.Shared._CE.ZLevels.Core.Components;
-using Content.Shared._CE.ZLevels.Core.EntitySystems;
+using Content.Shared._ST14.ZLevels.Core.Components;
+using Content.Shared._ST14.ZLevels.Core.EntitySystems;
 using Content.Shared.Mobs.Systems;
 using Content.Shared.Physics;
 using Robust.Client.ComponentTrees;
@@ -16,10 +16,10 @@ namespace Content.Client._ST14.ZLevelShooting;
 public sealed partial class ST14ZTargetingSystem : EntitySystem
 {
     [Dependency] private ClickableSystem _clickable = default!;
-    [Dependency] private CEClientZLevelsSystem _zLevels = default!;
+    [Dependency] private ST14ClientZLevelsSystem _zLevels = default!;
     [Dependency] private MobStateSystem _mobState = default!;
     [Dependency] private SpriteTreeSystem _spriteTree = default!;
-    [Dependency] private EntityQuery<CEZLevelViewerComponent> _viewerQuery = default!;
+    [Dependency] private EntityQuery<ST14ZLevelViewerComponent> _viewerQuery = default!;
     [Dependency] private EntityQuery<FixturesComponent> _fixturesQuery = default!;
     [Dependency] private EntityQuery<MapComponent> _mapQuery = default!;
 
@@ -28,7 +28,7 @@ public sealed partial class ST14ZTargetingSystem : EntitySystem
         if (Transform(shooter).MapUid is not { } map)
             return null;
 
-        var shift = (-eye.Rotation).ToWorldVec() * CESharedZLevelsSystem.ZLevelOffset;
+        var shift = (-eye.Rotation).ToWorldVec() * ST14SharedZLevelsSystem.ZLevelOffset;
         var above = _viewerQuery.TryComp(shooter, out var viewer) && viewer.LookUp
             ? _zLevels.GetVisibleZLevelsAbove(shooter)
             : 0;
@@ -42,7 +42,7 @@ public sealed partial class ST14ZTargetingSystem : EntitySystem
         if (TryGetTarget(map, 0, mouse.Position, shift, eye, out _))
             return null;
 
-        for (var depth = -1; depth >= -CESharedZLevelsSystem.MaxZLevelsBelowRendering; depth--)
+        for (var depth = -1; depth >= -ST14SharedZLevelsSystem.MaxZLevelsBelowRendering; depth--)
         {
             if (TryGetTarget(map, depth, mouse.Position, shift, eye, out var target))
                 return target;

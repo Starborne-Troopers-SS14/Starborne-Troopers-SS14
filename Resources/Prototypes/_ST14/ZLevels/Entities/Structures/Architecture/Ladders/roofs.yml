@@ -1,0 +1,132 @@
+# Roof tiles: climbable cover tiles placed on a lower level so the level above can be walked on.
+#
+# Ported 1:1 from CrystallEdge (MIT-sublicensed). The per-colour destructible layers
+# (ST14ZLevelsLadderRoof{Red,Green,Blue}Base) existed upstream only to override the drop spawn with the
+# matching CE floor-tile item; with the CE content economy stripped they collapsed into the shared
+# RoofBase definition below, so the colour variants now only differ by sprite.
+
+- type: entity
+  id: ST14ZLevelsLadderRoofBase
+  name: roof tile
+  description: Roof tiles, for covering building roofs.
+  abstract: true
+  components:
+  - type: Damageable
+    damageModifierSet: Rock
+  - type: Injurable
+    damageContainer: StructuralInorganic
+  - type: Destructible
+    thresholds:
+    - trigger:
+        !type:DamageTrigger
+        damage: 30
+      behaviors:
+      - !type:PlaySoundBehavior
+        sound:
+          path: /Audio/Effects/break_stone.ogg
+          params:
+            volume: -6
+      - !type:DoActsBehavior
+        acts: ["Destruction"]
+
+# Red
+
+- type: entity
+  parent:
+  - ST14ZLevelLadderBase
+  - ST14ZLevelsLadderRoofBase
+  id: ST14ZLevelsLadderRoofRed
+  name: red roof
+  components:
+  - type: Sprite
+    sprite: _ST14/ZLevels/Structures/Architecture/Ladders/roof_red.rsi
+
+- type: entity
+  parent:
+  - ST14ZLevelLadderCornerBase
+  - ST14ZLevelsLadderRoofBase
+  id: ST14ZLevelsLadderRoofRedCorner
+  name: red roof
+  suffix: Corner
+  components:
+  - type: Sprite
+    sprite: _ST14/ZLevels/Structures/Architecture/Ladders/roof_red.rsi
+
+- type: entity
+  parent:
+  - ST14ZLevelLadderCornerInnerBase
+  - ST14ZLevelsLadderRoofBase
+  id: ST14ZLevelsLadderRoofRedCornerInner
+  name: red roof
+  suffix: Inner Corner
+  components:
+  - type: Sprite
+    sprite: _ST14/ZLevels/Structures/Architecture/Ladders/roof_red.rsi
+
+# Green
+
+- type: entity
+  parent:
+  - ST14ZLevelLadderBase
+  - ST14ZLevelsLadderRoofBase
+  id: ST14ZLevelsLadderRoofGreen
+  name: green roof
+  components:
+  - type: Sprite
+    sprite: _ST14/ZLevels/Structures/Architecture/Ladders/roof_green.rsi
+
+- type: entity
+  parent:
+  - ST14ZLevelLadderCornerBase
+  - ST14ZLevelsLadderRoofBase
+  id: ST14ZLevelsLadderRoofGreenCorner
+  name: green roof
+  suffix: Corner
+  components:
+  - type: Sprite
+    sprite: _ST14/ZLevels/Structures/Architecture/Ladders/roof_green.rsi
+
+- type: entity
+  parent:
+  - ST14ZLevelLadderCornerInnerBase
+  - ST14ZLevelsLadderRoofBase
+  id: ST14ZLevelsLadderRoofGreenCornerInner
+  name: green roof
+  suffix: Inner Corner
+  components:
+  - type: Sprite
+    sprite: _ST14/ZLevels/Structures/Architecture/Ladders/roof_green.rsi
+
+# Blue
+
+- type: entity
+  parent:
+  - ST14ZLevelLadderBase
+  - ST14ZLevelsLadderRoofBase
+  id: ST14ZLevelsLadderRoofBlue
+  name: blue roof
+  components:
+  - type: Sprite
+    sprite: _ST14/ZLevels/Structures/Architecture/Ladders/roof_blue.rsi
+
+- type: entity
+  parent:
+  - ST14ZLevelLadderCornerBase
+  - ST14ZLevelsLadderRoofBase
+  id: ST14ZLevelsLadderRoofBlueCorner
+  name: blue roof
+  suffix: Corner
+  components:
+  - type: Sprite
+    sprite: _ST14/ZLevels/Structures/Architecture/Ladders/roof_blue.rsi
+
+- type: entity
+  parent:
+  - ST14ZLevelLadderCornerInnerBase
+  - ST14ZLevelsLadderRoofBase
+  id: ST14ZLevelsLadderRoofBlueCornerInner
+  name: blue roof
+  suffix: Inner Corner
+  components:
+  - type: Sprite
+    sprite: _ST14/ZLevels/Structures/Architecture/Ladders/roof_blue.rsi

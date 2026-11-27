@@ -1,5 +1,6 @@
 using Content.Server._ST14.Tiles;
 using Content.Shared.Gravity;
+using Content.Server._ST14.ZLevels.Layers; // ST14: z-levels of the sectors
 using System.Linq;
 using Content.Server._ST14.MainHub;
 using Content.Server.Decals;
@@ -68,6 +69,21 @@ public sealed partial class ST14SectorSystem : EntitySystem
     [Dependency] private ST14GalaxyWarSystem _war = default!;
     [Dependency] private ST14SubsectorSystem _subsectors = default!;
     [Dependency] private ServerStationSystem _station = default!;
+    [Dependency] private ST14ZLayerSystem _layers = default!;
+    [Dependency] private ST14ZNetworkSaveSystem _zSave = default!;
+    [Dependency] private Robust.Shared.Containers.SharedContainerSystem _container = default!;
+    [Dependency] private SharedTransformSystem _transform = default!;
+    [Dependency] private Content.Server.Chat.Systems.ChatSystem _chat = default!;
+
+    /// <summary>
+    /// The z-levels of every loaded sector by cell, then by depth; depth 0 is the sector map itself
+    /// </summary>
+    private readonly Dictionary<int, Dictionary<int, EntityUid>> _levels = new();
+
+    /// <summary>
+    /// The sector map (depth 0) of every level of a loaded sector, itself included
+    /// </summary>
+    private readonly Dictionary<EntityUid, EntityUid> _mainOf = new();
 
     /// <summary>
     /// The anchor grid of this round, null when the round is not a sector round
@@ -83,11 +99,34 @@ public sealed partial class ST14SectorSystem : EntitySystem
     /// </summary>
     private readonly Dictionary<int, EntityUid> _maps = new();
 
-    private bool _troopersSeen;
-    private bool _hiveSeen;
     private bool _decided;
     private TimeSpan _nextCheck;
-    private TimeSpan _timeUp;
+
+    /// <summary>
+    /// The sector fought over this round, -1 outside a sector round
+    /// </summary>
+    public int Target => _target;
+
+    /// <summary>
+    /// The sector the attacker gathers in this round, -1 when it lands straight in the target
+    /// </summary>
+    public int Staging => _staging;
+
+    /// <summary>
+    /// The levels of a loaded sector by depth, null when it is not loaded
+    /// </summary>
+    public IReadOnlyDictionary<int, EntityUid>? LevelsOfCell(int cell)
+    {
+        return _levels.GetValueOrDefault(cell);
+    }
+
+    /// <summary>
+    /// The sector a level of a loaded sector belongs to, -1 for any other map
+    /// </summary>
+    public int CellOf(EntityUid level)
+    {
+        return _mainOf.TryGetValue(level, out var main) && CompOrNull<ST14SectorMapComponent>(main) is { } sector ? sector.Cell : -1;
+    }
 
     public override void Initialize()
     {
@@ -99,13 +138,41 @@ public sealed partial class ST14SectorSystem : EntitySystem
         SubscribeLocalEvent<GameRunLevelChangedEvent>(OnRunLevelChanged);
         SubscribeLocalEvent<RoundRestartCleanupEvent>(OnCleanup);
         SubscribeLocalEvent<ST14WarResetEvent>(OnWarReset);
+        SubscribeLocalEvent<PlayerSpawnCompleteEvent>(OnPlayerSpawned);
     }
 
     private ST14SectorSettingsPrototype Settings => _prototype.Index<ST14SectorSettingsPrototype>(SettingsId);
 
     public IReadOnlyDictionary<int, EntityUid> LoadedMaps => _maps;
 
+    /// <summary>
+    /// Every level of every loaded sector: the sector maps and the z-levels around them
+    /// </summary>
+    public IEnumerable<EntityUid> AllLevels => _mainOf.Keys;
+
+    /// <summary>
+    /// The levels of the sector a map belongs to (the map itself when it is no sector level)
+    /// </summary>
+    public IEnumerable<EntityUid> LevelsOf(EntityUid map)
+    {
+        // read from the z-network, so any map with levels (a sector or one an admin gave levels) works the same
+        return _layers.GetLevels(map).Values;
+    }
+
+    /// <summary>
+    /// The main map (depth 0) of the z-network a map is in, the map itself when it has no levels
+    /// </summary>
+    public EntityUid MainLevelOf(EntityUid map)
+    {
+        return _layers.GetLevels(map).GetValueOrDefault(0, map);
+    }
+
     public string? Planet => _planet;
+
+    /// <summary>
+    /// The NPC faction every mob of the hive belongs to
+    /// </summary>
+    public string HiveFaction => Settings.HiveFaction;
 
     /// <summary>
     /// The sector a side starts this round in, -1 outside a sector round
@@ -164,9 +231,8 @@ public sealed partial class ST14SectorSystem : EntitySystem
         _planet = planet;
         _target = target;
         _staging = _war.StagingOf(planet);
-        _troopersSeen = false;
-        _hiveSeen = false;
         _decided = false;
+        ResetCapture();
 
         if (_station.GetOwningStation(anchor) is not { } station || !_war.TryGetWar(planet, out var war, out _))
         {
@@ -178,10 +244,13 @@ public sealed partial class ST14SectorSystem : EntitySystem
         if (_staging >= 0)
             cells.Add(_staging);
 
-        // the ground of the Federation stands every round, the hive's sleeps in its save until it is fought over
+        // the ground of the Federation in the region fought over stands every round, so the troopers walk up to the
+        // front from it; the hive's sleeps in its save until it is fought over. Other regions are out of reach: they
+        // stay in their saves. The first battle of a region locks the war to the region of its target
+        var region = war.ActiveRegion >= 0 ? war.ActiveRegion : war.Cells[target].Region;
         for (var i = 0; i < war.Cells.Length; i++)
         {
-            if (war.Cells[i].Initialized && war.Cells[i].Faction == ST14GalaxyFaction.Federation)
+            if (war.Cells[i].Initialized && war.Cells[i].Faction == ST14GalaxyFaction.Federation && war.Cells[i].Region == region)
                 cells.Add(i);
         }
 
@@ -196,16 +265,37 @@ public sealed partial class ST14SectorSystem : EntitySystem
     private void LoadCell(string planet, int cell, int terrain, EntityUid station, bool hiveHeld)
     {
         var save = SavePath(planet, cell);
-        var saved = _resources.UserData.Exists(save);
+        var saved = false;
 
         Entity<MapComponent>? map = null;
         HashSet<Entity<MapGridComponent>>? grids = null;
+        Dictionary<int, EntityUid>? savedLevels = null;
 
-        // the references a save dropped to things outside its map are expected, the save is whole otherwise
-        if (saved && !_mapLoader.TryLoadMap(save, out map, out grids, new DeserializationOptions { LogInvalidEntities = false }))
+        // ST14: a sector is saved with all its z-levels, one folder per sector
+        var folder = LevelsFolder(planet, cell);
+        if (_zSave.HasSave(folder))
         {
-            Log.Error($"The save of sector {cell} of {planet} does not load, the sector starts from a fresh map");
-            saved = false;
+            if (_zSave.TryLoadNetwork(folder, out var loaded, new DeserializationOptions { LogInvalidEntities = false }))
+            {
+                map = loaded[0];
+                grids = GridsOn(loaded[0]);
+                savedLevels = loaded.ToDictionary(kv => kv.Key, kv => kv.Value.Owner);
+                saved = true;
+            }
+            else
+            {
+                Log.Error($"The levels of sector {cell} of {planet} do not load, trying the old save");
+            }
+        }
+
+        // a save from before the z-levels: one file with the sector map only, the levels around it are built fresh
+        // the references a save dropped to things outside its map are expected, the save is whole otherwise
+        if (!saved && _resources.UserData.Exists(save))
+        {
+            if (_mapLoader.TryLoadMap(save, out map, out grids, new DeserializationOptions { LogInvalidEntities = false }))
+                saved = true;
+            else
+                Log.Error($"The save of sector {cell} of {planet} does not load, the sector starts from a fresh map");
         }
 
         if (!saved)
@@ -239,10 +329,29 @@ public sealed partial class ST14SectorSystem : EntitySystem
             _multiTile.FixGrid(grid);
         }
 
+        // ST14: the z-levels of the sector, from its save or built fresh: -2 bug tunnels, -1 trenches, +1 roofs, +2 sky
+        // (ST14ZLayerSystem gives every level the gravity of the sector map)
+        var levels = Settings.Layers is { } layerSet
+            ? _layers.EnsureLayers(map.Value, layerSet, savedLevels)
+            : new Dictionary<int, EntityUid> { [0] = map.Value };
+
+        _levels[cell] = levels;
+        foreach (var level in levels.Values)
+        {
+            _mainOf[level] = map.Value;
+        }
+
         if (saved)
-            ClearTrash(map.Value);
+        {
+            foreach (var level in levels.Values)
+            {
+                ClearTrash(level);
+            }
+        }
         else
+        {
             PlaceQueens(grids!);
+        }
 
         _subsectors.PreparePoints(map.Value, grids!, cell, hiveHeld, !saved);
     }
@@ -258,6 +367,22 @@ public sealed partial class ST14SectorSystem : EntitySystem
         var ev = new GravityChangedEvent(uid, true);
         RaiseLocalEvent(uid, ref ev, true);
         Dirty(uid, gravity);
+    }
+
+    /// <summary>
+    /// The grids standing on a map (the map itself too when it is a planet map)
+    /// </summary>
+    private HashSet<Entity<MapGridComponent>> GridsOn(EntityUid map)
+    {
+        var grids = new HashSet<Entity<MapGridComponent>>();
+        var query = AllEntityQuery<MapGridComponent, TransformComponent>(); // paused maps too
+        while (query.MoveNext(out var uid, out var grid, out var xform))
+        {
+            if (xform.MapUid == map)
+                grids.Add((uid, grid));
+        }
+
+        return grids;
     }
 
     /// <summary>
@@ -304,7 +429,8 @@ public sealed partial class ST14SectorSystem : EntitySystem
         var mobs = EntityQueryEnumerator<MobStateComponent, TransformComponent>();
         while (mobs.MoveNext(out var uid, out _, out var xform))
         {
-            if (xform.MapID == mapId && _mobState.IsDead(uid))
+            // the dead, and the bodies of players a save from before the players were left out of it still holds
+            if (xform.MapID == mapId && (_mobState.IsDead(uid) || HasComp<ST14SectorOwnerComponent>(uid)))
                 trash.Add(uid);
         }
 
@@ -383,12 +509,12 @@ public sealed partial class ST14SectorSystem : EntitySystem
     {
         if (ev.New == GameRunLevel.InRound)
         {
-            var settings = Settings;
-            _nextCheck = _timing.CurTime + settings.GracePeriod;
-            _timeUp = _timing.CurTime + settings.RoundLimit;
+            _nextCheck = _timing.CurTime + Settings.GracePeriod;
+            _lastCheck = _timing.CurTime;
 
+            // a battle has no time limit: it lasts until a sector of it is taken (ST14SectorSystem.Capture)
             if (_planet != null)
-                _war.BeginBattle(_planet, _timeUp);
+                _war.BeginBattle(_planet);
         }
 
         // the round is over, however it ended: every sector it touched goes back to its save
@@ -403,74 +529,29 @@ public sealed partial class ST14SectorSystem : EntitySystem
         _target = -1;
         _staging = -1;
         _maps.Clear();
-    }
-
-    public override void Update(float frameTime)
-    {
-        base.Update(frameTime);
-
-        if (_planet is not { } planet || _decided || _ticker.RunLevel != GameRunLevel.InRound || _timing.CurTime < _nextCheck)
-            return;
-
-        _nextCheck = _timing.CurTime + Settings.CheckInterval;
-
-        if (_timing.CurTime >= _timeUp)
-        {
-            EndBattle(planet, null, "st14-sector-time-up");
-            return;
-        }
-
-        CountSides(out var troopers, out var hive);
-        _troopersSeen |= troopers > 0;
-        _hiveSeen |= hive > 0;
-
-        // a side that never showed up cannot lose, there was nobody to fight
-        if (!_troopersSeen || !_hiveSeen || troopers > 0 && hive > 0)
-            return;
-
-        EndBattle(planet,
-            hive == 0 ? ST14GalaxyFaction.Federation : ST14GalaxyFaction.Arachnid,
-            hive == 0 ? "st14-sector-troopers-won" : "st14-sector-hive-won");
-    }
-
-    private void EndBattle(string planet, ST14GalaxyFaction? winner, string message)
-    {
-        _decided = true;
-        _war.ApplyResult(planet, winner, _subsectors.Holders(_maps));
-        _ticker.EndRound(Loc.GetString(message));
-    }
-
-    /// <summary>
-    /// Live fighters of both sides on all the sectors of the round: troopers are people with a player behind them, the
-    /// hive is every live mob of the hive's faction, players or not: a queen keeps laying larvae while she lives
-    /// </summary>
-    private void CountSides(out int troopers, out int hive)
-    {
-        troopers = 0;
-        hive = 0;
-        var faction = Settings.HiveFaction;
-        var maps = _maps.Values.ToHashSet();
-
-        var mobs = EntityQueryEnumerator<MobStateComponent, TransformComponent>();
-        while (mobs.MoveNext(out var uid, out _, out var xform))
-        {
-            if (xform.MapUid is not { } map || !maps.Contains(map) || _mobState.IsDead(uid))
-                continue;
-
-            if (TryComp<NpcFactionMemberComponent>(uid, out var member) && _faction.IsMember((uid, member), faction))
-                hive++;
-            else if (HasComp<HumanoidProfileComponent>(uid) && TryComp<MindContainerComponent>(uid, out var mind) && mind.HasMind)
-                troopers++;
-        }
+        _levels.Clear();
+        _mainOf.Clear();
+        ResetCapture();
     }
 
     #endregion
 
     #region Saves
 
+    /// <summary>
+    /// The save of a sector from before the z-levels: the sector map alone. Read once and replaced by the folder
+    /// </summary>
     private static ResPath SavePath(string planet, int cell)
     {
         return SaveRoot / $"{planet}_{cell}.yml";
+    }
+
+    /// <summary>
+    /// ST14: the save of a sector with all its z-levels, see ST14ZNetworkSaveSystem
+    /// </summary>
+    private static ResPath LevelsFolder(string planet, int cell)
+    {
+        return SaveRoot / $"{planet}_{cell}";
     }
 
     /// <summary>
@@ -481,9 +562,11 @@ public sealed partial class ST14SectorSystem : EntitySystem
         if (_planet is not { } planet)
             return;
 
-        MarkOwners();
         _resources.UserData.CreateDir(SaveRoot);
 
+        // the players are not kept: next round everyone comes in anew, in a fresh kit. Their bodies step out of the
+        // world for the time of the save and come back at once, within the same tick
+        var bodies = HidePlayerBodies();
         var unsaved = AllowLivingMobs();
         try
         {
@@ -501,10 +584,20 @@ public sealed partial class ST14SectorSystem : EntitySystem
 
                 try
                 {
-                    if (_mapLoader.TrySaveMap(map, SavePath(planet, cell), options))
+                    // ST14: the sector map and every z-level around it, into the folder of the sector
+                    if (_zSave.TrySaveNetwork(map, LevelsFolder(planet, cell), options))
+                    {
                         _war.MarkInitialized(planet, cell);
+
+                        // the old one-file save is superseded by the folder
+                        var legacy = SavePath(planet, cell);
+                        if (_resources.UserData.Exists(legacy))
+                            _resources.UserData.Delete(legacy);
+                    }
                     else
+                    {
                         Log.Error($"Could not save sector {cell} of {planet}");
+                    }
                 }
                 catch (Exception e)
                 {
@@ -518,6 +611,8 @@ public sealed partial class ST14SectorSystem : EntitySystem
             {
                 proto.MapSavable = false;
             }
+
+            RestorePlayerBodies(bodies);
         }
     }
 
@@ -529,7 +624,7 @@ public sealed partial class ST14SectorSystem : EntitySystem
     private HashSet<EntityPrototype> AllowLivingMobs()
     {
         var unsaved = new HashSet<EntityPrototype>();
-        var maps = _maps.Values.ToHashSet();
+        var maps = _mainOf.Keys.ToHashSet(); // ST14: every z-level of every sector
         var strip = Settings.UnsaveableComponents.Select(name => Factory.GetRegistration(name).Type).ToList();
 
         void Allow(EntityUid uid, TransformComponent xform)
@@ -562,25 +657,57 @@ public sealed partial class ST14SectorSystem : EntitySystem
     }
 
     /// <summary>
-    /// Writes on every body with a player whose it is: next round the player comes back to it
+    /// A body a player plays (or played this round and left): it never goes into a sector save
     /// </summary>
-    private void MarkOwners()
+    private bool IsPlayerBody(EntityUid uid)
     {
-        var maps = _maps.Values.ToHashSet();
-        var query = EntityQueryEnumerator<MindContainerComponent, TransformComponent>();
-        while (query.MoveNext(out var uid, out var container, out var xform))
-        {
-            if (xform.MapUid is not { } map || !maps.Contains(map) ||
-                !_mind.TryGetMind(uid, out var mindId, out var mind, container) || mind.UserId is not { } user)
-            {
-                continue;
-            }
+        return HasComp<ST14SectorOwnerComponent>(uid) ||
+               TryComp<MindContainerComponent>(uid, out var container) && container.HasMind;
+    }
 
-            var owner = EnsureComp<ST14SectorOwnerComponent>(uid);
-            owner.UserId = user.UserId.ToString();
-            _jobs.MindTryGetJobId(mindId, out var job);
-            owner.Job = job?.Id;
+    /// <summary>
+    /// Takes every player body off the sector levels, with all it carries, and says where each stood
+    /// </summary>
+    private List<(EntityUid Body, EntityCoordinates Coordinates, Angle Rotation)> HidePlayerBodies()
+    {
+        var hidden = new List<(EntityUid, EntityCoordinates, Angle)>();
+        var maps = _mainOf.Keys.ToHashSet();
+        var mobs = EntityQueryEnumerator<MobStateComponent, TransformComponent>();
+        while (mobs.MoveNext(out var uid, out _, out var xform))
+        {
+            if (xform.MapUid is not { } map || !maps.Contains(map) || !IsPlayerBody(uid) || _container.IsEntityInContainer(uid))
+                continue;
+
+            hidden.Add((uid, xform.Coordinates, xform.LocalRotation));
         }
+
+        foreach (var (uid, _, _) in hidden)
+        {
+            _transform.DetachEntity(uid, Transform(uid));
+        }
+
+        return hidden;
+    }
+
+    private void RestorePlayerBodies(List<(EntityUid Body, EntityCoordinates Coordinates, Angle Rotation)> bodies)
+    {
+        foreach (var (uid, coordinates, rotation) in bodies)
+        {
+            if (TerminatingOrDeleted(uid) || !coordinates.IsValid(EntityManager))
+                continue;
+
+            _transform.SetCoordinates(uid, Transform(uid), coordinates, rotation);
+        }
+    }
+
+    /// <summary>
+    /// A body that comes in by a player is marked as one, so it stays out of the save even after its player left it
+    /// </summary>
+    private void OnPlayerSpawned(PlayerSpawnCompleteEvent ev)
+    {
+        var owner = EnsureComp<ST14SectorOwnerComponent>(ev.Mob);
+        owner.UserId = ev.Player.UserId.UserId.ToString();
+        owner.Job = ev.JobId;
     }
 
     private void OnWarReset(ref ST14WarResetEvent ev)

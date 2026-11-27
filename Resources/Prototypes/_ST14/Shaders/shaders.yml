@@ -17,3 +17,9 @@
   id: ST14MedicalVision
   kind: source
   path: "/Textures/_ST14/Shaders/medical_vision.swsl"
+
+# the light sand over a quiet sky, see ST14WeatherOverlay
+- type: shader
+  id: ST14LightSand
+  kind: source
+  path: "/Textures/_ST14/Shaders/light_sand.swsl"

@@ -46,7 +46,7 @@ namespace Content.Server._ST14.Medicine;
 public sealed partial class ST14WoundSystem : EntitySystem
 {
     private static readonly ProtoId<DamageTypePrototype> Asphyxiation = "Asphyxiation";
-    private static readonly ProtoId<NpcFactionPrototype> Hive = "Xeno";
+    private static readonly ProtoId<NpcFactionPrototype> Hive = "Hive";
     private static readonly EntProtoId ForcedSleep = "StatusEffectForcedSleeping";
     private static readonly SoundSpecifier BoneCrack = new SoundCollectionSpecifier("ST14BoneCrack", AudioParams.Default.WithVolume(3f).WithVariation(0.08f));
     private static readonly SoundSpecifier HeartStop = new SoundPathSpecifier("/Audio/_ST14/Medicine/flatline.wav", AudioParams.Default.WithVolume(-4f));

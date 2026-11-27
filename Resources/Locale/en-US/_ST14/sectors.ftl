@@ -7,11 +7,17 @@ st14-sector-template-command-no-tile = There is no tile { $tile }.
 st14-sector-template-command-failed = Could not save { $path }.
 st14-sector-template-command-done = Sector template saved: { $path }.
 
-st14-sector-time-up = Time ran out: the attack has failed.
-st14-sector-gate-closed = The storm closes this way off.
-st14-sector-gate-not-initialized = Sector { $code } has not been fought over yet, there is no way through.
-ent-ST14SectorGateBase = sector passage
-    .desc = Beyond the storm lies the next sector. It can only be walked into once the sector has been fought over.
+st14-sector-gate-closed = The sector is shrouded in the storm, there is no way in.
+st14-sector-gate-rear = The hive cannot pass into the deep rear: there is no way in from the front.
+st14-sector-gate-solid = Solid ground on the other side: dig a way through first.
+st14-sector-gate-digging = You start digging a way through into the next sector.
+st14-sector-side-federation = The Federation
+st14-sector-side-arachnid = The hive
+st14-sector-capture-start = Sector { $code }: { $side } holds every resource point and the enemy is driven out. If it stays so for { $minutes } min, the sector is theirs.
+st14-sector-capture-stop = Sector { $code }: the capture is broken.
+st14-sector-capture-paused = Both sides hold sectors of each other: the capture clocks are stopped.
+st14-sector-captured = Sector { $code } is taken: { $side }.
+st14-sector-announcer = Front HQ
 
 ## Subsectors: a sector belongs to whoever has a building on every one of its resource points
 st14-nest-no-point = There is no resource point next to you.
@@ -54,3 +60,11 @@ st14-side-arachnids-name = Swarm
 st14-side-arachnids-motto = Arachnids. Claws, venom, numbers.
 st14-side-arachnids-lore = Countless bugs ruled by one mind. The Swarm digs tunnels, grows queens and throws wave after wave at anyone who sets foot on its ground.
 st14-side-arachnids-play = Claws, venom and acid. Queens lay larvae, the brain bug leads the hive, bugs evolve into new fighters. Strength is in the rush and the numbers: break the infantry lines and take the points.
+
+st14-stack-soldier-supplies = soldier supplies
+st14-stack-maintenance-supplies = maintenance supplies
+
+st14-landing-title = Landing point
+st14-landing-hint = Pick where to come into the battle. Landing at a bunker base costs one soldier supply from its crate.
+st14-landing-usual = Usual landing
+st14-landing-base = Bunker base in sector { $code } · supplies: { $supplies }

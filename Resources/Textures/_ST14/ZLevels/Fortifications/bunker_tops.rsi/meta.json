@@ -1,0 +1,1 @@
+{ "version": 1, "license": "All-Rights-Reserved", "copyright": "Made for Starborne Troopers by Denlero (generated programmatically)", "size": { "x": 96, "y": 96 }, "states": [ { "name": "base" }, { "name": "rifle" }, { "name": "machinegun" }, { "name": "heavy" }, { "name": "observation" }, { "name": "ramp" } ] }

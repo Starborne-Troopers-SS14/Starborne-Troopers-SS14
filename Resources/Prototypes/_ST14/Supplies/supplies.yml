@@ -1,0 +1,69 @@
+# Supplies of the front, made at the factories (a task of its own) and carried up by the logisticians.
+# Soldier supplies: every trooper who comes in at a bunker base takes one from its crate (ST14SectorSpawnSystem).
+# Maintenance supplies: bunker bases and maintenance tunnels keep the buildings round them from rotting (ST14DecaySystem).
+
+- type: stack
+  id: ST14SoldierSupplies
+  name: st14-stack-soldier-supplies
+  icon:
+    sprite: /Textures/Objects/Storage/boxes.rsi
+    state: box_security
+  spawn: ST14SoldierSupplies1
+  maxCount: 10
+
+- type: stack
+  id: ST14MaintenanceSupplies
+  name: st14-stack-maintenance-supplies
+  icon:
+    sprite: /Textures/Objects/Storage/boxes.rsi
+    state: box
+  spawn: ST14MaintenanceSupplies1
+  maxCount: 10
+
+- type: entity
+  parent: BaseItem
+  id: ST14SoldierSupplies
+  name: soldier supplies
+  suffix: Full
+  description: Kits, rations and ammunition for one trooper. Kept in the crate of a bunker base, every trooper who comes in there takes one.
+  components:
+  - type: Item
+    size: Normal
+  - type: Stack
+    stackType: ST14SoldierSupplies
+    count: 10
+  - type: Sprite
+    sprite: Objects/Storage/boxes.rsi
+    state: box_security
+
+- type: entity
+  parent: ST14SoldierSupplies
+  id: ST14SoldierSupplies1
+  suffix: One
+  components:
+  - type: Stack
+    count: 1
+
+- type: entity
+  parent: BaseItem
+  id: ST14MaintenanceSupplies
+  name: maintenance supplies
+  suffix: Full
+  description: Timber, nails, sandbags and tools. A bunker base or a maintenance tunnel spends them to keep the buildings round it from falling apart.
+  components:
+  - type: Item
+    size: Normal
+  - type: Stack
+    stackType: ST14MaintenanceSupplies
+    count: 10
+  - type: Sprite
+    sprite: Objects/Storage/boxes.rsi
+    state: box
+
+- type: entity
+  parent: ST14MaintenanceSupplies
+  id: ST14MaintenanceSupplies1
+  suffix: One
+  components:
+  - type: Stack
+    count: 1

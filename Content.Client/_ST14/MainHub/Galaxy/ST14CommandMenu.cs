@@ -598,7 +598,12 @@ public sealed partial class ST14CommandMenu : ST14WarScreenBase
         var state = State;
         var battle = state?.Battle ?? false;
         string text;
-        if (battle)
+        if (battle && state!.BattleSecondsLeft < 0)
+        {
+            // a battle has no time limit: the clock only runs while a sector is being held to be taken
+            text = Loc.GetString("st14-hq-banner-battle-open");
+        }
+        else if (battle)
         {
             var left = _battleEnds - _timing.RealTime;
             if (left < TimeSpan.Zero)
@@ -952,7 +957,10 @@ public sealed partial class ST14CommandMenu : ST14WarScreenBase
         AddFact("st14-hq-fact-terrain", TerrainName(cell), Color.White, ref y);
         AddFact("st14-hq-fact-region", war.Cells[war.RegionCenters[cell.Region]].Code, Color.White, ref y);
         AddFact("st14-hq-fact-fights", Loc.GetString(cell.Initialized ? "st14-hq-fought" : "st14-hq-not-fought"), cell.Initialized ? ST14HubStyle.GoldLight : ST14HqArt.Muted, ref y);
+        // the dead three ways: in this sector, in its region, on the whole planet
+        AddFact("st14-hq-fact-losses-sector", Loc.GetString("st14-hq-losses", ("bugs", cell.BugsKilled), ("troopers", cell.TroopersKilled)), Color.White, ref y);
         AddFact("st14-hq-fact-losses", Loc.GetString("st14-hq-losses", ("bugs", kills.Bugs), ("troopers", kills.Troopers)), Color.White, ref y);
+        AddFact("st14-hq-fact-losses-planet", Loc.GetString("st14-hq-losses", ("bugs", war.BugsKilled), ("troopers", war.TroopersKilled)), Color.White, ref y);
 
         return y + 6;
     }

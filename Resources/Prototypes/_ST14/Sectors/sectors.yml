@@ -8,10 +8,12 @@
   queen: ST14MobBugQueen
   gracePeriod: 120
   checkInterval: 5
-  roundLimit: 14400
+  holdTime: 900 # 15 minutes holding every point with the enemy driven out takes a sector
+  drivenOutBelow: 3
   trashComponents: [ Puddle ]
   unsaveableComponents: [ KillTracker ]
   trashDecalTags: [ ST14BloodSplatter, ST14BloodDrip, ST14BloodPool, ST14BugBlood ]
+  layers: ST14PlanetSector # five levels: -2 bug tunnels, -1 trenches, 0 the sector, +1 roofs, +2 sky
 
 # One kind of ground per terrain of the galaxy map (index = terrain number from 0). Add the mappers' map files to each list.
 - type: st14SectorTerrain
@@ -101,35 +103,16 @@
     layers:
     - state: red
 
-# A passage on an edge of a sector map into the neighbouring sector: edge 0 is east, then counter-clockwise
+# Obsolete: every stretch of every edge leads into the next sector now (ST14SectorCrossingSystem). Kept so the maps
+# that still hold them load; they do nothing and are not seen
 - type: entity
   id: ST14SectorGateBase
   abstract: true
   name: sector passage
-  description: Beyond the storm lies the next sector. It can only be walked into once the sector has been fought over.
-  placement:
-    mode: SnapgridCenter
+  categories: [ HideSpawnMenu ]
   components:
   - type: Transform
     anchored: true
-  - type: Physics
-    bodyType: Static
-  - type: Fixtures
-    fixtures:
-      gate:
-        shape:
-          !type:PhysShapeCircle
-          radius: 2.5
-        mask:
-        - FullTileMask
-        - GhostImpassable
-        layer:
-        - WallLayer
-        hard: false
-  - type: Sprite
-    sprite: Markers/cross.rsi
-    state: blue
-    drawdepth: FloorObjects
 
 - type: entity
   parent: ST14SectorGateBase

@@ -726,11 +726,14 @@ public sealed partial class ST14GalaxyMapScreen : ST14WarScreenBase
         AddText(Loc.GetString("st14-galaxy-cell-terrain", ("terrain", Loc.GetString($"st14-galaxy-terrain-{cell.Terrain + 1}")))
             .ToUpperInvariant(), ST14HubFont.Regular, 16, new Color(0.85f, 0.88f, 0.92f), 222, 26);
 
-        // a round can spread over a whole region, the dead are shown for all of it
+        // the dead three ways: in this sector, then in its region and on the whole planet
+        AddKills(cell.BugsKilled, cell.TroopersKilled, 252);
         var kills = war.RegionKills(index);
-        AddKills(kills.Bugs, kills.Troopers, 252);
+        AddText(Loc.GetString("st14-galaxy-kills-wider", ("regionBugs", kills.Bugs), ("regionTroopers", kills.Troopers),
+            ("planetBugs", war.BugsKilled), ("planetTroopers", war.TroopersKilled)).ToUpperInvariant(), ST14HubFont.Regular, 14,
+            new Color(0.85f, 0.88f, 0.92f), 278, 24);
 
-        var y = 286f;
+        var y = 310f;
         if (cell.Hive)
         {
             AddText(Loc.GetString("st14-galaxy-cell-hive").ToUpperInvariant(), ST14HubFont.Medium, 16, new Color(1f, 0.45f, 0.3f), y, 26);

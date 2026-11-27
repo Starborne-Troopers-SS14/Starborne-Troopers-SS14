@@ -1,0 +1,46 @@
+- type: entity
+  id: ST14ActionZLevelUp
+  name: Move up
+  description: Move up one Z-Level
+  components:
+  - type: Action
+    checkCanInteract: false
+  - type: Sprite
+    sprite: _ST14/ZLevels/Actions/misc.rsi
+    layers:
+    - state: up
+      map: ["enum.ActionVisuals.Icon"]
+  - type: InstantAction
+    event: !type:ST14ZLevelActionUp
+
+- type: entity
+  id: ST14ActionZLevelDown
+  name: Move down
+  description: Move down one Z-Level
+  components:
+  - type: Action
+    checkCanInteract: false
+  - type: Sprite
+    sprite: _ST14/ZLevels/Actions/misc.rsi
+    layers:
+    - state: down
+      map: ["enum.ActionVisuals.Icon"]
+  - type: InstantAction
+    event: !type:ST14ZLevelActionDown
+
+- type: entity
+  parent: BaseToggleAction
+  id: ST14ActionToggleLookUp
+  name: Look up
+  description: You lift your head and look up at the sky.
+  components:
+  - type: Action
+    checkCanInteract: false
+  - type: Sprite
+    sprite: _ST14/ZLevels/Actions/misc.rsi
+    layers:
+    - state: eye_down
+      map: ["enum.ActionVisuals.Icon"]
+    - state: eye_up
+      map: ["enum.ActionVisuals.IconToggled"]
+      visible: false

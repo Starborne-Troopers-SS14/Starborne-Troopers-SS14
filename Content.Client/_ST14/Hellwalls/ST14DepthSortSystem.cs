@@ -1,7 +1,7 @@
 using System.Numerics;
-using Content.Client._CE.ZLevels.Core;
-using Content.Shared._CE.ZLevels.Core.Components;
-using Content.Shared._CE.ZLevels.Core.EntitySystems;
+using Content.Client._ST14.ZLevels.Core;
+using Content.Shared._ST14.ZLevels.Core.Components;
+using Content.Shared._ST14.ZLevels.Core.EntitySystems;
 using Content.Shared._ST14.Hellwalls;
 using Robust.Client.ComponentTrees;
 using Robust.Client.GameObjects;
@@ -18,9 +18,9 @@ public sealed partial class ST14DepthSortSystem : EntitySystem
     [Dependency] private SpriteTreeSystem _spriteTree = default!;
     [Dependency] private SharedTransformSystem _transform = default!;
     [Dependency] private SharedMapSystem _map = default!;
-    [Dependency] private CEClientZLevelsSystem _zLevels = default!;
+    [Dependency] private ST14ClientZLevelsSystem _zLevels = default!;
     [Dependency] private EntityQuery<ST14DepthSortComponent> _sortQuery = default!;
-    [Dependency] private EntityQuery<CEZPhysicsComponent> _zPhysQuery = default!;
+    [Dependency] private EntityQuery<ST14ZPhysicsComponent> _zPhysQuery = default!;
     [Dependency] private EntityQuery<MapComponent> _mapQuery = default!;
 
     private const int MobsDepth = (int) Content.Shared.DrawDepth.DrawDepth.Mobs;
@@ -33,7 +33,7 @@ public sealed partial class ST14DepthSortSystem : EntitySystem
     {
         base.Initialize();
 
-        UpdatesAfter.Add(typeof(CEClientZLevelsPreAnimSystem));
+        UpdatesAfter.Add(typeof(ST14ClientZLevelsPreAnimSystem));
     }
 
     public override void FrameUpdate(float frameTime)
@@ -45,7 +45,7 @@ public sealed partial class ST14DepthSortSystem : EntitySystem
 
         var down = (-eye.Rotation).RotateVec(-Vector2.UnitY);
         var bounds = _eye.GetWorldViewbounds().CalcBoundingBox();
-        var shift = (-eye.Rotation).ToWorldVec() * CESharedZLevelsSystem.ZLevelOffset;
+        var shift = (-eye.Rotation).ToWorldVec() * ST14SharedZLevelsSystem.ZLevelOffset;
 
         Sort(eye.Position.MapId, bounds, down);
 

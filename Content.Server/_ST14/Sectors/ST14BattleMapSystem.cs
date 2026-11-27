@@ -25,7 +25,7 @@ namespace Content.Server._ST14.Sectors;
 /// </summary>
 public sealed partial class ST14BattleMapSystem : EntitySystem
 {
-    private static readonly ProtoId<NpcFactionPrototype> BugFaction = "Xeno";
+    private static readonly ProtoId<NpcFactionPrototype> BugFaction = "Hive";
 
     [Dependency] private IPrototypeManager _prototype = default!;
     [Dependency] private GameTicker _ticker = default!;

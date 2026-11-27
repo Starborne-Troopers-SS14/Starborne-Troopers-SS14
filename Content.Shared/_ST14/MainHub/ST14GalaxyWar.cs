@@ -536,32 +536,21 @@ public sealed class ST14PlanetWar
     }
 
     /// <summary>
-    /// Result of a round: one sector changes hands at most and the initiative goes to the other side. A null winner
-    /// is a battle that ran out of time, the attack has failed. A staging sector of the bugs falls to troopers who
-    /// wipe the bugs out even though it was the bugs who were attacking
+    /// Result of a round: the sectors taken in it change hands and the initiative goes to the other side. A sector is
+    /// taken only on the field (all of its resource points held and the enemy driven out for long enough, see
+    /// ST14SectorSystem), so <paramref name="captures"/> is everything that changes: nothing for a battle that took no
+    /// sector, such as one an admin ended
     /// </summary>
     /// <remarks>
-    /// A sector with resource points goes by them instead: <paramref name="points"/> holds such sectors of the battle,
-    /// each with the side that holds all of its points, or null when no side does and the sector stays as it is.
     /// Returns true when the Federation took the whole region of the war, which frees the commands to pick another one
     /// </remarks>
-    public bool ApplyResult(int target, int staging, ST14GalaxyFaction? winner, IReadOnlyDictionary<int, ST14GalaxyFaction?>? points = null)
+    public bool ApplyResult(int target, IReadOnlyDictionary<int, ST14GalaxyFaction> captures)
     {
         LockRegion(target);
 
-        var holder = Cells[target].Faction;
-        var byPoints = points ?? new Dictionary<int, ST14GalaxyFaction?>();
-        if (winner is { } side)
+        foreach (var (cell, taker) in captures)
         {
-            if (side != holder && !byPoints.ContainsKey(target))
-                SetHolder(target, side);
-            else if (side == holder && side == ST14GalaxyFaction.Federation && staging >= 0 && !byPoints.ContainsKey(staging))
-                SetHolder(staging, side);
-        }
-
-        foreach (var (cell, pointsHolder) in byPoints)
-        {
-            if (pointsHolder is { } taker && cell >= 0 && cell < Cells.Length && Cells[cell].Faction != taker)
+            if (cell >= 0 && cell < Cells.Length && Cells[cell].Faction != taker)
                 SetHolder(cell, taker);
         }
 

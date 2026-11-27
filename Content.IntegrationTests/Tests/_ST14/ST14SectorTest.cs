@@ -118,32 +118,20 @@ public sealed class ST14SectorTest : GameTest
         var ticker = server.System<GameTicker>();
         var sectors = server.System<ST14SectorSystem>();
         var war = server.System<ST14GalaxyWarSystem>();
-        var gates = server.System<ST14SectorGateSystem>();
+        var crossing = server.System<ST14SectorCrossingSystem>();
         var resources = server.ResolveDependency<IResourceManager>();
 
         var planet = string.Empty;
         var first = -1;
         var builtAt = new Vector2(100.5f, 100.5f);
         var standsAt = new Vector2(90.5f, 95.5f);
-        string firstJob = null;
-
-        // the test player has no job preferences and may draw another job next round, then the body rightly stays behind
-        string JobOf(EntityUid body)
-        {
-            var mind = server.System<Content.Shared.Mind.SharedMindSystem>();
-            if (!mind.TryGetMind(body, out var mindId, out _))
-                return null;
-
-            server.System<Content.Shared.Roles.Jobs.SharedJobSystem>().MindTryGetJobId(mindId, out var job);
-            return job?.Id;
-        }
-
         await server.WaitAssertion(() =>
         {
             server.CfgMan.SetCVar(ST14CVars.SectorRounds, true);
             server.CfgMan.SetCVar(CCVars.GameMap, string.Empty);
             planet = war.CurrentPlanet()!;
             Assert.That(war.Reset(planet));
+            war.SetSide(pair.Player!.UserId, ST14GalaxyFaction.Federation);
             ticker.RestartRound();
         });
 
@@ -165,7 +153,6 @@ public sealed class ST14SectorTest : GameTest
             // the player started in the sector of the battle and leaves their body at a place of their own
             Assert.That(pair.Player!.AttachedEntity, Is.Not.Null, "The player did not spawn.");
             var body = pair.Player.AttachedEntity!.Value;
-            firstJob = JobOf(body);
             Assert.That(entMan.GetComponent<TransformComponent>(body).MapUid, Is.EqualTo(map), "The player did not spawn in the sector of the battle.");
             server.System<SharedTransformSystem>().SetCoordinates(body, new EntityCoordinates(grid, standsAt));
 
@@ -184,7 +171,10 @@ public sealed class ST14SectorTest : GameTest
         {
             Assert.That(war.TryGetWar(planet, out var state, out _));
             Assert.That(state.Cells[first].Initialized, "The sector was not marked as saved.");
-            Assert.That(resources.UserData.Exists(new ResPath($"/st14_sectors/{planet}_{first}.yml")), "The sector has no save.");
+            // ST14: a sector is saved with all its z-levels, one folder per sector
+            Assert.That(resources.UserData.Exists(new ResPath($"/st14_sectors/{planet}_{first}/network.txt")), "The sector has no save.");
+            for (var depth = -2; depth <= 2; depth++)
+                Assert.That(resources.UserData.Exists(new ResPath($"/st14_sectors/{planet}_{first}/z{depth}.yml")), $"Level {depth} of the sector was not saved.");
             ticker.RestartRound();
         });
 
@@ -201,6 +191,10 @@ public sealed class ST14SectorTest : GameTest
 
             var map = sectors.LoadedMaps[first];
             var mapId = entMan.GetComponent<TransformComponent>(map).MapID;
+
+            // ST14: the sector came back with all five z-levels
+            var levels = server.System<Content.Server._ST14.ZLevels.Layers.ST14ZLayerSystem>().GetLevels(map);
+            Assert.That(levels.Keys.OrderBy(d => d), Is.EqualTo(new[] { -2, -1, 0, 1, 2 }), "The sector did not come back with its z-levels.");
             var walls = entMan.AllEntityQueryEnumerator<Robust.Shared.Physics.Components.PhysicsComponent, MetaDataComponent, TransformComponent>();
             var wall = false;
             while (walls.MoveNext(out _, out var meta, out var xform))
@@ -210,16 +204,11 @@ public sealed class ST14SectorTest : GameTest
 
             Assert.That(wall, "The wall built last round did not come back.");
 
-            // the player is back in the same body, where it was left
+            // the players are not kept: the body left last round did not come back with the save
             var player = pair.Player!.AttachedEntity;
             Assert.That(player, Is.Not.Null, "The player did not come back.");
-            if (JobOf(player!.Value) == firstJob)
-            {
-                Assert.That(entMan.TryGetComponent<ST14SectorOwnerComponent>(player, out var owner) && owner.UserId == pair.Player.UserId.UserId.ToString(), "The player got a new body.");
-                var at = entMan.GetComponent<TransformComponent>(player.Value);
-                Assert.That(at.MapID, Is.EqualTo(mapId), "The body came back in another sector.");
-                Assert.That((at.LocalPosition - standsAt).Length(), Is.LessThan(0.1f), "The body came back in another place.");
-            }
+            var at = entMan.GetComponent<TransformComponent>(player!.Value);
+            Assert.That(at.MapID != mapId || (at.LocalPosition - standsAt).Length() > 0.1f, "The body of last round came back with the save.");
 
             var mobs = entMan.AllEntityQueryEnumerator<Content.Shared.Mobs.Components.MobStateComponent, TransformComponent>();
             while (mobs.MoveNext(out var uid, out _, out var xform))
@@ -230,18 +219,14 @@ public sealed class ST14SectorTest : GameTest
 
             Assert.That(war.TryGetWar(planet, out var state, out _));
             var edge = Array.IndexOf(state.Grid.Edges[first], staging);
-            var gate = FindGate(entMan, map, edge);
-            var destination = gates.Destination((gate, entMan.GetComponent<ST14SectorGateComponent>(gate)), out _);
-            Assert.That(destination, Is.Not.Null, "The passage into the loaded neighbour leads nowhere.");
-            Assert.That(entMan.GetComponent<TransformComponent>(destination!.Value.EntityId).MapUid, Is.EqualTo(sectors.LoadedMaps[staging]), "The passage leads to the wrong sector.");
+            Assert.That(crossing.Leads(state, first, edge, false, out _), Is.EqualTo(staging), "The edge towards the loaded neighbour leads nowhere.");
 
             var closed = state.Grid.Edges[first].First(n => !sectors.LoadedMaps.ContainsKey(n));
-            var closedGate = FindGate(entMan, map, Array.IndexOf(state.Grid.Edges[first], closed));
-            Assert.That(gates.Destination((closedGate, entMan.GetComponent<ST14SectorGateComponent>(closedGate)), out var message), Is.Null, "A passage leads into a sector nobody fought for.");
+            Assert.That(crossing.Leads(state, first, Array.IndexOf(state.Grid.Edges[first], closed), false, out var message), Is.Null, "An edge leads into a sector not loaded this round.");
             Assert.That(message, Is.Not.Null);
 
             war.Reset(planet);
-            Assert.That(resources.UserData.Exists(new ResPath($"/st14_sectors/{planet}_{first}.yml")), Is.False, "Resetting the war left the save.");
+            Assert.That(resources.UserData.Exists(new ResPath($"/st14_sectors/{planet}_{first}")), Is.False, "Resetting the war left the save.");
 
             server.CfgMan.SetCVar(ST14CVars.SectorRounds, false);
             server.CfgMan.SetCVar(CCVars.GameMap, "Empty");

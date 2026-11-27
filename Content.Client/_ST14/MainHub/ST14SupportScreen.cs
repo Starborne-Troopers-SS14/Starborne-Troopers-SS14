@@ -239,7 +239,7 @@ public sealed partial class ST14SupportScreen : ST14WarScreenBase
             ToolTip = BoostyUrl,
         };
         boosty.OnPressed += _ => _uriOpener.OpenUri(BoostyUrl);
-        Canvas.AddAt(boosty, new Vector2(1, 1), new Vector2(-30, -ST14HubStyle.HubBarCenter), new Vector2(440, 70), new Vector2(1, 0.5f));
+        Canvas.AddAt(boosty, new Vector2(1, 1), new Vector2(-30, -ST14HubStyle.HubBarCenter), new Vector2(440, 66), new Vector2(1, 0.5f));
 
         var note = ST14HubStyle.Label(ResCache, Loc.GetString("st14-support-boosty-link"), ST14HubFont.Regular, 14, ST14HubStyle.Widget);
         note.Align = Label.AlignMode.Right;

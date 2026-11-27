@@ -457,9 +457,11 @@ public sealed partial class ST14CommsSystem : EntitySystem
             return;
         }
 
-        // a new frequency hidden somewhere on the scale, the dial starts where the pack stands
+        // a frequency hidden somewhere on the scale, the dial starts where the pack stands. A search under way keeps its
+        // frequency: closing the tuner and opening it again must not move the signal under the same dial
         comp.Tuner = user;
-        comp.Target = _random.Next(ST14Frequency.Min + 20, ST14Frequency.Max - 20);
+        if (!Searching(comp))
+            comp.Target = _random.Next(ST14Frequency.Min + 20, ST14Frequency.Max - 20);
         comp.Dial = packComp.Frequency;
         comp.Lock = 0f;
 

@@ -1,11 +1,17 @@
+using System.Linq;
 using System.Numerics;
 using Content.Shared._ST14.Construction;
 using Content.Shared.FixedPoint;
 using Robust.Client.UserInterface.Controls;
 using Robust.Client.UserInterface.CustomControls;
+using Robust.Shared.Prototypes;
 
 namespace Content.Client._ST14.Construction;
 
+/// <summary>
+/// The engineer's build menu: a row of tabs (ST14: <see cref="ST14BuildCategoryPrototype"/>, walls, bunkers, trenches
+/// and so on) over the buildables of the tab picked. The tab stays picked while the window is reopened.
+/// </summary>
 public sealed class ST14BuildMenuWindow : DefaultWindow
 {
     private static readonly Color AvailableCost = Color.FromHex("#59e6ff");
@@ -13,36 +19,103 @@ public sealed class ST14BuildMenuWindow : DefaultWindow
 
     public event Action<ST14EngineerBuildablePrototype>? BuildableSelected;
 
+    private readonly BoxContainer _tabs;
     private readonly BoxContainer _list;
     private readonly List<(ST14BuildMenuEntry Entry, Button Button, Label Cost)> _items = new();
+    private readonly List<(ProtoId<ST14BuildCategoryPrototype> Category, Button Button)> _tabButtons = new();
+
+    private IEntityManager? _entMan;
+    private List<ST14BuildMenuEntry> _entries = new();
+    private ProtoId<ST14BuildCategoryPrototype>? _category;
+    private FixedPoint2? _armium;
+    private string? _selected;
 
     public ST14BuildMenuWindow()
     {
         Title = Loc.GetString("st14-build-menu-title");
         Resizable = false;
 
+        var column = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical, SeparationOverride = 6 };
+        _tabs = new BoxContainer
+        {
+            Orientation = BoxContainer.LayoutOrientation.Horizontal,
+            SeparationOverride = 2,
+        };
         _list = new BoxContainer
         {
             Orientation = BoxContainer.LayoutOrientation.Horizontal,
             SeparationOverride = 4,
         };
 
-        Contents.AddChild(_list);
+        column.AddChild(_tabs);
+        column.AddChild(_list);
+        Contents.AddChild(column);
     }
 
     public void SetEntries(IEntityManager entMan, List<ST14BuildMenuEntry> entries)
     {
+        _entMan = entMan;
+        _entries = entries;
+        _tabs.RemoveAllChildren();
+        _tabButtons.Clear();
+
+        if (entries.Count == 0)
+        {
+            ShowCategory(null);
+            return;
+        }
+
+        // the tabs that have something in them, in their order
+        var prototypes = IoCManager.Resolve<IPrototypeManager>();
+        var categories = new List<ST14BuildCategoryPrototype>();
+        foreach (var entry in entries)
+        {
+            if (prototypes.TryIndex(entry.Buildable.Category, out var proto) && !categories.Contains(proto))
+                categories.Add(proto);
+        }
+
+        categories.Sort((a, b) => a.Order.CompareTo(b.Order));
+
+        foreach (var category in categories)
+        {
+            var id = new ProtoId<ST14BuildCategoryPrototype>(category.ID);
+            var tab = new Button
+            {
+                Text = Loc.GetString(category.Name),
+                ToggleMode = true,
+                MinWidth = 90,
+            };
+            tab.OnPressed += _ => ShowCategory(id);
+            _tabs.AddChild(tab);
+            _tabButtons.Add((id, tab));
+        }
+
+        var keep = _category is { } current && _tabButtons.Any(t => t.Category == current);
+        ShowCategory(keep ? _category : _tabButtons.Count > 0 ? _tabButtons[0].Category : (ProtoId<ST14BuildCategoryPrototype>?) null);
+    }
+
+    private void ShowCategory(ProtoId<ST14BuildCategoryPrototype>? category)
+    {
+        _category = category;
         _list.RemoveAllChildren();
         _items.Clear();
 
-        if (entries.Count == 0)
+        foreach (var (id, tab) in _tabButtons)
+        {
+            tab.Pressed = id == category;
+        }
+
+        if (_entries.Count == 0 || _entMan == null)
         {
             _list.AddChild(new Label { Text = Loc.GetString("st14-build-menu-empty") });
             return;
         }
 
-        foreach (var entry in entries)
+        foreach (var entry in _entries)
         {
+            if (entry.Buildable.Category != category)
+                continue;
+
             var cost = new Label
             {
                 Text = Loc.GetString("st14-build-menu-cost", ("cost", entry.Buildable.Cost.Int())),
@@ -50,7 +123,7 @@ public sealed class ST14BuildMenuWindow : DefaultWindow
             };
 
             var content = new BoxContainer { Orientation = BoxContainer.LayoutOrientation.Vertical };
-            content.AddChild(new EntityPrototypeView(entry.Buildable.Result, entMan)
+            content.AddChild(new EntityPrototypeView(entry.Buildable.Result, _entMan)
             {
                 SetSize = new Vector2(48, 48),
                 HorizontalAlignment = HAlignment.Center,
@@ -65,10 +138,15 @@ public sealed class ST14BuildMenuWindow : DefaultWindow
             _list.AddChild(button);
             _items.Add((entry, button, cost));
         }
+
+        UpdateState(_armium, _selected);
     }
 
     public void UpdateState(FixedPoint2? armium, string? selected)
     {
+        _armium = armium;
+        _selected = selected;
+
         foreach (var (entry, button, cost) in _items)
         {
             var available = armium >= entry.Buildable.Cost;

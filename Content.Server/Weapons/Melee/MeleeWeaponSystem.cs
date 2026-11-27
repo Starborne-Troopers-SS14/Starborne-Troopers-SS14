@@ -62,10 +62,19 @@ public sealed partial class MeleeWeaponSystem : SharedMeleeWeaponSystem
         if (session is { } pSession)
         {
             (targetCoordinates, targetLocalAngle) = _lag.GetCoordinatesAngle(target, pSession);
-            return Interaction.InRangeUnobstructed(user, target, targetCoordinates, targetLocalAngle, range, overlapCheck: false);
+            return Interaction.InRangeUnobstructed(user, target, targetCoordinates, targetLocalAngle, range, overlapCheck: false) ||
+                   ReachesAcrossLevels(user, target, range); // ST14
         }
 
-        return Interaction.InRangeUnobstructed(user, target, range);
+        return Interaction.InRangeUnobstructed(user, target, range) || ReachesAcrossLevels(user, target, range); // ST14
+    }
+
+    /// <summary>
+    /// ST14: a blow from the edge of a trench down into it, or up out of it, through the opening
+    /// </summary>
+    private bool ReachesAcrossLevels(EntityUid user, EntityUid target, float range)
+    {
+        return EntityManager.System<Content.Shared._ST14.ZLevels.Core.EntitySystems.ST14SharedZLevelsSystem>().InReachAcrossLevels(user, target, range);
     }
 
     protected override void DoDamageEffect(List<EntityUid> targets, EntityUid? user, TransformComponent targetXform)
