@@ -87,8 +87,6 @@ st14-pulse-weak = weak
 st14-pulse-thready = thready, barely there
 st14-pulse-erratic = erratic, skipping beats
 st14-cpr-start = { CAPITALIZE($user) } pushes on the chest of { $target }: one, two, three...
-st14-medic-call-shout = MEDIC!
-st14-medic-call-self = You call for a medic. Medics see a red cross over you.
 
 ## Examine
 st14-examine-tourniquet = [color=#d8b26a]A tourniquet is on ({ $minutes } min): { $zone }.[/color]
@@ -284,20 +282,6 @@ st14-treat-done-transfusion = Blood given.
 
 ## Medic calls
 
-st14-medic-call-done = { $name } needs no medic any more.
-st14-medic-respond-cancel = You no longer go to { $name }.
-st14-medic-respond-gone = The medic is not coming. Call again.
-st14-medic-respond-none = Nobody calls for a medic.
-st14-medic-respond-self = You go to { $name }.
-st14-medic-respond-patient = Medic { $name } is coming to you!
-st14-medic-status-waiting = You are calling for a medic. Nobody answered yet
-st14-medic-status-coming = Medic { $name } is coming: { $distance } m
-st14-medic-status-coming-far = Medic { $name } is coming
-st14-medic-hint-open = Calls for a medic: { $count }  ·  { $key }: go to the nearest
-st14-medic-hint-going = You go to { $name }: { $distance } m  ·  { $key }: cancel
 st14-medic-mark = { $name } · { $distance } m
-st14-medic-mark-taken = { $name } · { $distance } m · { $medic } goes
-st14-medic-mark-mine = { $name } · { $distance } m · you go
-ui-options-function-st14-medic-respond = Medic: answer a call
 st14-heartbeat-hit = ON BEAT!
 st14-heartbeat-miss = MISS

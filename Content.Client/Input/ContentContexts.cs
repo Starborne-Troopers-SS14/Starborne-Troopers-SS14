@@ -140,7 +140,6 @@ namespace Content.Client.Input
             common.AddFunction(ContentKeyFunctions.OpenGuidebook);
             common.AddFunction(ContentKeyFunctions.OpenBattleMap); // ST14
             common.AddFunction(ContentKeyFunctions.OpenSquads); // ST14
-            common.AddFunction(ContentKeyFunctions.ST14MedicRespond); // ST14
         }
     }
 }

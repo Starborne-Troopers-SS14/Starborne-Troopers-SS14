@@ -87,8 +87,6 @@ st14-pulse-weak = слабый
 st14-pulse-thready = нитевидный, едва прощупывается
 st14-pulse-erratic = сбивчивый, с перебоями
 st14-cpr-start = { CAPITALIZE($user) } давит на грудь { $target }: раз, два, три...
-st14-medic-call-shout = МЕДИК!
-st14-medic-call-self = Вы зовёте медика. Медики видят над вами красный крест.
 
 ## Осмотр
 st14-examine-tourniquet = [color=#d8b26a]Жгут затянут ({ $minutes } мин): { $zone }.[/color]
@@ -358,20 +356,6 @@ st14-treat-done-transfusion = Кровь перелита.
 
 ## Вызов медика
 
-st14-medic-call-done = { $name } больше не нужен медик.
-st14-medic-respond-cancel = Вы больше не идёте к { $name }.
-st14-medic-respond-gone = Медик не придёт. Зовите снова.
-st14-medic-respond-none = Никто не зовёт медика.
-st14-medic-respond-self = Вы идёте к { $name }.
-st14-medic-respond-patient = Медик { $name } идёт к вам!
-st14-medic-status-waiting = Вы зовёте медика. Пока никто не ответил
-st14-medic-status-coming = Медик { $name } идёт к вам: { $distance } м
-st14-medic-status-coming-far = Медик { $name } идёт к вам
-st14-medic-hint-open = Зовут медика: { $count }  ·  { $key }: иду к ближайшему
-st14-medic-hint-going = Вы идёте к { $name }: { $distance } м  ·  { $key }: отменить
 st14-medic-mark = { $name } · { $distance } м
-st14-medic-mark-taken = { $name } · { $distance } м · идёт { $medic }
-st14-medic-mark-mine = { $name } · { $distance } м · вы идёте
-ui-options-function-st14-medic-respond = Медик: иду на вызов
 st14-heartbeat-hit = В ТАКТ!
 st14-heartbeat-miss = МИМО
